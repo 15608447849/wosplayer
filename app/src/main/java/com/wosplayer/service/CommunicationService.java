@@ -5,10 +5,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 import com.wosplayer.app.log;
+import com.wosplayer.broadcast.CmdPostTaskCenter;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -31,14 +33,13 @@ public class CommunicationService extends Service{
     private DataOutputStream dataOutputStream;
     private DataInputStream dataInputStream;
     private Socket socket;
-
     private String ip;
     private int port;// 6666
     private String terminalNo;
     private long HeartBeatTime;
     private boolean isConnected = false;
-    private boolean isStartReceiveThread = false;
     private ReentrantLock msgLock = new ReentrantLock();
+    private boolean isReconnection = false;//是否可以尝试重连接
 
     @Nullable
     @Override
@@ -48,43 +49,65 @@ public class CommunicationService extends Service{
     @Override
     public void onCreate() {
         super.onCreate();
-
-        broad = new CommunicationServiceReceiveNotification();
-        IntentFilter filter=new IntentFilter();
-        filter.addAction(CommunicationServiceReceiveNotification.action);
-        getApplicationContext().registerReceiver(broad, filter); //只需要注册一次
-        log.i("已注册 接受广播");
+        log.i("开启通讯服务...");
+        isReconnection = true;
     }
-
-    private Thread receiveThread = new Thread(){
+/////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * 接受消息 线程
+     */
+    private receiveThread receiveMsg = null;
+    /**
+     * 接受消息的线程
+     */
+    private class  receiveThread extends Thread{
         //receive service to me msg
-
+        private volatile boolean isStart = false;
+        public void startMe(){
+            isStart =true;
+        }
+        public void stopMe(){
+            isStart =false;
+        }
         @Override
         public void run() {
-            while(isConnected && isStartReceiveThread){
+            while(isConnected && isStart){
                 //只要是连接中
-
                 try {
                     if (dataInputStream.available() > 0) {
                         String msg = dataInputStream.readUTF();
-
                         log.i("收到 服务器 参数:" + msg);
-
                         String cmd = msg.substring(0, 5);
                         String param = msg.substring(5);
-
                         postTask(cmd,param);
                     }
-
                 }catch (Exception e){
                     log.e("接受服务端消息 错误 :"+ e.getMessage());
                     CommunicationService.this.stopSelf();
                 }
-
             }
         }
-    };
-
+    }
+    /**
+     * 开启 接受
+     */
+    private void startReceiveThread(){
+        stopReceiveThread();
+        receiveMsg = new receiveThread();
+        receiveMsg.startMe();
+        receiveMsg.start();
+    }
+    /**
+     * 关闭接受
+     */
+    private void stopReceiveThread(){
+        if (receiveMsg != null){
+            receiveMsg.stopMe();
+            receiveMsg = null;
+            log.i("断开 接受消息 线程");
+        }
+    }
+/////////////////////////////////////////////////////////////////////////////////////
     /**
      * 分发任务
      * @param cmd
@@ -92,129 +115,129 @@ public class CommunicationService extends Service{
      */
     private void postTask(String cmd, String param) {
         log.i("派发任务:"+cmd);
+        Intent i = new Intent();
+        i.setAction(CmdPostTaskCenter.action);
+        Bundle b = new Bundle();
+        b.putString(CmdPostTaskCenter.cmd,cmd);
+        b.putString(CmdPostTaskCenter.param,param);
+        i.putExtras(b);
+        getApplicationContext().sendBroadcast(i);
     }
-
+/////////////////////////////////////////////////////////////////////////////////////
     /**
      * 返回值
      从Android官方文档中，知道onStartCommand有4种返回值：
-
      START_STICKY：如果service进程被kill掉，保留service的状态为开始状态，但不保留递送的intent对象。随后系统会尝试重新创建service，由于服务状态为开始状态，所以创建服务后一定会调用onStartCommand(Intent,int,int)方法。如果在此期间没有任何启动命令被传递到service，那么参数Intent将为null。
-
      START_NOT_STICKY：“非粘性的”。使用这个返回值时，如果在执行完onStartCommand后，服务被异常kill掉，系统不会自动重启该服务。
-
      START_REDELIVER_INTENT：重传Intent。使用这个返回值时，如果在执行完onStartCommand后，服务被异常kill掉，系统会自动重启该服务，并将Intent的值传入。
-
      START_STICKY_COMPATIBILITY：START_STICKY的兼容版本，但不保证服务被kill后一定能重启。
-     * @param intent
-     * @param flags
-     * @param startId
-     * @return
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         ip =  intent.getExtras().getString("ip");
         port = intent.getExtras().getInt("port");
         terminalNo = intent.getExtras().getString("terminalNo");
         HeartBeatTime = intent.getExtras().getLong("HeartBeatTime");
-
         if (ip==null || terminalNo==null){
            return START_STICKY;
         }
-
         Schedulers.newThread().createWorker().schedule(new Action0() {
             @Override
             public void call() {
-                init();
+                startCommunication();
             }
         });
-
         return super.onStartCommand(intent, flags, startId);
     }
-
-
-    private void init() {
-        //创建socket连接
+    /**
+     * 开始通讯
+     */
+    private void startCommunication(){
+        //连接
         CreaterSocket();
-
-        //开启 接受消息的线程
-        if (!isStartReceiveThread){
-            isStartReceiveThread=true;
-            receiveThread.start();
+        if (!isConnected){ //如果没连接上 可以滚蛋了
+            return;
         }
-
-        //发送上线通知
+        //创建接受消息线程
+        startReceiveThread();
+        //注册发送消息的广播
+        registSendBroad();
+        //开始心跳
+        startHeartbeat();
+        //发送上线指令
         String msg = "ONLI:" + terminalNo;//
         sendMsgToService(msg);
-
-//        msg = "GVAY:" + terminalNo+"#"+ Command_UPDC.getLocalVersionCode();//通知获取版本号信息
-//        sendMsgToService(SengCmd);
-
-        //创建定时器任务 发送心跳
-        timer.schedule(task,100,HeartBeatTime);
-
-        //注册 广播 ,用于接受 别人发给我的信息  ,并 发送给 外网 (在创建时候就ok了)
-
-
-
-
-
-
     }
+    /**
+     * 结束通讯
+     */
+    private void stopCommunication(){
+        //结束指令
+        //发送下线通知
+        String msg = "OFLI:" + terminalNo;
+        sendMsgToService(msg);
 
+        //注销广播
+        unregistSSendBroad();
+        //断开 接受消息 线程
+        stopReceiveThread();
+        //结束心跳
+        stopHeartbeat();
+
+        //结束链接
+        desconnection();
+    }
+    /////////////////////////////////////////////////////////////////////////////////////
+    //创建链接
     private void CreaterSocket() {
-
         //如果已连接 断开连接
         if (isConnected){
             desconnection();
         }
-
         try {
             socket = new Socket(ip , port);
-
             dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-
             dataInputStream    = new DataInputStream(socket.getInputStream());
-
             isConnected=true;
-
             log.i("Communication connectToServer :" +ip+":"+port);
-
         } catch (IOException e) {
             log.e(" socket connection err:"+ e.getMessage());
             isConnected=false;
-            ReConnection();
+            reConnection();
         }
-
-
     }
+    //尝试重新链接
+    private void reConnection() {
 
-    private int connectionCount = 3;//重连接次数
-    private int tryReconnectionCount=0;
-    private void ReConnection() {
-        tryReconnectionCount++;
-        if (tryReconnectionCount == connectionCount){
-            stopSelf();//停止自己
+        if (!isReconnection){
+            log.i("不可连接");
             return;
         }
 
+        log.i("尝试重新链接中...");
+        stopCommunication();
         try {
-            Thread.sleep(1 * 500);
+            Thread.sleep(3*1000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.e("重新链接失败"+e.getMessage());
+            Schedulers.newThread().createWorker().schedule(new Action0() {
+                @Override
+                public void call() {
+                    reConnection();
+                }
+            });
+
         }
-
-        CreaterSocket();
+        startCommunication();
     }
-
     /**
-     *
+     *断开链接
      */
     private void desconnection(){
-
         if (socket != null) {
             try {
                 socket.close();
+                socket=null;
             } catch (Exception e) {
                 log.e("Communication disconnect error :" + e.getMessage());
             }
@@ -222,25 +245,24 @@ public class CommunicationService extends Service{
         if (dataOutputStream != null) {
             try {
                 dataOutputStream.close();
+                dataOutputStream=null;
             } catch (Exception e) {
                 log.e("Communication disconnect error :" + e.getMessage());
             }
         }
-
         if (dataInputStream != null) {
             try {
                 dataInputStream.close();
+                dataInputStream=null;
             } catch (IOException e) {
                 log.e("Communication disconnect error :" + e.getMessage());
             }
         }
-
         isConnected = false;
     }
 
-
     /**
-     *
+     *发送信息
      */
     private void sendMsgToService(final String msg){
 
@@ -259,21 +281,18 @@ public class CommunicationService extends Service{
                         } catch (Exception e) {
                             e.printStackTrace();
                             log.e("发送信息失败 error :" + e.getMessage());
+                            //重连接
+                            reConnection();
                         }finally {
                             msgLock.unlock();
                         }
                     }
                 });
-
-
-
         }
     }
-
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //广播
     private CommunicationServiceReceiveNotification broad = null;
-
     /**
      * 请注册在使用
      */
@@ -285,55 +304,85 @@ public class CommunicationService extends Service{
     @Override
     public void onReceive(Context context, Intent intent) {
         String msg = intent.getExtras().getString(key);
-        log.i("收到一个广播..."+msg);
+//        log.i("收到一个广播..."+msg);
         if (msg==null) return;
         sendMsgToService(msg);
     }
 }
-
-    //发送心跳定时器
-   private Timer timer = new Timer();
-
-    private TimerTask task = new TimerTask() {
-        @Override
-        public void run() {
-
-            String msg = "HRBT:"+terminalNo;
-            sendMsgToService(msg);
-        }
-    };
-
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        log.i("通讯服务 停止了");
-        //注销广播
-        if (broad != null) {
+    /**
+     * 注册广播
+     */
+    private void registSendBroad() {
+        unregistSSendBroad();
+        broad = new CommunicationServiceReceiveNotification();
+        IntentFilter filter=new IntentFilter();
+        filter.addAction(CommunicationServiceReceiveNotification.action);
+        getApplicationContext().registerReceiver(broad, filter); //只需要注册一次
+        log.i("已注册 接受广播");
+    }
+    /**
+     * 注销广播
+     */
+    private void unregistSSendBroad() {
+        if (broad!=null){
             getApplicationContext().unregisterReceiver(broad);
             broad = null;
+            log.i("注销 接受广播");
         }
+    }
+    /////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////
+    //发送心跳定时器
+   private Timer timer = null;
+    private TimerTask timertask = null;
 
-        if (isStartReceiveThread){
-            isStartReceiveThread = false;
+    private class  Heartbeat extends TimerTask{
+
+        @Override
+        public void run() {
+            TimerTask task = new TimerTask() {
+                @Override
+                public void run() {
+
+                }
+            };
         }
-
-        //关闭定时器
-        timer.cancel();
-
-        //发送下线通知
-        String msg = "OFLI:" + terminalNo;
-        sendMsgToService(msg);
-        try {
-            Thread.sleep(5*100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        //关闭socket连接
-        desconnection();
     }
 
 
+    //开启 心跳
+    private void startHeartbeat(){
+        stopHeartbeat();
+        timer = new Timer();
+        timertask  =   new TimerTask() {
+            @Override
+            public void run() {
+                    String msg = "HRBT:"+terminalNo;
+                    sendMsgToService(msg);
+            }
+        };
 
+        //创建定时器任务 发送心跳
+        timer.schedule(timertask, 100, HeartBeatTime);
+    }
+    //关闭心跳
+    private void stopHeartbeat(){
+        if (timer != null){
+            //关闭定时器
+            timer.cancel();
+            timer = null;
+        }
+        if (timertask!=null){
+            timertask.cancel();
+            timertask = null;
+        }
+    }
+    /////////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        isReconnection = false;
+        log.i("通讯服务 停止了");
+       stopCommunication();
+    }
 }

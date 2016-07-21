@@ -26,7 +26,7 @@ public class XmlNodeEntity {
     public ArrayList<XmlNodeEntity> children;
     public HashMap<String,String> xmlData;
 
-    public List<String> ftplist = new ArrayList<String>(); //对应的资源下载
+    private List<String> ftplist = new ArrayList<String>(); //对应的资源下载
     private  static JsonBinder binder = JsonBinder.buildNonDefaultBinder();
 
 
@@ -34,9 +34,19 @@ public class XmlNodeEntity {
 
 
     public void addUriTast(String uri){
-        ftplist.add(uri);
-    }
+        log.i(TAG,"准备添加一个uri :"+uri);
+        if (uri.equals("") || uri.equals("null") || uri==null) return;
 
+        if (ftplist.contains(uri)){
+            log.i(TAG,"准备添加一个uri"+uri+"---- 已存在");
+            return;
+        }
+        ftplist.add(uri);
+
+    }
+    public List<String> getFtpTaskList(){
+        return ftplist;
+    }
     //添加属性
     public void AddProperty(String key, String value)
     {
@@ -87,6 +97,7 @@ public class XmlNodeEntity {
             String md5=binder.toJson(this);
             md5=MD5(md5);
             this.AddProperty("md5", md5);
+            log.d(TAG,"序列化数据:"+binder.toJson(this));
             writeShareDataSelf("settingNodeEntity", binder.toJson(this));
         }catch(Exception e)
         {
@@ -125,8 +136,13 @@ public class XmlNodeEntity {
     {
         try
         {
-            if(children!=null)
+            if(children!=null) {
                 children.clear();
+            }
+
+            if (ftplist!=null){
+                ftplist.clear();
+            }
         }catch(Exception e)
         {
             log.e(TAG, e.getMessage());
@@ -247,6 +263,7 @@ public class XmlNodeEntity {
             }
             return sb.toString();
         } catch (Exception e) {
+            log.e("md5 加密失败:"+e.getMessage());
             return null;
         }
     }

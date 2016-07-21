@@ -25,8 +25,7 @@ public class activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //开启通讯服务
-        wosPlayerApp.startCommunicationService();
+
 
 
 
@@ -40,19 +39,21 @@ public class activity extends AppCompatActivity {
 
     @Override
     public void onResume() {
-        super.onResume();
+       super.onResume();
+        //开启通讯服务
+        wosPlayerApp.startCommunicationService();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-
+        wosPlayerApp.stopCommunicationService(); //关闭服务
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        wosPlayerApp.stopCommunicationService(); //关闭服务
+
     }
 
 

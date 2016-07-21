@@ -1,6 +1,6 @@
 package com.wosplayer.broadcast.Command.Schedule.correlation;
 
-import android.util.Log;
+import com.wosplayer.app.log;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -64,7 +64,7 @@ public class JsonBinder {
         try {
             return mapper.writeValueAsString(object);
         } catch (IOException e) {
-            Log.e("toJson", e.getMessage());
+            log.e("toJson", e.getMessage());
             return null;
         }
     }
@@ -81,13 +81,5 @@ public class JsonBinder {
     public ObjectMapper getMapper() {
         return mapper;
     }
-
-
-
-
-
-
-
-
 
 }

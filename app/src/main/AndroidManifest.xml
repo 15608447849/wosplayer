@@ -19,7 +19,20 @@
 
         <!-- 通讯服务 -->
         <service android:name=".service.CommunicationService" />
-
+        <!-- 接受通讯服务的广播派发任务-->
+        <receiver android:name=".broadcast.CmdPostTaskCenter">
+            <intent-filter>
+                <action android:name="com.post.cmd.broad"></action>
+            </intent-filter>
+        </receiver>
+        <!-- 接受下载 队列 -->
+        <service android:name=".loadArea.loaderManager" />
+        <!-- 下载完成 广播-->
+        <receiver android:name=".loadArea.completeTaskListBroadcast">
+            <intent-filter>
+                <action android:name="com.complete.taskList"></action>
+            </intent-filter>
+        </receiver>
     </application>
 
 

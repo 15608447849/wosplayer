@@ -153,17 +153,17 @@ public class wosPlayerApp extends Application {
      */
 
     public static void startCommunicationService() {
+
         Intent intent = new Intent(appContext, CommunicationService.class);
         //传递参数
         Bundle b = new Bundle();
         b.putString("ip",config.GetStringDefualt("serverip","127.0.0.1"));
         b.putInt("port",6666);
         b.putString("terminalNo",config.GetStringDefualt("terminalNo","127.0.0.1"));
-        b.putLong("HeartBeatTime",(config.GetIntDefualt("HeartBeatInterval",50) * 100));
+        b.putLong("HeartBeatTime",(config.GetIntDefualt("HeartBeatInterval",50) * 500));
         intent.putExtras(b);
         appContext.startService(intent);
         log.i("尝试开启通讯服务...");
-
     }
 
     /**
@@ -176,8 +176,6 @@ public class wosPlayerApp extends Application {
 
 
     public static void sendMsgToServer(String msg){
-
-
         if (msg=="") return;
 
         //发送一个广播
@@ -185,7 +183,7 @@ public class wosPlayerApp extends Application {
         intent.setAction(CommunicationService.CommunicationServiceReceiveNotification.action);
         intent.putExtra(CommunicationService.CommunicationServiceReceiveNotification.key,msg);
         appContext.sendBroadcast(intent);
-        log.i("发送出去一个广播");
+//        log.i("发送出去一个广播");
 
     }
 

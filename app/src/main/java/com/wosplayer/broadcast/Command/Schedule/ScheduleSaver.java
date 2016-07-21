@@ -1,30 +1,39 @@
 package com.wosplayer.broadcast.Command.Schedule;
 
+import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 
-import com.lidroid.xutils.HttpUtils;
-import com.lidroid.xutils.exception.HttpException;
-import com.lidroid.xutils.http.ResponseInfo;
-import com.lidroid.xutils.http.callback.RequestCallBack;
-import com.lidroid.xutils.http.client.HttpRequest;
 import com.wosplayer.app.log;
+import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.broadcast.Command.Schedule.correlation.XmlHelper;
 import com.wosplayer.broadcast.Command.Schedule.correlation.XmlNodeEntity;
 import com.wosplayer.broadcast.Command.Schedule.correlation.Xmlparse;
 import com.wosplayer.broadcast.Command.iCommand;
+import com.wosplayer.loadArea.loaderManager;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.HashMap;
+
+import rx.functions.Action0;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by Administrator on 2016/7/20.
  */
 
 public class ScheduleSaver implements iCommand {
-    private final String TAG = ScheduleSaver.class.getName();
+    private static final String TAG = ScheduleSaver.class.getName();
 
 
     private final int ROOT_PARSE = 11;
@@ -40,72 +49,83 @@ public class ScheduleSaver implements iCommand {
             return this.compareTo(video) >= 0;
         }
     }
-
-
-    private HttpUtils http = new HttpUtils();//网络连接使用
     public static XmlNodeEntity rootNode = new XmlNodeEntity();//只存在一个
-
     /**
      * 序列化排期
      */
     public static void Serialize() {
         rootNode.SettingNodeEntitySave();
     }
-
     /**
      * 执行
      *
      * @param param
-     * @param obj
+     *
      */
     @Override
-    public void Execute(String param, Object obj) {
+    public void Execute(String param) {
+        saveData(param);
+
+
 
     }
-
-
     /**
      * 存储数据
      */
     private void saveData(String uri) {
 
         try {
-            rootNode.Clear();
-            rootNode.ftplist.clear();
+            rootNode.Clear();//清理存在的序列化数据
         } catch (Exception e) {
-            log.e(TAG, " - - " + e.getMessage());
+            log.e(TAG, " " + e.getMessage());
         }
-
         log.i(TAG," root uri:"+ uri);
-        getXMLdata(uri, ROOT_PARSE, null);
+        startWork(uri);
+    }
 
+
+
+    private void getXMLdata(String uri, final int callType, final Object Obj) {
+        String result = uriTranslationXml(uri);
+        ParseResultXml(callType,result, Obj);
+    }
+
+    private void startWork(final String uri){
+
+        Schedulers.newThread().createWorker().schedule(new Action0() {
+            @Override
+            public void call() {
+
+                Long startTime = System.currentTimeMillis();
+                getXMLdata(uri,ROOT_PARSE,null); //解析数据
+                Long endTime = System.currentTimeMillis();
+                log.i(TAG,"解析用时:"+(endTime - startTime)+"毫秒");
+
+                //开启后台下载线程
+                log.i("当前的任务数:"+rootNode.getFtpTaskList().size()+"--"+rootNode.getFtpTaskList().toString());
+
+                sendloadTask();
+            }
+        });
     }
 
     /**
-     * 获取数据
-     *
-     * @param uri
-     * @param callType
+     * 通知 开始 下载 资源
      */
-    private void getXMLdata(String uri, final int callType, final Object Obj) {
-        http.send(
-                HttpRequest.HttpMethod.GET,
-                uri,
-                new RequestCallBack<String>() {
-                    @Override
-                    public void onSuccess(ResponseInfo<String> responseInfo) {
+    private void sendloadTask() {
 
-                        //进行XML解析
-                        ParseResultXml(callType, responseInfo.result, Obj);
+        ArrayList<CharSequence> tasklist = new ArrayList<CharSequence>();
 
-                    }
+        for (int i = 0; i<rootNode.getFtpTaskList().size();i++){
+            tasklist.add(rootNode.getFtpTaskList().get(i));
+        }
 
-                    @Override
-                    public void onFailure(HttpException e, String s) {
-                        log.i(TAG,"http err"+e.getMessage() + ">" + s);
-                    }
-                }
-        );
+        Intent intent = new Intent(wosPlayerApp.appContext, loaderManager.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Bundle bundle = new Bundle();
+        bundle.putCharSequenceArrayList(loaderManager.taskKey,tasklist);
+        intent.putExtras(bundle);
+        wosPlayerApp.appContext.startService(intent);
     }
 
 
@@ -125,8 +145,10 @@ public class ScheduleSaver implements iCommand {
 
                 String scheduleXmlData = result;
                 if (scheduleXmlData.equals("")) return;
+
                 Element root = XmlHelper.getDomXml(new ByteArrayInputStream(scheduleXmlData.getBytes()));
                 if (root == null) return;
+                rootNode.Level="root";
 
                 try {
                     url = XmlHelper.getFirstChildNodeValue(root, "url");
@@ -142,6 +164,7 @@ public class ScheduleSaver implements iCommand {
                 NodeList scheduleList = root.getElementsByTagName("schedule");
                 if (scheduleList.getLength() == 0) return;
 
+                log.i(TAG,"当前排期总数:"+scheduleList.getLength());
 
                 for (int i = scheduleList.getLength() - 1; i > -1; i--) {
                     Element scheduleElement = (Element) scheduleList.item(i);
@@ -157,27 +180,33 @@ public class ScheduleSaver implements iCommand {
                     HashMap<String, String> schedule_xmldata_map = Xmlparse.ParseXml("/schedule", schedule_XmlData, Xmlparse.parseType.OnlyLeaf).get(0);//排期
 
                     XmlNodeEntity schedule_node = rootNode.NewSettingNodeEntity();//添加一个子节点
-                    schedule_node.Level = "schedule";
+                    schedule_node.Level = "root_schedule";
                     schedule_node.AddPropertyList(schedule_xmldata_map);
                     schedule_node.AddProperty("url", url);
                     schedule_node.AddProperty("uuks", uuks);
 
                     NodeList programsList = scheduleElement.getElementsByTagName("program"); //节目
+                    if(programsList.getLength()==0) continue;
 
+                    log.i(TAG,schedule_xmldata_map.get("id")+" 这个排期下面的 节目总数:"+programsList.getLength());
                     for (int i1 = 0; i1 < programsList.getLength(); i1++) {
                         Element program_Element = (Element) programsList.item(i1);
                         String pId = XmlHelper.getFirstChildNodeValue(program_Element, "id");
                         if (pId.equals("")) continue;
+
                         Log.i(TAG, "now to parse program url :" + url + pId );
                         //解析 节目:
                         getXMLdata(url + pId, SCHEDU_PROG_PARSE, schedule_node.NewSettingNodeEntity());// 下一节点 实体
+                        log.i(TAG,"解析完一个节目\n\r");
                     }
+                    log.i(TAG,"解析完一个排期\n\r");
                 }
                 break;
 
 
-            case SCHEDU_PROG_PARSE://解析 单个排期的一个节目
+            case SCHEDU_PROG_PARSE://解析 一个排期下的其中一个节目
 
+                log.i(TAG,"开始解析一个节目");
                 String program_root_XmlData = result;
                 if (program_root_XmlData.equals("")) return;
 
@@ -192,7 +221,7 @@ public class ScheduleSaver implements iCommand {
 
 
                 XmlNodeEntity program_node = (XmlNodeEntity) obj;
-                program_node.Level = "programs";
+                program_node.Level = "root_schedule_programs";
                 program_node.AddPropertyList(program_xmldataMap);
                 program_node.AddProperty("uuks", uuks);
 
@@ -204,10 +233,10 @@ public class ScheduleSaver implements iCommand {
                     }
                 }
 
-
                 NodeList program_layout_List = programElement.getElementsByTagName("layout");
                 if (program_layout_List.getLength()==0 ) return;
 
+                log.i(TAG,"某节目下面的 布局 总数:"+program_layout_List.getLength());
 
                 for (int i = 0; i < program_layout_List.getLength(); i++) {  //节目下面的布局循环
                     Element layout_Element = (Element) program_layout_List.item(i);
@@ -217,19 +246,17 @@ public class ScheduleSaver implements iCommand {
                     HashMap<String, String> layout_xmldataMap = Xmlparse.ParseXml("/layout", layout_XmlData, Xmlparse.parseType.OnlyLeaf).get(0);
 
                     XmlNodeEntity program_layout_node = program_node.NewSettingNodeEntity();
-                    program_layout_node.Level = "layout";
+                    program_layout_node.Level = "root_schedule_programs_layout";
                     program_layout_node.AddPropertyList(layout_xmldataMap);
                     program_layout_node.AddProperty("uuks", uuks);
 
-
                     NodeList layout_contentList = layout_Element.getElementsByTagName("contents");//内容
-                    if(layout_contentList.getLength()==0) return;
+                    if(layout_contentList.getLength()==0) continue;
+                    log.i(TAG,"节目下面的 布局 的 内容总数:"+layout_contentList.getLength());
 
-
-                    for (int j = 0; j < layout_contentList.getLength(); j++) {
+                    for (int j = 0; j < layout_contentList.getLength(); j++) {//循环 节目_布局_内容
                         Element content_Element = (Element) layout_contentList.item(j);
                         if (content_Element==null) continue;
-
 
                         String content_XmlData = XmlHelper.getNodeToString(content_Element);
                         HashMap<String, String> content_xmlDataMap = Xmlparse.ParseXml("/contents", content_XmlData, Xmlparse.parseType.OnlyLeaf).get(0);
@@ -237,10 +264,9 @@ public class ScheduleSaver implements iCommand {
                         XmlNodeEntity layout_content_Node
                                 = program_layout_node.NewSettingNodeEntity();
 
-                        layout_content_Node.Level = "Content";
+                        layout_content_Node.Level = "root_schedule_programs_layout_content";
                         layout_content_Node.AddPropertyList(content_xmlDataMap);
                         layout_content_Node.AddProperty("uuks", uuks);
-
 
                         //内容类型
                         String content_type = XmlHelper.getFirstChildNodeValue(content_Element, "fileproterty");
@@ -250,7 +276,7 @@ public class ScheduleSaver implements iCommand {
                             contentType = ContentTypeEnum.valueOf(content_type);
                         } catch (IllegalArgumentException e) {
                             log.e(TAG, "ScheduleSaver_>readContentXmlData_> contentType msg wrong:" + e.getMessage());
-                            return;
+                            continue;
                         }
 
                         String getcontents = ""; //资源地址
@@ -259,30 +285,33 @@ public class ScheduleSaver implements iCommand {
                         {
                             getcontents = XmlHelper.getFirstChildToString(content_Element, "getcontents");
                             content_xmlDataMap.put("getcontents", getcontents.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", ""));
-
+                            log.i(TAG,"\"-----------text end------\"");
                         } else if (contentType.equals(ContentTypeEnum.rss)) {
 
                             Element childfile = (Element) content_Element.getElementsByTagName("childfile").item(0);
                             String xfile = XmlHelper.getFirstChildNodeValue(childfile, "xfile");
                             String rss_programXmlData = XmlHelper.getXmlDataFromUrl(xfile);
-                            if (rss_programXmlData.equals("")) return;
+                            if (rss_programXmlData.equals("")) continue;
 
                             Element rssRoot = XmlHelper.getDomXml(new ByteArrayInputStream(rss_programXmlData.getBytes()));
-                            if (rssRoot==null) return;
+                            if (rssRoot==null) continue;
 
                             HashMap<String, String> rss_data_map = Xmlparse.ParseXml("/rss", rss_programXmlData, Xmlparse.parseType.OnlyLeaf).get(0);
                             content_xmlDataMap.putAll(rss_data_map);
+                            log.i(TAG,"-----------rss end------");
 
                         } else if (contentType.equals(ContentTypeEnum.interactive)) {
                             //再解析 继续解析
                             getcontents = XmlHelper.getFirstChildNodeValue(content_Element, "getcontents");
                             getXMLdata(getcontents, ACTION_PARSE, layout_content_Node.NewSettingNodeEntity());//进入互动
+                            log.i(TAG,"-----------interaction end------");
                         } else {
                             getcontents = XmlHelper.getFirstChildNodeValue(content_Element, "getcontents");
+                            log.i(TAG,"不在需要判断的特殊类型中");
                         }
 
-
                         if (contentType.needsDown()) {
+
                             try {
                                 getcontents = getcontents.trim();
                                 if (!getcontents.equals("")) {
@@ -290,9 +319,10 @@ public class ScheduleSaver implements iCommand {
                                 }
                             } catch (Exception e) {
                                 log.e(TAG, e.getMessage());
+                                continue;
                             }
                         }
-                        log.d(TAG, "a schedule on program to end parse");
+                        log.i(TAG, "a schedule on program to end parse");
                     }
                 }
                 break;
@@ -300,6 +330,7 @@ public class ScheduleSaver implements iCommand {
 
             case ACTION_PARSE:
                 //互动
+                log.i(TAG,"开始一个互动解析");
                 String interaction_XmlData = result;
                 if (interaction_XmlData.equals("")) return;
 
@@ -321,6 +352,7 @@ public class ScheduleSaver implements iCommand {
 
                 } catch (Exception e) {
                         log.e(TAG,e.getMessage());
+                    return;
                 }
 
                 Element action_layoutElement = (Element) interaction_root.getElementsByTagName("layout").item(0);
@@ -369,9 +401,15 @@ public class ScheduleSaver implements iCommand {
                     bgmode_type = Integer.parseInt(bgmode);
                 } catch (Exception e) {
                     log.e(TAG, e.getMessage());
+                    return;
                 }
                 if (bgmode_type == 2) {
                     String bg = XmlHelper.getFirstChildNodeValue(layout_ItemsElement, "bg");
+                    if (bg.equals("")) {
+                        log.i(TAG,"一个按钮背景解析错误:背景图片名不存在") ;
+                        return;
+                    }
+
                     String bgmode_uri = thumbnailurl + bg;
                     //创建ftp
                     rootNode.addUriTast(bgmode_uri); //创建一个ftp任务
@@ -381,6 +419,7 @@ public class ScheduleSaver implements iCommand {
                 NodeList items_itemNodeList = layout_ItemsElement.getElementsByTagName("item"); //子按钮
                 if (items_itemNodeList.getLength() == 0) return;
 
+                log.i(TAG,"一个互动下面的 按钮总数:"+items_itemNodeList.getLength());
 
                 for (int i1 = 0; i1 < items_itemNodeList.getLength(); i1++) {
                     Element item_Element = (Element) items_itemNodeList.item(i1);
@@ -407,13 +446,11 @@ public class ScheduleSaver implements iCommand {
 
                     String item_uri = null;
                     if (bindtype_id == 0 || bindtype_id == 2) {  //布局类型 0 2
-
                         item_uri = layouturl + uri_Id;
                         log.i(TAG, "一个按钮 -布局- url :" + item_uri);
                         getXMLdata(item_uri, I_LAYOUT_PARSE, interaction_layout_items_item_node.NewSettingNodeEntity());
 
                     } else if (bindtype_id == 1 || bindtype_id == 3) { // 文件1 3网页
-
                         item_uri = folderurl + uri_Id;
                         log.i(TAG, "一个按钮 -文件- url :" + item_uri);
                         getXMLdata(item_uri, I_FILE_PARSE, interaction_layout_items_item_node.NewSettingNodeEntity());
@@ -427,7 +464,7 @@ public class ScheduleSaver implements iCommand {
 
             case I_FILE_PARSE://文件
 
-
+                log.i(TAG,"开始解析一个文件");
                 String interaction_fl_XmlData = result;
                 if (interaction_fl_XmlData.equals("")) return;
 
@@ -457,6 +494,7 @@ public class ScheduleSaver implements iCommand {
                 //循环得到子内容信息
                 NodeList floder_item_List = folderElement.getElementsByTagName("item"); //子信息
                 if (floder_item_List.getLength() == 0) return;
+                log.i(TAG,"一个按钮下面绑定文件夹 包含的内容的总数:"+floder_item_List.getLength());
 
                 for (int i1 = 0; i1 < floder_item_List.getLength(); i1++) {
                     Element floder_item_Element = (Element) floder_item_List.item(i1);
@@ -472,35 +510,103 @@ public class ScheduleSaver implements iCommand {
                     //文件类型
                     String filetype = XmlHelper.getFirstChildNodeValue(floder_item_Element, "filetype");
                     if (filetype.equals("1006")) {
-                        return; //网页
+                        continue; //网页
                     }
 
                     //资源路径
                     String filepath = XmlHelper.getFirstChildNodeValue(floder_item_Element, "filepath");//资源路径
+                    if(filepath.equals("")||filepath.equals("null")){
+                        continue;
+                    }
                     rootNode.addUriTast(filepath); //创建一个ftp任务
 
                     //还有第一帧的图像
                     if (filetype.equals("1002")) {
-                        filepath = XmlHelper.getFirstChildNodeValue(floder_item_Element, "video_image_uri");//视频第一帧路径
+                        filepath = XmlHelper.getFirstChildNodeValue(floder_item_Element, "video_image_url");//视频第一帧路径
+                        if(filepath.equals("")||filepath.equals("null")){
+                            filepath="http://img15.3lian.com/2015/f1/59/d/31.jpg";
+                            log.e("视频第一帧不存在,下载默认图片:"+ filepath);
+
+                        }
                         rootNode.addUriTast(filepath); //创建一个ftp任务
                     }
  //
                 }
-                log.d(TAG, "a interaction to end parse");
+                log.i(TAG, "a interaction to end parse");
                 break;
             case I_LAYOUT_PARSE ://布局
                 ParseResultXml(ACTION_PARSE,result,obj);
                 break;
         }
-
-
-
-
-
-
-
-
     }
+
+    ///////////////////////////
+
+
+    /**
+     * 把url转化为xml格式数据
+     *
+     * @param urlString
+     * @return the xml data or "" if catch Exception
+     */
+    public String uriTranslationXml(String urlString) {
+        URL url;
+        try {
+            url = new URL(urlString);
+        } catch (MalformedURLException e1) {
+            log.e(TAG,""+ "url wrong:" +urlString +"cause: "+ e1.getMessage());
+            return "";
+        }
+        URLConnection urlConnection;
+        try {
+            urlConnection = url.openConnection();
+        } catch (IOException ioe) {
+
+            log.e(TAG,""+ "url connect failed:" +  ioe.getMessage());
+            return "";
+        }
+
+        InputStreamReader in = null;
+        BufferedReader br = null;
+        try {
+            in = new InputStreamReader(urlConnection.getInputStream());
+            br = new BufferedReader(in);
+            StringBuilder xmlData = new StringBuilder();
+            String temp;
+            while ((temp = br.readLine()) != null)
+                xmlData.append(temp).append("\n");
+            return xmlData.toString();
+        } catch (IOException e) {
+
+            log.e(TAG,""+ "get input stream error:" +  e.getMessage());
+            e.printStackTrace();
+            return "";
+        } finally {
+            try {
+                if (br != null)
+                    br.close();
+                if (in != null)
+                    in.close();
+            } catch (IOException e) {
+
+                log.e(TAG,""+ "close input stream error:" +  urlString+"cause:" +e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
+    ///////////////////////
+
+
+
+
+
+
+
+
+
+
+
 }
 
 
