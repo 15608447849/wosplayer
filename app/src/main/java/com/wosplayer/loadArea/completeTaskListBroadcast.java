@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.wosplayer.app.log;
+import com.wosplayer.broadcast.Command.Schedule.ScheduleReader;
 import com.wosplayer.broadcast.Command.Schedule.ScheduleSaver;
 
 /**
@@ -21,6 +22,7 @@ public class completeTaskListBroadcast extends BroadcastReceiver {
         ScheduleSaver.Serialize();
 
         //执行 数据读取者
+        ScheduleReader.Start();
         //通知 时间控制台
     }
 }

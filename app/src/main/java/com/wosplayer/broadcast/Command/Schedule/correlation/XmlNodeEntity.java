@@ -10,6 +10,7 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -23,8 +24,8 @@ public class XmlNodeEntity {
 
     public static ReentrantLock lock = new ReentrantLock();//同步锁
 
-    public ArrayList<XmlNodeEntity> children;
-    public HashMap<String,String> xmlData;
+    private ArrayList<XmlNodeEntity> children;
+    private HashMap<String,String> xmlData;
 
     private List<String> ftplist = new ArrayList<String>(); //对应的资源下载
     private  static JsonBinder binder = JsonBinder.buildNonDefaultBinder();
@@ -47,6 +48,7 @@ public class XmlNodeEntity {
     public List<String> getFtpTaskList(){
         return ftplist;
     }
+    public Map<String,String> getXml(){return xmlData;}
     //添加属性
     public void AddProperty(String key, String value)
     {
@@ -96,6 +98,7 @@ public class XmlNodeEntity {
             xmlData=null;
             String md5=binder.toJson(this);
             md5=MD5(md5);
+
             this.AddProperty("md5", md5);
             String savedata = binder.toJson(this);
             log.i(TAG,"序列化数据:"+savedata);
@@ -144,6 +147,7 @@ public class XmlNodeEntity {
             if (ftplist!=null){
                 ftplist.clear();
             }
+
         }catch(Exception e)
         {
             log.e(TAG, e.getMessage());
@@ -215,8 +219,12 @@ public class XmlNodeEntity {
             if(SettingNodeEntityText!="")
             {
                 settingnodeentity=binder.fromJson(SettingNodeEntityText, XmlNodeEntity.class);
-                if(settingnodeentity.xmlData!=null&&settingnodeentity.xmlData.containsKey("md5"))
+                log.i(TAG,"settingnodeentity = "+ settingnodeentity.toString());
+
+                if(settingnodeentity.xmlData!=null&&settingnodeentity.xmlData.containsKey("md5")){
                     Current_Read_md5=settingnodeentity.xmlData.get("md5");
+                }
+
                 else
                     Current_Read_md5="";
             }
