@@ -21,7 +21,6 @@ public class completeTaskListBroadcast extends BroadcastReceiver {
         ScheduleSaver.Serialize();
 
         //执行 数据读取者
-
-
+        //通知 时间控制台
     }
 }

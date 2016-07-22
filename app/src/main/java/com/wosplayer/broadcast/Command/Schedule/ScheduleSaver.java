@@ -35,7 +35,6 @@ import rx.schedulers.Schedulers;
 public class ScheduleSaver implements iCommand {
     private static final String TAG = ScheduleSaver.class.getName();
 
-
     private final int ROOT_PARSE = 11;
     private final int SCHEDU_PROG_PARSE = 12;
     private final int ACTION_PARSE = 13;
@@ -64,10 +63,8 @@ public class ScheduleSaver implements iCommand {
      */
     @Override
     public void Execute(String param) {
+        log.i("获取排期信息,当前线程名:"+Thread.currentThread().getName());
         saveData(param);
-
-
-
     }
     /**
      * 存储数据

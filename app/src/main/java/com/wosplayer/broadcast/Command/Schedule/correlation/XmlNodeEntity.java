@@ -97,8 +97,9 @@ public class XmlNodeEntity {
             String md5=binder.toJson(this);
             md5=MD5(md5);
             this.AddProperty("md5", md5);
-            log.d(TAG,"序列化数据:"+binder.toJson(this));
-            writeShareDataSelf("settingNodeEntity", binder.toJson(this));
+            String savedata = binder.toJson(this);
+            log.i(TAG,"序列化数据:"+savedata);
+            writeShareDataSelf("settingNodeEntity", savedata);
         }catch(Exception e)
         {
             log.e(TAG ,e.getMessage());
@@ -112,7 +113,7 @@ public class XmlNodeEntity {
      * 节点读取
      *
      */
-    public  static String SettingNodeEntityRead()
+    private static String SettingNodeEntityRead()
     {
         lock.lock();
         String result="";
