@@ -60,9 +60,10 @@ public class DataList {
     public void put(String key, String value) {
         map.put(key, value);
     }
-
+    public void setMap(HashMap<String, String> map) {
+        this.map = map;
+    }
     public void clear(){
         map.clear();
     }
-
 }

@@ -2,6 +2,8 @@ package com.wosplayer.broadcast.Command.Schedule.correlation;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
@@ -16,7 +18,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Created by user on 2016/7/16.
  */
-public class XmlNodeEntity {
+public class XmlNodeEntity implements Parcelable {
 
 
     private static final String TAG = XmlNodeEntity.class.getName();
@@ -24,10 +26,34 @@ public class XmlNodeEntity {
 
     public static ReentrantLock lock = new ReentrantLock();//同步锁
 
-    private ArrayList<XmlNodeEntity> children;
-    private HashMap<String,String> xmlData;
+    public List<String> getFtplist() {
+        return ftplist;
+    }
 
+    public void setFtplist(List<String> ftplist) {
+        this.ftplist = ftplist;
+    }
+
+    public HashMap<String, String> getXmldata() {
+        return xmldata;
+    }
+
+    public void setXmldata(HashMap<String, String> xmldata) {
+        this.xmldata = xmldata;
+    }
+
+    public ArrayList<XmlNodeEntity> getChildren() {
+        return children;
+    }
+
+    public void setChildren(ArrayList<XmlNodeEntity> children) {
+        this.children = children;
+    }
+
+    private ArrayList<XmlNodeEntity> children;
+    private HashMap<String,String> xmldata;
     private List<String> ftplist = new ArrayList<String>(); //对应的资源下载
+
     private  static JsonBinder binder = JsonBinder.buildNonDefaultBinder();
 
 
@@ -45,20 +71,21 @@ public class XmlNodeEntity {
         ftplist.add(uri);
 
     }
-    public List<String> getFtpTaskList(){
-        return ftplist;
-    }
-    public Map<String,String> getXml(){return xmlData;}
+
+
+
+
+
     //添加属性
     public void AddProperty(String key, String value)
     {
         try
         {
-            if (xmlData == null)
+            if (xmldata == null)
             {
-                xmlData = new HashMap<String,String> ();
+                xmldata = new HashMap<String,String> ();
             }
-            xmlData.put(key, value);
+            xmldata.put(key, value);
         }
         catch (Exception e)
         {
@@ -71,7 +98,7 @@ public class XmlNodeEntity {
     {
         if (list.size() > 0)
         {
-            xmlData = list;
+            xmldata = list;
         }
     }
 
@@ -88,14 +115,15 @@ public class XmlNodeEntity {
     }
 
     /**
-     * 节点保存
+     * 所有排期节点保存
      */
     public void SettingNodeEntitySave()
     {
         this.lock.lock();
         try
         {
-            xmlData=null;
+            xmldata=null;
+            Level = null;
             String md5=binder.toJson(this);
             md5=MD5(md5);
 
@@ -155,17 +183,10 @@ public class XmlNodeEntity {
 
     }
 
-    public String area(boolean f) {
-        try{
-            return xmlData.get("id")+"#"+xmlData.get("uuks");
-        }catch(Exception e)
-        {
-            return "0#0";
-        }
-    }
+
     public String area() {
         try{
-            return xmlData.get("x")+"-"+xmlData.get("y")+"-"+xmlData.get("height")+"-"+xmlData.get("width");
+            return xmldata.get("x")+"-"+xmldata.get("y")+"-"+xmldata.get("height")+"-"+xmldata.get("width");
         }catch(Exception e)
         {
             return "0-0-0-0";
@@ -207,7 +228,7 @@ public class XmlNodeEntity {
     }
 
     /**
-     *获取全部
+     *获取全部排期
      * @return
      */
     public static ArrayList<XmlNodeEntity> GetAllNodeInfo()
@@ -221,8 +242,8 @@ public class XmlNodeEntity {
                 settingnodeentity=binder.fromJson(SettingNodeEntityText, XmlNodeEntity.class);
                 log.i(TAG,"settingnodeentity = "+ settingnodeentity.toString());
 
-                if(settingnodeentity.xmlData!=null&&settingnodeentity.xmlData.containsKey("md5")){
-                    Current_Read_md5=settingnodeentity.xmlData.get("md5");
+                if(settingnodeentity.xmldata!=null&&settingnodeentity.xmldata.containsKey("md5")){
+                    Current_Read_md5=settingnodeentity.xmldata.get("md5");
                 }
 
                 else
@@ -312,16 +333,39 @@ public class XmlNodeEntity {
     }
 
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.Level);
+        dest.writeList(this.children);
+        dest.writeSerializable(this.xmldata);
+        dest.writeStringList(this.ftplist);
+    }
 
+    public XmlNodeEntity() {
+    }
 
+    protected XmlNodeEntity(Parcel in) {
+        this.Level = in.readString();
+        this.children = new ArrayList<XmlNodeEntity>();
+        in.readList(this.children, XmlNodeEntity.class.getClassLoader());
+        this.xmldata = (HashMap<String, String>) in.readSerializable();
+        this.ftplist = in.createStringArrayList();
+    }
 
+    public static final Parcelable.Creator<XmlNodeEntity> CREATOR = new Parcelable.Creator<XmlNodeEntity>() {
+        @Override
+        public XmlNodeEntity createFromParcel(Parcel source) {
+            return new XmlNodeEntity(source);
+        }
 
-
-
-
-
-
-
-
+        @Override
+        public XmlNodeEntity[] newArray(int size) {
+            return new XmlNodeEntity[size];
+        }
+    };
 }

@@ -36,7 +36,7 @@ public class Loader {
      * 添加一个任务
      * @param Task
      */
-    public boolean addTask(String Task){
+    private boolean addTask(String Task){
 
         if (!loadingTaskList.contains(Task)){
             loadingTaskList.add(Task);
@@ -53,7 +53,7 @@ public class Loader {
     /**
      * 删除一个任务
      */
-    public  void complateTask(String Task, final String filepath){
+    private  void complateTask(String Task, final String filepath){
 
         if (loadingTaskList.contains(Task)){
             loadingTaskList.remove(Task);

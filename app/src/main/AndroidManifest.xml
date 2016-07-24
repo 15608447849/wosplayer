@@ -34,6 +34,13 @@
                 <action android:name="com.complete.taskList"></action>
             </intent-filter>
         </receiver>
+        <!-- 通知ui执行者 广播接受-->
+        <receiver android:name=".Ui.uiBroadcast.UibrocdCastReceive">
+            <intent-filter>
+                <action android:name="com.wos.ui.refresh" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 

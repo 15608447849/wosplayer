@@ -31,19 +31,6 @@ public class Command_SYTI implements iCommand {
 		android.provider.Settings.System.putInt(wosPlayerApp.appContext.getContentResolver(), android.provider.Settings.System.AUTO_TIME, 0);//1 获取网络时间
 		android.provider.Settings.System.putInt(wosPlayerApp.appContext.getContentResolver(), android.provider.Settings.System.AUTO_TIME_ZONE, 0);
 	}
-	
-	private void syncSystemTime(String timeExp)
-	{
-		log.i(TAG,"当前终端时间:"+getSystemTime());
-		log.i(TAG, "准备同步服务器时间 : " + timeExp);
-		DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
-		DateTime dateTime  = fmt.parseDateTime(timeExp);
-		long millseconds = dateTime.getMillis();
-		log.i(TAG, "sync system time : "+ dateTime);
-		log.i(TAG, "sync system time to milliseconds: "+ String.valueOf(millseconds));
-
-	}
-
 
 	private String getSystemTime(){
 		long time= System.currentTimeMillis();
@@ -110,7 +97,7 @@ public class Command_SYTI implements iCommand {
 	}
 
 
-	private boolean RegexMatches (String matcherStr){
+	public static boolean RegexMatches (String matcherStr){
 
 		String date = "((((1[6-9]|[2-9]\\d)\\d{2})-(1[02]|0?[13578])-([12]\\d|3[01]|0?[1-9]))|(((1[6-9]|[2-9]\\d)\\d{2})-(1[012]|0?[13456789])-([12]\\d|30|0?[1-9]))|(((1[6-9]|[2-9]\\d)\\d{2})-0?2-(1\\d|2[0-8]|0?[1-9]))|(((1[6-9]|[2-9]\\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00))-0?2-29-))";
 		String space = "\\s";

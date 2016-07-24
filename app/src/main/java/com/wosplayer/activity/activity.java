@@ -2,9 +2,16 @@ package com.wosplayer.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.AbsoluteLayout;
+import android.widget.FrameLayout;
 
 import com.wosplayer.R;
 import com.wosplayer.app.wosPlayerApp;
+import com.wosplayer.broadcast.Command.Schedule.ScheduleReader;
+
+import rx.schedulers.Schedulers;
 
 /**
  *  Timer timer = new Timer();
@@ -19,16 +26,23 @@ wosPlayerApp.sendMsgToServer(msg);
  */
 
 public class activity extends AppCompatActivity {
+    private static final java.lang.String TAG = activity.class.getName();
+    public  static AbsoluteLayout main = null;    //存放所有 视图 的主容器
+    public static FrameLayout frame = null;  //隐藏图层
+    public static AbsoluteLayout frame_main = null; //隐藏图层上面的 容器图层
+    public static activity activityContext = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-
-
-
-
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//去标题
+        setContentView(R.layout.activity_main);//设置布局文件
+        main = (AbsoluteLayout) this.findViewById(R.id.main);
+        frame = (FrameLayout)this.findViewById(R.id.frame_layout);
+        frame_main = (AbsoluteLayout)this.findViewById(R.id.frame_layout_main);
+        activityContext = this;
+        ScheduleReader.Start();
     }
 
     @Override
@@ -56,5 +70,9 @@ public class activity extends AppCompatActivity {
 
     }
 
+/////////////////////////////////////////////////////////////////////////////////////
+    public void FrameBtnEvent(View view){
+
+    }
 
 }

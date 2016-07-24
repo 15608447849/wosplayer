@@ -24,6 +24,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 import rx.functions.Action0;
 import rx.schedulers.Schedulers;
@@ -33,6 +34,7 @@ import rx.schedulers.Schedulers;
  */
 
 public class ScheduleSaver implements iCommand {
+    private static ReentrantLock lock = new ReentrantLock();
     private static final String TAG = ScheduleSaver.class.getName();
 
     private final int ROOT_PARSE = 11;
@@ -72,12 +74,16 @@ public class ScheduleSaver implements iCommand {
     private void saveData(String uri) {
 
         try {
-            rootNode.Clear();//清理存在的序列化数据
+            lock.lock();
+            rootNode.Clear();//清理存在的数据
+
+            log.i(TAG," root uri:"+ uri);
+            startWork(uri);
         } catch (Exception e) {
             log.e(TAG, " " + e.getMessage());
+        }finally {
+            lock.unlock();
         }
-        log.i(TAG," root uri:"+ uri);
-        startWork(uri);
     }
 
 
@@ -99,7 +105,7 @@ public class ScheduleSaver implements iCommand {
                 log.i(TAG,"解析用时:"+(endTime - startTime)+"毫秒");
 
                 //开启后台下载线程
-                log.i("当前的任务数:"+rootNode.getFtpTaskList().size()+"--"+rootNode.getFtpTaskList().toString());
+                log.i("当前的任务数:"+rootNode.getFtplist().size()+"--"+rootNode.getFtplist().toString());
 
                 sendloadTask();
             }
@@ -113,8 +119,8 @@ public class ScheduleSaver implements iCommand {
 
         ArrayList<CharSequence> tasklist = new ArrayList<CharSequence>();
 
-        for (int i = 0; i<rootNode.getFtpTaskList().size();i++){
-            tasklist.add(rootNode.getFtpTaskList().get(i));
+        for (int i = 0; i<rootNode.getFtplist().size();i++){
+            tasklist.add(rootNode.getFtplist().get(i));
         }
 
         Intent intent = new Intent(wosPlayerApp.appContext, loaderManager.class);
@@ -576,7 +582,7 @@ public class ScheduleSaver implements iCommand {
         } catch (IOException e) {
 
             log.e(TAG,""+ "get input stream error:" +  e.getMessage());
-            e.printStackTrace();
+
             return "";
         } finally {
             try {
