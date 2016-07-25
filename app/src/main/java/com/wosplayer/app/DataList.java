@@ -8,6 +8,13 @@ import java.util.HashMap;
 
 public class DataList {
 
+    private String key;
+    public void setKey(String key) {
+        this.key = key;
+    }
+    public String getKey() {
+        return key;
+    }
     protected HashMap<String, String> map = new HashMap<String, String>();
 
 

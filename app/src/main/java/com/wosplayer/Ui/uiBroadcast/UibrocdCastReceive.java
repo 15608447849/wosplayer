@@ -3,11 +3,13 @@ package com.wosplayer.Ui.uiBroadcast;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.app.log;
 import com.wosplayer.broadcast.Command.Schedule.correlation.XmlNodeEntity;
+
+import rx.functions.Action0;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by Administrator on 2016/7/24.
@@ -22,15 +24,20 @@ public class UibrocdCastReceive extends BroadcastReceiver{
     public void onReceive(Context context, Intent intent) {
 
 
-        XmlNodeEntity entity = intent.getExtras().getParcelable(key);
+        final XmlNodeEntity entity = intent.getExtras().getParcelable(key);
         log.i(TAG, "onReceive: "+entity.toString());
 
         if (entity==null){
 
 
         }else {
-            UiExcuter.getInstancs(entity);
-//            UiExcuter.StartExcuter();
+            Schedulers.newThread().createWorker().schedule(new Action0() {
+                @Override
+                public void call() {
+                    UiExcuter.getInstancs().StartExcuter(entity);
+                }
+            });
+
         }
 
 

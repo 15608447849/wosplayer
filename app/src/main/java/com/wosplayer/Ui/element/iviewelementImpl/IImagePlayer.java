@@ -2,7 +2,7 @@ package com.wosplayer.Ui.element.iviewelementImpl;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.ViewGroup;
@@ -14,7 +14,8 @@ import com.wosplayer.Ui.element.IPlayer;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.log;
 import com.wosplayer.loadArea.excuteBolock.Loader;
-import com.wosplayer.loadArea.loaderManager;
+
+import java.io.File;
 
 import it.sephiroth.android.library.picasso.MemoryPolicy;
 import it.sephiroth.android.library.picasso.Picasso;
@@ -36,6 +37,9 @@ public class IImagePlayer extends ImageView implements IPlayer{
     private int y=0;
     private int h=0;
     private int w=0;
+    private boolean isExistOnLayout = false;
+
+
     public IImagePlayer(Context context, ViewGroup mfatherView) {
         super(context);
         mCcontext =context;
@@ -43,26 +47,41 @@ public class IImagePlayer extends ImageView implements IPlayer{
         loader = new Loader();
         loader.settingCaller(this);
         this.mfatherView = mfatherView;
-        mfatherView.addView(this);
-        this.setlayout();//设置布局
-        //设置 图片显示 方式
-        this.setScaleType(ImageView.ScaleType.FIT_XY);
+       //设置 图片显示 方式
+//        this.setScaleType(ImageView.ScaleType.FIT_XY);
     }
 
+    private String localpath = null;
     private String uri = null;
+    private DataList mp = null;
     @Override
     public void loadData(DataList mp) {
-        this.x = mp.GetIntDefualt("x", 0);
-        this.y = mp.GetIntDefualt("y", 0);
-        this.w = mp.GetIntDefualt("width", 0);
-        this.h = mp.GetIntDefualt("height", 0);
-        this.uri = mp.GetStringDefualt("sourece_uri", "");
+        try {
+            this.mp = mp;
+            this.x = mp.GetIntDefualt("x", 0);
+            this.y = mp.GetIntDefualt("y", 0);
+            this.w = mp.GetIntDefualt("width", 0);
+            this.h = mp.GetIntDefualt("height", 0);
+            this.localpath = mp.GetStringDefualt("localpath", "");
+            this.uri = mp.GetStringDefualt("getcontents", "");
+        }catch (Exception e){
+            log.e(TAG, "loaddata() " + e.getMessage());
+        }
     }
 
+    @Override
+    public DataList getDatalist() {
+        return mp;
+    }
     @Override
     public void setlayout() {
 
         try {
+            if (!isExistOnLayout){
+                mfatherView.addView(this);
+                isExistOnLayout = true;
+            }
+
             AbsoluteLayout.LayoutParams lp = (AbsoluteLayout.LayoutParams) this
                     .getLayoutParams();
             lp.x = x;
@@ -74,6 +93,8 @@ public class IImagePlayer extends ImageView implements IPlayer{
           log.e(TAG,"设置布局:" + e.getMessage());
         }
     }
+
+
 
     @Override
     public void start() {
@@ -97,6 +118,7 @@ public class IImagePlayer extends ImageView implements IPlayer{
         try {
             //移除父视图
             mfatherView.removeView(this);
+            isExistOnLayout = false;
             //移除存在的图片资源
             Schedulers.newThread().createWorker().schedule(new Action0() {
                 @Override
@@ -108,7 +130,6 @@ public class IImagePlayer extends ImageView implements IPlayer{
         }catch (Exception e){
             log.e(TAG,"停止:"+e.getMessage());
         }
-
     }
 
     private void removeMyImage() {
@@ -132,9 +153,9 @@ public class IImagePlayer extends ImageView implements IPlayer{
     }
 
     @Override
-    public void Call(String filePath) {
+    public void Call(final String filePath) {
         log.i(TAG, IImagePlayer.this.toString()+"  一个图片 资源 传递了来了:" + filePath);
-        Bitmap bitmap = null;
+      /*  Bitmap bitmap = null;
         if (filePath.equals("404")) {//如果找不到资源
             bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.no_found);
         }else{
@@ -156,6 +177,83 @@ public class IImagePlayer extends ImageView implements IPlayer{
                     IImagePlayer.this.setImageDrawable(drawable);
                 }
             });
+        }*/
+
+
+try {
+    AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+        @Override
+        public void call() {
+            picassoLoaderImager(filePath);
+        }
+    });
+}catch (Exception e){
+    log.e(TAG,""+e.getMessage());
+}
+
+
+
+
+    }
+
+    private void picassoLoaderImager(String filePath) {
+        log.i(TAG,"width:"+w);
+        log.i(TAG,"layoutparam w:"+this.getLayoutParams().width);
+        log.i(TAG,"getMeasuredWidth:"+this.getMeasuredWidth());
+        //纯用picasso 加载本地图片
+        Picasso.with(mCcontext)
+                .load(new File(filePath))
+//                .resize(w-1,h-1)
+                .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
+                .centerCrop()
+                .resize(this.getMeasuredWidth(), this.getMeasuredHeight())
+                .placeholder(R.drawable.no_found)
+                .error(R.drawable.error)
+                .into(this);
+        /**.memoryPolicy(NO_CACHE, NO_STORE)
+         * 其中memoryPolicy的NO_CACHE是指图片加载时放弃在内存缓存中查找，NO_STORE是指图片加载完不缓存在内存中。
+         *        .transform(new Transformation(){
+
+        @Override
+        public Bitmap transform(Bitmap source) {
+        int size = Math.min(source.getWidth(), source.getHeight());
+        int x = (source.getWidth() - size) / 2;
+        int y = (source.getHeight() - size) / 2;
+        Bitmap result = Bitmap.createBitmap(source, x, y, size, size);
+        if (result != source) {
+        source.recycle();
+        }
+        return result;
+        }
+
+        @Override
+        public String key() {
+        return "square()";
+        }
+        })
+         */
+    }
+
+
+    //重写系统方法
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        try {
+            super.onDraw(canvas);
+        } catch (Exception e) {
+            log.e(TAG,"试图引用　一个　回收的图片 ["+e.getMessage()+"-----"+e.getCause()+"]");
         }
     }
+    @Override
+    protected void onDetachedFromWindow() {
+        try {
+            super.onDetachedFromWindow();
+            setImageDrawable(null);
+        }catch (Exception e){
+            log.e(TAG,"onDetachedFromWindow:"+e.getMessage());
+        }
+
+    }
+
 }

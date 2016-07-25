@@ -12,7 +12,7 @@ public interface IPlayer extends Loader.LoaderCaller {
     public void loadData(DataList mp);
     public void start();
     public void stop();
-
     public void setlayout ();
+    public DataList getDatalist();
 
 }

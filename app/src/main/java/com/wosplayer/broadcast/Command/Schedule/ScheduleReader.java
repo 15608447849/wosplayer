@@ -2,7 +2,6 @@ package com.wosplayer.broadcast.Command.Schedule;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Xml;
 
 import com.wosplayer.Ui.uiBroadcast.UibrocdCastReceive;
 import com.wosplayer.app.log;
@@ -40,9 +39,8 @@ public class ScheduleReader {
 
     private static  Timer timer = null;
     private static  TimerTask timerTask = null;
-    private static void startTimer(long second){
+    private static void startTimer(long millisecond){
         stopTimer();
-
 
         timerTask = new TimerTask() {
             @Override
@@ -60,8 +58,8 @@ public class ScheduleReader {
         };
 
         timer = new Timer();
-        timer.schedule(timerTask,second);
-        log.i(TAG,"开始 定时任务");
+        timer.schedule(timerTask,millisecond);
+        log.i(TAG,"开始 定时任务 ,延时毫秒数:" +millisecond);
     }
 
     private static void stopTimer(){
@@ -204,6 +202,7 @@ public class ScheduleReader {
         String timelength = entity.getXmldata().get("timelength");
            try{
                dalay = Integer.parseInt(timelength);
+               dalay = dalay * 1000;
            }catch (Exception e){
                log.e(TAG,"点播解析播放时长异常:"+timelength);
                return;
@@ -218,7 +217,7 @@ public class ScheduleReader {
             String endcron = entity.getXmldata().get("endcron");
 
             dalay = getTimeMillsecondes(endcron) - getTimeMillsecondes(startcron);
-            dalay =  dalay/1000;
+
 
         }
         else{
@@ -227,13 +226,15 @@ public class ScheduleReader {
             String todayEndTimeText =  currentTimeText.substring(0, 11) + "23:59:59";
 
             dalay = getTimeMillsecondes(todayEndTimeText) - getTimeMillsecondes(currentTimeText);
-            dalay =  dalay/1000;
+
         }
 
         if (dalay<0){
             log.e(TAG,"定时任务 执行时间 错误:"+dalay);
             return;
         }
+
+        log.i(TAG,"延时秒数:"+dalay/1000);
         startTimer(dalay);
     }
 

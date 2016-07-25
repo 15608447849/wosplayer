@@ -11,8 +11,6 @@ import com.wosplayer.R;
 import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.broadcast.Command.Schedule.ScheduleReader;
 
-import rx.schedulers.Schedulers;
-
 /**
  *  Timer timer = new Timer();
  timer.schedule(new TimerTask() {
@@ -49,7 +47,6 @@ public class activity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
     }
-
 
     @Override
     public void onResume() {

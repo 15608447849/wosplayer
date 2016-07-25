@@ -12,6 +12,9 @@ import com.wosplayer.Ui.element.IPlayer;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.log;
 
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
+
 /**
  * Created by Administrator on 2016/7/24.
  */
@@ -25,18 +28,20 @@ public class IWebPlayer extends android.webkit.WebView  implements IPlayer {
     private int y=0;
     private int h=0;
     private int w=0;
+    private boolean isExistOnLayout = false;
     public IWebPlayer(Context context, ViewGroup mfatherView) {
         super(context);
         mCcontext =context;
         this.mfatherView = mfatherView;
-        mfatherView.addView(this);
-        this.setlayout();//设置布局
+
     }
 
+    private DataList mp = null;
     private String uri = null;
     @Override
     public void loadData(DataList mp) {
         try {
+        this.mp = mp;
         this.x = mp.GetIntDefualt("x", 0);
         this.y = mp.GetIntDefualt("y", 0);
         this.w = mp.GetIntDefualt("width", 0);
@@ -49,7 +54,7 @@ public class IWebPlayer extends android.webkit.WebView  implements IPlayer {
 
             initParam();
         } catch (Exception e) {
-            log.e(TAG, "loadFile() " + e.getMessage());
+            log.e(TAG, "loaddata() " + e.getMessage());
         }
     }
 
@@ -98,6 +103,11 @@ public class IWebPlayer extends android.webkit.WebView  implements IPlayer {
     @Override
     public void setlayout(){
         try {
+            if (!isExistOnLayout){
+                mfatherView.addView(this);
+                isExistOnLayout= true;
+            }
+
             LayoutParams lp = (LayoutParams) this
                     .getLayoutParams();
             lp.x = x;
@@ -105,10 +115,17 @@ public class IWebPlayer extends android.webkit.WebView  implements IPlayer {
             lp.width = w;
             lp.height = h;
             this.setLayoutParams(lp);
+
         } catch (Exception e) {
             log.e(TAG, "setlayout() " + e.getMessage());
         }
     }
+
+    @Override
+    public DataList getDatalist() {
+        return mp;
+    }
+
     @Override
     public void start() {
         setlayout();
@@ -116,7 +133,15 @@ public class IWebPlayer extends android.webkit.WebView  implements IPlayer {
     }
     @Override
     public void stop() {
-        mfatherView.removeView(this);
+        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+            @Override
+            public void call() {
+                mfatherView.removeView(IWebPlayer.this);
+                isExistOnLayout = false;
+            }
+        });
+
+
     }
 
     @Override

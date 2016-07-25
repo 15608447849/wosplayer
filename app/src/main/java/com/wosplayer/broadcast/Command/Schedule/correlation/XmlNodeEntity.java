@@ -12,7 +12,6 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -184,14 +183,7 @@ public class XmlNodeEntity implements Parcelable {
     }
 
 
-    public String area() {
-        try{
-            return xmldata.get("x")+"-"+xmldata.get("y")+"-"+xmldata.get("height")+"-"+xmldata.get("width");
-        }catch(Exception e)
-        {
-            return "0-0-0-0";
-        }
-    }
+
 
     private  static String Current_Read_md5="";
     private  static String Current_Playing_md5="init";
