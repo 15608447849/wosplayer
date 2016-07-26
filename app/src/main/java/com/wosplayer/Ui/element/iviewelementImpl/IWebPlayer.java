@@ -12,9 +12,6 @@ import com.wosplayer.Ui.element.IPlayer;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.log;
 
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-
 /**
  * Created by Administrator on 2016/7/24.
  */
@@ -33,7 +30,6 @@ public class IWebPlayer extends android.webkit.WebView  implements IPlayer {
         super(context);
         mCcontext =context;
         this.mfatherView = mfatherView;
-
     }
 
     private DataList mp = null;
@@ -127,23 +123,24 @@ public class IWebPlayer extends android.webkit.WebView  implements IPlayer {
     }
 
     @Override
-    public void start() {
-        setlayout();
-        this.loadUrl(this.uri);
+    public void start() {//主线程执行
+        try {
+            setlayout();
+            this.loadUrl(this.uri);
+        }catch (Exception e){
+            log.e(TAG,"web start():"+e.getMessage());
+        }
     }
     @Override
-    public void stop() {
-        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-            @Override
-            public void call() {
-                mfatherView.removeView(IWebPlayer.this);
-                isExistOnLayout = false;
-            }
-        });
-
-
+    public void stop() {//主线程执行
+     try{
+         mfatherView.removeView(IWebPlayer.this);
+         isExistOnLayout = false;
+     }
+     catch (Exception e){
+         log.e(TAG,"web stop():"+e.getMessage());
+     }
     }
-
     @Override
     public void Call(String filePath) {
         //未使用

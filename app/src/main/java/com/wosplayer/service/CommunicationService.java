@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
+import com.wosplayer.activity.counts;
 import com.wosplayer.app.log;
 import com.wosplayer.broadcast.CmdPostTaskCenter;
 
@@ -21,6 +22,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
 
+import rx.Scheduler;
 import rx.functions.Action0;
 import rx.schedulers.Schedulers;
 
@@ -30,6 +32,7 @@ import rx.schedulers.Schedulers;
 
 public class CommunicationService extends Service{
 
+    private static final java.lang.String TAG = CommunicationService.class.getName();
     private DataOutputStream dataOutputStream;
     private DataInputStream dataInputStream;
     private Socket socket;
@@ -40,6 +43,8 @@ public class CommunicationService extends Service{
     private boolean isConnected = false;
     private ReentrantLock msgLock = new ReentrantLock();
     private boolean isReconnection = false;//是否可以尝试重连接
+
+    private static final Scheduler.Worker connectHelper =  Schedulers.newThread().createWorker();
 
     @Nullable
     @Override
@@ -141,9 +146,10 @@ public class CommunicationService extends Service{
         if (ip==null || terminalNo==null){
            return START_STICKY;
         }
-        Schedulers.newThread().createWorker().schedule(new Action0() {
+        connectHelper.schedule(new Action0() {
             @Override
             public void call() {
+                log.i(TAG,"RXJAVA :" +Thread.currentThread().getName()+ counts.i++);
                 startCommunication();
             }
         });
@@ -153,11 +159,13 @@ public class CommunicationService extends Service{
      * 开始通讯
      */
     private void startCommunication(){
+        log.i(TAG,"当前所在线程:"+Thread.currentThread().getName()+"当前线程数量:"+Thread.getAllStackTraces().size());
         //连接
         CreaterSocket();
         if (!isConnected){ //如果没连接上 可以滚蛋了
-            return;
+             return;
         }
+
         //创建接受消息线程
         startReceiveThread();
         //注册发送消息的广播
@@ -203,7 +211,7 @@ public class CommunicationService extends Service{
         } catch (IOException e) {
             log.e(" socket connection err:"+ e.getMessage());
             isConnected=false;
-            reConnection();
+            reConnection();//重新链接
         }
     }
     //尝试重新链接
@@ -220,15 +228,16 @@ public class CommunicationService extends Service{
             Thread.sleep(3*1000);
         } catch (InterruptedException e) {
             log.e("重新链接失败"+e.getMessage());
-            Schedulers.newThread().createWorker().schedule(new Action0() {
-                @Override
-                public void call() {
-                    reConnection();
-                }
-            });
-
+            reConnection();
+            return;
         }
-        startCommunication();
+        connectHelper.schedule(new Action0() {
+            @Override
+            public void call() {
+                log.i(TAG,"RXJAVA :" +Thread.currentThread().getName()+ counts.i++);
+                startCommunication();
+            }
+        });
     }
     /**
      *断开链接
@@ -267,27 +276,19 @@ public class CommunicationService extends Service{
     private void sendMsgToService(final String msg){
 
         if (isConnected){
-
-                Schedulers.newThread().createWorker().schedule(new Action0() {
-                    @Override
-                    public void call() {
-                        try {
-                       msgLock.lock();
-
-                        dataOutputStream.writeUTF(msg);
-                        dataOutputStream.flush();
-                        log.i("发送一条信息到服务器 :" + msg);
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            log.e("发送信息失败 error :" + e.getMessage());
-                            //重连接
-                            reConnection();
-                        }finally {
-                            msgLock.unlock();
-                        }
-                    }
-                });
+            try {
+            msgLock.lock();
+            dataOutputStream.writeUTF(msg);
+            dataOutputStream.flush();
+            log.i("发送一条信息到服务器 :" + msg);
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.e("发送信息失败 error :" + e.getMessage());
+                //重连接
+                reConnection();
+            }finally {
+                         msgLock.unlock();
+            }
         }
     }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -336,25 +337,12 @@ public class CommunicationService extends Service{
    private Timer timer = null;
     private TimerTask timertask = null;
 
-    private class  Heartbeat extends TimerTask{
-
-        @Override
-        public void run() {
-            TimerTask task = new TimerTask() {
-                @Override
-                public void run() {
-
-                }
-            };
-        }
-    }
-
 
     //开启 心跳
     private void startHeartbeat(){
         stopHeartbeat();
         timer = new Timer();
-        timertask  =   new TimerTask() {
+        timertask  =  new TimerTask() {
             @Override
             public void run() {
                     String msg = "HRBT:"+terminalNo;

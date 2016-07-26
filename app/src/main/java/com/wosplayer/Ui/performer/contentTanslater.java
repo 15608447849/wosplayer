@@ -85,7 +85,7 @@ public final class contentTanslater {
             }
             //执行它
             iplay.loadData(list);
-            iplay.start();
+            iplay.start();//主线程执行
         } catch (ClassNotFoundException e) {
             log.e(TAG,"无法找到这个类");
         }catch(NoSuchMethodException e){

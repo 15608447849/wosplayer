@@ -21,7 +21,6 @@ import it.sephiroth.android.library.picasso.MemoryPolicy;
 import it.sephiroth.android.library.picasso.Picasso;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
-import rx.schedulers.Schedulers;
 
 /**
  * Created by Administrator on 2016/7/24.
@@ -95,7 +94,7 @@ public class IImagePlayer extends ImageView implements IPlayer{
     }
 
 
-
+    //主线程中执行
     @Override
     public void start() {
         try{
@@ -108,11 +107,18 @@ public class IImagePlayer extends ImageView implements IPlayer{
 
     //加载图片
     private void loadMyImage() {
+        //先判断文件是不是存在
+        if (loader.fileIsExist(localpath)){
+//            Call(localpath);
+            picassoLoaderImager(localpath);
+            return;
+        }
         //通过 资源加载者
         loader.LoadingUriResource(uri,null);
     }
 
 
+    //主线程中执行
     @Override
     public void stop() {
         try {
@@ -120,18 +126,13 @@ public class IImagePlayer extends ImageView implements IPlayer{
             mfatherView.removeView(this);
             isExistOnLayout = false;
             //移除存在的图片资源
-            Schedulers.newThread().createWorker().schedule(new Action0() {
-                @Override
-                public void call() {
-                    //异步释放视图
-                    removeMyImage();
-                }
-            });
+            removeMyImage();
         }catch (Exception e){
             log.e(TAG,"停止:"+e.getMessage());
         }
     }
 
+    //放入主线程
     private void removeMyImage() {
         //资源回调的地方
         Drawable drawable = this.getDrawable();
@@ -139,12 +140,12 @@ public class IImagePlayer extends ImageView implements IPlayer{
             BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
             Bitmap bitmap = bitmapDrawable.getBitmap();
             if (bitmap != null && !bitmap.isRecycled()) {
-                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-                    @Override
-                    public void call() {
+//                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+//                    @Override
+//                    public void call() {
                         IImagePlayer.this.setBackgroundResource(0);
-                    }
-                });
+//                    }
+//                });
                 drawable.setCallback(null);
                 bitmap.recycle();
                 log.i(TAG, IImagePlayer.this.toString()+" 释放资源..." );
@@ -154,7 +155,8 @@ public class IImagePlayer extends ImageView implements IPlayer{
 
     @Override
     public void Call(final String filePath) {
-        log.i(TAG, IImagePlayer.this.toString()+"  一个图片 资源 传递了来了:" + filePath);
+        log.i(TAG," 图片资源回传:" + filePath +" 当前所在线程:"+Thread.currentThread().getName()+"正在执行的所有线程数:"+ Thread.getAllStackTraces().size());
+
       /*  Bitmap bitmap = null;
         if (filePath.equals("404")) {//如果找不到资源
             bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.no_found);
@@ -206,7 +208,8 @@ try {
 //                .resize(w-1,h-1)
                 .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
                 .centerCrop()
-                .resize(this.getMeasuredWidth(), this.getMeasuredHeight())
+               // .resize(this.getMeasuredWidth(), this.getMeasuredHeight())
+                .resize(w,h)
                 .placeholder(R.drawable.no_found)
                 .error(R.drawable.error)
                 .into(this);

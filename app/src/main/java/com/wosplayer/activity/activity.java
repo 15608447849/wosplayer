@@ -8,6 +8,7 @@ import android.widget.AbsoluteLayout;
 import android.widget.FrameLayout;
 
 import com.wosplayer.R;
+import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.broadcast.Command.Schedule.ScheduleReader;
 
@@ -24,6 +25,7 @@ wosPlayerApp.sendMsgToServer(msg);
  */
 
 public class activity extends AppCompatActivity {
+
     private static final java.lang.String TAG = activity.class.getName();
     public  static AbsoluteLayout main = null;    //存放所有 视图 的主容器
     public static FrameLayout frame = null;  //隐藏图层
@@ -40,6 +42,7 @@ public class activity extends AppCompatActivity {
         frame = (FrameLayout)this.findViewById(R.id.frame_layout);
         frame_main = (AbsoluteLayout)this.findViewById(R.id.frame_layout_main);
         activityContext = this;
+        log.i(TAG,"正在执行的所有线程数:"+ Thread.getAllStackTraces().size());
         ScheduleReader.Start();
     }
 
@@ -64,7 +67,6 @@ public class activity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
     }
 
 /////////////////////////////////////////////////////////////////////////////////////

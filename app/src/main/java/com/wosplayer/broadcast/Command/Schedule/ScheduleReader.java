@@ -28,9 +28,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
 
-import rx.functions.Action0;
-import rx.schedulers.Schedulers;
-
 /**
  * Created by user on 2016/7/22.
  * 读取排期
@@ -45,14 +42,8 @@ public class ScheduleReader {
         timerTask = new TimerTask() {
             @Override
             public void run() {
-
-                Schedulers.newThread().createWorker().schedule(new Action0() {
-                    @Override
-                    public void call() {
-                        //重新读取排期
-                        Start();
-                    }
-                });
+            //重新读取排期
+               Start();
 
             }
         };
@@ -65,9 +56,11 @@ public class ScheduleReader {
     private static void stopTimer(){
         if (timerTask!=null){
             timerTask.cancel();
+            timerTask = null;
         }
        if (timer!=null){
            timer.cancel();
+           timer = null;
        }
 
         log.i(TAG,"停止 定时任务");

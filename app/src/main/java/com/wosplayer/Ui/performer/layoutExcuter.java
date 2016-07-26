@@ -124,7 +124,7 @@ public class layoutExcuter {
         datalist.put("localpath",localpath);
         datalist.put("timelength",timelength);
 
-        String key = content.getXmldata().get("id")+content.getXmldata().get("materialid")+fileproterty+content.getXmldata().get("contentsnewname");//生成一个唯一标识
+        String key = layout.getXmldata().get("id")+content.getXmldata().get("id")+content.getXmldata().get("materialid")+fileproterty+content.getXmldata().get("contentsnewname");//生成一个唯一标识
         datalist.setKey(key);//唯一标识
         return  datalist;
     }
@@ -151,7 +151,7 @@ public class layoutExcuter {
     }
 
     /**
-     * 创建内容视图
+     * 创建内容视图 放入主线程
      * @param datalist
      */
     private void createContent(final DataList datalist){

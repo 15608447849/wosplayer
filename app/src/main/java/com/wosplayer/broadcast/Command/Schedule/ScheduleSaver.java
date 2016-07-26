@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.wosplayer.activity.counts;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.broadcast.Command.Schedule.correlation.XmlHelper;
@@ -95,18 +96,16 @@ public class ScheduleSaver implements iCommand {
 
     private void startWork(final String uri){
 
-        Schedulers.newThread().createWorker().schedule(new Action0() {
+        Schedulers.io().createWorker().schedule(new Action0() {
             @Override
             public void call() {
-
+                log.i(TAG,"RXJAVA :" + counts.i++);
                 Long startTime = System.currentTimeMillis();
                 getXMLdata(uri,ROOT_PARSE,null); //解析数据
                 Long endTime = System.currentTimeMillis();
                 log.i(TAG,"解析用时:"+(endTime - startTime)+"毫秒");
-
                 //开启后台下载线程
                 log.i("当前的任务数:"+rootNode.getFtplist().size()+"--"+rootNode.getFtplist().toString());
-
                 sendloadTask();
             }
         });

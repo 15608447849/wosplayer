@@ -5,9 +5,11 @@ import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.HttpHandler;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
+import com.wosplayer.activity.counts;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.loadArea.ftpBlock.ActiveFtpUtils;
+import com.wosplayer.loadArea.otherBlock.fileUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
+import rx.Scheduler;
 import rx.functions.Action0;
 import rx.schedulers.Schedulers;
 
@@ -32,6 +35,8 @@ public class Loader {
         this.other_caller = calle;
     }
     private static List<String> loadingTaskList = Collections.synchronizedList(new LinkedList<String>());
+    private final static Scheduler.Worker ioThread = Schedulers.io().createWorker();
+    private final static Scheduler.Worker notifyThread = Schedulers.io().createWorker();
     /**
      * 添加一个任务
      * @param Task
@@ -48,13 +53,12 @@ public class Loader {
             addRepeatTask(this);
             return false;
         }
-
     }
     /**
      * 删除一个任务
      */
     private  void complateTask(String Task, final String filepath){
-
+        log.i(TAG,"当前所在线程:"+Thread.currentThread().getName()+";总线程数量:"+Thread.getAllStackTraces().size());
         if (loadingTaskList.contains(Task)){
             loadingTaskList.remove(Task);
             log.i("下载任务队列 (移除) :"+TAG,Task);
@@ -65,9 +69,10 @@ public class Loader {
             log.e(TAG,"当前重复任务队列对象:"+repeatTaskList.toString());
         }
 
-        Schedulers.newThread().createWorker().schedule(new Action0() {
+        notifyThread.schedule(new Action0() {
             @Override
             public void call() {
+                log.i(TAG, " - RXJAVA :" +Thread.currentThread().getName()+ "  "+ counts.i++);
                 //异步通知所有人 一个任务完成
                 notifyRepatList(Loader.this.muri,filepath);
             }
@@ -78,7 +83,7 @@ public class Loader {
      * 请放入io 线程
      * @param uri
      */
-    public void LoadingUriResource(String uri,String mySettingFileName) {
+    public void LoadingUriResource(final String uri, String mySettingFileName) {
 
         try {
             locker.lock();
@@ -98,7 +103,15 @@ public class Loader {
             if (mySettingFileName!=null){
                 fps = mySettingFileName;
             }
-            HttpLoad(uri, fps);
+            final String finalFps = fps;
+            ioThread.schedule(new Action0() {
+                @Override
+                public void call() {
+                    log.i(TAG,"RXJAVA :" + counts.i++);
+                    HttpLoad(uri, finalFps);
+                }
+            });
+
 
         } else if (uri.startsWith("ftp://")) {
             // ftp://ftp:FTPmedia@21.89.68.163/uploads/1466573392435.png
@@ -110,12 +123,16 @@ public class Loader {
             final String path = str.substring(str.indexOf("/"), str.lastIndexOf("/") + 1);
             final String filename = str.substring(str.lastIndexOf("/") + 1);
             final String localPath = localFileDir;
-            Schedulers.newThread().createWorker().schedule(new Action0() {
+            ioThread.schedule(new Action0() {
                 @Override
                 public void call() {
+                    log.i(TAG,"RXJAVA :" + counts.i++);
                     FTPload(host, name, password, path, filename, localPath);
+
                 }
             });
+
+
         }
         }catch (Exception e){
             log.e(TAG,e.getMessage());
@@ -151,26 +168,20 @@ public class Loader {
                     }
                     @Override
                     public void onSuccess(ResponseInfo<File> responseInfo) {
-                        log.i(TAG,"http 下载完成" + url);
+                        log.i(TAG,"http 下载完成" + url + "当前所在线程:"+Thread.currentThread().getName()+" "+Thread.getAllStackTraces().size());
                         final String path  =responseInfo.result.getPath();
-                        Schedulers.newThread().createWorker().schedule(new Action0() {
-                            @Override
-                            public void call() {
+
                                 caller.Call(path);
                                 nitifyMsg(url.substring(url.lastIndexOf("/")+1),3);
-                            }
-                        });
+
                     }
                     @Override
                     public void onFailure(HttpException error, String msg) {
-                        log.e(TAG,"http 下载失败:"+msg + url);
-                        Schedulers.newThread().createWorker().schedule(new Action0() {
-                            @Override
-                            public void call() {
+                        log.e(TAG,"http 下载失败:"+msg + url +"当前所在线程:"+Thread.currentThread().getName());
+
                                 loadFileRecall("loaderr");
                                 nitifyMsg(url.substring(url.lastIndexOf("/")+1),4);
-                            }
-                        });
+
 
 //                        if (msg.equals("maybe the file has downloaded completely")){
 //                            caller.Call(Filepath);
@@ -224,7 +235,6 @@ public class Loader {
                         log.i(TAG, file.getAbsolutePath()+"下载完成,当前线程 -:"+ Thread.currentThread().getName());
                         caller.Call(file.getAbsolutePath());
                         nitifyMsg(fileName,3);
-
                     }
 
                     if (currentStep.equals(ActiveFtpUtils.FTP_DOWN_LOADING)){
@@ -293,7 +303,7 @@ public class Loader {
 
             log.i(TAG, "Call: 当前一个回调结果"+Loader.this.toString()+"-> "+Loader.this.muri);
             log.i(TAG, "Call: 执行线程"+ Thread.currentThread().getName());
-
+            log.i(TAG,"正在执行的所有线程数:"+ Thread.getAllStackTraces().size());
             if (other_caller!=null){
 
                     try {
@@ -324,8 +334,7 @@ public class Loader {
 
     private void addRepeatTask(Loader l){
         try{
-            lock_repeat.lock();
-
+//            lock_repeat.lock();
             if(repeatTaskList.containsKey(l.muri)){
                 ArrayList<Loader> list = repeatTaskList.get(l.muri);
                 list.add(l);
@@ -341,7 +350,7 @@ public class Loader {
         }catch (Exception e){
 
         }finally {
-            lock_repeat.unlock();
+//            lock_repeat.unlock();
         }
     }
 
@@ -351,8 +360,8 @@ public class Loader {
     private static void notifyRepatList(final String uri, final String filepath){
 
         try{
-//            lock_repeat.lock();
-            log.d(TAG,  " 开始通知 ");
+            lock_repeat.lock();
+            log.d(TAG,  " 开始通知 "+Thread.currentThread().getName()+" - "+Thread.getAllStackTraces().size());
 
             final ArrayList<Loader> arr = repeatTaskList.get(uri);
 
@@ -362,8 +371,9 @@ public class Loader {
 
                 for (final Loader l:arr){
                     Schedulers.newThread().createWorker().schedule(new Action0() {
-                        @Override
-                        public void call() {
+                            @Override
+                            public void call() {
+                            log.i(TAG, Thread.currentThread().getName()+" - RXJAVA :" + counts.i++);
                             l.receivedNotifi(uri,filepath);
                         }
                     });
@@ -378,7 +388,7 @@ public class Loader {
         }catch (Exception e){
             log.e(TAG,  "通告 下载 重复任务队列 Err :"+ e.toString());
         }finally {
-//            lock_repeat.unlock();
+            lock_repeat.unlock();
         }
 
     }
@@ -398,6 +408,15 @@ public class Loader {
          caller.Call(filePath);
         }
     }
+
+
+    /**
+     * 判断一个文件是不是已经存在
+     */
+    public boolean fileIsExist(String filename){
+      return   fileUtils.checkFileExists(filename);
+    }
+
 }
 
 
