@@ -1,7 +1,7 @@
 package com.wosplayer.activity;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
@@ -24,7 +24,7 @@ wosPlayerApp.sendMsgToServer(msg);
 },5000);
  */
 
-public class activity extends AppCompatActivity {
+public class activity extends Activity {
 
     private static final java.lang.String TAG = activity.class.getName();
     public  static AbsoluteLayout main = null;    //存放所有 视图 的主容器
@@ -48,7 +48,9 @@ public class activity extends AppCompatActivity {
 
     @Override
     public void onStart() {
+
         super.onStart();
+
     }
 
     @Override
@@ -62,6 +64,7 @@ public class activity extends AppCompatActivity {
     public void onStop() {
         super.onStop();
         wosPlayerApp.stopCommunicationService(); //关闭服务
+        this.finish();
     }
 
     @Override
