@@ -1,5 +1,7 @@
 package com.wosplayer.Ui.performer;
 
+import android.graphics.Typeface;
+
 import com.wosplayer.Ui.element.IPlayer;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.log;
@@ -126,6 +128,40 @@ public class layoutExcuter {
 
         String key = layout.getXmldata().get("id")+content.getXmldata().get("id")+content.getXmldata().get("materialid")+fileproterty+content.getXmldata().get("contentsnewname");//生成一个唯一标识
         datalist.setKey(key);//唯一标识
+
+        if (fileproterty.equals("text")){
+            //滚动字幕
+            ArrayList<XmlNodeEntity> contentArr = content.getChildren();
+                if (contentArr.size()==0 || contentArr==null){
+
+                    log.e(TAG,"一个文本类型的内容 不存在"+ contentArr);
+                    return datalist;
+                }
+            log.i("");
+
+            XmlNodeEntity textcontent = contentArr.get(0);
+
+            String boldstr = textcontent.getXmldata().get("fontweight");
+            int boldvalue = Typeface.NORMAL;
+            if (boldstr.equals("bold")){
+                boldvalue = Typeface.BOLD;
+            }
+            boldstr = String.valueOf(boldvalue);
+            String speed = textcontent.getXmldata().get("txtspeed");
+            String fontcolor = textcontent.getXmldata().get("fontcolor");
+            String bgcolor = textcontent.getXmldata().get("backgroudcolor");
+            String texttype = textcontent.getXmldata().get("txtfont");
+            String fontsize = textcontent.getXmldata().get("fontsize");
+            String textContent = textcontent.getXmldata().get("txtcontents");
+
+            datalist.put("bgcolor",bgcolor);
+            datalist.put("fontcolor",fontcolor);
+            datalist.put("fontsize",fontsize);
+            datalist.put("textcontent",textContent);
+            datalist.put("texttype",texttype);
+            datalist.put("textstyle",boldstr);
+            datalist.put("speed",speed);
+        }
         return  datalist;
     }
 
@@ -151,7 +187,7 @@ public class layoutExcuter {
     }
 
     /**
-     * 创建内容视图 放入主线程
+     * 创建内容 视图 放入主线程
      * @param datalist
      */
     private void createContent(final DataList datalist){

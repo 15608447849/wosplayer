@@ -31,6 +31,10 @@ public final class contentTanslater {
         String packageName = "com.wosplayer.Ui.element.iviewelementImpl.";
         referenceViewMap.put("image",packageName+"IImagePlayer");
         referenceViewMap.put("webpage",packageName+"IWebPlayer");
+        referenceViewMap.put("video",packageName+"IVideoPlayer");
+        referenceViewMap.put("text",packageName+"IrunTextPlayer");
+
+
     }
 
     //存储一部分视图

@@ -75,8 +75,8 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
         mContext = context;
         this.layout = layout;
 
-        layout.addView(this); //把自己 添加到 父视图
-        initVideoView();
+        layout.addView(this); //把自己 添加到 父视图 还没有布局
+
     }
 
 
@@ -211,7 +211,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
     /**
      * 初始化
      */
-    private void initVideoView() {
+    public void initVideoView(boolean isLoop) {
         mVideoWidth = 0; //视频宽度
         mVideoHeight = 0;   //视频高度
         getHolder().addCallback(mySurfaceHolderCallback); //表层回调
@@ -219,6 +219,9 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
         setFocusable(false);//设置焦点
         setFocusableInTouchMode(false);//设置焦点触摸
 
+        if (!isLoop){
+            return;
+        }
         this.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {

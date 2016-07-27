@@ -285,8 +285,20 @@ public class ScheduleSaver implements iCommand {
 
                         if (contentType.equals(ContentTypeEnum.text))//文本
                         {
-                            getcontents = XmlHelper.getFirstChildToString(content_Element, "getcontents");
-                            content_xmlDataMap.put("getcontents", getcontents.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", ""));
+                             // getcontents = XmlHelper.getFirstChildToString(content_Element, "getcontents");
+                            //content_xmlDataMap.put("getcontents", getcontents.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", ""));
+
+                            String text_xml=  getcontents = XmlHelper.getFirstChildToString(content_Element, "getcontents");
+
+                            HashMap<String, String> text_xmlDataMap = Xmlparse.ParseXml("/getcontents", text_xml, Xmlparse.parseType.OnlyLeaf).get(0);
+
+                            XmlNodeEntity layout_content_text_Node
+                                    = layout_content_Node.NewSettingNodeEntity();
+
+                            layout_content_text_Node.Level = "root_schedule_programs_layout_content_text";
+                            layout_content_text_Node.AddPropertyList(text_xmlDataMap);
+                            layout_content_text_Node.AddProperty("uuks", uuks);
+
                             log.i(TAG,"\"-----------text end------\"");
                         } else if (contentType.equals(ContentTypeEnum.rss)) {
 
