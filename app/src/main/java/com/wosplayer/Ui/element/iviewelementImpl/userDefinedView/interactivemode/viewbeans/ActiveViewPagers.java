@@ -1,0 +1,410 @@
+package com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans;
+
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsoluteLayout;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+
+import com.wosplayer.R;
+import com.wosplayer.Ui.element.iviewelementImpl.IinteractionPlayer;
+import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
+import com.wosplayer.activity.DisplayActivity;
+import com.wosplayer.app.log;
+
+import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
+
+/**
+ * Created by user on 2016/6/24.
+ *
+ */
+public class ActiveViewPagers extends ViewPager implements IviewPlayer {
+
+    private static final java.lang.String TAG = ActiveViewPagers.class.getName();
+    private ArrayList<View> myViewList = new ArrayList<View>();
+    private View mCurrentView; //当前视图
+    /**
+     * 适配器
+     */
+    private PagerAdapter pa = new PagerAdapter() {
+        /**
+         * 这个方法，是获取当前窗体界面数
+         * 返回页卡的数量
+         * @return
+         */
+        @Override
+        public int getCount() {
+            return myViewList.size();
+        }
+
+        /**
+         * 用于判断是否由对象生成界面
+         * @param view
+         * @param object
+         * @return
+         *
+         */
+        @Override
+        public boolean isViewFromObject(View view, Object object) {
+            return view==object;//官方提示这样写
+        }
+
+        /**
+         * return一个对象，这个对象表明了PagerAdapter适配器选择哪个对象*放在当前的ViewPager中
+         * 用来实例化页
+         * @param container
+         * @param position
+         * @return
+         */
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+
+            container.addView((View) myViewList.get(position), 0);//添加页卡
+            return  myViewList.get(position);//super.instantiateItem(container, position);
+
+            /*container.removeView((View) myViewList.get(position));
+            container.addView((View) myViewList.get(position));
+            return myViewList.get(position);*/
+
+
+        }
+
+        @Override
+        public int getItemPosition(Object object) {
+             return POSITION_NONE;//super.getItemPosition(object);
+        }
+
+        /**
+         * 从ViewGroup中移出当前View
+         * @param container
+         * @param position
+         * @param object
+         */
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+
+            container.removeView((View) myViewList.get(position));//删除页卡
+        }
+
+        @Override
+        public void setPrimaryItem(ViewGroup container, int position, Object object) {
+            mCurrentView = (View)object; //当前视图
+        }
+    };
+
+
+    /**
+     * 构造
+     * @param context
+     */
+    public ActiveViewPagers(Context context) {
+        super(context);
+
+        AbsoluteLayout.LayoutParams lp = new AbsoluteLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,0,0);
+        this.setLayoutParams(lp);
+        this.setBackgroundColor(Color.WHITE);
+        this.setAdapter(pa); //适配器
+        this.addOnPageChangeListener(new mVPageChangger());//滑动监听
+    }
+
+    private ImageView left;
+    private ImageView right;
+    private int mCurrentPos=0;
+
+    /**
+     * 加载资源
+     */
+    @Override
+    public void AotuLoadingResource() {
+
+        if (mFather==null){
+            return;
+        }
+
+        //创建左右滑动按钮
+        left = new ImageView(DisplayActivity.activityContext);
+        Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.left);
+        BitmapDrawable bd = new BitmapDrawable(this.getResources(), bitmap);
+        left.setImageDrawable(bd);
+        left.setLayoutParams(new AbsoluteLayout.LayoutParams(60, 60, 0, (mFather.getLayoutParams().height/2)-60));
+        left.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ScollToLeft();
+
+            }
+        });
+
+        right = new ImageView(DisplayActivity.activityContext);
+        Bitmap bitmap2 = BitmapFactory.decodeResource(this.getResources(), R.drawable.right);
+        BitmapDrawable bd2 = new BitmapDrawable(this.getResources(), bitmap2);
+        right.setImageDrawable(bd2);
+        right.setLayoutParams(new AbsoluteLayout.LayoutParams(60, 60, mFather.getLayoutParams().width-60, (mFather.getLayoutParams().height/2)-60));
+        right.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ScollToRight();
+            }
+        });
+        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+            @Override
+            public void call() {
+                ((AbsoluteLayout)mFather).removeView(left);
+                ((AbsoluteLayout)mFather).addView(left);
+
+                ((AbsoluteLayout)mFather).removeView(right);
+                ((AbsoluteLayout)mFather).addView(right);
+            }
+        });
+    }
+
+    private void ScollToRight() {
+        log.e(TAG,"ScollToRight");
+        int index = ++mCurrentPos;
+        if ( index<= ActiveViewPagers.this.myViewList.size() - 1) {
+            //现在的下标如果小于最后一个 向右边滑动
+            ActiveViewPagers.this.setCurrentItem(index);
+        } else {
+            //现在的下标如果大于最后一个  设置为第一个
+            mCurrentPos = 0;
+            ActiveViewPagers.this.setCurrentItem(mCurrentPos);
+        }
+        log.e(TAG,"ScollToRight over");
+    }
+
+    private void ScollToLeft() {
+        int index = --mCurrentPos;
+        if (index >= 0) { //如果比最左边的大 左滑动
+            ActiveViewPagers.this.setCurrentItem(index);
+
+        } else {
+
+            mCurrentPos = (ActiveViewPagers.this.myViewList.size()-1);
+            ActiveViewPagers.this.setCurrentItem(mCurrentPos);
+        }
+    }
+
+    //移除资源  解除与我绑定的对象
+    private void releasedResource(){
+        stopTimer();
+        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+            @Override
+            public void call() {
+                ActiveViewPagers.this.removeAllViews();
+            }
+        });
+    }
+    private View mFather=null;
+    private FrameLayout returnbtn;//返回按钮
+    //重载　添加带按钮　的　
+    public void setMyReturnBtn(FrameLayout buttonLayout){
+        returnbtn = buttonLayout;
+    }
+
+    /**
+     * 设置Viewpage 的 大小
+     * 把自己 添加到 父布局上
+     */
+    @Override
+    public void addMeToFather(View f){
+
+        if(f!=null){
+            this.mFather = f;
+        }
+        if (mFather!=null) {
+
+            if(mFather instanceof AbsoluteLayout) {
+
+                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+                    @Override
+                    public void call() {
+                        ((AbsoluteLayout)mFather).removeView(ActiveViewPagers.this);
+                        ((AbsoluteLayout)mFather).addView(ActiveViewPagers.this);
+                        if(returnbtn!=null){
+                            ((AbsoluteLayout) mFather).removeView(returnbtn);
+                            ((AbsoluteLayout) mFather).addView(returnbtn);
+                        }
+                       IinteractionPlayer.worker.schedule(new Action0() {
+                            @Override
+                            public void call() {
+                                AotuLoadingResource();
+                                startTimer();
+                            }
+                        });
+
+                    }
+                });
+
+
+            }
+        }
+    }
+
+    @Override
+    public void removeMeToFather(){
+        if (mFather!=null) {
+            AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+                @Override
+                public void call() {
+
+                     if(left!=null){
+                          ((AbsoluteLayout)mFather).removeView(left);
+                    }
+                    if(right!=null){
+                            ((AbsoluteLayout)mFather).removeView(right);
+                    }
+
+                    ((AbsoluteLayout)mFather).removeView(ActiveViewPagers.this);
+                    mFather = null;
+                }
+            });
+            releasedResource();
+
+
+        }
+    }
+
+
+        /**
+         * 添加子视图对象
+         *
+         */
+        public void addMeSubView(IviewPlayer iview){
+
+            AbsoluteLayout loadLayout = new AbsoluteLayout(DisplayActivity.activityContext);
+            loadLayout.setLayoutParams(
+                    new AbsoluteLayout.LayoutParams(
+                            AbsoluteLayout.LayoutParams.MATCH_PARENT,
+                            AbsoluteLayout.LayoutParams.MATCH_PARENT,
+                            0,
+                            0));
+            loadLayout.setBackgroundColor(Color.YELLOW);//黄色
+            iview.addMeToFather(loadLayout);
+
+        if(!myViewList.contains(loadLayout)){ //不存在
+            myViewList.add(loadLayout);
+        }
+
+        this.pa.notifyDataSetChanged();
+
+    }
+
+
+    /**
+     * 滑动监听
+     */
+    class  mVPageChangger implements OnPageChangeListener {
+    /**
+     * 滑动完成
+     * @param position
+     * @param positionOffset
+     * @param positionOffsetPixels
+     */
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+    }
+
+    /**
+     * 选择完成
+     * @param position
+     */
+    @Override
+    public void onPageSelected(int position) {
+//        mCurrentPos = position;
+    }
+
+    /**
+     * 滑动状态监听
+     * @param state
+     */
+    @Override
+    public void onPageScrollStateChanged(int state) {
+       // Log.i("view","onPageScrollStateChanged:"+ state);
+        if (state==1){ // 正在滑动1 滑动完毕2 不动3空闲
+
+        }else if (state==2){
+
+        }else if(state == ViewPager.SCROLL_STATE_IDLE){
+
+        }
+
+    }
+}
+
+    @Override
+    public void scrollTo(int x, int y) {
+//        Log.i("views", myViewList.size()+"");
+        if(myViewList.size()<=1){
+            return;
+        }
+        super.scrollTo(x, y);
+    }
+
+
+    /**
+     *
+     */
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev){
+
+        int action = ev.getAction();
+        if (action == MotionEvent.ACTION_DOWN){
+
+        }
+        return false;
+    }
+    @Override
+    public boolean onTouchEvent(MotionEvent event){
+        return super.onTouchEvent(event);
+    }
+
+
+    private Timer timer = null;
+    private TimerTask timerTask  = null;
+    //開始
+    private void startTimer(){
+        stopTimer();
+        timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                log.e(TAG,"Thread name:"+Thread.currentThread().getName());
+                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+                    @Override
+                    public void call() {
+                        ScollToRight();
+                    }
+                });
+            }
+        };
+        timer = new Timer();
+        timer.schedule(timerTask,3*1000,30*1000);
+    }
+    //停止
+    private void stopTimer(){
+        if (timerTask != null){
+            timerTask.cancel();
+            timerTask=null;
+
+        }
+        if (timer!=null){
+            timer.cancel();
+            timer=null;
+        }
+    }
+
+
+}

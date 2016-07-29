@@ -1,4 +1,4 @@
-package com.wosplayer.broadcast.Command.Schedule.correlation;
+package com.wosplayer.cmdBroadcast.Command.Schedule.correlation;
 
 /**
  * Created by user on 2016/7/16.

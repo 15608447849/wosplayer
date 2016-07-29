@@ -25,6 +25,7 @@ public class loaderManager extends IntentService implements Loader.LoaderCaller{
         super("loaderManager");
     }
 
+    private boolean isComplete = false;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -53,7 +54,18 @@ public class loaderManager extends IntentService implements Loader.LoaderCaller{
             Loader loader = new Loader();
             loader.settingCaller(this);
             loader.LoadingUriResource((String) TaskList.get(i),null);
+            log.i(TAG," - - - 準備下載:"+TaskList.get(i) +" 次數:"+i);
         }
+
+//        while(!isComplete){
+//
+//           log.i(TAG, "onHandleIntent: "+  Thread.currentThread().getName() +" 線程總數:"+Thread.getAllStackTraces().size());
+//            try {
+//                Thread.sleep(1*1000);
+//            } catch (InterruptedException e) {
+//             log.e(TAG,e.getMessage());
+//            }
+//        }
     }
 
     private int SuccessCount = 0;
@@ -63,14 +75,16 @@ public class loaderManager extends IntentService implements Loader.LoaderCaller{
         SuccessCount++;
 
         if(filePath.equals("404")){
-            log.i(TAG,filePath + "-");
+            log.e(TAG,filePath + "-");
         }
+        log.i(TAG,"current count :"+SuccessCount+" sumCount:"+TaskList.size());
         if (SuccessCount == TaskList.size()){
             log.i(TAG,"任务完成 发送通知");
             //发送完成通知
             Intent intent = new Intent();
             intent.setAction(completeTaskListBroadcast.action);
             getApplicationContext().sendBroadcast(intent);
+            isComplete = true;
         }
     }
 

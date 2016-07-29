@@ -9,7 +9,7 @@ import com.wosplayer.loadArea.excuteBolock.Loader;
 
 public interface IPlayer extends Loader.LoaderCaller {
 
-    public void loadData(DataList mp);
+    public void loadData(DataList mp,Object ob);
     public void start();
     public void stop();
     public void setlayout ();

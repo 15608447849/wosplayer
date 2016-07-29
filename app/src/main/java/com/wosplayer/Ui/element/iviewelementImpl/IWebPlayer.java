@@ -35,7 +35,7 @@ public class IWebPlayer extends android.webkit.WebView  implements IPlayer {
     private DataList mp = null;
     private String uri = null;
     @Override
-    public void loadData(DataList mp) {
+    public void loadData(DataList mp, Object ob) {
         try {
         this.mp = mp;
         this.x = mp.GetIntDefualt("x", 0);

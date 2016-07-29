@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="45dp"
+    android:orientation="horizontal"
+    android:layout_gravity="center_vertical">
+
+    <ImageButton
+        android:id="@+id/back"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_alignParentLeft="true"
+        android:paddingRight="10dp"
+        android:src="@drawable/web_back" />
+
+    <ImageButton
+        android:id="@+id/go"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_toRightOf="@id/back"
+        android:paddingRight="10dp"
+        android:src="@drawable/web_goto"
+
+        />
+
+    <ImageButton
+        android:id="@+id/refresh"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_toRightOf="@id/go"
+        android:paddingRight="10dp"
+        android:src="@drawable/web_refresh" />
+
+    <ImageButton
+        android:id="@+id/home"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_toRightOf="@id/refresh"
+        android:paddingRight="10dp"
+
+        android:src="@drawable/web_home" />
+
+    <ImageButton
+        android:id="@+id/close"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/web_close" />
+
+
+</RelativeLayout>

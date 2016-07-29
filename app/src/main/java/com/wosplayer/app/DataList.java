@@ -1,12 +1,16 @@
 package com.wosplayer.app;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.HashMap;
 
 /**
  * Created by Administrator on 2016/7/19.
+ *
  */
 
-public class DataList {
+public class DataList implements Parcelable {
 
     private String key;
     public void setKey(String key) {
@@ -73,4 +77,35 @@ public class DataList {
     public void clear(){
         map.clear();
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.key);
+        dest.writeSerializable(this.map);
+    }
+
+    public DataList() {
+    }
+
+    protected DataList(Parcel in) {
+        this.key = in.readString();
+        this.map = (HashMap<String, String>) in.readSerializable();
+    }
+
+    public static final Parcelable.Creator<DataList> CREATOR = new Parcelable.Creator<DataList>() {
+        @Override
+        public DataList createFromParcel(Parcel source) {
+            return new DataList(source);
+        }
+
+        @Override
+        public DataList[] newArray(int size) {
+            return new DataList[size];
+        }
+    };
 }

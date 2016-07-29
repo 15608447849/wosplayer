@@ -6,7 +6,7 @@ import android.util.LruCache;
 import android.view.ViewGroup;
 
 import com.wosplayer.Ui.element.IPlayer;
-import com.wosplayer.activity.activity;
+import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.log;
 
@@ -33,8 +33,7 @@ public final class contentTanslater {
         referenceViewMap.put("webpage",packageName+"IWebPlayer");
         referenceViewMap.put("video",packageName+"IVideoPlayer");
         referenceViewMap.put("text",packageName+"IrunTextPlayer");
-
-
+        referenceViewMap.put("interactive",packageName+"IinteractionPlayer");
     }
 
     //存储一部分视图
@@ -53,7 +52,7 @@ public final class contentTanslater {
      * @param list
      * @return
      */
-    public static IPlayer tanslationAndStart(DataList list){
+    public static IPlayer tanslationAndStart(DataList list,Object ob){
         log.i(TAG,"准备转换视图控件,所在线程:"+Thread.currentThread().getName());
         IPlayer iplay = null;
 
@@ -78,17 +77,17 @@ public final class contentTanslater {
                 Class cls = Class.forName(className);//得到类
                 Constructor constructor = cls.getConstructor(Context.class, //得到构造
                         ViewGroup.class);
-                if (activity.activityContext == null || activity.main ==null){
-                    log.e(TAG,"无法创建 iplayer ,环境不正确,请初始化 activity");
+                if (DisplayActivity.activityContext == null || DisplayActivity.main ==null){
+                    log.e(TAG,"无法创建 iplayer ,环境不正确,请初始化 Activity");
                     return iplay;
                 }
-                iplay = (IPlayer) constructor.newInstance(activity.activityContext, (ViewGroup)activity.main); //得到具体实例
+                iplay = (IPlayer) constructor.newInstance(DisplayActivity.activityContext, (ViewGroup) DisplayActivity.main); //得到具体实例
 
                 //添加到 缓存中
                 putIplayerToCache(key,iplay);
             }
             //执行它
-            iplay.loadData(list);
+            iplay.loadData(list,ob);
             iplay.start();//主线程执行
         } catch (ClassNotFoundException e) {
             log.e(TAG,"无法找到这个类");

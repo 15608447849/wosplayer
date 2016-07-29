@@ -6,7 +6,7 @@ import com.wosplayer.Ui.element.IPlayer;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
-import com.wosplayer.broadcast.Command.Schedule.correlation.XmlNodeEntity;
+import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -98,16 +98,14 @@ public class layoutExcuter {
      */
     private void startContent(XmlNodeEntity content) {
         //重新组合数据 -> 生成 datalist
-        final DataList datalist = ReorganizationData(content);
-        createContent(datalist);//自动执行
+        Object[] dataArr = ReorganizationData(content);
+        createContent((DataList) dataArr[0],dataArr[1]);//自动执行
     }
 
-
-
     //组装数据
-    private DataList ReorganizationData(XmlNodeEntity content) {
+    private Object[] ReorganizationData(XmlNodeEntity content) {
         DataList datalist =new DataList();
-
+        Object ob = null;
         //1 x,y,w,h  2.本地文件路径,<contentsnewname><![CDATA[1469177181932.mp4]]></contentsnewname> 3.<fileproterty>video</fileproterty>类型 4.资源uri    <getcontents><![CDATA[ftp://ftp:FTPmedia@172.16.0.19/uploads/1469177181932.mp4]]></getcontents>
         String x = layout.getXmldata().get("x");
         String y = layout.getXmldata().get("y");
@@ -126,7 +124,7 @@ public class layoutExcuter {
         datalist.put("localpath",localpath);
         datalist.put("timelength",timelength);
 
-        String key = layout.getXmldata().get("id")+content.getXmldata().get("id")+content.getXmldata().get("materialid")+fileproterty+content.getXmldata().get("contentsnewname");//生成一个唯一标识
+        String key = layout.getXmldata().get("id")+content.getXmldata().get("id")+content.getXmldata().get("materialid")+fileproterty+content.getXmldata().get("contentsnewname")+content.getXmldata().get("uuks");//生成一个唯一标识
         datalist.setKey(key);//唯一标识
 
         if (fileproterty.equals("text")){
@@ -135,7 +133,7 @@ public class layoutExcuter {
                 if (contentArr.size()==0 || contentArr==null){
 
                     log.e(TAG,"一个文本类型的内容 不存在"+ contentArr);
-                    return datalist;
+                    return new Object[]{datalist,ob};
                 }
             log.i("");
 
@@ -162,7 +160,24 @@ public class layoutExcuter {
             datalist.put("textstyle",boldstr);
             datalist.put("speed",speed);
         }
-        return  datalist;
+
+        if (fileproterty.equals("interactive")){
+            ArrayList<XmlNodeEntity> activeArr = content.getChildren();
+            if (activeArr==null || activeArr.size()==0){
+                log.e(TAG,"互动模块 无布局");
+                return new Object[]{datalist,ob};
+            }
+            if (activeArr.size() == 1){
+                ob = activeArr.get(0);
+            }else{
+                log.e(TAG,"互动模块 存在多个 布局 无法解析 ...");
+                return new Object[]{datalist,ob};
+            }
+        }
+
+
+
+        return  new Object[]{datalist,ob};
     }
 
     /**
@@ -190,14 +205,14 @@ public class layoutExcuter {
      * 创建内容 视图 放入主线程
      * @param datalist
      */
-    private void createContent(final DataList datalist){
+    private void createContent(final DataList datalist, final Object ob){
 
         AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
             @Override
             public void call() {
                 clearContent();
                 //生成iplayer
-                currentIplayer = contentTanslater.tanslationAndStart(datalist);//创建必须放入主线程执行
+                currentIplayer = contentTanslater.tanslationAndStart(datalist,ob);//创建必须放入主线程执行
             }
         });
     }

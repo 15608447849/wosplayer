@@ -1,4 +1,4 @@
-package com.wosplayer.broadcast.Command.Schedule.correlation;
+package com.wosplayer.cmdBroadcast.Command.Schedule.correlation;
 
 import com.wosplayer.app.log;
 

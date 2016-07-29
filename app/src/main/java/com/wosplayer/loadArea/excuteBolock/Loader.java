@@ -5,7 +5,6 @@ import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.HttpHandler;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
-import com.wosplayer.activity.counts;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.loadArea.ftpBlock.ActiveFtpUtils;
@@ -15,6 +14,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -42,37 +42,38 @@ public class Loader {
      * @param Task
      */
     private boolean addTask(String Task){
-
+        log.i(TAG,"準備添加任務:"+Task+",當前任務隊列數量:"+loadingTaskList.size());
         if (!loadingTaskList.contains(Task)){
             loadingTaskList.add(Task);
-            log.i("下载任务队列 (添加) :"+TAG,Task);
+            log.i(TAG,"下载任务队列 (添加) :"+Task);
             return true;
         }
         else {
-            log.i("已存在,不要重复添加"+TAG,Task);
+            log.i(TAG,"已存在,不要重复添加: "+Task);
             addRepeatTask(this);
             return false;
         }
+
     }
     /**
      * 删除一个任务
      */
     private  void complateTask(String Task, final String filepath){
         log.i(TAG,"当前所在线程:"+Thread.currentThread().getName()+";总线程数量:"+Thread.getAllStackTraces().size());
+        log.i(TAG,"一個任務完成了:"+ Task+" - 準備刪除 ,當前下載中任務數量:"+loadingTaskList.size());
         if (loadingTaskList.contains(Task)){
             loadingTaskList.remove(Task);
-            log.i("下载任务队列 (移除) :"+TAG,Task);
+            log.i(TAG, "下载任务队列 (移除) :"+Task);
         }
         else {
             log.i(TAG,Task + "不存在 任务队列 ,不需要删除");
 
-            log.e(TAG,"当前重复任务队列对象:"+repeatTaskList.toString());
+            log.i(TAG,"当前重复任务队列对象:"+repeatTaskList.toString());
         }
 
         notifyThread.schedule(new Action0() {
             @Override
             public void call() {
-                log.i(TAG, " - RXJAVA :" +Thread.currentThread().getName()+ "  "+ counts.i++);
                 //异步通知所有人 一个任务完成
                 notifyRepatList(Loader.this.muri,filepath);
             }
@@ -88,8 +89,13 @@ public class Loader {
         try {
             locker.lock();
             muri = uri;
-            if(!addTask(uri)){
 
+            //是否加入等待
+            if (loadingTaskList.size()>10){
+                addWaitList(this);
+                return;
+            }
+            if(!addTask(uri)){
                 return;
             };
 
@@ -107,7 +113,6 @@ public class Loader {
             ioThread.schedule(new Action0() {
                 @Override
                 public void call() {
-                    log.i(TAG,"RXJAVA :" + counts.i++);
                     HttpLoad(uri, finalFps);
                 }
             });
@@ -126,14 +131,12 @@ public class Loader {
             ioThread.schedule(new Action0() {
                 @Override
                 public void call() {
-                    log.i(TAG,"RXJAVA :" + counts.i++);
                     FTPload(host, name, password, path, filename, localPath);
 
                 }
             });
-
-
         }
+
         }catch (Exception e){
             log.e(TAG,e.getMessage());
     }finally {
@@ -145,7 +148,7 @@ public class Loader {
     /**
      * Http
      */
-    private void HttpLoad(final String url, final String Filepath){
+    private synchronized void HttpLoad(final String url, final String Filepath){
         HttpUtils http = new HttpUtils();
         HttpHandler handler =http.download(
                 url,
@@ -156,7 +159,7 @@ public class Loader {
 
                     @Override
                     public void onStart() {
-                        log.i(TAG,"启动一个http下载任务:"+ url);
+                        log.i(TAG,"启动一个http下载任务:"+ url+" On:"+Thread.currentThread().getName());
 
                         nitifyMsg(url.substring(url.lastIndexOf("/")+1),1);
                         nitifyMsg(url.substring(url.lastIndexOf("/")+1),2);
@@ -196,7 +199,7 @@ public class Loader {
     }
 
     private void loadFileRecall(String Filepath) {
-        log.d("服务端 未找到文件:"+ Filepath);
+        log.e("服务端 未找到文件:"+ Filepath);
         caller.Call("404");
 //        if (new File(Filepath).exists()){//存在  直接回调
 //            log.w("本地存在 文件:"+Filepath);
@@ -218,7 +221,7 @@ public class Loader {
      * @param fileName  要下载的文件名
      * @param localPath 本地路径
      */
-    private void FTPload(final String host, String user, String pass, String remotePath, final String fileName, String localPath){
+    private synchronized void FTPload(final String host, String user, String pass, String remotePath, final String fileName, String localPath){
         log.i(TAG, "启动一个FTP任务,所在线程:"+ Thread.currentThread().getName()+",任务名:"+fileName );
 
             ActiveFtpUtils ftp = new ActiveFtpUtils(host,21,user,pass);
@@ -294,21 +297,22 @@ public class Loader {
         void Call(String filePath);
     }
 ////////////////////////////////
-
+    private static int callCount = 0;
     private String muri = null;
     private boolean existRepeatList = false;
     private LoaderCaller caller = new LoaderCaller() {
         @Override
         public void Call(String filePath) {
 
-            log.i(TAG, "Call: 当前一个回调结果"+Loader.this.toString()+"-> "+Loader.this.muri);
-            log.i(TAG, "Call: 执行线程"+ Thread.currentThread().getName());
-            log.i(TAG,"正在执行的所有线程数:"+ Thread.getAllStackTraces().size());
+            log.i(TAG, "Call: 当前一个回调结果"+Loader.this.toString()+"-> "+Loader.this.muri+"\n\r");
+            log.i(TAG, "Call: 执行线程"+ Thread.currentThread().getName()+"\n\r");
+            log.i(TAG,"正在执行的所有线程数:"+ Thread.getAllStackTraces().size()+"\n\r");
             if (other_caller!=null){
 
                     try {
-                        log.i(TAG,"Call:传递到子监听回调中...");
+
                         other_caller.Call(filePath);
+                        log.i(TAG,"Call:传递到子监听回调中...count:"+ callCount++);
                     }catch (Exception e){
                         log.e(TAG,"传递子监听回调err:"+e.toString());
                     }
@@ -322,7 +326,7 @@ public class Loader {
                     existRepeatList = false;
                 }
 
-
+            notifyWaitList();
         }
     };
 
@@ -373,7 +377,6 @@ public class Loader {
                     Schedulers.newThread().createWorker().schedule(new Action0() {
                             @Override
                             public void call() {
-                            log.i(TAG, Thread.currentThread().getName()+" - RXJAVA :" + counts.i++);
                             l.receivedNotifi(uri,filepath);
                         }
                     });
@@ -416,6 +419,52 @@ public class Loader {
     public boolean fileIsExist(String filename){
       return   fileUtils.checkFileExists(filename);
     }
+    /**
+     * 任務過多 等待隊列
+     */
+    private static List<Loader> waitList = Collections.synchronizedList(new LinkedList<Loader>());
+    /**
+     * 加入等待隊列
+     */
+    private static void addWaitList(Loader loader){
+        log.e(TAG,loader.muri + " 加入等待中 ");
+        waitList.add(loader);
+    }
+    /**
+     * 通知等待隊列執行
+     */
+    private static void notifyWaitList(){
+        //如果存在 每次只執行 至多 5 個
+        if (loadingTaskList.size()==0){
+            if (waitList.size()>0){
+                ArrayList<Loader> waitload = new ArrayList<Loader>();
+
+                Iterator<Loader> itr = waitList.iterator();
+                int i = 0;
+                while(itr.hasNext()){
+                    if (i==5){
+                        break;
+                    }
+                    Loader o = itr.next();
+                    waitload.add(o);
+                    itr.remove();
+                    i++;
+                }
+
+                if (waitload.size() == 0){
+                    waitload = null;
+                    return;
+                }
+                for (Loader loader:waitload){
+                    loader.LoadingUriResource(loader.muri,null);
+                }
+                waitload.clear();
+                waitload = null;
+                log.i(TAG,"  完成一次 等待隊列的執行 ");
+            }
+        }
+    }
+
 
 }
 

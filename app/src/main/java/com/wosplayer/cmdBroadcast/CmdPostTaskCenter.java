@@ -1,15 +1,15 @@
-package com.wosplayer.broadcast;
+package com.wosplayer.cmdBroadcast;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.wosplayer.activity.counts;
 import com.wosplayer.app.log;
-import com.wosplayer.broadcast.Command.CMD_INFO;
-import com.wosplayer.broadcast.Command.OtherCmd.Command_SYTI;
-import com.wosplayer.broadcast.Command.Schedule.ScheduleSaver;
-import com.wosplayer.broadcast.Command.iCommand;
+import com.wosplayer.cmdBroadcast.Command.CMD_INFO;
+import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_CAPT;
+import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_SYTI;
+import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleSaver;
+import com.wosplayer.cmdBroadcast.Command.iCommand;
 
 import java.util.HashMap;
 
@@ -48,6 +48,10 @@ public class CmdPostTaskCenter extends BroadcastReceiver {
         commandList.put(CMD_INFO.UPSC, new ScheduleSaver());
         //syncTime
         commandList.put(CMD_INFO.SYTI,new Command_SYTI());
+        // 抓图
+        commandList.put("SCRN:", new Command_CAPT());
+        // 抓图
+        commandList.put("CAPT:", new Command_CAPT());
     }
 
     private void postCmd(final String cmd, final String param){
@@ -57,7 +61,6 @@ public class CmdPostTaskCenter extends BroadcastReceiver {
             helper.schedule(new Action0() {
                 @Override
                 public void call() {
-                    log.i(TAG,Thread.currentThread().getName()+"RXJAVA :" + counts.i++);
                     iCommand icommand = commandList.get(cmd);
                     icommand.Execute(param); // 执行~
                 }

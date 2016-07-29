@@ -9,9 +9,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
-import com.wosplayer.activity.counts;
 import com.wosplayer.app.log;
-import com.wosplayer.broadcast.CmdPostTaskCenter;
+import com.wosplayer.cmdBroadcast.CmdPostTaskCenter;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -139,17 +138,22 @@ public class CommunicationService extends Service{
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+         if (intent == null){
+             log.e(TAG,"連接服務 未傳遞 intent");
+             stopSelf();
+             return START_REDELIVER_INTENT;
+         }
         ip =  intent.getExtras().getString("ip");
         port = intent.getExtras().getInt("port");
         terminalNo = intent.getExtras().getString("terminalNo");
         HeartBeatTime = intent.getExtras().getLong("HeartBeatTime");
         if (ip==null || terminalNo==null){
+            log.e(TAG,"連接服務  intent 參數不正確");
            return START_STICKY;
         }
         connectHelper.schedule(new Action0() {
             @Override
             public void call() {
-                log.i(TAG,"RXJAVA :" +Thread.currentThread().getName()+ counts.i++);
                 startCommunication();
             }
         });
@@ -225,7 +229,7 @@ public class CommunicationService extends Service{
         log.i("尝试重新链接中...");
         stopCommunication();
         try {
-            Thread.sleep(3*1000);
+            Thread.sleep(30*1000);
         } catch (InterruptedException e) {
             log.e("重新链接失败"+e.getMessage());
             reConnection();
@@ -234,7 +238,6 @@ public class CommunicationService extends Service{
         connectHelper.schedule(new Action0() {
             @Override
             public void call() {
-                log.i(TAG,"RXJAVA :" +Thread.currentThread().getName()+ counts.i++);
                 startCommunication();
             }
         });

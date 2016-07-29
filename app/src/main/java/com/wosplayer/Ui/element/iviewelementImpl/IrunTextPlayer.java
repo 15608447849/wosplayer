@@ -35,7 +35,7 @@ public class IrunTextPlayer implements IPlayer{
     private DataList mp;
 
     @Override
-    public void loadData(DataList mp) {
+    public void loadData(DataList mp, Object ob) {
         try{
             this.mp = mp;
             //创建 surfaceview

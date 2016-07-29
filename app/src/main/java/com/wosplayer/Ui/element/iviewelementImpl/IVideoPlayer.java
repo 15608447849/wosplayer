@@ -54,7 +54,7 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
     private String singleFileUri = null;
     private DataList mp = null;
     @Override
-    public void loadData(DataList mp) {
+    public void loadData(DataList mp, Object ob) {
         try {
         this.mp = mp;
         this.x = mp.GetIntDefualt("x", 0);

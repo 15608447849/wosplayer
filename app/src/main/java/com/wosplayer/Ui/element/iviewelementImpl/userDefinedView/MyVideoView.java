@@ -19,7 +19,19 @@ import com.wosplayer.app.log;
  */
 public class MyVideoView extends SurfaceView implements MediaController.MediaPlayerControl{
 
+    //catch screen use
+    public String getFileName() {
+        return this.filename;
 
+    }
+    public int getViewWidth() {
+        return w;
+    }
+
+    public int getViewHeight() {
+        return h;
+    }
+//
 
     public static final String TAG = MyVideoView.class.getName();
     private Context mContext;//上下文
@@ -78,7 +90,6 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
         layout.addView(this); //把自己 添加到 父视图 还没有布局
 
     }
-
 
     /**
      * 设置 布局属性

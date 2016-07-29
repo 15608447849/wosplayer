@@ -54,7 +54,7 @@ public class IImagePlayer extends ImageView implements IPlayer{
     private String uri = null;
     private DataList mp = null;
     @Override
-    public void loadData(DataList mp) {
+    public void loadData(DataList mp, Object ob) {
         try {
             this.mp = mp;
             this.x = mp.GetIntDefualt("x", 0);
@@ -67,6 +67,8 @@ public class IImagePlayer extends ImageView implements IPlayer{
             log.e(TAG, "loaddata() " + e.getMessage());
         }
     }
+
+
 
     @Override
     public DataList getDatalist() {
@@ -208,7 +210,7 @@ try {
 //                .resize(w-1,h-1)
                 .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
                 .centerCrop()
-               // .resize(this.getMeasuredWidth(), this.getMeasuredHeight())
+                // .resize(this.getMeasuredWidth(), this.getMeasuredHeight())
                 .resize(w,h)
                 .placeholder(R.drawable.no_found)
                 .error(R.drawable.error)

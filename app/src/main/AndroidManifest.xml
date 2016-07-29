@@ -8,26 +8,21 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:sharedUserId="android.uid.system">
+        android:sharedUserId="android.uid.system"
+        android:hardwareAccelerated="true">
 
         <!-- 启动activity -->
-        <activity android:name=".activity.activity" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.HOME" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
+        <activity android:name=".activity.DisplayActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-
             </intent-filter>
         </activity>
 
         <!-- 通讯服务 -->
         <service android:name=".service.CommunicationService" />
         <!-- 接受通讯服务的广播派发任务-->
-        <receiver android:name=".broadcast.CmdPostTaskCenter">
+        <receiver android:name=".cmdBroadcast.CmdPostTaskCenter">
             <intent-filter>
                 <action android:name="com.post.cmd.broad"></action>
             </intent-filter>

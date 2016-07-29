@@ -1,4 +1,4 @@
-package com.wosplayer.broadcast.Command.Schedule;
+package com.wosplayer.cmdBroadcast.Command.Schedule;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,8 +6,8 @@ import android.os.Bundle;
 import com.wosplayer.Ui.uiBroadcast.UibrocdCastReceive;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
-import com.wosplayer.broadcast.Command.OtherCmd.Command_SYTI;
-import com.wosplayer.broadcast.Command.Schedule.correlation.XmlNodeEntity;
+import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_SYTI;
+import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;

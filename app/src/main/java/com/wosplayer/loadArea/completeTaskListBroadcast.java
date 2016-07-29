@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.wosplayer.app.log;
-import com.wosplayer.broadcast.Command.Schedule.ScheduleReader;
-import com.wosplayer.broadcast.Command.Schedule.ScheduleSaver;
+import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleReader;
+import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleSaver;
 
 /**
  * Created by user on 2016/7/21.

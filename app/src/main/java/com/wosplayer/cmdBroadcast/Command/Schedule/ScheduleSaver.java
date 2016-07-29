@@ -1,16 +1,15 @@
-package com.wosplayer.broadcast.Command.Schedule;
+package com.wosplayer.cmdBroadcast.Command.Schedule;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.wosplayer.activity.counts;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
-import com.wosplayer.broadcast.Command.Schedule.correlation.XmlHelper;
-import com.wosplayer.broadcast.Command.Schedule.correlation.XmlNodeEntity;
-import com.wosplayer.broadcast.Command.Schedule.correlation.Xmlparse;
-import com.wosplayer.broadcast.Command.iCommand;
+import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlHelper;
+import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
+import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.Xmlparse;
+import com.wosplayer.cmdBroadcast.Command.iCommand;
 import com.wosplayer.loadArea.loaderManager;
 
 import org.w3c.dom.Element;
@@ -99,7 +98,6 @@ public class ScheduleSaver implements iCommand {
         Schedulers.io().createWorker().schedule(new Action0() {
             @Override
             public void call() {
-                log.i(TAG,"RXJAVA :" + counts.i++);
                 Long startTime = System.currentTimeMillis();
                 getXMLdata(uri,ROOT_PARSE,null); //解析数据
                 Long endTime = System.currentTimeMillis();
@@ -385,27 +383,30 @@ public class ScheduleSaver implements iCommand {
                 interaction_layout_node.AddProperty("thumbnailurl", thumbnailurl);
 
                 //ad
-                Element adElement = (Element) action_layoutElement.getElementsByTagName("ad").item(0);
+              /*Element adElement = (Element) action_layoutElement.getElementsByTagName("ad").item(0);
                 if (adElement == null) return;
                 String ad_myXmlData = XmlHelper.getNodeToString(adElement);
                 HashMap<String, String> ad_xmldataList = Xmlparse.ParseXml("/ad", ad_myXmlData, Xmlparse.parseType.OnlyLeaf).get(0);
                 XmlNodeEntity interaction_layout_ad_node = interaction_layout_node.NewSettingNodeEntity();
                 interaction_layout_ad_node.Level = "interaction_layout_ad";
                 interaction_layout_ad_node.AddPropertyList(ad_xmldataList);
-                interaction_layout_ad_node.AddProperty("uuks", uuks);
+                interaction_layout_ad_node.AddProperty("uuks", uuks);*/
 
 
-                //items
+                //items 包含了 布局的东西
                 Element layout_ItemsElement = (Element) action_layoutElement.getElementsByTagName("items").item(0);
                 if (layout_ItemsElement == null) return;
 
                 String layout_Items_XmlData = XmlHelper.getNodeToString(layout_ItemsElement);
                 HashMap<String, String> layout_items_xmldatamap = Xmlparse.ParseXml("/items", layout_Items_XmlData, Xmlparse.parseType.OnlyLeaf).get(0);
 
-                XmlNodeEntity interaction_layout_items_node = interaction_layout_node.NewSettingNodeEntity();
+               /*XmlNodeEntity interaction_layout_items_node = interaction_layout_node.NewSettingNodeEntity();
                 interaction_layout_items_node.Level = "interaction_layout_items";
                 interaction_layout_items_node.AddPropertyList(layout_items_xmldatamap);
-                interaction_layout_items_node.AddProperty("uuks", uuks);
+                interaction_layout_items_node.AddProperty("uuks", uuks);*/
+
+                interaction_layout_node.getXmldata().putAll(layout_items_xmldatamap);
+                XmlNodeEntity interaction_layout_items_node = interaction_layout_node;
 
                 String bgmode = XmlHelper.getFirstChildNodeValue(layout_ItemsElement, "bgmode");//布局背景图
 
@@ -420,7 +421,7 @@ public class ScheduleSaver implements iCommand {
                 if (bgmode_type == 2) {
                     String bg = XmlHelper.getFirstChildNodeValue(layout_ItemsElement, "bg");
                     if (bg.equals("")) {
-                        log.i(TAG,"一个按钮背景解析错误:背景图片名不存在") ;
+                        log.e(TAG,"一个按钮背景解析错误:背景图片名不存在") ;
                         return;
                     }
 

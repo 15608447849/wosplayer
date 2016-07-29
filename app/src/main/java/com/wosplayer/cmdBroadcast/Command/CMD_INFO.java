@@ -1,4 +1,4 @@
-package com.wosplayer.broadcast.Command;
+package com.wosplayer.cmdBroadcast.Command;
 
 /**
  * Created by user on 2016/6/22.

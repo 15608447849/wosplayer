@@ -5,9 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.wosplayer.Ui.performer.UiExcuter;
-import com.wosplayer.activity.counts;
 import com.wosplayer.app.log;
-import com.wosplayer.broadcast.Command.Schedule.correlation.XmlNodeEntity;
+import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
 
 import rx.Scheduler;
 import rx.functions.Action0;
@@ -37,7 +36,6 @@ public class UibrocdCastReceive extends BroadcastReceiver{
             helper.schedule(new Action0() {
                 @Override
                 public void call() {
-                    log.i(TAG,Thread.currentThread().getName()+"RXJAVA :" + counts.i++ );
                     UiExcuter.getInstancs().StartExcuter(entity);
                 }
             });
