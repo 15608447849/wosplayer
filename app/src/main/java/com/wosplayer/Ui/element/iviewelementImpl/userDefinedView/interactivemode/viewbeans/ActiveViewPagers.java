@@ -3,16 +3,18 @@ package com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemod
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
+import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.IinteractionPlayer;
@@ -120,8 +122,8 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
         this.addOnPageChangeListener(new mVPageChangger());//滑动监听
     }
 
-    private ImageView left;
-    private ImageView right;
+    private Button left;
+    private Button right;
     private int mCurrentPos=0;
 
     /**
@@ -134,11 +136,12 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
             return;
         }
 
+
         //创建左右滑动按钮
-        left = new ImageView(DisplayActivity.activityContext);
+        left = new Button(DisplayActivity.activityContext);
         Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.left);
         BitmapDrawable bd = new BitmapDrawable(this.getResources(), bitmap);
-        left.setImageDrawable(bd);
+        left.setBackgroundDrawable(bd);
         left.setLayoutParams(new AbsoluteLayout.LayoutParams(60, 60, 0, (mFather.getLayoutParams().height/2)-60));
         left.setOnClickListener(new OnClickListener() {
             @Override
@@ -148,10 +151,10 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
             }
         });
 
-        right = new ImageView(DisplayActivity.activityContext);
+        right = new Button(DisplayActivity.activityContext);
         Bitmap bitmap2 = BitmapFactory.decodeResource(this.getResources(), R.drawable.right);
         BitmapDrawable bd2 = new BitmapDrawable(this.getResources(), bitmap2);
-        right.setImageDrawable(bd2);
+        right.setBackgroundDrawable(bd2);
         right.setLayoutParams(new AbsoluteLayout.LayoutParams(60, 60, mFather.getLayoutParams().width-60, (mFather.getLayoutParams().height/2)-60));
         right.setOnClickListener(new OnClickListener() {
             @Override
@@ -196,16 +199,48 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
             ActiveViewPagers.this.setCurrentItem(mCurrentPos);
         }
     }
+    //移除左右視圖對象
+    private void removeLeftAndRightButton() {
+        if (left!=null){
+            releativeBtnBgImage(left);
+            left = null;
+        }
+        if (right!=null){
+            releativeBtnBgImage(right);
+            left=null;
+        }
 
-    //移除资源  解除与我绑定的对象
-    private void releasedResource(){
-        stopTimer();
-        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-            @Override
-            public void call() {
-                ActiveViewPagers.this.removeAllViews();
+    }
+    //移除左右背景資源
+    private void releativeBtnBgImage(final Button ibtn){
+        Drawable drawable = ibtn.getBackground();
+        if (drawable!=null) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            if (bitmapDrawable != null) {
+                if (!bitmapDrawable.getBitmap().isRecycled()) {
+                    bitmapDrawable.getBitmap().recycle();
+                    bitmapDrawable.setCallback(null);
+                    ibtn.setBackgroundResource(0);
+                }
             }
-        });
+        }
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        try {
+            super.onDraw(canvas);
+        }catch (Exception e){
+            log.e(TAG,"" + e.getMessage());
+        }
+    }
+
+    //移除资源  解除与我绑定的对象 需要在主線程執行
+    private void releasedResource(){
+        stopTimer();//停止計時器
+                //清空 左右按鈕 資源
+                removeLeftAndRightButton();
+                ActiveViewPagers.this.removeAllViews();//移除全部的視圖
     }
     private View mFather=null;
     private FrameLayout returnbtn;//返回按钮
@@ -269,9 +304,10 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
 
                     ((AbsoluteLayout)mFather).removeView(ActiveViewPagers.this);
                     mFather = null;
+                    releasedResource();
                 }
             });
-            releasedResource();
+
 
 
         }

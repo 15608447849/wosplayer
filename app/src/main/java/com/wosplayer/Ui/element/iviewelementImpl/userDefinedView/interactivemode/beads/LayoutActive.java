@@ -82,7 +82,6 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
         log.i(TAG," 互动执行者-> 绑定的视图->设置自己的布局参数");
 
         //获取 与父容器的 宽高比值
-        mFather.measure(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 
         log.i(TAG,"1f宽度"+mFather.getWidth()+"--f高度"+ mFather.getHeight());
         log.i(TAG,"2f宽度"+mFather.getMeasuredWidth()+"--f高度"+ mFather.getMeasuredHeight());

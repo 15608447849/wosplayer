@@ -7,7 +7,11 @@ import android.content.Intent;
 import com.wosplayer.app.log;
 import com.wosplayer.cmdBroadcast.Command.CMD_INFO;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_CAPT;
+import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Close_App;
+import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Reboot_App;
+import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Reboot_Sys;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_SYTI;
+import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_VOLU;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleSaver;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 
@@ -52,6 +56,19 @@ public class CmdPostTaskCenter extends BroadcastReceiver {
         commandList.put("SCRN:", new Command_CAPT());
         // 抓图
         commandList.put("CAPT:", new Command_CAPT());
+        // 音量控制
+        commandList.put("VOLU:", new Command_VOLU());
+//        // 更新apk
+//        commandList.put("UPDC:", new Command_UPDC());
+//        // 上传日志
+//        commandList.put("UPLG:", new Command_UPLG());
+
+        // 重启程序
+        commandList.put("UIRE:", new Command_Reboot_App());
+        // 重启终端
+        commandList.put("REBO:", new Command_Reboot_Sys());
+        // 关闭程序
+        commandList.put("SHDP:", new Command_Close_App());
     }
 
     private void postCmd(final String cmd, final String param){

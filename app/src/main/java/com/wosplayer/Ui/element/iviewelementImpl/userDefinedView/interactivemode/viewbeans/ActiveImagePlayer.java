@@ -142,6 +142,7 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
         }
     }
 
+    private boolean existLoaddingBg = false;
     /**
      * 加载视图
      */
@@ -158,6 +159,7 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
                     Bitmap bitmap = BitmapFactory.decodeResource(ActiveImagePlayer.this.getResources(), R.drawable.loadding);
                     BitmapDrawable bd = new BitmapDrawable(ActiveImagePlayer.this.getResources(), bitmap);
                     ActiveImagePlayer.this.setBackgroundDrawable(bd);
+                    existLoaddingBg = true;
                 }
             });
 
@@ -224,6 +226,11 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
     public void Call(final String filePath) {
         log.i(TAG, "  一个图片 资源 下载结果传递了来了:" + filePath);
         isloading = false; //下载完毕
+        if (existLoaddingBg){
+            releaseImageViewResouce();
+            existLoaddingBg = false;
+        }
+
         if (mFather == null) {
         return;
         }
@@ -341,23 +348,23 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
 
         //如果返回按钮存在. 移除
 
-            Drawable drawable = playVideoBtn.getBackground();
-            if (drawable!=null) {
-                BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-                if (bitmapDrawable != null) {
-                    if (!bitmapDrawable.getBitmap().isRecycled()) {
-                        bitmapDrawable.getBitmap().recycle();
-                        bitmapDrawable.setCallback(null);
-                        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-                            @Override
-                            public void call() {
-                                playVideoBtn.setBackgroundResource(0);
-                            }
-                        });
+        Drawable drawable = playVideoBtn.getBackground();
+        if (drawable!=null) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            if (bitmapDrawable != null) {
+                if (!bitmapDrawable.getBitmap().isRecycled()) {
+                    bitmapDrawable.getBitmap().recycle();
+                    bitmapDrawable.setCallback(null);
+                    AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+                        @Override
+                        public void call() {
+                            playVideoBtn.setBackgroundResource(0);
+                        }
+                    });
 
-                    }
                 }
             }
+        }
 
         AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
             @Override

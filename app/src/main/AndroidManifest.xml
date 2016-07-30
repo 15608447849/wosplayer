@@ -12,7 +12,9 @@
         android:hardwareAccelerated="true">
 
         <!-- 启动activity -->
-        <activity android:name=".activity.DisplayActivity" >
+        <activity android:name=".activity.DisplayActivity"
+            android:launchMode="singleTask">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
