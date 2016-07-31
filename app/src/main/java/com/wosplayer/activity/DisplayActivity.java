@@ -1,7 +1,10 @@
 package com.wosplayer.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -11,9 +14,12 @@ import android.widget.FrameLayout;
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.MyVideoView;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
+import com.wosplayer.Ui.performer.contentTanslater;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleReader;
+import com.wosplayer.service.MonitorService;
+import com.wosplayer.service.RestartApplicationBroad;
 
 /**
  *  Timer timer = new Timer();
@@ -32,7 +38,8 @@ public class DisplayActivity extends FragmentActivity {
     private static final java.lang.String TAG = DisplayActivity.class.getName();
 
     public static FrameLayout baselayout = null;
-    public  static AbsoluteLayout main = null;    //存放所有 视图 的主容器
+
+    public  static AbsoluteLayout main = null;    //存放所有 排期视图 的主容器
     public static FrameLayout frame = null;  //隐藏图层
     public static AbsoluteLayout frame_main = null; //隐藏图层上面的 容器图层
     public static DisplayActivity activityContext = null;
@@ -43,19 +50,22 @@ public class DisplayActivity extends FragmentActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//去标题
         setContentView(R.layout.activity_main);//设置布局文件
-        baselayout = (FrameLayout)this.findViewById(R.id.baselayout);
+        baselayout = (FrameLayout) LayoutInflater.from(this).inflate(R.layout.activity_main,null);
+
         main = (AbsoluteLayout) this.findViewById(R.id.main);
         frame = (FrameLayout)this.findViewById(R.id.frame_layout);
         frame_main = (AbsoluteLayout)this.findViewById(R.id.frame_layout_main);
         activityContext = this;
         log.i(TAG,"正在执行的所有线程数:"+ Thread.getAllStackTraces().size());
 
+        //开启监听服务
+        Intent intent = new Intent(this, MonitorService.class);
+        this.startService(intent);
     }
 
     @Override
     public void onStart() {
         super.onStart();
-
     }
 
     @Override
@@ -70,6 +80,8 @@ public class DisplayActivity extends FragmentActivity {
     protected void onPause() {
         super.onPause();
         wosPlayerApp.stopCommunicationService(); //关闭服务
+
+
     }
 
     @Override
@@ -80,9 +92,23 @@ public class DisplayActivity extends FragmentActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Intent intent  = new Intent();
+        intent.setAction(RestartApplicationBroad.action);
+        sendBroadcast(intent);
     }
 
-/////////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK ) {
+                        log.e("click back key");
+                      DisplayActivity.this.finish();
+                        return true;
+                    }
+
+            return super.onKeyDown(keyCode, event);
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////
     public void FrameBtnEvent(View view){
         goneLayoutdialog();
     }

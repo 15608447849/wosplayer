@@ -44,6 +44,15 @@
             </intent-filter>
         </receiver>
 
+
+
+        //监听服务
+        <service android:name=".service.MonitorService" android:enabled="true" ></service>
+        <receiver android:name=".service.RestartApplicationBroad">
+            <intent-filter>
+                <action android:name="com.wos.restartbroad"></action>
+            </intent-filter>
+        </receiver>
     </application>
 
 

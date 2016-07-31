@@ -37,7 +37,7 @@ public final class contentTanslater {
     }
 
     //存储一部分视图
-    private static LruCache<String,IPlayer> mLruCache = new LruCache<String,IPlayer>((int) (Runtime.getRuntime().maxMemory() / 8));//最大内存的1/3
+    private static LruCache<String,IPlayer> mLruCache = null;
     private static void putIplayerToCache(String key,IPlayer value){
         mLruCache.put(key,value);
     }
@@ -45,7 +45,10 @@ public final class contentTanslater {
         return  mLruCache.get(key);
     }
 
-
+    public static void clearCache(){
+        mLruCache = null;
+        log.i(TAG,"清理缓存");
+    }
 
     /**
      * 请放入 主线程
@@ -53,6 +56,9 @@ public final class contentTanslater {
      * @return
      */
     public static IPlayer tanslationAndStart(DataList list,Object ob){
+        if (mLruCache==null){
+            mLruCache =  new LruCache<String,IPlayer>((int) (Runtime.getRuntime().maxMemory() / 8));//最大内存的1/3
+        }
         log.i(TAG,"准备转换视图控件,所在线程:"+Thread.currentThread().getName());
         IPlayer iplay = null;
 

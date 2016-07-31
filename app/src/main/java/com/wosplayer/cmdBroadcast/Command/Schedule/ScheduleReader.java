@@ -3,6 +3,7 @@ package com.wosplayer.cmdBroadcast.Command.Schedule;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.Ui.uiBroadcast.UibrocdCastReceive;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
@@ -421,9 +422,13 @@ public class ScheduleReader {
     /**
      * 停止
      */
-    private static void Stop() {
+    public static void Stop() {
         //清楚所有排期
         clearScheduleMap();
+        //停止所有定时任务
+        stopTimer();
+        //停止ui执行者
+//        UiExcuter.getInstancs().StopExcuter();
     }
 
     /**

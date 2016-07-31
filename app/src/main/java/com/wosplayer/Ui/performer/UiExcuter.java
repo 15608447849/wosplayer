@@ -35,9 +35,11 @@ public class UiExcuter {
     public void StartExcuter(XmlNodeEntity schedule){
         log.i(TAG,"ui执行者 所在线程:"+Thread.currentThread().getName());
         try{
+            if (schedule==null){
+                log.e(TAG," ui执行者不执行 ,schedule is null");
+            }
 
             lock.lock();
-
             StopExcuter();
             uiExcuter.setPlaySchedule(schedule);
 
@@ -50,11 +52,12 @@ public class UiExcuter {
 
     }
 
-    private void StopExcuter() {
+    public void StopExcuter() {
         //清理 : 1 存在的定时器 2.初始化_index 3.清理节目执行者
         clearTimer();
         _index = 0;
         clearProgramExcuter();
+        contentTanslater.clearCache();
         log.i(TAG,"ui执行者 清理完毕");
     }
 
@@ -192,6 +195,7 @@ public class UiExcuter {
     //清理节目执行者
     private void clearProgramExcuter() {
         if(currentPlayProgram!=null){
+            log.i(TAG,"开始清理节目中...");
             currentPlayProgram.stop();
             currentPlayProgram = null;
         }

@@ -24,13 +24,18 @@ public class UibrocdCastReceive extends BroadcastReceiver{
     @Override
     public void onReceive(Context context, Intent intent) {
 
+        if (intent == null){
+            log.e(TAG,"intent is null");
+            return;
+        }
 
         final XmlNodeEntity entity = intent.getExtras().getParcelable(key);
         log.i(TAG, "onReceive: "+entity.toString());
 
-        log.i(TAG,"当前线程:"+Thread.currentThread().getName()+";线程数:"+Thread.getAllStackTraces());
+        log.i(TAG,"当前线程:"+Thread.currentThread().getName()+";线程数:"+Thread.getAllStackTraces().size());
         if (entity==null){
 
+            return;
 
         }else {
             helper.schedule(new Action0() {

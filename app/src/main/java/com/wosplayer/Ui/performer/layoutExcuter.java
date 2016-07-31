@@ -192,13 +192,14 @@ public class layoutExcuter {
         log.i(TAG,"----"+layout.getChildren());
         layout = null;
         contentArr=null;
-        //清理内容 放在 主线程
+        //清理 内容 放在 主线程
         AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
             @Override
             public void call() {
            clearContent();
             }
         });
+        log.i(TAG,"布局 停止了 "+this.toString());
     }
 
     /**
@@ -225,6 +226,7 @@ public class layoutExcuter {
             currentIplayer.stop();
             currentIplayer = null;
         }
+        log.i("清理 布局 下 的 内容");
     }
 
 

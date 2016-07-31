@@ -17,6 +17,7 @@ public class programExcuter {
     public programExcuter(XmlNodeEntity program) {
         this.program = program;
         layoutList = new ArrayList<layoutExcuter>();
+        log.i(TAG,"节目:"+program.getXmldata().get("title")+"创建了");
     }
 
     public void start(){
@@ -44,15 +45,17 @@ public class programExcuter {
 
     public void stop(){
         //停止所有 布局
-        if (layoutList.size()==0){
-            return;
+        log.i(TAG,"节目:"+program.getXmldata().get("title")+"准备停止了");
+
+        if (layoutList!=null && layoutList.size()!=0 ){
+            for (layoutExcuter layoutexcuter:layoutList){
+                layoutexcuter.stop();
+                layoutexcuter=null;
+            }
+            layoutList.clear();
+            layoutList = null;
         }
-        for (layoutExcuter layoutexcuter:layoutList){
-            layoutexcuter.stop();
-            layoutexcuter=null;
-        }
-        layoutList.clear();
-        layoutList = null;
+
         program = null;
     }
 }
