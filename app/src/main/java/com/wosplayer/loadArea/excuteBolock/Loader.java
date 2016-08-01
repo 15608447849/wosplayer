@@ -342,12 +342,12 @@ public class Loader {
             if(repeatTaskList.containsKey(l.muri)){
                 ArrayList<Loader> list = repeatTaskList.get(l.muri);
                 list.add(l);
-                log.d(TAG,"找到存在的key:"+l.muri+" 对应的arr"+ list.toString());
+                log.i(TAG,"找到存在的key:"+l.muri+" 对应的arr"+ list.toString());
             }else{
                 ArrayList<Loader> arr = new ArrayList<Loader>();
                 arr.add(l);
                 repeatTaskList.put(l.muri,arr);
-                log.d(TAG,"没有找到存在的key :"+l.muri+" 对应的arr,创建:"+ arr.toString());
+                log.i(TAG,"没有找到存在的key :"+l.muri+" 对应的arr,创建:"+ arr.toString());
             };
             l.existRepeatList = true;
 
@@ -365,12 +365,12 @@ public class Loader {
 
         try{
             lock_repeat.lock();
-            log.d(TAG,  " 开始通知 "+Thread.currentThread().getName()+" - "+Thread.getAllStackTraces().size());
+            log.i(TAG,  " 开始通知 "+Thread.currentThread().getName()+" - "+Thread.getAllStackTraces().size());
 
             final ArrayList<Loader> arr = repeatTaskList.get(uri);
 
             if (arr!=null){
-                log.d(TAG, uri+ " 存在 重复列表,取出映射的value :"+ arr.toString());
+                log.i(TAG, uri+ " 存在 重复列表,取出映射的value :"+ arr.toString());
                 repeatTaskList.remove(uri);
 
                 for (final Loader l:arr){
@@ -383,10 +383,10 @@ public class Loader {
                 }
 
             }else{
-                log.d(TAG, uri+ "  不存在 重复列表");
+                log.i(TAG, uri+ "  不存在 重复列表");
             }
 
-            log.d(TAG,  "结束通知 ");
+            log.i(TAG,  "结束通知 ");
 
         }catch (Exception e){
             log.e(TAG,  "通告 下载 重复任务队列 Err :"+ e.toString());
@@ -406,7 +406,7 @@ public class Loader {
         String u = muri.trim();
         String t = uri.trim();
         boolean f =  u.equals(t);
-        log.d(TAG,  u+ " < - >"+t+"{"+f+"}");
+        log.i(TAG,  u+ " < - >"+t+"{"+f+"}");
         if(f){
          caller.Call(filePath);
         }
@@ -427,7 +427,7 @@ public class Loader {
      * 加入等待隊列
      */
     private static void addWaitList(Loader loader){
-        log.e(TAG,loader.muri + " 加入等待中 ");
+        log.i(TAG,loader.muri + " 加入等待中 ");
         waitList.add(loader);
     }
     /**

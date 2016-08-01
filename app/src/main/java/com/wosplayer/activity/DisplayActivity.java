@@ -14,7 +14,6 @@ import android.widget.FrameLayout;
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.MyVideoView;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
-import com.wosplayer.Ui.performer.contentTanslater;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleReader;
@@ -36,7 +35,7 @@ wosPlayerApp.sendMsgToServer(msg);
 public class DisplayActivity extends FragmentActivity {
 
     private static final java.lang.String TAG = DisplayActivity.class.getName();
-
+    public static boolean isSendRestartBroad = true;
     public static FrameLayout baselayout = null;
 
     public  static AbsoluteLayout main = null;    //存放所有 排期视图 的主容器
@@ -92,9 +91,13 @@ public class DisplayActivity extends FragmentActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Intent intent  = new Intent();
-        intent.setAction(RestartApplicationBroad.action);
-        sendBroadcast(intent);
+        if(isSendRestartBroad){
+            Intent intent  = new Intent();
+            intent.setAction(RestartApplicationBroad.action);
+            sendBroadcast(intent);
+        }
+
+
     }
 
     @Override

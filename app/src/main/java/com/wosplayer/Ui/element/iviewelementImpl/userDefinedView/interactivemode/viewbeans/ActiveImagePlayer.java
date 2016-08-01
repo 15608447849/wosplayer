@@ -225,6 +225,7 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
     @Override
     public void Call(final String filePath) {
         log.i(TAG, "  一个图片 资源 下载结果传递了来了:" + filePath);
+
         isloading = false; //下载完毕
         if (existLoaddingBg){
             releaseImageViewResouce();

@@ -30,7 +30,9 @@ public class wosPlayerApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        CrashHandler.getInstance().init(getApplicationContext());
         //检测sd卡
+
         //初始化 配置信息
         init();
 

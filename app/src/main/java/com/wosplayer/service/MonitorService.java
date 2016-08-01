@@ -33,26 +33,22 @@ public class MonitorService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        log.e("监听服务 开启");
-        log.e(" DisplayActivity.class.getName()=>"+ DisplayActivity.class.getName());
-        log.e(" DisplayActivity.activityContext.getComponentName().getClassName():"+DisplayActivity.activityContext.getComponentName().getClassName());
-//        startTimer();
-        canAppThread =  new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(threadFlag){
-                    monitor();
-                    try {
-                        Thread.sleep(interval);
-                    } catch (InterruptedException e) {
-                        log.e("监听服务 监听线程 err:"+e.getMessage());
-                    }
-                    log.e("监听服务 监听线程 执行...");
-                }
 
-            }
-        });
-        canAppThread.start();
+        log.e("monitor server s...");
+        boolean f = serverUtils.isAppOnForeground(MonitorService.this.getApplicationContext());
+        log.e("- - - f:"+f);
+        f = serverUtils.isRunningForeground(this.getApplicationContext(),this.getApplicationContext().getPackageName());
+        log.e("- - - f2:"+f);
+        f = serverUtils.isRunningToTaskTop(this.getApplicationContext(),DisplayActivity.class.getName());
+        log.e("- - - f3:"+f);
+        if (!f){
+            log.e("monitor server - app not task top");
+            Intent mintent  = new Intent();
+            mintent.setAction(RestartApplicationBroad.action);
+            sendBroadcast(mintent);
+        }
+//        startTimer();
+
 
     }
 
@@ -72,13 +68,38 @@ public class MonitorService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
+        if (canAppThread!=null){
+            threadFlag = false;
+            canAppThread = null;
+        }
+        log.i("监听服务 开启");
+        canAppThread =  new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(threadFlag){
+                    log.i("監聽中");
+                    monitor();
+                    try {
+                        Thread.sleep(interval);
+                    } catch (InterruptedException e) {
+                        log.e("监听服务 监听线程 err:"+e.getMessage());
+                    }
+                    log.i("监听服务 监听线程 执行...");
+                }
+
+            }
+        });
+        canAppThread.start();
+
+
         return super.onStartCommand(intent, flags, startId);
 
     }
     @Override
     public void onDestroy() {
         super.onDestroy();
-        log.e(" 监听服务 结束");
+        log.i(" 监听服务 结束");
 //        stopTimer();
 
         if (canAppThread!=null){
@@ -100,11 +121,12 @@ public class MonitorService extends Service {
 
     private void monitor(){
         boolean flag =  serverUtils.isAppOnForeground(MonitorService.this.getApplicationContext());
-        log.e("监听结果 :"+flag);
+        log.i("监听结果 :"+flag);
         if (flag){
             return;
         }
 
+        log.e("app not foreground...");
         //如果不是运行在前台
         Intent intent = new Intent();
         intent.setClassName(MonitorService.this.getPackageName(), DisplayActivity.class.getName());

@@ -1,5 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.wosplayer">
+    package="com.wosplayer"
+    android:versionCode="10"
+    android:versionName="10"
+    android:screenOrientation="portrait">
 
     <application
         android:name=".app.wosPlayerApp"
@@ -51,6 +54,23 @@
         <receiver android:name=".service.RestartApplicationBroad">
             <intent-filter>
                 <action android:name="com.wos.restartbroad"></action>
+            </intent-filter>
+        </receiver>
+
+        <!-- log-->
+        <!-- 记录日志sever-->
+        <service
+            android:name=".service.serviceLog" />
+        <!-- 日志上传-->
+        <service
+            android:name=".service.logUploadService"
+            />
+
+        <!-- 开机自启动广播-->
+        <receiver android:name=".service.StartSelfBroad">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <category android:name="android.intent.category.HOME" />
             </intent-filter>
         </receiver>
     </application>

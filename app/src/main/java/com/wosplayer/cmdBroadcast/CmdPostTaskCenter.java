@@ -11,6 +11,8 @@ import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Close_App;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Reboot_App;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Reboot_Sys;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_SYTI;
+import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_UPDC;
+import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_UPLG;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_VOLU;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleSaver;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
@@ -59,9 +61,9 @@ public class CmdPostTaskCenter extends BroadcastReceiver {
         // 音量控制
         commandList.put("VOLU:", new Command_VOLU());
 //        // 更新apk
-//        commandList.put("UPDC:", new Command_UPDC());
+        commandList.put("UPDC:", new Command_UPDC());
 //        // 上传日志
-//        commandList.put("UPLG:", new Command_UPLG());
+        commandList.put("UPLG:", new Command_UPLG());
 
         // 重启程序
         commandList.put("UIRE:", new Command_Reboot_App());

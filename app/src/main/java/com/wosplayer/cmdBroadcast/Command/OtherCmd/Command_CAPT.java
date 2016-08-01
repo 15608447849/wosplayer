@@ -290,6 +290,7 @@ public class Command_CAPT implements iCommand {
             os.writeBytes("exit\n");
             os.flush();
 
+            log.i("liunx command execute");
         } catch (Exception e) {
             log.e("执行命令失败："+e.getMessage());
 

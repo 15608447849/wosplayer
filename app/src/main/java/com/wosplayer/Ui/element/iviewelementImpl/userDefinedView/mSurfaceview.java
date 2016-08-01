@@ -53,7 +53,7 @@ public class mSurfaceview extends SurfaceView implements SurfaceHolder.Callback,
      */
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        Log.d(TAG, "suface created (): [" + this.getHeight()+","+this.getWidth()+"]");
+        Log.i(TAG, "suface created (): [" + this.getHeight()+","+this.getWidth()+"]");
 
         if (isMove) {//滚动效果
             if (orientation == MOVE_LEFT) {//向左
@@ -81,7 +81,13 @@ public class mSurfaceview extends SurfaceView implements SurfaceHolder.Callback,
     public void run() {
         while (loop) {
             synchronized (mSurfaceHolder) {
-                draw();
+
+                try {
+                    draw();
+                } catch (Exception e) {
+                    log.e(TAG,""+e.getMessage());
+                }
+
             }
             try {
                 Thread.sleep(speed);
@@ -99,12 +105,12 @@ public class mSurfaceview extends SurfaceView implements SurfaceHolder.Callback,
      * 绘制
      */
     private void draw() {
-        log.d(TAG, "draw: start");
+       // log.i(TAG, "draw: start");
         //锁定画布
         Canvas canvas = mSurfaceHolder.lockCanvas();
 
         if (mSurfaceHolder == null || canvas == null) {
-            Log.i(TAG, "draw: mSurfaceHolder 不存在" + mSurfaceHolder);
+            Log.e(TAG, "draw: mSurfaceHolder or camvas -不存在" + mSurfaceHolder+" - "+ canvas);
             return;
         }
         Paint paint = new Paint();
@@ -122,7 +128,7 @@ public class mSurfaceview extends SurfaceView implements SurfaceHolder.Callback,
         canvas.drawText(content, x, (getHeight() / 2 + 5), paint);//画文字
 
         mSurfaceHolder.unlockCanvasAndPost(canvas);//解锁显示
-
+       // log.i(TAG, "draw: end");
 
         //滚动
         if (isMove) {
@@ -135,16 +141,15 @@ public class mSurfaceview extends SurfaceView implements SurfaceHolder.Callback,
                 if (x < -conlen) {
                     x = w;
                 } else {
-                    x -= 2;
+                    x -= 2*5;
                 }
 
             } else if (orientation == MOVE_RIGHT) {//右边
                 if (x >= w) {
                     x = -conlen;
                 } else {
-                    x += 2;
+                    x += 2*5;
                 }
-
             }
         }
     }
