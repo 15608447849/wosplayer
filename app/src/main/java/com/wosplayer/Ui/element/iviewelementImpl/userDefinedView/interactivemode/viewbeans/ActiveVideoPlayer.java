@@ -26,15 +26,20 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loa
     //构造
     public ActiveVideoPlayer(Context context, String uri, String localpath) {
         super(context);
+        log.e("互动 视频播放者 创建");
         InitSettting(uri,localpath);
         video = new MyVideoView(context,this);
-        video.setMyLayout(0,0,-1,-1);
+
+
 
     }
 
 
 
     private void mInitStart(String filePath) {
+        video.setMyLayout(0,0,LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT);
+        video.initVideoView(true);
+        log.i("start video");
         video.loadRouce(filePath);
         video.start();
     }
@@ -64,10 +69,12 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loa
         this.videoFileLocalPath = localPath;
 
         //设置布局 属性　
-        settingLayout(AbsoluteLayout.LayoutParams.MATCH_PARENT, AbsoluteLayout.LayoutParams.MATCH_PARENT, 0, 0);
+        this.settingLayout(AbsoluteLayout.LayoutParams.MATCH_PARENT, AbsoluteLayout.LayoutParams.MATCH_PARENT, 0, 0);
+
         //初始化 资源加载者
         load = new Loader();
         load.settingCaller(this);
+        log.e("互动 视频 初始化:"+uriPath+"; "+localPath);
     }
 
     /**
@@ -101,6 +108,12 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loa
      */
     @Override
     public void AotuLoadingResource() {
+        //本地如果存在 不加载
+        if (load.fileIsExist(videoFileLocalPath)){
+            log.e("video 资源 本地存在");
+            return;
+        }
+
         load.LoadingUriResource(UriPath,null);
         isloading = true;
     }
@@ -109,22 +122,26 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loa
      */
     private void loadingMyVideoView() {
         if (mFather == null) {
+            log.e("video viewGroup is null");
             return;
         }
-        if(isloading){//在下载
-            return;
-        }
-        //  查看本地
+              //  查看本地
         if (fileUtils.checkFileExists(videoFileLocalPath)) {
             //存在
             Call(videoFileLocalPath);
         } else {
+
+            if(isloading){//在下载
+                log.e("video 正在下载中");
+                return;
+            }
             //访问网络
             if (!isloading) {
                 load.LoadingUriResource(UriPath,null);
+                isloading = true;
             }
         }
-        ;
+
     }
     /**
      * 释放资源
@@ -159,6 +176,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loa
                             mFather.addView(ActiveVideoPlayer.this.returnBtn);
                         }
                         isremove = false;
+                        log.e("互动 video player 添加到 视图 ,video 还没有添加");
                     }
                 });
 
@@ -206,6 +224,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loa
         log.i(TAG, "videoplayer  一个视频 资源 下载结果传递了来了:" + filePath);
         isloading = false; //下载完毕
         if (mFather == null) {
+            log.e("video - >vp is null");
             return;
         }
 

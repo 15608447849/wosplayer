@@ -23,6 +23,7 @@ import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.iCache.InteractionCache;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.ActiveViewPagers;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.xml.XmlParse;
+import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
@@ -118,6 +119,11 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, L
      */
     @Override
     public void onClick(View v) {
+        if (UiExcuter.isStoping){
+            log.e("清理布局中.....");
+            return;
+        }
+
         log.i(TAG, "按钮 click:[" + this.toString() +"] ,绑定id:"+bindid);
         if (CanvasView == null) {
             log.e(TAG," 互动模块容器 不存在");
@@ -530,13 +536,18 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, L
                         ////////////////////////
                         for (int i = 0; i < arr.size(); i++) {
 
-                            IviewPlayer view = arr.get(i).TanslateInfoToView();//转化视图
-                            if (view != null) {
-                                myBindFileViews.add(view);
-                            }
-                            if (i == arr.size() - 1) {//最后一个
-                                ButtonActive.this.setEnabled(true);
-                                log.i(TAG, bindid+"可以点击了");
+                            try {
+                                IviewPlayer view = arr.get(i).TanslateInfoToView();//转化视图
+                                if (view != null) {
+                                    myBindFileViews.add(view);//把视图 保存
+                                }
+                                if (i == arr.size() - 1) {//最后一个
+                                    ButtonActive.this.setEnabled(true);
+                                    log.i(TAG, bindid+"可以点击了");
+                                }
+                            }catch (Exception e){
+                                log.e(" "+e.getMessage());
+                                continue;
                             }
                         }
 

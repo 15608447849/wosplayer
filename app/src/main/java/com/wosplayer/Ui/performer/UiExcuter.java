@@ -30,7 +30,7 @@ public class UiExcuter {
     }
 
     private static ReentrantLock lock = new ReentrantLock();
-
+    public static boolean isStoping = false;
 
     public void StartExcuter(XmlNodeEntity schedule){
         log.i(TAG,"ui执行者 所在线程:"+Thread.currentThread().getName());
@@ -53,12 +53,14 @@ public class UiExcuter {
     }
 
     public void StopExcuter() {
+        isStoping = true;
         //清理 : 1 存在的定时器 2.初始化_index 3.清理节目执行者
         clearTimer();
         _index = 0;
         clearProgramExcuter();
         contentTanslater.clearCache();
         log.i(TAG,"ui执行者 清理完毕");
+        isStoping =false;
     }
 
 

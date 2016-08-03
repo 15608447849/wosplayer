@@ -44,6 +44,7 @@ public class CmdPostTaskCenter extends BroadcastReceiver {
         if (msgCmd==null) return;
 
         log.i("收到一个命令 => "+msgCmd+ " 参数:"+ msgParam);
+
         postCmd(msgCmd,msgParam);
     }
 

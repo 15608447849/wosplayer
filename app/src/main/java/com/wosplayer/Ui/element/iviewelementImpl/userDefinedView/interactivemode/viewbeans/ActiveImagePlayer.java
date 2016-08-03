@@ -33,7 +33,7 @@ import rx.functions.Action0;
 public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller, IviewPlayer {
 
 
-    private static final java.lang.String TAG = ActiveImagePlayer.class.getName();
+    private static final java.lang.String TAG = "ActiveImagePlayer.class.getName()";
     private Loader load;
     private boolean isloading = false;//是否正在下载中
     private String uriPath;  //网络 uri 地址
@@ -133,7 +133,6 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
                     }
                 });
 
-
                         //异步释放视图
                         releaseImageViewResouce();
 
@@ -143,6 +142,7 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
     }
 
     private boolean existLoaddingBg = false;
+    Bitmap bitmap = null;
     /**
      * 加载视图
      */
@@ -156,9 +156,16 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
             AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                 @Override
                 public void call() {
-                    Bitmap bitmap = BitmapFactory.decodeResource(ActiveImagePlayer.this.getResources(), R.drawable.loadding);
+                    if(bitmap==null){
+                        try {
+                            bitmap = BitmapFactory.decodeResource(ActiveImagePlayer.this.getResources(), R.drawable.loadding);
+                        } catch (Exception e) {
+                           log.e("下载 时 图片 异常:"+e.getMessage());
+                            return;
+                        }
+                    }
                     BitmapDrawable bd = new BitmapDrawable(ActiveImagePlayer.this.getResources(), bitmap);
-                    ActiveImagePlayer.this.setBackgroundDrawable(bd);
+                    ActiveImagePlayer.this.setImageDrawable(bd);
                     existLoaddingBg = true;
                 }
             });
@@ -186,6 +193,11 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
      */
     @Override
     public void AotuLoadingResource() {
+        if (fileUtils.checkFileExists(localPath)){
+            log.e("互动 image 存在资源");
+          return;
+        }
+
         isloading = true; //正在下载中
         log.i(TAG, ActiveImagePlayer.this.toString()+" 加载资源..."+uriPath );
         load.LoadingUriResource(uriPath,null);
@@ -229,6 +241,11 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
         isloading = false; //下载完毕
         if (existLoaddingBg){
             releaseImageViewResouce();
+            if (bitmap!=null){
+                ActiveImagePlayer.this.setImageDrawable(null);
+                bitmap.recycle();
+                bitmap=null;
+            }
             existLoaddingBg = false;
         }
 
@@ -269,15 +286,24 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
         });
 
     }
+
+    /**
+     * Android中有四种，分别是：
+     ALPHA_8：每个像素占用1byte内存
+     ARGB_4444:每个像素占用2byte内存
+     ARGB_8888:每个像素占用4byte内存
+     RGB_565:每个像素占用2byte内存
+     * @param filePath
+     */
     private void picassoLoaderImager(String filePath) {
-        log.i(TAG,"width:"+w);
-        log.i(TAG,"layoutparam w:"+this.getLayoutParams().width);
-        log.i(TAG,"getMeasuredWidth:"+this.getMeasuredWidth());
+
         //纯用picasso 加载本地图片
         Picasso.with(mcontext)
                 .load(new File(filePath))
+                .config(Bitmap.Config.RGB_565)
                 .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
 //                .centerCrop()
+                .fit().centerCrop()
                 .placeholder(R.drawable.no_found)
                 .error(R.drawable.error)
                 .into(this);

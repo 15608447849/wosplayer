@@ -115,6 +115,8 @@ public class layoutExcuter {
         String getcontents = content.getXmldata().get("getcontents");//uri
         String localpath = wosPlayerApp.config.GetStringDefualt("basepath","")+content.getXmldata().get("contentsnewname");//本地路径
         String timelength = content.getXmldata().get("timelength");
+        String UUKS = content.getXmldata().get("uuks");
+
         datalist.put("x",x);
         datalist.put("y",y);
         datalist.put("width",width);
@@ -123,8 +125,9 @@ public class layoutExcuter {
         datalist.put("getcontents",getcontents);
         datalist.put("localpath",localpath);
         datalist.put("timelength",timelength);
+        datalist.put("uuks",UUKS);
 
-        String key = layout.getXmldata().get("id")+content.getXmldata().get("id")+content.getXmldata().get("materialid")+fileproterty+content.getXmldata().get("contentsnewname")+content.getXmldata().get("uuks");//生成一个唯一标识
+        String key = layout.getXmldata().get("id")+content.getXmldata().get("id")+content.getXmldata().get("materialid")+fileproterty+content.getXmldata().get("contentsnewname")+UUKS;//生成一个唯一标识
         datalist.setKey(key);//唯一标识
 
         if (fileproterty.equals("text")){
@@ -152,6 +155,7 @@ public class layoutExcuter {
             String fontsize = textcontent.getXmldata().get("fontsize");
             String textContent = textcontent.getXmldata().get("txtcontents");
 
+
             datalist.put("bgcolor",bgcolor);
             datalist.put("fontcolor",fontcolor);
             datalist.put("fontsize",fontsize);
@@ -159,6 +163,7 @@ public class layoutExcuter {
             datalist.put("texttype",texttype);
             datalist.put("textstyle",boldstr);
             datalist.put("speed",speed);
+
         }
 
         if (fileproterty.equals("interactive")){

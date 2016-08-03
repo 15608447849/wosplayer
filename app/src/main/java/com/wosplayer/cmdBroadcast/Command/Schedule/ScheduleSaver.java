@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.wos.Toals;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlHelper;
@@ -25,9 +26,6 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantLock;
-
-import rx.functions.Action0;
-import rx.schedulers.Schedulers;
 
 /**
  * Created by Administrator on 2016/7/20.
@@ -57,6 +55,8 @@ public class ScheduleSaver implements iCommand {
     public static void Serialize() {
         rootNode.SettingNodeEntitySave();
     }
+
+//    private static Scheduler.Worker helper =  Schedulers.io().createWorker();
     /**
      * 执行
      *
@@ -66,6 +66,9 @@ public class ScheduleSaver implements iCommand {
     @Override
     public void Execute(String param) {
         log.i("获取排期信息,当前线程名:"+Thread.currentThread().getName());
+        Toals.Say("排期地址 =  "+ param);
+
+
         saveData(param);
     }
     /**
@@ -75,7 +78,6 @@ public class ScheduleSaver implements iCommand {
 
         try {
             lock.lock();
-            rootNode.Clear();//清理存在的数据
 
             log.i(TAG," root uri:"+ uri);
             startWork(uri);
@@ -95,18 +97,18 @@ public class ScheduleSaver implements iCommand {
 
     private void startWork(final String uri){
 
-        Schedulers.io().createWorker().schedule(new Action0() {
-            @Override
-            public void call() {
+//        helper.schedule(new Action0() {
+//            @Override
+//            public void call() {
                 Long startTime = System.currentTimeMillis();
                 getXMLdata(uri,ROOT_PARSE,null); //解析数据
                 Long endTime = System.currentTimeMillis();
-                log.i(TAG,"解析用时:"+(endTime - startTime)+"毫秒");
+                log.e(TAG,"解析用时:"+(endTime - startTime)+"毫秒");
                 //开启后台下载线程
-                log.i("当前的任务数:"+rootNode.getFtplist().size()+"--"+rootNode.getFtplist().toString());
+                log.i("当前的任务数:"+rootNode.getFtplist().size()+"-->"+rootNode.getFtplist().toString());
                 sendloadTask();
-            }
-        });
+//            }
+//        });
     }
 
     /**
@@ -129,8 +131,8 @@ public class ScheduleSaver implements iCommand {
     }
 
 
-    String url = null;
-    String uuks = null;//全局 唯一标识
+    private static String url = null;
+    private static String uuks = null;//全局 唯一标识
 
     /**
      * 解析 result
@@ -151,15 +153,34 @@ public class ScheduleSaver implements iCommand {
                 rootNode.Level="root";
 
                 try {
+                    String ruuks = XmlHelper.getFirstChildNodeValue(root, "uuks");
+                    if (ruuks.equals("")) throw new Exception("uuks  is null");
+
+                    if (uuks==null || !uuks.equals(ruuks)){
+                        rootNode.Clear();//清楚数据
+                        uuks = ruuks;
+
+                    }else{
+                        throw new Exception("排期无改变.uuks 无变化");
+                    }
+
+                    url = null;
                     url = XmlHelper.getFirstChildNodeValue(root, "url");
                     if (url.equals("")) throw new Exception("url is null");
-                    uuks = XmlHelper.getFirstChildNodeValue(root, "uuks");
-                    if (uuks.equals("")) throw new Exception("uuks  is null");
+
                 } catch (Exception e) {
                     log.e(TAG,e.getMessage());
                     return;
                 }
 
+                //图片 视频 错误时 所需
+
+                //图片
+                String errImage = "http://e.hiphotos.baidu.com/zhidao/pic/item/9345d688d43f8794f8bb0d5bd61b0ef41bd53a7a.jpg";
+                rootNode.addUriTast(errImage); //创建一个ftp任务
+                //视频
+                String errVideo = "http://static.zqgame.com/html/playvideo.html?name=http://lom.zqgame.com/v1/video/LOM_Promo~2.flv";
+                rootNode.addUriTast(errVideo); //创建一个ftp任务
 
                 NodeList scheduleList = root.getElementsByTagName("schedule");
                 if (scheduleList.getLength() == 0) return;
@@ -382,6 +403,17 @@ public class ScheduleSaver implements iCommand {
                 interaction_layout_node.AddProperty("folderurl", folderurl);
                 interaction_layout_node.AddProperty("thumbnailurl", thumbnailurl);
 
+                //获取 缩略图 的地址
+                String layout_thumbnailpath = XmlHelper.getFirstChildNodeValue(action_layoutElement, "thumbnailpath");//封面图片文件名，完整路径需加前缀
+                if (layout_thumbnailpath==null || layout_thumbnailpath.equals("")) {
+                    log.e(TAG,"按钮 背景 解析错误:背景图片名不存在") ;
+                    String errImageBgUri = "http://imgsrc.baidu.com/forum/w%3D580/sign=55460f6a367adab43dd01b4bbbd5b36b/269759ee3d6d55fb1fa4ca646d224f4a20a4dd16.jpg";
+                    rootNode.addUriTast(errImageBgUri);
+                }else{
+                    String bgmode_uri = thumbnailurl + layout_thumbnailpath;
+                    //创建ftp
+                    rootNode.addUriTast(bgmode_uri); //创建一个ftp任务
+                }
                 //ad
               /*Element adElement = (Element) action_layoutElement.getElementsByTagName("ad").item(0);
                 if (adElement == null) return;
@@ -420,15 +452,18 @@ public class ScheduleSaver implements iCommand {
                 }
                 if (bgmode_type == 2) {
                     String bg = XmlHelper.getFirstChildNodeValue(layout_ItemsElement, "bg");
-                    if (bg.equals("")) {
-                        log.e(TAG,"一个按钮背景解析错误:背景图片名不存在") ;
-                        return;
+                    if (bg == null || bg.equals("")) {
+                        log.e(TAG,"一个布局背景解析错误:背景图片名不存在") ;
+                        String layoutBgerr = "http://cdn.duitang.com/uploads/item/201205/07/20120507220903_VR22y.thumb.600_0.jpeg";
+                        rootNode.addUriTast(layoutBgerr); //创建一个ftp任务
+                    }else{
+                        String bgmode_uri = thumbnailurl + bg;
+                        //创建ftp
+                        rootNode.addUriTast(bgmode_uri); //创建一个ftp任务
                     }
-
-                    String bgmode_uri = thumbnailurl + bg;
-                    //创建ftp
-                    rootNode.addUriTast(bgmode_uri); //创建一个ftp任务
                 }
+
+
 
                 //循环得到按钮的信息
                 NodeList items_itemNodeList = layout_ItemsElement.getElementsByTagName("item"); //子按钮
@@ -471,7 +506,6 @@ public class ScheduleSaver implements iCommand {
                         getXMLdata(item_uri, I_FILE_PARSE, interaction_layout_items_item_node.NewSettingNodeEntity());
 
                     }
-
                 }
 
                 break;
@@ -500,10 +534,12 @@ public class ScheduleSaver implements iCommand {
                 //创建ftp对象
 
                 String thumbnailpath = XmlHelper.getFirstChildNodeValue(folderElement, "thumbnailpath");
-                if (thumbnailpath != null) {
-                    rootNode.addUriTast(thumbnailpath);//创建一个ftp任务 绑定他的按钮的背景图片
+                if (thumbnailpath != null && !thumbnailpath.equals("")) {
+                    rootNode.addUriTast(thumbnailpath);//创建一个ftp任务 绑定他 的 按钮的背景图片
                 }else{
-                    log.i(TAG,"按钮不存在背景");
+                    log.i(TAG,"按钮 不存在 背景");
+                    String layoutBgerr = "http://cdn.duitang.com/uploads/item/201205/07/20120507220903_VR22y.thumb.600_0.jpeg";
+                    rootNode.addUriTast(layoutBgerr); //创建一个ftp任务
                 }
 
                 //循环得到子内容信息
@@ -525,16 +561,18 @@ public class ScheduleSaver implements iCommand {
                     //文件类型
                     String filetype = XmlHelper.getFirstChildNodeValue(floder_item_Element, "filetype");
                     if (filetype.equals("1006")) {
+                        log.i(TAG,"一个网页资源类型");
                         continue; //网页
                     }
 
                     //资源路径
                     String filepath = XmlHelper.getFirstChildNodeValue(floder_item_Element, "filepath");//资源路径
                     if(filepath.equals("")||filepath.equals("null")){
+                       log.e(TAG,"互动 下面 的 文件 所需 资源 路径 错误 filepath:"+ filepath);
                         continue;
+                    }else{
+                        rootNode.addUriTast(filepath); //创建一个ftp任务
                     }
-                    rootNode.addUriTast(filepath); //创建一个ftp任务
-
                     //还有第一帧的图像
                     if (filetype.equals("1002")) {
                         filepath = XmlHelper.getFirstChildNodeValue(floder_item_Element, "video_image_url");//视频第一帧路径

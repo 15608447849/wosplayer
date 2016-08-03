@@ -91,7 +91,7 @@ public class Loader {
             muri = uri;
 
             //是否加入等待
-            if (loadingTaskList.size()>10){
+            if (loadingTaskList.size()>5){
                 addWaitList(this);
                 return;
             }

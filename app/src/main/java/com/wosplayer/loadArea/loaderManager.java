@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.util.Log;
 
+import com.wos.Toals;
 import com.wosplayer.app.log;
 import com.wosplayer.loadArea.excuteBolock.Loader;
 
@@ -80,6 +81,7 @@ public class loaderManager extends IntentService implements Loader.LoaderCaller{
         log.i(TAG,"current count :"+SuccessCount+" sumCount:"+TaskList.size());
         if (SuccessCount == TaskList.size()){
             log.i(TAG,"任务完成 发送通知");
+            Toals.Say("下载任务全部完成 发送通知");
             //发送完成通知
             Intent intent = new Intent();
             intent.setAction(completeTaskListBroadcast.action);

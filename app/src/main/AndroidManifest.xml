@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.wosplayer"
-    android:versionCode="10"
-    android:versionName="10"
+    android:versionCode="5"
+    android:versionName="5.0"
     android:screenOrientation="portrait">
 
     <application
@@ -21,6 +21,10 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.wos.launcher.show" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
@@ -49,8 +53,9 @@
 
 
 
+
         //监听服务
-        <service android:name=".service.MonitorService" android:enabled="true" ></service>
+        <service android:name=".service.MonitorService" android:enabled="true"  android:process=".MonitorService" ></service>
         <receiver android:name=".service.RestartApplicationBroad">
             <intent-filter>
                 <action android:name="com.wos.restartbroad"></action>
@@ -71,6 +76,22 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <category android:name="android.intent.category.HOME" />
+            </intent-filter>
+        </receiver>
+
+        <!-- 安装卸载等广播 -->
+        <receiver android:name="com.wosplayer.service.installBroad" >
+            <intent-filter>
+                <data android:scheme="package" />
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <action android:name="android.intent.action.PACKAGE_REMOVED" />
+                <action android:name="android.intent.action.PACKAGE_CHANGED" />
+                <action android:name="android.intent.action.PACKAGE_INSTALL" />
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.PACKAGE_DATA_CLEARED" />
+                <action android:name="android.intent.action.PACKAGE_FIRST_LAUNCH" />
+                <action android:name="android.intent.action.PACKAGE_RESTARTED" />
+                <action android:name="android.intent.action.PACKAGE_VERIFIED" />
             </intent-filter>
         </receiver>
     </application>

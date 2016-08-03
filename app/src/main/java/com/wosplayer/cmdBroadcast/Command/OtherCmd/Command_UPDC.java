@@ -16,7 +16,6 @@ import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 import com.wosplayer.loadArea.excuteBolock.Loader;
-import com.wosplayer.service.MonitorService;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -150,7 +149,7 @@ private void installApk(String apkLocalPath) {
 
 //		System.exit(0);
 
-  /*  Intent intent = new Intent(DisplayActivity.activityContext,  DisplayActivity.class);
+   Intent intent = new Intent(DisplayActivity.activityContext,  DisplayActivity.class);
     // 创建PendingIntent对象
     final PendingIntent pi = PendingIntent.getActivity(DisplayActivity.activityContext, 0, intent, 0);
 
@@ -158,14 +157,14 @@ private void installApk(String apkLocalPath) {
     calendar.setTimeInMillis(System.currentTimeMillis());
     calendar.add(Calendar.SECOND, 20);
     ((AlarmManager) DisplayActivity.activityContext.getSystemService(Context.ALARM_SERVICE))
-            .set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);*/
-    Intent intent = new Intent(DisplayActivity.activityContext,  MonitorService.class);
+            .set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
+    /*Intent intent = new Intent(DisplayActivity.activityContext,  MonitorService.class);
     // 创建PendingIntent对象
     final PendingIntent pi = PendingIntent.getService(DisplayActivity.activityContext, 0, intent, 0);
     Calendar calendar = Calendar.getInstance();
     calendar.setTimeInMillis(System.currentTimeMillis());
     calendar.add(Calendar.SECOND, 10);
-    ((AlarmManager) DisplayActivity.activityContext.getSystemService(Context.ALARM_SERVICE)).set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
+    ((AlarmManager) DisplayActivity.activityContext.getSystemService(Context.ALARM_SERVICE)).set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);*/
 
 
 

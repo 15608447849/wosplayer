@@ -18,6 +18,8 @@ import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.UUID;
 
+import installUtils.ApkController;
+
 /**
  * Created by Administrator on 2016/7/19.
  */
@@ -30,7 +32,15 @@ public class wosPlayerApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        CrashHandler.getInstance().init(getApplicationContext());
+        //查看 老版本app 是否存在 存在 卸载
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ApkController.uninstall("com.wos",getApplicationContext());
+            }
+        });
+
+       // CrashHandler.getInstance().init(getApplicationContext());
         //检测sd卡
 
         //初始化 配置信息

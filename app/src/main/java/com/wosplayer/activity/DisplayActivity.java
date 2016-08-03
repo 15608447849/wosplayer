@@ -36,7 +36,7 @@ public class DisplayActivity extends FragmentActivity {
 
     private static final java.lang.String TAG = DisplayActivity.class.getName();
     public static boolean isSendRestartBroad = true;
-    public static FrameLayout baselayout = null;
+    public static AbsoluteLayout baselayout = null;
 
     public  static AbsoluteLayout main = null;    //存放所有 排期视图 的主容器
     public static FrameLayout frame = null;  //隐藏图层
@@ -49,7 +49,7 @@ public class DisplayActivity extends FragmentActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//去标题
         setContentView(R.layout.activity_main);//设置布局文件
-        baselayout = (FrameLayout) LayoutInflater.from(this).inflate(R.layout.activity_main,null);
+        baselayout = (AbsoluteLayout) LayoutInflater.from(this).inflate(R.layout.activity_main,null);
 
         main = (AbsoluteLayout) this.findViewById(R.id.main);
         frame = (FrameLayout)this.findViewById(R.id.frame_layout);
@@ -114,7 +114,7 @@ public class DisplayActivity extends FragmentActivity {
     /////////////////////////////////////////////////////////////////////////////////////
     public void FrameBtnEvent(View view){
         goneLayoutdialog();
-    }
+    }//返回按钮
 
     //隐藏帧布局
     public void goneLayoutdialog(){
@@ -135,6 +135,7 @@ public class DisplayActivity extends FragmentActivity {
             }
             //隐藏
             frame.setVisibility(View.GONE);
+
             openOtherVideo(main);
         }
     }
@@ -143,16 +144,17 @@ public class DisplayActivity extends FragmentActivity {
     /**
      * 显示帧布局
      */
-    public void visibleLayoutDialog(boolean isShowLoadWaitImage){
+    public void visibleLayoutDialog(boolean isShowLoadWaitImage,AbsoluteLayout.LayoutParams p){
         //如果是显示的
         if (frame.getVisibility() == View.VISIBLE){
+            log.e("帧布局 已显示");
             return;
         }
 
         //显示
         frame.setVisibility(View.VISIBLE);
 
-
+        frame.setLayoutParams(p);
 
         if (isShowLoadWaitImage){
             //显示 图片
@@ -161,6 +163,7 @@ public class DisplayActivity extends FragmentActivity {
             findViewById(R.id.frame_load_wait_image).setVisibility(View.GONE);
         }
 
+        log.e("main childs :"+main.getChildCount());
         closeOtherVideo(main);
 
     }
@@ -173,10 +176,15 @@ public class DisplayActivity extends FragmentActivity {
     private void openOtherVideo(ViewGroup vg){
         for (int i = 0;i<vg.getChildCount();i++){
 
+            log.e("");
             View view = vg.getChildAt(i);
-            if (view instanceof ViewGroup){
+            if (view instanceof AbsoluteLayout ||  view instanceof ViewGroup){
                 closeOtherVideo((ViewGroup) view);
             }
+//            if (view instanceof IVideoPlayer){
+//                IVideoPlayer v = (IVideoPlayer)view;
+//                v.start();
+//            }
             if (view instanceof MyVideoView){
                 MyVideoView v = (MyVideoView)view;
                 v.start();
@@ -189,12 +197,17 @@ public class DisplayActivity extends FragmentActivity {
      * 关闭 其他视频资源
      */
     private void closeOtherVideo(ViewGroup vg){
+
         for (int i = 0;i<vg.getChildCount();i++){
 
             View view = vg.getChildAt(i);
-            if (view instanceof ViewGroup){
+            if (view instanceof AbsoluteLayout || view instanceof ViewGroup ){
                 closeOtherVideo((ViewGroup) view);
             }
+//            if (view instanceof IVideoPlayer){
+//                IVideoPlayer v = (IVideoPlayer)view;
+//                v.stop();
+//            }
             if (view instanceof MyVideoView){
                 MyVideoView v = (MyVideoView)view;
                 v.pause();

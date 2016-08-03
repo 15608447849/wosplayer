@@ -34,19 +34,19 @@ public class MonitorService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        log.e("monitor server s...");
+       log.e("monitor server s...");
         boolean f = serverUtils.isAppOnForeground(MonitorService.this.getApplicationContext());
         log.e("- - - f:"+f);
         f = serverUtils.isRunningForeground(this.getApplicationContext(),this.getApplicationContext().getPackageName());
         log.e("- - - f2:"+f);
         f = serverUtils.isRunningToTaskTop(this.getApplicationContext(),DisplayActivity.class.getName());
         log.e("- - - f3:"+f);
-        if (!f){
+       // if (!f){
             log.e("monitor server - app not task top");
             Intent mintent  = new Intent();
             mintent.setAction(RestartApplicationBroad.action);
             sendBroadcast(mintent);
-        }
+     //   }
 //        startTimer();
 
 

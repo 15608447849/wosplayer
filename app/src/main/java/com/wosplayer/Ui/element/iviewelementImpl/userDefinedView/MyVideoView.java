@@ -103,7 +103,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
         this.y =y;
         this.w =w;
         this.h =h;
-        log.i(TAG," layout param:"+x+","+y+","+w+","+h);
+        log.i(TAG,"video layout param:"+x+","+y+","+w+","+h);
         if (layout == null){
             return;
         }
@@ -192,6 +192,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
      */
     public void pause() {
         if (isDestroy){
+            log.e("video 是销毁的");
             return;
         }
         if (mMediaPlayer != null && mIsPrepared) {//如果媒体播放器存在,并且准备完成的
@@ -498,10 +499,12 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        log.i(TAG, "视频播放器 onMeasure()");
+
 
         int width = getDefaultSize(mVideoWidth, widthMeasureSpec);
         int height = getDefaultSize(mVideoHeight, heightMeasureSpec);
+
+        log.i(TAG, "视频播放器 onMeasure() 绘制 w:"+width+" - h:"+height);
         setMeasuredDimension(width, height); //设置绘制大小
     }
 

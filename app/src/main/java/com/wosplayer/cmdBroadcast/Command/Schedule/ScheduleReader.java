@@ -3,7 +3,7 @@ package com.wosplayer.cmdBroadcast.Command.Schedule;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.wosplayer.Ui.performer.UiExcuter;
+import com.wos.Toals;
 import com.wosplayer.Ui.uiBroadcast.UibrocdCastReceive;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
@@ -39,19 +39,18 @@ public class ScheduleReader {
     private static  TimerTask timerTask = null;
     private static void startTimer(long millisecond){
         stopTimer();
-
         timerTask = new TimerTask() {
             @Override
             public void run() {
             //重新读取排期
+               Toals.Say("一个定时任务到时间了,开始执行");
                Start();
-
             }
         };
-
         timer = new Timer();
         timer.schedule(timerTask,millisecond);
         log.i(TAG,"开始 定时任务 ,延时毫秒数:" +millisecond);
+        Toals.Say("开始 定时任务 ,延时几秒:" +millisecond/1000);
     }
 
     private static void stopTimer(){
@@ -65,6 +64,7 @@ public class ScheduleReader {
        }
 
         log.i(TAG,"停止 定时任务");
+        Toals.Say("停止 一个 定时任务");
     }
 
     private static final java.lang.String TAG = ScheduleReader.class.getName();
@@ -124,7 +124,9 @@ public class ScheduleReader {
             log.e(TAG," not fount schedule.");
             return null;
         }
+
         log.i(TAG,"all schedule :" + allScheduleList);
+
         return allScheduleList;
     }
 
@@ -147,14 +149,6 @@ public class ScheduleReader {
         }
     }
 
-
-
-
-
-
-
-
-
     private static ReentrantLock lock = new ReentrantLock();
 
     public static void Start(){
@@ -162,10 +156,17 @@ public class ScheduleReader {
             lock.lock();
             Stop();
            ArrayList<XmlNodeEntity> list =  getAllSchedule();
+            log.i(TAG,"全部排期数量:"+list.size());
+
+            Toals.Say("全部排期数量:"+list.size());
            filterScheduleList(list);
+
             XmlNodeEntity entity = querySchedule();
             clearScheduleMap();
-            log.i(TAG," 今天要播放的排期 :"+entity);
+            log.i(TAG," 今天要播放的排期 type:"+entity.getXmldata().get("type"));
+
+            Toals.Say("当前排期的类型:"+entity.getXmldata().get("type")+"最后修改时间:"+entity.getXmldata().get("modifydt"));
+
             boolean isExistes = false;
             if (entity != null){
                 isExistes = true;
@@ -207,11 +208,14 @@ public class ScheduleReader {
         if (type.equals("2") && !entity.getXmldata().get("allday").equals("1")){
             //如果不是全天
             //"endcron" -> "2016-08-23 23:30:00"
+            Toals.Say("当前 时间段点播");
             String startcron = dataFormatUtils.format(new Date());//entity.getXmldata().get("startcron");
+
             String endcron = entity.getXmldata().get("endcron");
+            Toals.Say("点播开始时间:"+startcron+"点播结束时间:"+endcron);
 
             dalay = getTimeMillsecondes(endcron) - getTimeMillsecondes(startcron);
-
+            Toals.Say("持续秒数:"+ dalay/1000);
 
         }
         else{
@@ -220,7 +224,6 @@ public class ScheduleReader {
             String todayEndTimeText =  currentTimeText.substring(0, 11) + "23:59:59";
 
             dalay = getTimeMillsecondes(todayEndTimeText) - getTimeMillsecondes(currentTimeText);
-
         }
 
         if (dalay<0){
@@ -255,6 +258,7 @@ public class ScheduleReader {
 
         //根据排期优先级
         ArrayList<XmlNodeEntity> currentArr = DetermineScheduling();
+
         if (currentArr==null){
             return e;
         }
@@ -263,6 +267,7 @@ public class ScheduleReader {
         if (entity==null){
             return e;
         }
+
         //根据时间范围判断
         boolean flag = determineTime(entity);
         if (!flag){
@@ -406,7 +411,7 @@ public class ScheduleReader {
             public int compare(XmlNodeEntity lhs, XmlNodeEntity rhs) {
                 long a = getTimeMillsecondes(lhs.getXmldata().get("modifydt"));
                 long b = getTimeMillsecondes(rhs.getXmldata().get("modifydt"));
-                return a-b>0 ? -1:1;  //-1代表前者小，0代表两者相等，1代表前者大。
+                return a-b>0 ? -1:a-b==0?0:-1;  //-1代表前者小，0代表两者相等，1代表前者大。
             }
         });
 

@@ -79,7 +79,7 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
     /**
      * 视频播放者
      */
-    ActiveVideoPlayer vplayer ;
+    ActiveVideoPlayer vplayer = null;
 
     private String UriPath;
     private String videoFileLocalPath;//播放的文件路径
@@ -97,13 +97,43 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
         @Override
         public void onClick(View v) {
 
-           DisplayActivity.activityContext.visibleLayoutDialog(!image_Src_isOK); //资源如果没有加载完 显示图层 传递true
+            log.e("准备播放一个视频,当前资源状态:" + image_Src_isOK);
 
-            if (!image_Src_isOK){ //如果资源没有下载完  不加载视频
+            if (mFather==null){
                 return;
             }
 
+
+            int iw = -1;
+            int ih = -1;
+            int ix = 0;
+            int iy = 0;
+            //获取互动模块的执行者
+            if (mFather.getParent() instanceof ActiveViewPagers){
+                if(((ActiveViewPagers)mFather.getParent()).getParent() instanceof IinteractionPlayer){
+                    AbsoluteLayout.LayoutParams lp = (AbsoluteLayout.LayoutParams) ((IinteractionPlayer)((ActiveViewPagers)mFather.getParent()).getParent()).getLayoutParams();
+                    iw = lp.width;
+                    ih = lp.height;
+                    ix = lp.x;
+                    iy = lp.y;
+                }
+            }
+
+           AbsoluteLayout.LayoutParams param = new AbsoluteLayout.LayoutParams(iw,ih,ix,iy);
+//           param.gravity = Gravity.CENTER;
+
+           DisplayActivity.activityContext.visibleLayoutDialog(!image_Src_isOK,param); //资源如果没有加载完 显示图层 传递true
+
+            if (!image_Src_isOK){ //如果资源没有下载完  不加载视频
+                log.e("资源没有加载完");
+                return;
+            }
+
+
            ViewGroup vp = DisplayActivity.frame_main;
+
+            log.e("this Vp:"+mFather.getMeasuredHeight());
+
             if (vplayer == null){
                 vplayer = new ActiveVideoPlayer(DisplayActivity.activityContext,UriPath,videoFileLocalPath);
             }
@@ -116,8 +146,15 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
      */
     @Override
     public void AotuLoadingResource() {
-        load.LoadingUriResource(UriPath,null);//视频资源
-        isloading = true;
+        log.e("视频 资源 加载 准备:"+UriPath+" 本地:"+videoFileLocalPath);
+
+        if (load.fileIsExist(videoFileLocalPath)){
+            Call(videoFileLocalPath);
+            return;
+        }else{
+            load.LoadingUriResource(UriPath,null);//视频资源
+            isloading = true;
+        }
     }
     /**
      * 加载视图
@@ -130,7 +167,6 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
         //图片 播放者  出来吧!!!
         if (imager == null){
             imager = new ActiveImagePlayer(mcontext,imageUriPath,imageLoalPath);
-
         }
         imager.addMeToFather(ActiveVideoPlayerAndImage.this);//添加到绝对布局
         Button btn = imager.getPlayVideoBtn();
@@ -254,10 +290,7 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
     public void Call(final String filePath) {
         log.i(TAG, "一个视频 资源 下载结果传递了来了:" + filePath);
         isloading = false; //下载完毕
-
-        if (mFather == null) {
-            return;
-        }
         image_Src_isOK = true;
+
     }
 }
