@@ -7,10 +7,11 @@ import android.util.LruCache;
  */
 public class XMLCache {
 
-
     private static XMLCache xmlCache ;
 
     private LruCache<String,String> mLruCache;
+
+
 
     private XMLCache(){
        mLruCache  = new LruCache<String,String>((int) (Runtime.getRuntime().maxMemory() / 8));
@@ -25,8 +26,6 @@ public class XMLCache {
     }
 
 
-
-
     //存 xml 文件
     public void saveCache(String key, String value){
         mLruCache.put(key,value);
@@ -37,7 +36,5 @@ public class XMLCache {
        return mLruCache.get(Key);
 
     }
-
-
 
 }

@@ -36,16 +36,25 @@ public class DataSeparator {
         dataStore = null;
 
     }
-    public static void Split(XmlNodeEntity entity){
+    public static void Split(XmlNodeEntity entity,DataStore ds){
 
         log.e("",entity.toString());
 
-        if (dataStore == null){
+      /* if (dataStore == null){
             dataStore = new DataStore();
             currentIndex = dataStore;
         }else{
             currentIndex = currentIndex.NewSettingNodeEntity();
+        }*/
+
+        if (ds==null){//第一次
+            dataStore = new DataStore();
+            currentIndex = dataStore;
+        }else{
+            currentIndex = ds;
         }
+
+
         //判断
         if (entity.Level.equals(layoutLevel)){
             layoutDataParse(entity);
@@ -63,7 +72,8 @@ public class DataSeparator {
         ArrayList<XmlNodeEntity> child = entity.getChildren();
         if (child!=null && child.size()>0){
             for (XmlNodeEntity e : child){
-                    Split(e);
+//                    Split(e);
+                Split(e,currentIndex.NewSettingNodeEntity());
             }
         }
     }

@@ -232,7 +232,7 @@ public class XmlNodeEntity implements Parcelable {
             if(SettingNodeEntityText!="")
             {
                 settingnodeentity=binder.fromJson(SettingNodeEntityText, XmlNodeEntity.class);
-                log.i(TAG,"settingnodeentity = "+ settingnodeentity.toString());
+                log.i(TAG,"全部的排期信息setting node entity => "+ settingnodeentity.Level+";childs size:"+settingnodeentity.getChildren().size());
 
                 if(settingnodeentity.xmldata!=null&&settingnodeentity.xmldata.containsKey("md5")){
                     Current_Read_md5=settingnodeentity.xmldata.get("md5");

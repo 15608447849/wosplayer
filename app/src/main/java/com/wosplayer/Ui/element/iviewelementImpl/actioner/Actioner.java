@@ -41,13 +41,13 @@ public class Actioner implements IPlayer{
            muuks = uuks;
            DataSeparator.clear();
            //分离数据
-           DataSeparator.Split((XmlNodeEntity) ob);
+           DataSeparator.Split((XmlNodeEntity) ob,null);
 
        }else{
            if (!muuks.equals(uuks)){
                DataSeparator.clear();
                //分离数据
-               DataSeparator.Split((XmlNodeEntity) ob);
+               DataSeparator.Split((XmlNodeEntity) ob,null);
            }
        }
 

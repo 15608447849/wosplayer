@@ -3,6 +3,7 @@ package com.wos;
 import android.widget.Toast;
 
 import com.wosplayer.activity.DisplayActivity;
+import com.wosplayer.app.log;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
@@ -12,6 +13,14 @@ import rx.functions.Action0;
  */
 public class Toals {
     public static void Say(final String str){
+        if (str==null || str.equals("")){
+            log.e("toals err message is null");
+            return;
+        }
+        if (DisplayActivity.activityContext ==null){
+            log.e("toals err activity is null");
+            return;
+        }
         AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
             @Override
             public void call() {

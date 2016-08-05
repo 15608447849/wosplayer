@@ -175,7 +175,7 @@ public class wosPlayerApp extends Application {
         b.putLong("HeartBeatTime",(config.GetIntDefualt("HeartBeatInterval",50) * 500));
         intent.putExtras(b);
         appContext.startService(intent);
-        log.i("尝试开启通讯服务...");
+        log.i("wosPlayerApp: 尝试开启通讯服务...");
     }
 
     /**

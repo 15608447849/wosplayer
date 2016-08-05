@@ -29,18 +29,19 @@ public class UibrocdCastReceive extends BroadcastReceiver{
             return;
         }
 
+
         final XmlNodeEntity entity = intent.getExtras().getParcelable(key);
-        log.i(TAG, "onReceive: "+entity.toString());
 
-        log.i(TAG,"当前线程:"+Thread.currentThread().getName()+";线程数:"+Thread.getAllStackTraces().size());
         if (entity==null){
-
+            log.e(TAG,"无排期");
             return;
 
         }else {
+            log.i(TAG, "onReceive: "+entity.getXmldata().get("type")+","+entity.getXmldata().get("id"));
             helper.schedule(new Action0() {
                 @Override
                 public void call() {
+                    log.e(TAG,"当前线程:"+Thread.currentThread().getName()+";线程数:"+Thread.getAllStackTraces().size());
                     UiExcuter.getInstancs().StartExcuter(entity);
                 }
             });

@@ -17,6 +17,7 @@ import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleReader;
+import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleSaver;
 import com.wosplayer.service.MonitorService;
 import com.wosplayer.service.RestartApplicationBroad;
 
@@ -72,15 +73,23 @@ public class DisplayActivity extends FragmentActivity {
        super.onResume();
         //开启通讯服务
         wosPlayerApp.startCommunicationService();
-        ScheduleReader.Start();
+        if (activityContext!=null){
+            try {
+
+                ScheduleReader.Start(false);
+            } catch (Exception e) {
+               log.e(TAG,"activity 开始执行读取排期 时 err:"+ e.getMessage());
+            }
+        }
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         wosPlayerApp.stopCommunicationService(); //关闭服务
-
-
+        ScheduleSaver.clear();
+        ScheduleReader.clear();
     }
 
     @Override
@@ -96,8 +105,6 @@ public class DisplayActivity extends FragmentActivity {
             intent.setAction(RestartApplicationBroad.action);
             sendBroadcast(intent);
         }
-
-
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.wosplayer.Ui.performer;
 
+import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.log;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
 
@@ -9,6 +10,9 @@ import java.util.Comparator;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
+
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 
 /**
  * Created by Administrator on 2016/7/24.
@@ -37,15 +41,20 @@ public class UiExcuter {
         try{
             if (schedule==null){
                 log.e(TAG," ui执行者不执行 ,schedule is null");
+                return;
             }
 
             lock.lock();
-            StopExcuter();
+            try {
+                StopExcuter();
+            } catch (Exception e) {
+                log.e(TAG,"UI Executer stop err:"+ e.getMessage());
+            }
+            log.i(TAG,"uiExcuter setting schedule");
             uiExcuter.setPlaySchedule(schedule);
 
         }catch (Exception e){
          log.e(TAG,"ui 执行者 开始异常 "+e.getMessage());
-
         }finally {
             lock.unlock();
         }
@@ -59,6 +68,13 @@ public class UiExcuter {
         _index = 0;
         clearProgramExcuter();
         contentTanslater.clearCache();
+        //隐藏层布局
+        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+            @Override
+            public void call() {
+                DisplayActivity.activityContext.goneLayoutdialog();
+            }
+        });
         log.i(TAG,"ui执行者 清理完毕");
         isStoping =false;
     }

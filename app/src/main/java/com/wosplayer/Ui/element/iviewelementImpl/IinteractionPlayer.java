@@ -48,6 +48,7 @@ public class IinteractionPlayer extends AbsoluteLayout implements IPlayer{
 
     private DataList mp = null;
     private String mUri = null;
+    private String name = null;
     @Override
     public void loadData(DataList mp, Object ob) {
         try {
@@ -59,6 +60,7 @@ public class IinteractionPlayer extends AbsoluteLayout implements IPlayer{
             this.mUri = mp.GetStringDefualt("getcontents", "");
 
             InteractionCache.uid = mp.GetStringDefualt("uuks","ffffffff");
+            name = mp.GetStringDefualt("contentsname","null");
         }catch (Exception e){
             log.e(TAG, "loaddata() " + e.getMessage());
         }
@@ -192,6 +194,9 @@ private void releasedResource() {
             return;
         }
         final String key = uri;
+
+        log.e(TAG," 互动布局name:"+name+"+uri"+uri);
+
         http.send(
                 HttpRequest.HttpMethod.GET,
                 uri,

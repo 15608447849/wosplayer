@@ -11,11 +11,13 @@ import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
+import com.wos.Toals;
 import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 import com.wosplayer.loadArea.excuteBolock.Loader;
+import com.wosplayer.service.RestartApplicationBroad;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -36,7 +38,7 @@ public class Command_UPDC implements iCommand {
     @Override
     public void Execute(String param) {
         log.i("更新app,远程版本号:"+param);
-
+        Toals.Say("更新app");
         getRemoteVersionCode(param);
     }
 
@@ -45,6 +47,7 @@ public class Command_UPDC implements iCommand {
      */
     private void getRemoteVersionCode(String uri) {
         String apkVersionUri = uri;
+
         HttpUtils http = new HttpUtils();
         http.send(HttpRequest.HttpMethod.GET,
                 apkVersionUri,
@@ -99,15 +102,15 @@ public class Command_UPDC implements iCommand {
         int remote = remoteVersion;
 
         log.i("upload  LocalVersion :"+ local+" remoteVersion:"+remote);
+
+        Toals.Say("upload  LocalVersion :"+ local+" remoteVersion:"+remote);
         wosPlayerApp.sendMsgToServer("terminalNo:"+wosPlayerApp.config.GetStringDefualt("terminalNo","0000")+",localVersionNumber:"+local+",serverVersionNumber:"+remote);
 
         if (local<remote){
-
             final Loader loader = new Loader();
             loader.settingCaller(new Loader.LoaderCaller() {
                 @Override
                 public void Call(String filePath) {
-
                     installApk(filePath);
                 }
             });
@@ -149,32 +152,41 @@ private void installApk(String apkLocalPath) {
 
 //		System.exit(0);
 
-   Intent intent = new Intent(DisplayActivity.activityContext,  DisplayActivity.class);
+    Toals.Say("install start ...");
+   //Intent intent = new Intent(DisplayActivity.activityContext,  DisplayActivity.class);
     // 创建PendingIntent对象
-    final PendingIntent pi = PendingIntent.getActivity(DisplayActivity.activityContext, 0, intent, 0);
+  /*  final PendingIntent pi = PendingIntent.getActivity(DisplayActivity.activityContext, 0, intent, 0);
 
     Calendar calendar = Calendar.getInstance();
     calendar.setTimeInMillis(System.currentTimeMillis());
     calendar.add(Calendar.SECOND, 20);
     ((AlarmManager) DisplayActivity.activityContext.getSystemService(Context.ALARM_SERVICE))
             .set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
-    /*Intent intent = new Intent(DisplayActivity.activityContext,  MonitorService.class);
+    /*Intent intent = new Intent(DisplayActivity.activityContext,  MonitorService.class);*/
     // 创建PendingIntent对象
-    final PendingIntent pi = PendingIntent.getService(DisplayActivity.activityContext, 0, intent, 0);
+   /* final PendingIntent pi = PendingIntent.getService(DisplayActivity.activityContext, 0, intent, 0);
     Calendar calendar = Calendar.getInstance();
     calendar.setTimeInMillis(System.currentTimeMillis());
     calendar.add(Calendar.SECOND, 10);
     ((AlarmManager) DisplayActivity.activityContext.getSystemService(Context.ALARM_SERVICE)).set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);*/
 
 
+    Intent intent = new Intent();
+    intent.setAction(RestartApplicationBroad.action);
 
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTimeInMillis(System.currentTimeMillis());
+    calendar.add(Calendar.SECOND, 10);
 
+    PendingIntent pi = PendingIntent.getBroadcast(DisplayActivity.activityContext,0,intent,0);
+    ((AlarmManager) DisplayActivity.activityContext.getSystemService(Context.ALARM_SERVICE))
+            .set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
 
+    Toals.Say(calendar.getTime().toString()+",10 秒后 发送启动广播");
+    log.e(" execute install APK.. end progress");
+    int code =  PackageUtils.install(DisplayActivity.activityContext,apkLocalPath);
+    log.e("install requst code :"+code);
 
-
-
-    log.e("execute install APK.. end progress");
-    PackageUtils.install(DisplayActivity.activityContext,apkLocalPath);
 }
 
 }

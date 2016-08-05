@@ -116,6 +116,8 @@ public class layoutExcuter {
         String localpath = wosPlayerApp.config.GetStringDefualt("basepath","")+content.getXmldata().get("contentsnewname");//本地路径
         String timelength = content.getXmldata().get("timelength");
         String UUKS = content.getXmldata().get("uuks");
+        String contentsname = content.getXmldata().get("contentsname");
+
 
         datalist.put("x",x);
         datalist.put("y",y);
@@ -126,8 +128,8 @@ public class layoutExcuter {
         datalist.put("localpath",localpath);
         datalist.put("timelength",timelength);
         datalist.put("uuks",UUKS);
-
-        String key = layout.getXmldata().get("id")+content.getXmldata().get("id")+content.getXmldata().get("materialid")+fileproterty+content.getXmldata().get("contentsnewname")+UUKS;//生成一个唯一标识
+        datalist.put("contentsname",contentsname);
+        String key = layout.getXmldata().get("id")+content.getXmldata().get("id")+content.getXmldata().get("materialid")+fileproterty+contentsname+UUKS;//生成一个唯一标识
         datalist.setKey(key);//唯一标识
 
         if (fileproterty.equals("text")){

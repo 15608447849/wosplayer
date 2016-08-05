@@ -56,6 +56,11 @@ public class ScheduleSaver implements iCommand {
         rootNode.SettingNodeEntitySave();
     }
 
+    public static void clear(){
+        uuks = null;
+    }
+
+
 //    private static Scheduler.Worker helper =  Schedulers.io().createWorker();
     /**
      * 执行
@@ -94,19 +99,28 @@ public class ScheduleSaver implements iCommand {
         String result = uriTranslationXml(uri);
         ParseResultXml(callType,result, Obj);
     }
-
+    private static boolean isNextLoad = true;
     private void startWork(final String uri){
 
 //        helper.schedule(new Action0() {
 //            @Override
 //            public void call() {
+
+                isNextLoad = true;
+
                 Long startTime = System.currentTimeMillis();
                 getXMLdata(uri,ROOT_PARSE,null); //解析数据
                 Long endTime = System.currentTimeMillis();
+
                 log.e(TAG,"解析用时:"+(endTime - startTime)+"毫秒");
-                //开启后台下载线程
-                log.i("当前的任务数:"+rootNode.getFtplist().size()+"-->"+rootNode.getFtplist().toString());
-                sendloadTask();
+
+                log.e(TAG,"是否开启下载:"+isNextLoad);
+                if (isNextLoad){
+                    //开启后台下载线程
+                    log.i("当前的任务数:"+rootNode.getFtplist().size()+"-->"+rootNode.getFtplist().toString());
+                    sendloadTask();
+                }
+
 //            }
 //        });
     }
@@ -121,7 +135,6 @@ public class ScheduleSaver implements iCommand {
         for (int i = 0; i<rootNode.getFtplist().size();i++){
             tasklist.add(rootNode.getFtplist().get(i));
         }
-
         Intent intent = new Intent(wosPlayerApp.appContext, loaderManager.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         Bundle bundle = new Bundle();
@@ -156,7 +169,9 @@ public class ScheduleSaver implements iCommand {
                     String ruuks = XmlHelper.getFirstChildNodeValue(root, "uuks");
                     if (ruuks.equals("")) throw new Exception("uuks  is null");
 
+                    Toals.Say("Lc:"+uuks+";Rm:"+ruuks);
                     if (uuks==null || !uuks.equals(ruuks)){
+                        log.i(TAG," muuks is null OR local uuks != remote UUKS"+uuks+","+ruuks);
                         rootNode.Clear();//清楚数据
                         uuks = ruuks;
 
@@ -170,6 +185,7 @@ public class ScheduleSaver implements iCommand {
 
                 } catch (Exception e) {
                     log.e(TAG,e.getMessage());
+                    isNextLoad = false;
                     return;
                 }
 
@@ -179,8 +195,8 @@ public class ScheduleSaver implements iCommand {
                 String errImage = "http://e.hiphotos.baidu.com/zhidao/pic/item/9345d688d43f8794f8bb0d5bd61b0ef41bd53a7a.jpg";
                 rootNode.addUriTast(errImage); //创建一个ftp任务
                 //视频
-                String errVideo = "http://static.zqgame.com/html/playvideo.html?name=http://lom.zqgame.com/v1/video/LOM_Promo~2.flv";
-                rootNode.addUriTast(errVideo); //创建一个ftp任务
+              /*  String errVideo = "http://static.zqgame.com/html/playvideo.html?name=http://lom.zqgame.com/v1/video/LOM_Promo~2.flv";
+                rootNode.addUriTast(errVideo); //创建一个ftp任务*/
 
                 NodeList scheduleList = root.getElementsByTagName("schedule");
                 if (scheduleList.getLength() == 0) return;
@@ -336,6 +352,7 @@ public class ScheduleSaver implements iCommand {
                         } else if (contentType.equals(ContentTypeEnum.interactive)) {
                             //再解析 继续解析
                             getcontents = XmlHelper.getFirstChildNodeValue(content_Element, "getcontents");
+                            log.i(TAG,"interaction uri :"+ getcontents);
                             getXMLdata(getcontents, ACTION_PARSE, layout_content_Node.NewSettingNodeEntity());//进入互动
                             log.i(TAG,"-----------interaction end------");
                         } else {
@@ -363,7 +380,7 @@ public class ScheduleSaver implements iCommand {
 
             case ACTION_PARSE:
                 //互动
-                log.i(TAG,"开始一个互动解析");
+                log.i(TAG,"  - -开始一个互动解析 - -");
                 String interaction_XmlData = result;
                 if (interaction_XmlData.equals("")) return;
 
@@ -577,9 +594,16 @@ public class ScheduleSaver implements iCommand {
                     if (filetype.equals("1002")) {
                         filepath = XmlHelper.getFirstChildNodeValue(floder_item_Element, "video_image_url");//视频第一帧路径
                         if(filepath.equals("")||filepath.equals("null")){
+
                             filepath="http://img15.3lian.com/2015/f1/59/d/31.jpg";
                             log.e("视频第一帧不存在,下载默认图片:"+ filepath);
-
+                        }else {
+                           String  mfilepath = filepath.substring(filepath.lastIndexOf("/")+1);
+                            log.i(TAG,"mfilepath:"+mfilepath);
+                            if (mfilepath.equals("null")){
+                                filepath="http://img15.3lian.com/2015/f1/59/d/31.jpg";
+                                log.e("视频第一帧不存在,下载默认图片:"+ filepath);
+                            }
                         }
                         rootNode.addUriTast(filepath); //创建一个ftp任务
                     }
