@@ -17,6 +17,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
@@ -45,6 +48,72 @@ public class CommunicationService extends Service{
 
     private static final Scheduler.Worker connectHelper =  Schedulers.newThread().createWorker();
 
+
+    private static ReentrantLock msgStoreLock = new ReentrantLock();//消息存储锁
+    private List<String> msgWatiList = null;//消息过多时 存储消息
+    private List<String> msgSendingList = null; //消息待发送队列
+    private int sendCount = 10;
+
+        //添加一个消息
+        private void addMsgToSend(String msg){
+            try {
+                msgStoreLock.lock();
+                //如果发送队列消息过多 进入存储
+                if (msgSendingList!=null && msgSendingList.size()<10){
+                    msgSendingList.add(msg);
+                }else{
+                    if (msgWatiList!=null){
+                        msgWatiList.add(msg);
+                    }
+                }
+            }catch (Exception e){
+                log.e(TAG,e.getMessage());
+            }finally {
+                msgStoreLock.unlock();
+            }
+        }
+
+        //获取一个消息
+        private String getMsg(){
+            String msg = null;
+            try{
+                msgStoreLock.lock();
+                if (msgSendingList!=null && msgSendingList.size()>0){
+
+                    Iterator<String> itr = msgSendingList.iterator();
+                    if (itr.hasNext()){
+                        msg = itr.next();
+                        itr.remove();
+                    }
+                }
+                else if (msgSendingList!=null && msgSendingList.size()==0){
+
+                    if (msgWatiList!=null && msgWatiList.size()>0){
+                        int index = 0;
+                        Iterator<String> itr = msgWatiList.iterator();
+                        while(itr.hasNext()){
+                            if (index == sendCount){
+                                break;
+                            }
+                            String str = itr.next();
+                            msgSendingList.add(str);
+                            itr.remove();
+                            index++;
+                        }
+                    }
+                }
+
+            }catch (Exception e){
+                log.e(e.getMessage());
+            }finally {
+                msgStoreLock.unlock();
+            }
+            return msg;
+        }
+
+
+
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -53,8 +122,10 @@ public class CommunicationService extends Service{
     @Override
     public void onCreate() {
         super.onCreate();
-        log.i("开启通讯服务...");
+        log.i("-------------------------------------------开启通讯服务-------------------------------------------------------------------------");
         isReconnection = true;
+        msgWatiList = new LinkedList<String>();
+        msgSendingList = new LinkedList<String>();
     }
 /////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -87,11 +158,73 @@ public class CommunicationService extends Service{
                     }
                 }catch (Exception e){
                     log.e("接受服务端消息 错误 :"+ e.getMessage());
-                    CommunicationService.this.stopSelf();
+                 //   CommunicationService.this.stopSelf();
+                    reConnection();
                 }
             }
         }
     }
+
+    private sendThread sendmsgThread = null;
+    //发送消息 线程
+    private class sendThread extends Thread{
+
+        private volatile boolean isStart = false;
+        public void startMe(){
+            isStart =true;
+        }
+        public void stopMe(){
+            isStart =false;
+        }
+
+        @Override
+        public void run() {
+            while(isConnected && isStart){
+                //在连接中 并且 开始了
+
+                try{
+                    msgLock.lock();
+
+                    //获取一个消息
+                  String msg =  getMsg();
+                    if (msg != null){
+                        dataOutputStream.writeUTF(msg);
+                        dataOutputStream.flush();
+                        log.v("发送一条信息到服务器 :" + msg);
+                    }
+
+                    Thread.sleep(1*500);//一秒发送两条信息
+
+                }catch (Exception e){
+                    log.e("发送消息到服务器 错误 :"+ e.getMessage());//尝试重新链接
+                    //重连接
+                    reConnection();
+                }finally {
+                    msgLock.unlock();
+                }
+            }
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * 开启 接受
      */
@@ -100,6 +233,10 @@ public class CommunicationService extends Service{
         receiveMsg = new receiveThread();
         receiveMsg.startMe();
         receiveMsg.start();
+        //发送线程
+        sendmsgThread = new sendThread();
+        sendmsgThread.startMe();
+        sendmsgThread.start();
     }
     /**
      * 关闭接受
@@ -109,6 +246,11 @@ public class CommunicationService extends Service{
             receiveMsg.stopMe();
             receiveMsg = null;
             log.i("断开 接受消息 线程");
+        }
+        if (sendmsgThread!=null){
+            sendmsgThread.stopMe();
+            sendmsgThread = null;
+            log.i("断开 发送消息 线程");
         }
     }
 /////////////////////////////////////////////////////////////////////////////////////
@@ -278,7 +420,10 @@ public class CommunicationService extends Service{
      */
     private void sendMsgToService(final String msg){
 
-        if (isConnected){
+        //添加消息到消息队列
+        addMsgToSend(msg);
+
+      /*  if (isConnected){
             try {
             msgLock.lock();
             dataOutputStream.writeUTF(msg);
@@ -290,9 +435,9 @@ public class CommunicationService extends Service{
                 //重连接
                 reConnection();
             }finally {
-                         msgLock.unlock();
+            msgLock.unlock();
             }
-        }
+        }*/
     }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //广播
@@ -373,7 +518,7 @@ public class CommunicationService extends Service{
     public void onDestroy() {
         super.onDestroy();
         isReconnection = false;
-        log.i("通讯服务 停止了");
+        log.e("--------------------------------------------------------------通讯服务 停止了-------------------------------------------------------------------------");
        stopCommunication();
     }
 }
