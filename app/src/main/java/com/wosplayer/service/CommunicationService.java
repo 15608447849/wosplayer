@@ -56,13 +56,18 @@ public class CommunicationService extends Service{
 
         //添加一个消息
         private void addMsgToSend(String msg){
+
             try {
                 msgStoreLock.lock();
+                //log.i(TAG,"准备添加消息: "+ msg);
+
                 //如果发送队列消息过多 进入存储
                 if (msgSendingList!=null && msgSendingList.size()<10){
+                    //log.i(TAG,"添加消息到 发送等待队列");
                     msgSendingList.add(msg);
                 }else{
                     if (msgWatiList!=null){
+                        //log.i(TAG,"添加消息到 等待队列");
                         msgWatiList.add(msg);
                     }
                 }
@@ -85,9 +90,10 @@ public class CommunicationService extends Service{
                         msg = itr.next();
                         itr.remove();
                     }
+                    //log.i(TAG,"获取 到 发送等待队列消息:"+msg);
                 }
                 else if (msgSendingList!=null && msgSendingList.size()==0){
-
+                    //log.i(TAG,"发送等待无消息");
                     if (msgWatiList!=null && msgWatiList.size()>0){
                         int index = 0;
                         Iterator<String> itr = msgWatiList.iterator();
@@ -100,6 +106,7 @@ public class CommunicationService extends Service{
                             itr.remove();
                             index++;
                         }
+                        //log.i(TAG," 重等待队列 获取 消息 到发送队列中 over");
                     }
                 }
 
@@ -151,7 +158,7 @@ public class CommunicationService extends Service{
                 try {
                     if (dataInputStream.available() > 0) {
                         String msg = dataInputStream.readUTF();
-                        log.i("收到 服务器 参数:" + msg);
+                        log.i(" 收到 服务器 参数: " + msg);
                         String cmd = msg.substring(0, 5);
                         String param = msg.substring(5);
                         postTask(cmd,param);
@@ -181,20 +188,16 @@ public class CommunicationService extends Service{
         public void run() {
             while(isConnected && isStart){
                 //在连接中 并且 开始了
-
                 try{
                     msgLock.lock();
-
                     //获取一个消息
                   String msg =  getMsg();
                     if (msg != null){
                         dataOutputStream.writeUTF(msg);
                         dataOutputStream.flush();
-                        log.v("发送一条信息到服务器 :" + msg);
+                        log.e(" 发送一条信息到服务器 :" + msg);
                     }
-
                     Thread.sleep(1*500);//一秒发送两条信息
-
                 }catch (Exception e){
                     log.e("发送消息到服务器 错误 :"+ e.getMessage());//尝试重新链接
                     //重连接
@@ -416,7 +419,7 @@ public class CommunicationService extends Service{
     }
 
     /**
-     *发送信息
+     *  发送信息
      */
     private void sendMsgToService(final String msg){
 
@@ -467,7 +470,7 @@ public class CommunicationService extends Service{
         IntentFilter filter=new IntentFilter();
         filter.addAction(CommunicationServiceReceiveNotification.action);
         getApplicationContext().registerReceiver(broad, filter); //只需要注册一次
-        log.i("已注册 接受广播");
+        log.i("已注册 接受本地 到服务器 ,广播");
     }
     /**
      * 注销广播
@@ -476,7 +479,7 @@ public class CommunicationService extends Service{
         if (broad!=null){
             getApplicationContext().unregisterReceiver(broad);
             broad = null;
-            log.i("注销 接受广播");
+            log.i("注销 接受本地消息到服务器 ,广播");
         }
     }
     /////////////////////////////////////////////////////////////////////////////////////

@@ -25,7 +25,7 @@ public class UibrocdCastReceive extends BroadcastReceiver{
     public void onReceive(Context context, Intent intent) {
 
         if (intent == null){
-            log.e(TAG,"intent is null");
+            log.e(TAG," intent is null");
             return;
         }
 

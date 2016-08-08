@@ -32,6 +32,8 @@ public class wosPlayerApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        log.d("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
         //查看 老版本app 是否存在 存在 卸载
         new Thread(new Runnable() {
             @Override
@@ -174,8 +176,9 @@ public class wosPlayerApp extends Application {
         b.putString("terminalNo",config.GetStringDefualt("terminalNo","127.0.0.1"));
         b.putLong("HeartBeatTime",(config.GetIntDefualt("HeartBeatInterval",50) * 500));
         intent.putExtras(b);
-        appContext.startService(intent);
         log.i("wosPlayerApp: 尝试开启通讯服务...");
+        appContext.startService(intent);
+
     }
 
     /**

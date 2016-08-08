@@ -14,7 +14,7 @@ public class log {
 	public static final String TAG = "_WosPlayer log:";
 
 	private static boolean isNeed = false;
-	public static boolean isWrite = true;
+	public static boolean isWrite = false;
 
 	private static void writeLogToFile(String logStr){
 		Date date = new Date();

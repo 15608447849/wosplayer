@@ -18,7 +18,6 @@ import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleReader;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleSaver;
-import com.wosplayer.service.MonitorService;
 import com.wosplayer.service.RestartApplicationBroad;
 
 /**
@@ -56,29 +55,35 @@ public class DisplayActivity extends FragmentActivity {
         frame = (FrameLayout)this.findViewById(R.id.frame_layout);
         frame_main = (AbsoluteLayout)this.findViewById(R.id.frame_layout_main);
         activityContext = this;
-        log.i(TAG,"正在执行的所有线程数:"+ Thread.getAllStackTraces().size());
+        log.i(TAG,"onCreate() 正在执行的所有线程数:"+ Thread.getAllStackTraces().size());
 
         //开启监听服务
-        Intent intent = new Intent(this, MonitorService.class);
-        this.startService(intent);
+  /*      Intent intent = new Intent(this, MonitorService.class);
+        log.d(TAG," 开启<监听>服务");
+        this.startService(intent);*/
+
+        log.d("--------create over-------------");
+
     }
 
     @Override
     public void onStart() {
+        log.d(TAG,"onStart");
         super.onStart();
     }
 
     @Override
     public void onResume() {
        super.onResume();
+        log.d(TAG,"onResume");
         //开启通讯服务
         wosPlayerApp.startCommunicationService();
         if (activityContext!=null){
             try {
-
                 ScheduleReader.Start(false);
             } catch (Exception e) {
                log.e(TAG,"activity 开始执行读取排期 时 err:"+ e.getMessage());
+
             }
         }
 
@@ -87,6 +92,7 @@ public class DisplayActivity extends FragmentActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        log.d(TAG,"onPause");
         wosPlayerApp.stopCommunicationService(); //关闭服务
         ScheduleSaver.clear();
         ScheduleReader.clear();
@@ -95,11 +101,13 @@ public class DisplayActivity extends FragmentActivity {
     @Override
     public void onStop() {
         super.onStop();
+        log.d(TAG,"onStop");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        log.d(TAG,"onDestroy");
         if(isSendRestartBroad){
             Intent intent  = new Intent();
             intent.setAction(RestartApplicationBroad.action);
@@ -110,12 +118,11 @@ public class DisplayActivity extends FragmentActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK ) {
-                        log.e("click back key");
+                        log.e(TAG,"click back key");
                       DisplayActivity.this.finish();
                         return true;
                     }
-
-            return super.onKeyDown(keyCode, event);
+        return super.onKeyDown(keyCode, event);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////

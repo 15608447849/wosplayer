@@ -265,12 +265,14 @@ public class ScheduleReader {
             if (entity != null){
                 isExistes = true;
                 isUploadUI = makeTimerTask(entity);
-
             }
             //false 不存在任何排期
             //播放默认的图片
 
+
+
         if (isUploadUI){
+            //更新ui
             //发送广播 通知视图更新
             notificationUIexcuter(isExistes,entity);
         }else{
@@ -417,27 +419,27 @@ public class ScheduleReader {
             startTimer(dalay,isNotTo);
         } catch (Exception e) {
            log.e(TAG,"开始定时器 err:"+ e.getMessage()+" cause:"+e.getCause());
-            return false;
+            throw new Exception("start timer is err");
         }
         return flag;
     }
 
     //通知视图更新
     private static void notificationUIexcuter(boolean isExistes, XmlNodeEntity entity) {
-        //true 有排期 false 默认版面播放
-        Intent intent = new Intent();
-        intent.setAction(UibrocdCastReceive.action);
+        //true 有排期
+        // false 默认版面播放
+
 
         if (isExistes){//有排期
+            Intent intent = new Intent();
+            intent.setAction(UibrocdCastReceive.action);
             Bundle b = new Bundle();
             b.putParcelable(UibrocdCastReceive.key,entity);
             intent.putExtras(b);
+            wosPlayerApp.appContext.sendBroadcast(intent);
         }else{
-            //
             log.e(TAG,"播放默认排期");
-            return;
         }
-        wosPlayerApp.appContext.sendBroadcast(intent);
     }
 
     /**
@@ -668,13 +670,14 @@ public class ScheduleReader {
             public int compare(XmlNodeEntity lhs, XmlNodeEntity rhs) {
                 long a = getTimeMillsecondes(lhs.getXmldata().get("modifydt"));
                 long b = getTimeMillsecondes(rhs.getXmldata().get("modifydt"));
-                return a-b>0 ? -1:a-b==0?0:-1;  //-1代表前者小，0代表两者相等，1代表前者大。
+
+                return a-b>0 ? -1: a-b==0 ? 0:1;  //-1代表前者小，0代表两者相等，1代表前者大。
             }
         });
 
         log.i(TAG,"-----------------------start-------------------------------");
         for (int i = 0;i<current.size();i++){
-            log.i(TAG,"name: "+current.get(i).getXmldata().get("summary")+",最后修改时间:["+current.get(i).getXmldata().get("modifydt")+"]");
+            log.i(TAG,"name: {"+current.get(i).getXmldata().get("summary")+"}最后修改时间:["+current.get(i).getXmldata().get("modifydt")+"]");
         }
 
         log.i(TAG,"-----------------------end-------------------------------");

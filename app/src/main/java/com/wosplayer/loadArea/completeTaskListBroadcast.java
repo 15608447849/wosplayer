@@ -19,7 +19,7 @@ public class completeTaskListBroadcast extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
 
         //收到通知
-        log.i(" 下载数据成功 ");
+        log.i(TAG," 下载数据成功 ");
         //序列化数据
         ScheduleSaver.Serialize();
         Toals.Say("序列化保存数据完成,准备本地获取排期");

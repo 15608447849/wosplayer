@@ -128,12 +128,12 @@ public class ActiveFtpUtils {
 
     public static final String FTP_CONNECT_SUCCESSS = "ftp连接成功";
     public static final String FTP_CONNECT_FAIL = "ftp连接失败";
-    public static final String FTP_DISCONNECT_SUCCESS = "ftp断开连接";
+//    public static final String FTP_DISCONNECT_SUCCESS = "ftp断开连接";
     public static final String FTP_DOWN_LOADING = "ftp文件正在下载";
     public static final String FTP_DOWN_SUCCESS = "ftp文件下载成功";
     public static final String FTP_DOWN_FAIL = "ftp文件下载失败";
     public static final String FTP_FILE_NOTEXISTS = "ftp文件不存在";
-    public static final String FTP_LOCAL_FILE_NOTEXISIS = "本地文件不存在或者创建失败";
+//    public static final String FTP_LOCAL_FILE_NOTEXISIS = "本地文件不存在或者创建失败";
 
 
 
@@ -183,10 +183,11 @@ public class ActiveFtpUtils {
             return;
         }
         if (files.length == 0) {
+            log.i(TAG,"服务器文件 不存存在 :"+ serverPath);
             listener.onDownLoadProgress(FTP_FILE_NOTEXISTS, 0,null, null);
             return;
         }
-        log.i(TAG,"服务器文件存在 :"+ serverPath);
+        log.i(TAG,"服务器文件 存在 :"+ serverPath);
 
         //创建本地文件夹
         File mkFile = new File(localPath);

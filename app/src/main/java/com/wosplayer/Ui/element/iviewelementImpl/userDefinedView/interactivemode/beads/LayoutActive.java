@@ -34,7 +34,7 @@ import rx.functions.Action0;
 
 public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.LoaderCaller {
 
-    private static final java.lang.String TAG = LayoutActive.class.getName();
+    private static final java.lang.String TAG = "_LayoutActive";//LayoutActive.class.getName();
     public String bgImagelurl;
     public String id;
     public int w, h;
@@ -44,6 +44,8 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
     public List<ButtonActive> myItems;
     private Loader loader;
     private Context mcontext;
+
+    private boolean isLayout = false;
 
     /**
      * @param context
@@ -133,9 +135,11 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
                             ((AbsoluteLayout) mFather).removeView(returnBtn);
                             ((AbsoluteLayout) mFather).addView(returnBtn);
                         }
+                        isLayout = true;
+                        AotuLoadingResource();//自动加载资源
                     }
                 });
-                AotuLoadingResource();//自动加载资源
+
             }
 
         }
@@ -207,7 +211,8 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
             }
     }
     /**
-     *  加载背景图片资源资源 //在添加到父组件中被调用
+     *  加载背景图片资源资源
+     *  在添加到父组件中被调用
      */
     public void  LoaderSource() {
         if (bgType == 1) { //纯色
@@ -226,6 +231,7 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
         } else if (bgType == 2){
             String uriLoad = bgImagelurl + bgImagename; //下载地址
             String localpath = wosPlayerApp.config.GetStringDefualt("basepath", "/sdcard/") + bgImagename; //本地路径
+
             if (fileUtils.checkFileExists(localpath)) { //资源是否存在
               Call(localpath);
             } else {
@@ -267,30 +273,46 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
      */
     @Override
     public void Call(final String filePath) {
-        log.i(TAG, " 一个布局 资源 下载结果传递了来了:" + filePath +Thread.currentThread().getName()+"-count:"+Thread.getAllStackTraces().size());
+        log.i(TAG, " 一个布局 资源 下载结果传递了来了:" + filePath + " - "+Thread.currentThread().getName()+"-count:"+Thread.getAllStackTraces().size());
         if (mFather == null) {
             log.i(TAG, this.toString()+"_Layout Active 没有父容器:");
             return;
         }
 
-        Bitmap bitmap = null;
-//        releasSource();
-            try {
-                bitmap = Picasso.with(DisplayActivity.activityContext).load(filePath).memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE).get();//.config(Bitmap.Config.RGB_565)
-            } catch (Exception e) {
-                log.e(TAG," "+e.getMessage());
-                bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.no_found);
-            }
-
-        final Drawable dw = new BitmapDrawable(bitmap);
-        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+        IinteractionPlayer.worker.schedule(new Action0() {
             @Override
             public void call() {
-                log.i(TAG, " 互动布局设置背景图片");
-                LayoutActive.this.setBackgroundDrawable(dw);
-                addMeSubView();//添加子类视图
+
+                Bitmap bitmap = null;
+//        releasSource();
+                try {
+                    bitmap = Picasso.with(DisplayActivity.activityContext)
+                            .load(filePath)
+                            .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
+                            .config(Bitmap.Config.RGB_565)
+                            .get();
+                } catch (Exception e) {
+                    log.e(TAG," call(): "+e.getMessage());
+                    bitmap = BitmapFactory.decodeResource(LayoutActive.this.getResources(), R.drawable.no_found);
+                }
+
+                final Drawable dw = new BitmapDrawable(bitmap);
+                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+                    @Override
+                    public void call() {
+                        log.i(TAG, " 互动布局设置背景图片");
+                        LayoutActive.this.setBackgroundDrawable(dw);
+                        //addMeSubView();//添加子类视图
+                    }
+                });
+
             }
         });
+
+
+
+
+
 
     }
 

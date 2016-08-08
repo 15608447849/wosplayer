@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.wosplayer"
-    android:versionCode="3"
-    android:versionName="3.0"
+    android:versionCode="9"
+    android:versionName="9.0"
     android:screenOrientation="portrait">
 
     <application
@@ -38,10 +38,11 @@
         </receiver>
         <!-- 接受下载 队列 -->
         <service android:name=".loadArea.loaderManager" />
+
         <!-- 下载完成 广播-->
         <receiver android:name=".loadArea.completeTaskListBroadcast">
             <intent-filter>
-                <action android:name="com.complete.taskList"></action>
+                <action android:name="com.complete.taskList"/>
             </intent-filter>
         </receiver>
         <!-- 通知ui执行者 广播接受-->
@@ -54,11 +55,11 @@
 
 
 
-        //监听服务
-        <service android:name=".service.MonitorService" android:enabled="true"  android:process=".MonitorService" ></service>
+        <!--监听服务  android:enabled="true"  android:process=".MonitorService"-->
+        <service android:name="com.wosplayer.service.MonitorService" />
         <receiver android:name=".service.RestartApplicationBroad">
             <intent-filter>
-                <action android:name="com.wos.restartbroad"></action>
+                <action android:name="com.wos.restartbroad" />
             </intent-filter>
         </receiver>
 

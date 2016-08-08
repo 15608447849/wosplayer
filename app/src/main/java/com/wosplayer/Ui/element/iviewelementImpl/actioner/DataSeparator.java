@@ -12,10 +12,10 @@ import java.util.ArrayList;
  */
 public class DataSeparator {
 
-    private static final  String layoutLevel = "interaction_layout";
-    private static final String layoutItemLevel = "interaction_layout_items_item";
-    private static final String folderLevel = "interaction_layout_items_item_folder";
-    private static final String folderItemLevel = "interaction_layout_items_item_floder_item";
+    public static final  String layoutLevel = "interaction_layout";
+    public static final String layoutItemLevel = "interaction_layout_items_item";
+    public static final String folderLevel = "interaction_layout_items_item_folder";
+    public static final String folderItemLevel = "interaction_layout_items_item_floder_item";
     private static String sd_path  = wosPlayerApp.config.GetStringDefualt("basepath","");
 
     public  static  String errImageName = "9345d688d43f8794f8bb0d5bd61b0ef41bd53a7a.jpg";//http://e.hiphotos.baidu.com/zhidao/pic/item/9345d688d43f8794f8bb0d5bd61b0ef41bd53a7a.jpg
@@ -25,18 +25,13 @@ public class DataSeparator {
     public static String layoutBgerr = "20120507220903_VR22y.thumb.600_0.jpeg";//http://cdn.duitang.com/uploads/item/201205/07/20120507220903_VR22y.thumb.600_0.jpeg
 
 
-    private static DataStore dataStore = null;
-    public static DataStore getDataStore() {
+    private DataStore dataStore = null;
+    public DataStore getDataStore() {
         return dataStore;
     }
 
-    private static DataStore  currentIndex = null;
-    public static void clear(){
-//        DataList
-        dataStore = null;
 
-    }
-    public static void Split(XmlNodeEntity entity,DataStore ds){
+    public void Split(XmlNodeEntity entity,DataStore ds){
 
         log.e("",entity.toString());
 
@@ -49,31 +44,28 @@ public class DataSeparator {
 
         if (ds==null){//第一次
             dataStore = new DataStore();
-            currentIndex = dataStore;
-        }else{
-            currentIndex = ds;
+            ds = dataStore;
         }
 
 
         //判断
         if (entity.Level.equals(layoutLevel)){
-            layoutDataParse(entity);
+            layoutDataParse(entity,ds);
         }
         if (entity.Level.equals(layoutItemLevel)){
-            buttonDataParse(entity);
+            buttonDataParse(entity,ds);
         }
         if (entity.Level.equals(folderLevel)){
-            folderDataParse(entity);
+            folderDataParse(entity,ds);
         }
         if (entity.Level.equals(folderItemLevel)){
-            contentDataParse(entity);
+            contentDataParse(entity,ds);
         }
         //循环
         ArrayList<XmlNodeEntity> child = entity.getChildren();
         if (child!=null && child.size()>0){
             for (XmlNodeEntity e : child){
-//                    Split(e);
-                Split(e,currentIndex.NewSettingNodeEntity());
+                Split(e,ds.NewSettingNodeEntity());
             }
         }
     }
@@ -82,9 +74,9 @@ public class DataSeparator {
      * 具体的内容
      * @param entity
      */
-    private static void contentDataParse(XmlNodeEntity entity) {
+    private void contentDataParse(XmlNodeEntity entity,DataStore ds) {
         //网页 视屏 图片
-        DataList data = currentIndex.getData();
+        DataList data = ds.getData();
         String level = entity.Level;
         String filetype =  entity.getXmldata().get("filetype");//1006 网页 1002视频 1007 图片
         String web_url = entity.getXmldata().get("web_url");
@@ -122,8 +114,8 @@ public class DataSeparator {
      *
      *
      */
-    private static void folderDataParse(XmlNodeEntity entity) {
-        DataList data = currentIndex.getData();
+    private void folderDataParse(XmlNodeEntity entity,DataStore ds) {
+        DataList data = ds.getData();
         String level = entity.Level;
         String name = entity.getXmldata().get("name");
         String type = entity.getXmldata().get("type");//1 视频 图片  3 网页
@@ -139,9 +131,9 @@ public class DataSeparator {
      *
      * x y w h
      */
-    private static void buttonDataParse(XmlNodeEntity entity) {
+    private void buttonDataParse(XmlNodeEntity entity,DataStore ds) {
 
-        DataList data = currentIndex.getData();
+        DataList data = ds.getData();
         String level = entity.Level;
         String w = entity.getXmldata().get("width");
         String h = entity.getXmldata().get("height");
@@ -177,10 +169,10 @@ public class DataSeparator {
 
 
     //分解布局
-    private static void layoutDataParse(XmlNodeEntity entity) {
+    private void layoutDataParse(XmlNodeEntity entity,DataStore ds) {
         //level  w h bgmodel bgimage bgcolor
 
-        DataList data = currentIndex.getData();
+        DataList data = ds.getData();
         String level = entity.Level;
         String w = entity.getXmldata().get("totalwidth");
         String h = entity.getXmldata().get("totalheight");

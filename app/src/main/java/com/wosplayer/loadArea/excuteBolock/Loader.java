@@ -42,7 +42,7 @@ public class Loader {
      * @param Task
      */
     private boolean addTask(String Task){
-        log.i(TAG,"當前进行中 - 任務隊列數量:"+loadingTaskList.size()+"\r 添加任務:["+Task+"]");
+        log.e(TAG," 當前进行中 - 任務隊列數量:"+loadingTaskList.size()+" -> 添加任務:["+Task+"]");
 
         if (!loadingTaskList.contains(Task)){
             loadingTaskList.add(Task);
@@ -90,48 +90,47 @@ public class Loader {
             locker.lock();
             muri = uri;
 
-            //是否加入等待
-            if (loadingTaskList.size()>5){
+            //是否 加入 等待 ,如果进行中的任务数量已经满足了
+            if (loadingTaskList.size()>2){
                 addWaitList(this);
                 return;
             }
-            //是否是重复任务
-            if(!addTask(uri)){
+            //是否 是 重复任务
+            boolean f = addTask(uri);
+            if(!f){
+                log.e("重复任务");
                 return;
             };
 
 //            log.i(TAG, Loader.this.toString()+" -> 加载资源 ->"+uri );
 
-         String localFileDir =  wosPlayerApp.config.GetStringDefualt("basepath", "/sdcard/mnt/playlist");
-        //判断路径i
-        if (uri.startsWith("http://")) {
-            String fns = uri.substring(uri.lastIndexOf("/") + 1);
-            String fps = localFileDir + fns;
-            if (mySettingFileName!=null){
-                fps = mySettingFileName;
-            }
-            final String finalFps = fps;
+            String fns = uri.substring(uri.lastIndexOf("/") + 1);//文件名
+            String localFileDir =  wosPlayerApp.config.GetStringDefualt("basepath", "/sdcard/mnt/playlist");//本地路径
+            String fps = localFileDir + fns;//全路径
 
-            if (fileIsExist(finalFps)){
-                log.i(TAG,"任务:" + uri + "->本地所在路径:"+ finalFps +"-> exist!");
+            final String finalFps = fps;
+            if (fileIsExist(fps)) {
+
+
+                log.i(TAG, "任务:" + uri + "-> 本地所在路径: " + finalFps + " -> exist!");
                 ioThread.schedule(new Action0() {
                     @Override
                     public void call() {
                         caller.Call(finalFps);
-                        nitifyMsg(uri.substring(uri.lastIndexOf("/")+1),1);
-                        nitifyMsg(uri.substring(uri.lastIndexOf("/")+1),2);
-                        nitifyMsg(uri.substring(uri.lastIndexOf("/")+1),3);
+                        nitifyMsg(uri.substring(uri.lastIndexOf("/") + 1), 1);
+                        nitifyMsg(uri.substring(uri.lastIndexOf("/") + 1), 2);
+                        nitifyMsg(uri.substring(uri.lastIndexOf("/") + 1), 3);
                     }
                 });
 
-            }else{
-//                ioThread.schedule(new Action0() {
-//                    @Override
-//                    public void call() {
-                        HttpLoad(uri, finalFps);
-//                    }
-//                });
+                return;
             }
+
+    log.e(" ! -- -- -- -- ! " );
+
+        //判断路径i
+        if (uri.startsWith("http://")) {
+            HttpLoad(uri, finalFps);
 
         } else if (uri.startsWith("ftp://")) {
             // ftp://ftp:FTPmedia@21.89.68.163/uploads/1466573392435.png
@@ -273,6 +272,12 @@ public class Loader {
                         notifyProgress(fileName,downProcess+"",speed);
                     }
 
+                    if (currentStep.equals(ActiveFtpUtils.FTP_FILE_NOTEXISTS)){
+                        //ftp远程文件不存在
+                        log.e(TAG,"ftp服务器 不存在文件");
+                        loadFileRecall("loaderr");
+                        nitifyMsg(fileName,4);
+                    }
                     if(currentStep.equals(ActiveFtpUtils.FTP_CONNECT_FAIL)){
                         //连接失败
                         log.e(TAG,"ftp 连接失败 ");
@@ -330,12 +335,15 @@ public class Loader {
     private static int callCount = 0;
     private String muri = null;
     private boolean existRepeatList = false;
+
     private LoaderCaller caller = new LoaderCaller() {
         @Override
         public void Call(String filePath) {
 
-           // log.i(TAG, "Call: 当前一个回调结果"+Loader.this.toString()+"-> "+Loader.this.muri+"\n\r");
+            log.i(TAG, "Call: 当前一个回调结果[ "+Loader.this.muri+" ]");
+
             log.d(TAG, "loader Call(): 执行线程"+ Thread.currentThread().getName()+"\n\r thread size:"+ Thread.getAllStackTraces().size());
+
             if (other_caller!=null){
                     try {
                         log.d(TAG,"Call:传递到 子监听回调 , count:"+ callCount++);
@@ -459,36 +467,38 @@ public class Loader {
         waitList.add(loader);
     }
     /**
-     * 通知等待隊列執行
+     * 通知 等待隊列 執行
      */
     private static void notifyWaitList(){
         //如果存在 每次只執行 至多 5 個
         if (loadingTaskList.size()==0){
             if (waitList.size()>0){
-                ArrayList<Loader> waitload = new ArrayList<Loader>();
-
+                //ArrayList<Loader> waitload = new ArrayList<Loader>();
                 Iterator<Loader> itr = waitList.iterator();
                 int i = 0;
                 while(itr.hasNext()){
-                    if (i==5){
-                        break;
-                    }
                     Loader o = itr.next();
-                    waitload.add(o);
+//                    waitload.add(o);
+                    o.LoadingUriResource(o.muri,null);
                     itr.remove();
                     i++;
+
+                    if (i==2){
+                        break;
+                    }
                 }
 
-                if (waitload.size() == 0){
+               /* if (waitload.size() == 0){
                     waitload = null;
                     return;
                 }
                 for (Loader loader:waitload){
+
                     loader.LoadingUriResource(loader.muri,null);
-                }
-                waitload.clear();
-                waitload = null;
-                log.i(TAG,"  完成一次 等待隊列的執行 ");
+                }*/
+//                waitload.clear();
+//                waitload = null;
+                log.i(TAG," ----------------------- 完成一次 等待隊列的執行 ----------------------------------------");
             }
         }
     }
