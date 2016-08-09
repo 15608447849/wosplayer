@@ -242,7 +242,7 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
     }
 
     /**
-     * 释放资源
+     *     释放资源
      * //被移除时调用
      */
     private void releasSource() {
@@ -263,7 +263,6 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
                 log.i(TAG, "释放资源...");
             }
         }
-
     }
 
     /**

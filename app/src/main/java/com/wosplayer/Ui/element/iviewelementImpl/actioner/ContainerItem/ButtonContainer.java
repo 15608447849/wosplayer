@@ -1,0 +1,188 @@
+package com.wosplayer.Ui.element.iviewelementImpl.actioner.ContainerItem;
+
+import android.content.Context;
+import android.graphics.Canvas;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsoluteLayout;
+import android.widget.ImageButton;
+
+import com.wosplayer.R;
+import com.wosplayer.Ui.element.iviewelementImpl.actioner.Container;
+import com.wosplayer.app.DataList;
+import com.wosplayer.app.log;
+
+import java.io.File;
+
+import it.sephiroth.android.library.picasso.MemoryPolicy;
+import it.sephiroth.android.library.picasso.Picasso;
+
+/**
+ * Created by user on 2016/8/9.
+ */
+public class ButtonContainer extends Container{
+
+
+    private int x;
+    private int y;
+    private int w;
+    private int h;
+    private String bgimage;
+    private Context context;
+    private ViewGroup vp;
+    public ButtonContainer(Context context, DataList ls){
+        this.context = context;
+        view = new ImageButton(context){
+            @Override
+            protected void onDraw(Canvas canvas) {
+                try {
+                    super.onDraw(canvas);
+                } catch (Exception e) {
+                    log.i(TAG,"试图引用　一个　回收的图片 ["+e.getMessage()+"-----"+e.getCause()+"]");
+                }
+            }
+            @Override
+            protected void onDetachedFromWindow() {
+                try {
+                    super.onDetachedFromWindow();
+                    // setImageDrawable(null);
+                }catch (Exception e){
+                    log.e(TAG,"onDetachedFromWindow:"+e.getMessage());
+                }
+            }
+        };
+        x = ls.GetIntDefualt("x",0);
+        y = ls.GetIntDefualt("y",0);
+        h = ls.GetIntDefualt("h",0);
+        w = ls.GetIntDefualt("w",0);
+        bgimage = ls.GetStringDefualt("bgimage","");
+    }
+
+    @Override
+    public void onSettingScale(float widthScale, float heightScale) {
+        log.i(TAG,"button: 宽度比例-"+widthScale+", 高度比例-"+ heightScale);
+
+        if (widthScale == 0.0 || heightScale== 0.0){
+            log.e(TAG,"scale is err");
+            return;
+        }
+        w = (int) ((float)this.w *widthScale);
+        h =(int) ((float)this.h *heightScale);
+        x = (int)((float)this.x*widthScale );
+        y = (int)((float)this.y*heightScale );
+    }
+    @Override
+    protected float[] onSettingScale(int fwidth, int fheight) {
+        return null;
+    }
+
+
+
+    @Override
+    protected void onBg(ViewGroup vp) {
+        try{
+            loadBg(bgimage);
+        }catch (Exception e){
+            log.e(TAG,"按钮容器:"+e.getMessage());
+        }
+    }
+
+    private void loadBg(String filePath) {
+        log.i(TAG,"按钮背景路径:"+filePath);
+        //纯用picasso 加载本地图片
+        Picasso.with(context)
+                .load(new File(filePath))
+                .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
+                .centerCrop()
+                .resize(w,h)
+                .placeholder(R.drawable.no_found)
+                .error(R.drawable.error)
+                .into((ImageButton)view);
+        log.i(TAG,"按钮背景加载完成");
+    }
+
+    @Override
+    protected void onUnbg(ViewGroup vp) {
+            releasSourceBg(view);
+    }
+
+    @Override
+    protected void onLayout(ViewGroup vp) {
+        this.vp = vp ;
+        try {
+            if (!isLayout){
+                vp.addView(view);
+                isLayout = true;
+            }
+            AbsoluteLayout.LayoutParams lp = (AbsoluteLayout.LayoutParams) view
+                    .getLayoutParams();
+            lp.x = x;
+            lp.y = y;
+            lp.width = w;
+            lp.height = h;
+            view.setLayoutParams(lp);
+        }catch (Exception e){
+            log.e(TAG,"onLayout() err:" + e.getMessage());
+        }
+    }
+
+    @Override
+    protected void onUnlayout() {
+        try{
+            if (isLayout){
+                vp.removeView(view);
+                isLayout = false;
+            }
+        }catch (Exception e){
+            log.e(TAG,"onUnlayout() err:" + e.getMessage());
+        }
+    }
+
+    @Override
+    protected void onBind(ViewGroup vp) {//附着在上面 layoutContainer
+        try {
+            // 1. 设置 view 宽高属性 添加到外层容器上
+            onLayout(vp);
+            //加载资源
+            onBg(null);
+        }catch (Exception e){
+            log.e(TAG,"onBind() err:" + e.getMessage());
+        }
+    }
+
+    @Override
+    protected void onUnbind() {
+        try {
+            onUnlayout();
+            //解除资源
+            onUnbg(null);
+        }catch (Exception e){
+            log.e(TAG,"onUnbind() err:" + e.getMessage());
+        }
+    }
+
+    @Override
+    protected void onClick(View v) {
+        if (view!=null){
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    log.i(TAG," tm 老子是 一个 按钮 !");
+                    if (next!=null){
+                        log.e("进去下一个布局- ->"+next.toString());
+                    }
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void onBack(View v) {
+
+    }
+
+    @Override
+    protected void addChilds(Container child) {
+            next = child;
+    }
+}

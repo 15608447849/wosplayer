@@ -33,40 +33,39 @@ public class DataSeparator {
 
     public void Split(XmlNodeEntity entity,DataStore ds){
 
-        log.e("",entity.toString());
+        log.e(" ",entity.Level+" ------start--------- ");
 
-      /* if (dataStore == null){
-            dataStore = new DataStore();
-            currentIndex = dataStore;
-        }else{
-            currentIndex = currentIndex.NewSettingNodeEntity();
-        }*/
-
-        if (ds==null){//第一次
+        if (ds==null){
+            //第一次
             dataStore = new DataStore();
             ds = dataStore;
         }
 
-
         //判断
         if (entity.Level.equals(layoutLevel)){
+            log.e(" "," ----布局-----");
             layoutDataParse(entity,ds);
         }
         if (entity.Level.equals(layoutItemLevel)){
+            log.e(" "," ----布局-----按钮");
             buttonDataParse(entity,ds);
         }
         if (entity.Level.equals(folderLevel)){
+            log.e(" "," ----布局-----按钮 ---- 文件夹");
             folderDataParse(entity,ds);
         }
         if (entity.Level.equals(folderItemLevel)){
+            log.e(" "," ----布局-----按钮 ---- 文件夹 ---内容");
             contentDataParse(entity,ds);
         }
         //循环
         ArrayList<XmlNodeEntity> child = entity.getChildren();
         if (child!=null && child.size()>0){
+            log.e(" "," 子对象数量:"+child.size());
             for (XmlNodeEntity e : child){
                 Split(e,ds.NewSettingNodeEntity());
             }
+            log.e(" "," -----over ------" );
         }
     }
 
@@ -75,14 +74,37 @@ public class DataSeparator {
      * @param entity
      */
     private void contentDataParse(XmlNodeEntity entity,DataStore ds) {
+        try{
+            if (ds==null){
+                log.e("ds is null");
+            }
         //网页 视屏 图片
         DataList data = ds.getData();
         String level = entity.Level;
         String filetype =  entity.getXmldata().get("filetype");//1006 网页 1002视频 1007 图片
+
         String web_url = entity.getXmldata().get("web_url");
+            if (web_url==null){
+                log.e("","web_url is null");
+                web_url = "";
+            }
+
         String filename = entity.getXmldata().get("filename");//"filename" -> "zhoudongyiu.web"
+            if (filename==null){
+                log.e(" ","filename is null");
+                filename = "";
+            }
+
         String video_image_url = entity.getXmldata().get("video_image_url");//视频第一帧 不存在时,设置为 player.png "video_image_url" -> "null"  "video_image_url" -> "ftp://ftp:FTPmedia@218.89.68.163/uploads/1469783401641.png"
 
+            if (video_image_url == null || video_image_url.equals("")){
+                 video_image_url = videoFristImageNotFount;
+            }else {
+                video_image_url = video_image_url.substring(video_image_url.lastIndexOf("/") + 1);
+                if (video_image_url.equals("null")) {
+                    video_image_url = videoFristImageNotFount;
+                }
+            }
         String filepath = entity.getXmldata().get("filepath");//"filepath" -> "ftp://ftp:FTPmedia@218.89.68.163/uploads/1469783401641new.mp4"
 
         if (filepath==null || filename.equals("null") || filename.equals("")){
@@ -91,12 +113,6 @@ public class DataSeparator {
             filepath = filepath.substring(filepath.lastIndexOf("/")+1);
         }
 
-        if (video_image_url==null  || video_image_url.equals("")){
-            video_image_url = video_image_url.substring(video_image_url.lastIndexOf("/")+1);
-            if (video_image_url.equals("null")){
-                video_image_url = videoFristImageNotFount;
-            }
-        }
 
         data.put("level",level);
         data.put("filetype",filetype);
@@ -105,7 +121,11 @@ public class DataSeparator {
         data.put("video_image_url",video_image_url);
         data.put("filepath",filepath);
 
+        }catch (Exception e){
+            log.e("contentDataParse()",e.getMessage());
+        }
 
+        log.e(" "," -- -- 布局 按钮 文件夹 内容 解析完毕----");
     }
 
     /**

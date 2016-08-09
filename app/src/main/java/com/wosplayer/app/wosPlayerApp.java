@@ -53,6 +53,7 @@ public class wosPlayerApp extends Application {
 
 
 
+
     /**
      *
      */
@@ -201,11 +202,6 @@ public class wosPlayerApp extends Application {
 //        log.i("发送出去一个广播");
 
     }
-
-
-
-
-
 
 
 }

@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
 
 import com.wosplayer.Ui.element.IPlayer;
+import com.wosplayer.Ui.element.iviewelementImpl.actioner.ContainerItem.LayoutContainer;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.log;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
@@ -45,8 +46,6 @@ public class Actioner extends AbsoluteLayout implements IPlayer{
     private DataStore stores;//数据存储
     @Override
     public void loadData(DataList mp, Object ob) {
-
-
         try {
             this.x = mp.GetIntDefualt("x", 0);
             this.y = mp.GetIntDefualt("y", 0);
@@ -54,18 +53,26 @@ public class Actioner extends AbsoluteLayout implements IPlayer{
             this.h = mp.GetIntDefualt("height", 0);
 
             // 分离 数据
-            DataSeparator ds = new DataSeparator();
-            ds.Split((XmlNodeEntity) ob,null);
-            stores = ds.getDataStore();
+            DataSeparator dst = new DataSeparator();
+            dst.Split((XmlNodeEntity) ob,null);
 
-            if (stores==null){
-                log.e("互动模块 数据 分离错误");
+            if (dst==null){
+                log.e(TAG,"互动模块 数据 分离错误 DataSeparator is null");
+                return;
+            }
+            stores = dst.getDataStore();
+
+            if (stores == null){
+                log.e(TAG,"互动模块 数据 分离错误 stores is null");
                 return;
             }
             //转换 数据变成视图 创建 所有子容器
             ContainerFactory.SettingParam(mp);
-            ContainerFactory.TanslateDataToContainer(stores,null);
-
+           container = ContainerFactory.TanslateDataToContainer(stores,null);
+            if (container==null){
+                log.e(TAG," 互动模块 容器 获取错误,container="+container);
+            }
+            log.i(TAG," 互动模块 初始化 完成");
 
 
         }catch (Exception e){
@@ -77,11 +84,13 @@ public class Actioner extends AbsoluteLayout implements IPlayer{
     public void start() {
         try{
             setlayout();//设置布局
-           // loadMyImage();
+            loadContainer();
         }catch (Exception e){
             log.e(TAG,"开始:"+e.getMessage());
         }
     }
+
+
 
     @Override
     public void stop() {
@@ -89,9 +98,25 @@ public class Actioner extends AbsoluteLayout implements IPlayer{
             //移除父视图
             vp.removeView(this);
             isExistOnLayout = false;
-          //  removeMyImage();
+            removeContainer();
         }catch (Exception e){
             log.e(TAG,"停止:"+e.getMessage());
+        }
+    }
+    //加载容器
+    private void loadContainer() {
+        if (container!=null){
+            if (container instanceof LayoutContainer){
+                container.onBind(this);
+            }
+        }
+    }
+    //移除容器
+    private void removeContainer() {
+        if (container!=null){
+            if (container instanceof LayoutContainer){
+                container.onUnbind();
+            }
         }
     }
 
