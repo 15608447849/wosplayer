@@ -201,9 +201,21 @@ try {
     }
 
     private void picassoLoaderImager(String filePath) {
-        log.i(TAG,"width:"+w);
+    /*    log.i(TAG,"width:"+w);
         log.i(TAG,"layoutparam w:"+this.getLayoutParams().width);
-        log.i(TAG,"getMeasuredWidth:"+this.getMeasuredWidth());
+        log.i(TAG,"getMeasuredWidth:"+this.getMeasuredWidth());*/
+        if (w==AbsoluteLayout.LayoutParams.MATCH_PARENT || h == AbsoluteLayout.LayoutParams.MATCH_PARENT){
+            Picasso.with(mCcontext)
+                    .load(new File(filePath))
+                    .config(Bitmap.Config.RGB_565)
+                    .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
+//                .centerCrop()
+                    .fit().centerCrop()
+                    .placeholder(R.drawable.no_found)
+                    .error(R.drawable.error)
+                    .into(this);
+            return;
+        }
         //纯用picasso 加载本地图片
         Picasso.with(mCcontext)
                 .load(new File(filePath))
@@ -258,7 +270,6 @@ try {
         }catch (Exception e){
             log.e(TAG,"onDetachedFromWindow:"+e.getMessage());
         }
-
     }
 
 }

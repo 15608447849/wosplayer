@@ -114,6 +114,9 @@ public class DataSeparator {
         }
 
 
+
+        filepath = sd_path+filepath;
+        video_image_url = sd_path+filename;
         data.put("level",level);
         data.put("filetype",filetype);
         data.put("web_url",web_url);

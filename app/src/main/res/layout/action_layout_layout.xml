@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <AbsoluteLayout
+        android:id="@+id/layot_absulute"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        >
+
+    </AbsoluteLayout>
+
+    <FrameLayout
+        android:id="@+id/layot_frame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@android:color/holo_red_dark"
+        >
+        <ImageButton
+            android:id="@+id/layout_back_back"
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:src="@drawable/back"/>
+    </FrameLayout>
+
+</RelativeLayout>

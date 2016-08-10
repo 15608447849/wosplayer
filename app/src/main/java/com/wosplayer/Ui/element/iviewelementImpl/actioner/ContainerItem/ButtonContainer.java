@@ -28,8 +28,6 @@ public class ButtonContainer extends Container{
     private int w;
     private int h;
     private String bgimage;
-    private Context context;
-    private ViewGroup vp;
     public ButtonContainer(Context context, DataList ls){
         this.context = context;
         view = new ImageButton(context){
@@ -38,7 +36,7 @@ public class ButtonContainer extends Container{
                 try {
                     super.onDraw(canvas);
                 } catch (Exception e) {
-                    log.i(TAG,"试图引用　一个　回收的图片 ["+e.getMessage()+"-----"+e.getCause()+"]");
+                    log.i(TAG,"布局子按钮,试图引用一个　回收的图片 ["+e.getMessage()+"-----"+e.getCause()+"]");
                 }
             }
             @Override
@@ -71,6 +69,9 @@ public class ButtonContainer extends Container{
         x = (int)((float)this.x*widthScale );
         y = (int)((float)this.y*heightScale );
     }
+
+
+
     @Override
     protected float[] onSettingScale(int fwidth, int fheight) {
         return null;
@@ -132,6 +133,7 @@ public class ButtonContainer extends Container{
             if (isLayout){
                 vp.removeView(view);
                 isLayout = false;
+                this.vp = null;
             }
         }catch (Exception e){
             log.e(TAG,"onUnlayout() err:" + e.getMessage());
@@ -139,7 +141,7 @@ public class ButtonContainer extends Container{
     }
 
     @Override
-    protected void onBind(ViewGroup vp) {//附着在上面 layoutContainer
+    public void onBind(ViewGroup vp) {//附着在上面 layoutContainer
         try {
             // 1. 设置 view 宽高属性 添加到外层容器上
             onLayout(vp);
@@ -151,7 +153,7 @@ public class ButtonContainer extends Container{
     }
 
     @Override
-    protected void onUnbind() {
+    public void onUnbind() {
         try {
             onUnlayout();
             //解除资源
@@ -168,8 +170,20 @@ public class ButtonContainer extends Container{
                 @Override
                 public void onClick(View v) {
                     log.i(TAG," tm 老子是 一个 按钮 !");
-                    if (next!=null){
-                        log.e("进去下一个布局- ->"+next.toString());
+                    if (next!=null && previous!=null){
+                        log.e(TAG,"进去下一个布局- ->"+next.toString());
+//                                = previous
+//                                next.onBind();
+//                                onUnbind();
+//                                previous.onUnbind();
+
+                        if (previous instanceof LayoutContainer){
+                            ViewGroup vp = ((LayoutContainer)previous).getVp();
+                            if (vp!=null){
+                                next.onBind(vp);
+                                previous.onUnbind();
+                            }
+                        }
                     }
                 }
             });
@@ -185,4 +199,6 @@ public class ButtonContainer extends Container{
     protected void addChilds(Container child) {
             next = child;
     }
+
+
 }

@@ -1,7 +1,9 @@
 package com.wosplayer.Ui.element.iviewelementImpl.actioner;
 
 import com.wosplayer.Ui.element.iviewelementImpl.actioner.ContainerItem.ButtonContainer;
+import com.wosplayer.Ui.element.iviewelementImpl.actioner.ContainerItem.ContentContainer;
 import com.wosplayer.Ui.element.iviewelementImpl.actioner.ContainerItem.LayoutContainer;
+import com.wosplayer.Ui.element.iviewelementImpl.actioner.ContainerItem.ListViewContainer;
 import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.log;
@@ -26,16 +28,21 @@ public class ContainerFactory {
         param = dl;
     }
 
+    /**
+     *
+     * @param ds 当前 数据存储
+     * @param prev 上一个视图
+     * @return
+     */
     public static Container TanslateDataToContainer(DataStore ds,Container prev){
 
 
             DataList dl = ds.getData();
 
             if (prev == null){  //如果不存在 上一个视图
-               prev = createLayoutFirst(dl); //创建 第一层布局容器
+               prev = createLayout(dl,true); //创建 第一层布局容器
 
                 //创建它的button容器  //布局 - child-> button
-
                 ArrayList<DataStore> arr = ds.getStores();
                 if (arr !=null && arr.size()>0){
                     for (int i = 0 ;i<arr.size();i++){
@@ -61,29 +68,82 @@ public class ContainerFactory {
 
                     current = currentButtonContainer(dl);//数据
                     if (current!=null){
+                        current.previous = prev;
                         //设置按钮的下一个视图
                         ArrayList<DataStore> arr = ds.getStores();
                         if (arr!=null && arr.size()==1){
                             log.i(TAG,"按钮 next exist");
                             Container layout = TanslateDataToContainer(arr.get(0),prev);
-                            current.next = layout;//按钮 关联 下一个视图
-                            //设置按钮的点击事件
-                            current.onClick(null);
+                            if (layout!=null){
+                                current.next = layout;//按钮 关联 的下一个视图 ->布局 或者 列表
+                                //设置按钮的点击事件
+                                current.onClick(null);
+                            }
+
                         }else{
                             log.e(TAG,"button next container is err");
-
                         }
                     }
                     return current;
                 }
                 if (level.equals(DataSeparator.layoutLevel)){ //布局容器
+                    //按钮绑定的 布局
+                    //需要增加返回按钮
+                    current = createLayout(dl,false);
+                    if (current!=null){
+                        current.previous = prev;// 下一个视图回到的上一个视图
 
+                        //创建它的button容器  //布局 - child-> button
+                        ArrayList<DataStore> arr = ds.getStores();
+                        if (arr !=null && arr.size()>0){
+                            for (int i = 0 ;i<arr.size();i++){
+                                Container buttonContainer = TanslateDataToContainer(arr.get(i),current);
+                                if (buttonContainer==null){
+                                    log.e(TAG," button container is null,index ="+i);
+                                    continue;
+                                }
+                                current.addChilds(buttonContainer);//布局 添加 button 到 childs
+                            }
+                        }else{
+                            log.e(TAG,"layout child container is err: dataStore arr :"+arr);
+                        }
+                    }
                     return current;
                 }
                 if (level.equals(DataSeparator.folderLevel)){ // listView
+                    current = createList(dl);
+                    if (current!=null){
+                        current.previous = prev;// 上一个视图
+
+                        ArrayList<DataStore> arr = ds.getStores();
+                        if (arr !=null && arr.size()>0){
+
+                            for(int i=0;i<arr.size();i++){
+                                Container content = TanslateDataToContainer(arr.get(i),current);//具体内容 web image video
+                                if (content==null){
+                                    log.e(TAG," list content container is null,index ="+i);
+                                    continue;
+                                }
+                                current.addChilds(content);
+                            }
+                            //设置适配器
+                            ((ListViewContainer)current).SetttingAdapter();
+                            //设置子项点击时间
+                            current.onClick(null);
+
+                        }else{
+                            log.e(TAG,"list child container is err");
+                        }
+
+                    }
                     return current;
                 }
                 if (level.equals(DataSeparator.folderItemLevel)){ // item (image video web)
+
+                    current = createContent(dl);
+                    if (current!=null){
+                        current.previous =prev;
+                    }
                     return current;
                 }
 
@@ -95,6 +155,23 @@ public class ContainerFactory {
         //filelist - chile -> image,video,web ...
         return prev;
     }
+
+    /**
+     * 创建具体内容 视图
+     * @param dl
+     * @return
+     */
+    private static Container createContent(DataList dl) {
+        ContentContainer content = new ContentContainer(DisplayActivity.activityContext,dl);
+
+        return content;
+    }
+
+    private static Container createList(DataList dl) {
+        ListViewContainer listContainer = new ListViewContainer(DisplayActivity.activityContext,dl);
+        return listContainer;
+    }
+
 
     /**
      * 创建 某一个 按钮
@@ -117,11 +194,11 @@ public class ContainerFactory {
      * 创建布局 第一次
      * @param dl
      */
-    private static Container createLayoutFirst(DataList dl) {
+    private static Container createLayout(DataList dl,boolean isFirst) {
         //创建布局容器
         LayoutContainer layoutContainer = new LayoutContainer(DisplayActivity.activityContext,dl);
 
-        if(param!=null){
+        if(param!=null && isFirst){
             //设置 布局背景的宽高比例
             int width = param.GetIntDefualt("width", 0);
             int height = param.GetIntDefualt("height", 0);
@@ -136,7 +213,20 @@ public class ContainerFactory {
             }
             param.put("wscale",wscale);
             param.put("hscale",hscale);
+        }else{
+            //传递比例值
+
+            float wscale = (float) (param.GetdoubleDefualt("wscale", 1));
+            float hscale = (float) (param.GetdoubleDefualt("hscale", 1));
+            layoutContainer.onSettingScale(wscale,hscale);
         }
+
+        if (!isFirst){
+            //添加返回按钮
+            layoutContainer.addReturnButton(true);
+        }
+
+
         return layoutContainer;
     }
 

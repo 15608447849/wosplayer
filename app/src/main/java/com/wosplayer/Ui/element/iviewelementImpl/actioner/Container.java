@@ -1,5 +1,6 @@
 package com.wosplayer.Ui.element.iviewelementImpl.actioner;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -26,6 +27,8 @@ public abstract  class Container {
     protected Container next;//下一个视图
     protected boolean isBind = false;
     protected boolean isLayout =false;
+    protected Context context;
+    protected ViewGroup vp;
 
 
    protected abstract float[]  onSettingScale (int fwidth,int fheight);
@@ -35,8 +38,8 @@ public abstract  class Container {
 
    protected abstract void  onLayout (ViewGroup vp);
    protected abstract void  onUnlayout ();
-   protected abstract void  onBind(ViewGroup vp);
-   protected abstract void  onUnbind();
+   public abstract void  onBind(ViewGroup vp);
+   public abstract void  onUnbind();
    protected abstract void onClick(View v);
    protected abstract void onBack(View v);
    protected abstract void addChilds(Container child);
@@ -63,4 +66,6 @@ public abstract  class Container {
             log.e(TAG,e.getMessage());
         }
     }
+
+
 }

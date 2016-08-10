@@ -6,9 +6,12 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.actioner.Container;
@@ -38,20 +41,42 @@ public class LayoutContainer extends Container{
    private int width ;
    private int height;
 
-   private Context context;
-   private ViewGroup vp;
+
 
     private int bgWidth ;
     private int bgHeight ;
 
-   public LayoutContainer(Context context, DataList ls){
+    private AbsoluteLayout absulute ;
+
+    public LayoutContainer(Context context, DataList ls){
        this.context = context;
-       view = new AbsoluteLayout(context);//创建绝对布局
+        view = (ViewGroup) LayoutInflater.from(context).inflate(R.layout.action_layout_layout,null);
+
+       absulute = (AbsoluteLayout) view.findViewById(R.id.layot_absulute);
+
        bgmode = ls.GetIntDefualt("bgmodel",1);// 1 #ffffcc   , 2 imageName
        bgName = ls.GetStringDefualt("bg","");
        width = ls.GetIntDefualt("w",-1);
        height = ls.GetIntDefualt("h",-1);
    }
+
+
+    public ViewGroup getVp(){
+        return vp;
+    }
+    public void addReturnButton(boolean isAddReturnButton){
+
+        if (isAddReturnButton){
+            log.e(TAG,"-----");
+           FrameLayout f = (FrameLayout) view.findViewById(R.id.layot_frame);
+           f.setVisibility(View.VISIBLE);
+           ImageButton back = (ImageButton) view.findViewById(R.id.layout_back_back);
+           onBack(back);
+           log.e(TAG,"layout add back is success");
+        }
+
+    }
+
 
     //设置 w h x y 大小 比例
     @Override
@@ -73,8 +98,9 @@ public class LayoutContainer extends Container{
     }
 
     @Override
-    protected void onSettingScale(float widthScale, float heightScale) {
-        //
+    public void onSettingScale(float widthScale, float heightScale) {
+        bgWidth = (int) ((float)this.width * widthScale);
+        bgHeight =(int) ((float)this.height * heightScale);
     }
 
     @Override
@@ -83,9 +109,9 @@ public class LayoutContainer extends Container{
             if (bgmode==1){ //color
 
                 if (bgName.equals("")){
-                    view.setBackgroundColor(Color.WHITE);
+                    absulute.setBackgroundColor(Color.WHITE);
                 }else{
-                    view.setBackgroundColor(Color.parseColor(bgName));
+                    absulute.setBackgroundColor(Color.parseColor(bgName));
                 }
 
             }else if (bgmode==2){ //image
@@ -126,7 +152,7 @@ public class LayoutContainer extends Container{
                     @Override
                     public void call() {
                         log.i(TAG, " 互动布局设置背景图片");
-                        view.setBackgroundDrawable(dw);
+                        absulute.setBackgroundDrawable(dw);
                     }
                 });
             }
@@ -135,7 +161,7 @@ public class LayoutContainer extends Container{
 
     @Override
     protected void onUnbg(ViewGroup vp) {
-        releasSourceBg(view);
+        releasSourceBg(absulute);
     }
 
     @Override
@@ -164,6 +190,7 @@ public class LayoutContainer extends Container{
             if (isLayout){
                 vp.removeView(view);
                 isLayout = false;
+                this.vp = null;
             }
         }catch (Exception e){
             log.e(TAG,"onUnlayout() err:" + e.getMessage());
@@ -172,7 +199,7 @@ public class LayoutContainer extends Container{
 
     //布局绑定时
     @Override
-    protected void onBind(ViewGroup vp) { // 容器
+    public void onBind(ViewGroup vp) { // 容器
 
         try {
             // 1. 设置 view 宽高属性 添加到外层容器上
@@ -184,7 +211,7 @@ public class LayoutContainer extends Container{
                 log.i(TAG," 布局子类:"+ childs.size());
                 for (Container button:childs){
                     if (button instanceof ButtonContainer){
-                        ((ButtonContainer)button).onBind((ViewGroup) view);
+                        ((ButtonContainer)button).onBind((ViewGroup) absulute);
                     }
                 }
             }
@@ -194,7 +221,7 @@ public class LayoutContainer extends Container{
     }
 
     @Override
-    protected void onUnbind() {
+    public void onUnbind() {
         try {
             // 1. 删除视图
             onUnlayout();
@@ -209,7 +236,7 @@ public class LayoutContainer extends Container{
                 }
             }
         }catch (Exception e){
-            log.e(TAG,"onBind() err:" + e.getMessage());
+            log.e(TAG,"onUnbind() err:" + e.getMessage());
         }
 
     }
@@ -221,7 +248,18 @@ public class LayoutContainer extends Container{
 
     @Override
     protected void onBack(View v) {
-
+            v.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    log.e(TAG,"- 布局 返回 按钮 - ");
+                    if (previous!=null && previous instanceof LayoutContainer){
+                        //调用上一个视图的 bind
+                        ((LayoutContainer)previous).onBind(vp);
+                        //调用自己的 onbind
+                        onUnbind();
+                    }
+                }
+            });
     }
 
     @Override

@@ -33,13 +33,25 @@ public final class contentTanslater {
         referenceViewMap.put("webpage",packageName+"IWebPlayer");
         referenceViewMap.put("video",packageName+"IVideoPlayer");
         referenceViewMap.put("text",packageName+"IrunTextPlayer");
-        referenceViewMap.put("interactive",packageName+"IinteractionPlayer");
-//        referenceViewMap.put("interactive","com.wosplayer.Ui.element.iviewelementImpl.actioner."+"Actioner");
+//        referenceViewMap.put("interactive",packageName+"IinteractionPlayer");
+
+
+        referenceViewMap.put("interactive","com.wosplayer.Ui.element.iviewelementImpl.actioner."+"Actioner");
+        referenceViewMap.put("1007",packageName+"IImagePlayer");
+        referenceViewMap.put("1002",packageName+"IVideoPlayer");
+        referenceViewMap.put("1006",packageName+"IWebPlayer");
     }
 
     //存储一部分视图
     private static LruCache<String,IPlayer> mLruCache = null;
     private static void putIplayerToCache(String key,IPlayer value){
+        if (mLruCache==null){
+            mLruCache =  new LruCache<String,IPlayer>((int) (Runtime.getRuntime().maxMemory() / 8));//最大内存的1/3
+        }
+        if (key ==null || value ==null){
+            log.e(TAG,"-------------tanslate key or value is null" );
+            return;
+        }
         mLruCache.put(key,value);
     }
     private static IPlayer getIplayerToCache(String key){
@@ -56,7 +68,7 @@ public final class contentTanslater {
      * @param list
      * @return
      */
-    public static IPlayer tanslationAndStart(DataList list,Object ob){
+    public static IPlayer tanslationAndStart(DataList list,Object ob,boolean isStart,ViewGroup vp){
         if (mLruCache==null){
             mLruCache =  new LruCache<String,IPlayer>((int) (Runtime.getRuntime().maxMemory() / 8));//最大内存的1/3
         }
@@ -88,14 +100,20 @@ public final class contentTanslater {
                     log.e(TAG,"无法创建 iplayer ,环境不正确,请初始化 Activity");
                     return iplay;
                 }
-                iplay = (IPlayer) constructor.newInstance(DisplayActivity.activityContext, (ViewGroup) DisplayActivity.main); //得到具体实例
+                if (vp==null){
+                    vp = (ViewGroup) DisplayActivity.main;
+                }
+                iplay = (IPlayer) constructor.newInstance(DisplayActivity.activityContext,vp); //得到具体实例
 
                 //添加到 缓存中
                 putIplayerToCache(key,iplay);
             }
             //执行它
             iplay.loadData(list,ob);
-            iplay.start();//主线程执行
+            if (isStart){
+                iplay.start();//主线程执行
+            }
+
         } catch (ClassNotFoundException e) {
             log.e(TAG,"无法找到这个类");
         }catch(NoSuchMethodException e){

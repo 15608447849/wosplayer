@@ -220,7 +220,7 @@ public class layoutExcuter {
             public void call() {
                 clearContent();
                 //生成iplayer
-                currentIplayer = contentTanslater.tanslationAndStart(datalist,ob);//创建必须放入主线程执行
+                currentIplayer = contentTanslater.tanslationAndStart(datalist,ob,true,null);//创建必须放入主线程执行
             }
         });
     }

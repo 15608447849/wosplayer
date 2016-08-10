@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ListView
+        android:id="@+id/active_listlayout_lv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/holo_green_light">
+    </ListView>
+
+
+    <FrameLayout
+        android:id="@+id/active_listlayout_fl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/drop_down_list_footer_font_color">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/active_listlayout_fl_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="返回"
+                />
+            <TextView
+                android:id="@+id/active_listlayout_fl_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="文件夹"
+                android:textSize="16sp"
+                android:textColor="@android:color/white"
+                android:gravity="center"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="2dp"
+                />
+        </LinearLayout>
+
+
+    </FrameLayout>
+
+
+
+</FrameLayout>
