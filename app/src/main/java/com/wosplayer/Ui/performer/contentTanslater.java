@@ -33,13 +33,13 @@ public final class contentTanslater {
         referenceViewMap.put("webpage",packageName+"IWebPlayer");
         referenceViewMap.put("video",packageName+"IVideoPlayer");
         referenceViewMap.put("text",packageName+"IrunTextPlayer");
-//        referenceViewMap.put("interactive",packageName+"IinteractionPlayer");
+        referenceViewMap.put("interactive",packageName+"IinteractionPlayer");
 
 
-        referenceViewMap.put("interactive","com.wosplayer.Ui.element.iviewelementImpl.actioner."+"Actioner");
-        referenceViewMap.put("1007",packageName+"IImagePlayer");
-        referenceViewMap.put("1002",packageName+"IVideoPlayer");
-        referenceViewMap.put("1006",packageName+"IWebPlayer");
+//        referenceViewMap.put("interactive","com.wosplayer.Ui.element.iviewelementImpl.actioner."+"Actioner");
+//        referenceViewMap.put("1007",packageName+"IImagePlayer");
+//        referenceViewMap.put("1002",packageName+"IVideoPlayer");
+//        referenceViewMap.put("1006",packageName+"IWebPlayer");
     }
 
     //存储一部分视图

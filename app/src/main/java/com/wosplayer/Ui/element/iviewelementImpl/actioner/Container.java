@@ -43,7 +43,9 @@ public abstract  class Container {
    protected abstract void onClick(View v);
    protected abstract void onBack(View v);
    protected abstract void addChilds(Container child);
-
+   public ViewGroup getVp(){
+        return vp;
+   }
 
     /**
      *   释放资源背景

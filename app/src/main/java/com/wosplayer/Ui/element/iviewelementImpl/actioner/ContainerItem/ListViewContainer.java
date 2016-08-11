@@ -191,4 +191,44 @@ public class ListViewContainer extends Container{
         contentListView.setAdapter(adapter);
     }
 
+    /**
+     * 向左 向右 传递
+     * @param contentContainer
+     * @param i
+     */
+    public void leftOrRight(ContentContainer contentContainer, int i) {
+            if (adapter!=null){
+                List<ContentContainer> arr = adapter.getList();
+                if (arr.contains(contentContainer)){
+
+                    int index = arr.indexOf(contentContainer);//下标
+                    if (i == 0){//向左
+
+                        if (index==0){
+                            index = arr.size()-1;
+                        }else{
+                            index--;
+                        }
+
+                    }else if (i==1){ //向右
+                        if (index==arr.size()-1){
+                            index = 0;
+                        }else{
+                            index++;
+                        }
+                    }
+                    ViewGroup vg = contentContainer.getVp();
+                    if (vg!=null){
+                        arr.get(index).onBind(vg);
+                        contentContainer.onUnbind();
+                    }
+
+
+                }
+
+            }
+
+    }
+
+
 }

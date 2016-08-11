@@ -48,19 +48,33 @@ public class ContentContainer extends Container{
         left.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                //自己消亡, 在父控件中 调用向左,把自己传递进去
+                leftOrRight(0);//0左 1右
             }
         });
 
         right.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                leftOrRight(1);//0左 1右
             }
         });
 
         onBack(back);
         initContent();
+    }
+
+    /**
+     *
+     * @param i 0 左 1 右
+     */
+    private void leftOrRight(int i) {
+        if(previous!=null){
+            if (previous instanceof ListViewContainer){
+
+                ((ListViewContainer)previous).leftOrRight(this,i);
+            }
+        }
     }
 
     private String key = null;

@@ -61,9 +61,7 @@ public class LayoutContainer extends Container{
    }
 
 
-    public ViewGroup getVp(){
-        return vp;
-    }
+
     public void addReturnButton(boolean isAddReturnButton){
 
         if (isAddReturnButton){
