@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 
 import com.wosplayer.app.log;
 import com.wosplayer.cmdBroadcast.CmdPostTaskCenter;
+import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_UPDC;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -323,6 +324,8 @@ public class CommunicationService extends Service{
         startHeartbeat();
         //发送上线指令
         String msg = "ONLI:" + terminalNo;//
+        sendMsgToService(msg);
+        msg = "GVAY:" + terminalNo+"#"+ Command_UPDC.getLocalVersionCode();//通知获取版本号信息
         sendMsgToService(msg);
     }
     /**

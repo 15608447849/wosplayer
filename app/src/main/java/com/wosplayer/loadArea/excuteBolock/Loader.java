@@ -254,7 +254,7 @@ public class Loader {
             ftp.downloadSingleFile(remotePath + fileName,
                     localPath,
                     fileName,
-                    1000,
+                    3,//重新链接次数
                     new ActiveFtpUtils.DownLoadProgressListener() {
                 @Override
                 public void onDownLoadProgress(String currentStep, long downProcess, String speed, File file) {
