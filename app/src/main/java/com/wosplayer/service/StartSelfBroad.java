@@ -3,6 +3,7 @@ package com.wosplayer.service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.widget.Toast;
 
 import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.log;
@@ -15,10 +16,16 @@ public class StartSelfBroad extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        log.e("开机 自启动");
-        if (intent.getAction().equals(action_boot)){
+        log.e("-----------------------开机 -----------------------   自启动---------------------------------------");
+        log.e(" installBroad ","["+intent.getAction()+"]");
+        if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)){//"android.intent.action.BOOT_COMPLETED";
+
+            Toast.makeText(context, "boot completed action has got !!!", Toast.LENGTH_LONG).show();
+
             Intent ootStartIntent=new Intent(context,DisplayActivity.class);
+
             ootStartIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
             context.startActivity(ootStartIntent);
         }
     }

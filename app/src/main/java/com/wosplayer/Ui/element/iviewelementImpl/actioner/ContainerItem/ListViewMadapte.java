@@ -84,7 +84,7 @@ public class ListViewMadapte extends BaseAdapter{
 //                    .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
                     .fit().
                     centerCrop()
-                    .placeholder(R.drawable.no_found)
+                    .placeholder(R.drawable.loadding)
                     .error(R.drawable.error)
                     .into(holder.imageView);
         }else{
@@ -93,7 +93,7 @@ public class ListViewMadapte extends BaseAdapter{
 //                    .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
                     .fit().
                     centerCrop()
-                    .placeholder(R.drawable.no_found)
+                    .placeholder(R.drawable.loadding)
                     .error(R.drawable.error)
                     .into(holder.imageView);
         }

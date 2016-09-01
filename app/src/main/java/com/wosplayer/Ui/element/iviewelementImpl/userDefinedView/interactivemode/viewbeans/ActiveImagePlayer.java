@@ -161,7 +161,8 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
                             bitmap = BitmapFactory.decodeResource(ActiveImagePlayer.this.getResources(), R.drawable.loadding);
                         } catch (Exception e) {
                            log.e("下载 时 图片 异常:"+e.getMessage());
-                            return;
+//                            return;
+                            bitmap = BitmapFactory.decodeResource(ActiveImagePlayer.this.getResources(), R.drawable.error);
                         }
                     }
                     BitmapDrawable bd = new BitmapDrawable(ActiveImagePlayer.this.getResources(), bitmap);
@@ -304,7 +305,7 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
                 .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
 //                .centerCrop()
                 .fit().centerCrop()
-                .placeholder(R.drawable.no_found)
+                .placeholder(R.drawable.loadding)
                 .error(R.drawable.error)
                 .into(this);
     }

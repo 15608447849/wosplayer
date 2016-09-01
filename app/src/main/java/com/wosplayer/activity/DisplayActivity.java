@@ -10,14 +10,18 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 
+import com.wos.Toals;
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.MyVideoView;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
+import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Close_App;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleReader;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleSaver;
+import com.wosplayer.service.MonitorService;
 import com.wosplayer.service.RestartApplicationBroad;
 
 /**
@@ -46,8 +50,10 @@ public class DisplayActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
-                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//去标题
+        /*getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);*/
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         setContentView(R.layout.activity_main);//设置布局文件
         baselayout = (AbsoluteLayout) LayoutInflater.from(this).inflate(R.layout.activity_main,null);
 
@@ -58,10 +64,21 @@ public class DisplayActivity extends FragmentActivity {
         log.i(TAG,"onCreate() 正在执行的所有线程数:"+ Thread.getAllStackTraces().size());
 
         //开启监听服务
-  /*      Intent intent = new Intent(this, MonitorService.class);
+       Intent intent = new Intent(this, MonitorService.class);
         log.d(TAG," 开启<监听>服务");
-        this.startService(intent);*/
+        this.startService(intent);
 
+        ImageButton closebtn = (ImageButton)findViewById(R.id.closeappbtn);
+        closebtn.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Toals.Say("close app");
+
+                new Command_Close_App().Execute(null);
+
+                return false;
+            }
+        });
         log.d("--------create over-------------");
 
     }
@@ -77,7 +94,7 @@ public class DisplayActivity extends FragmentActivity {
        super.onResume();
         log.d(TAG,"onResume");
         //开启通讯服务
-        wosPlayerApp.startCommunicationService();
+        wosPlayerApp.startCommunicationService(this);
         if (activityContext!=null){
             try {
                 ScheduleReader.Start(false);
@@ -86,14 +103,13 @@ public class DisplayActivity extends FragmentActivity {
 
             }
         }
-
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         log.d(TAG,"onPause");
-        wosPlayerApp.stopCommunicationService(); //关闭服务
+        wosPlayerApp.stopCommunicationService(this); //关闭服务
         ScheduleSaver.clear();
         ScheduleReader.clear();
     }
@@ -101,6 +117,7 @@ public class DisplayActivity extends FragmentActivity {
     @Override
     public void onStop() {
         super.onStop();
+        finish();
         log.d(TAG,"onStop");
     }
 
@@ -111,6 +128,8 @@ public class DisplayActivity extends FragmentActivity {
         if(isSendRestartBroad){
             Intent intent  = new Intent();
             intent.setAction(RestartApplicationBroad.action);
+            intent.putExtra(RestartApplicationBroad.IS_START,false);
+            intent.putExtra(RestartApplicationBroad.KEYS,wosPlayerApp.config.GetStringDefualt("sleepTime","10"));
             sendBroadcast(intent);
         }
     }
@@ -150,7 +169,7 @@ public class DisplayActivity extends FragmentActivity {
             //隐藏
             frame.setVisibility(View.GONE);
 
-            openOtherVideo(main);
+           // openOtherVideo(main);
         }
     }
 
@@ -178,7 +197,7 @@ public class DisplayActivity extends FragmentActivity {
         }
 
         log.e("main childs :"+main.getChildCount());
-        closeOtherVideo(main);
+     //   closeOtherVideo(main);
 
     }
 

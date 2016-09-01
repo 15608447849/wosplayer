@@ -1,6 +1,9 @@
 package com.wosplayer.app;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -9,7 +12,7 @@ import android.os.Environment;
 import android.os.Looper;
 import android.widget.Toast;
 
-
+import com.wosplayer.service.RestartApplicationBroad;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -20,6 +23,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,6 +77,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
 	 */
 	@Override
 	public void uncaughtException(Thread thread, Throwable ex) {
+
 		if (!handleException(ex) && mDefaultHandler != null) {
 			//如果用户没有处理则让系统默认的异常处理器来处理
 			mDefaultHandler.uncaughtException(thread, ex);
@@ -82,10 +87,34 @@ public class CrashHandler implements UncaughtExceptionHandler {
 			} catch (InterruptedException e) {
 				log.e(TAG, "error : ", e);
 			}
+
+			/*//发送广播
+			Intent intent  = new Intent();
+			intent.setAction(RestartApplicationBroad.action);
+			intent.putExtra(RestartApplicationBroad.IS_START,false);
+			intent.putExtra(RestartApplicationBroad.KEYS,wosPlayerApp.config.GetStringDefualt("sleepTime","10"));
+			mContext.sendBroadcast(intent);*/
+
+
+			Intent intenta = new Intent();
+			intenta.putExtra(RestartApplicationBroad.IS_START,true);
+			intenta.setAction(RestartApplicationBroad.action);
+
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTimeInMillis(System.currentTimeMillis());
+			calendar.add(Calendar.SECOND, (int)10);
+
+			PendingIntent pi = PendingIntent.getBroadcast(mContext,0,intenta,0);
+			((AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE))
+					.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
+
+			log.e("错误收集 发送重启广播");
+
 			//退出程序
 			android.os.Process.killProcess(android.os.Process.myPid());
 			System.exit(1);
 		}
+
 	}
 
 	/**
@@ -105,6 +134,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
 				Looper.prepare();
 				Toast.makeText(mContext, "很抱歉,程序出现异常,即将退出.", Toast.LENGTH_LONG).show();
 				Looper.loop();
+
 			}
 		}.start();
 		//收集设备参数信息 

@@ -29,9 +29,6 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loa
         log.e("互动 视频播放者 创建");
         InitSettting(uri,localpath);
         video = new MyVideoView(context,this);
-
-
-
     }
 
 
@@ -39,8 +36,9 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loa
     private void mInitStart(String filePath) {
         video.setMyLayout(0,0,LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT);
         video.initVideoView(true);
-        log.i("start video");
+        log.i("videoPlayer","- -start video- - ");
         video.loadRouce(filePath);
+        log.d("videoPlayer","videoPlayer call video.start()");
         video.start();
     }
 

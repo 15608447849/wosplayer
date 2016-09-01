@@ -1,6 +1,7 @@
 package com.wosplayer.app;
 
 import android.app.Application;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import com.wosplayer.R;
 import com.wosplayer.service.CommunicationService;
 
 import java.io.File;
@@ -19,6 +21,7 @@ import java.util.Enumeration;
 import java.util.UUID;
 
 import installUtils.ApkController;
+import installUtils.AppToSystem;
 
 /**
  * Created by Administrator on 2016/7/19.
@@ -32,23 +35,78 @@ public class wosPlayerApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        log.d("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        log.d("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wosPlayer app start~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
 
         //查看 老版本app 是否存在 存在 卸载
         new Thread(new Runnable() {
             @Override
             public void run() {
                 ApkController.uninstall("com.wos",getApplicationContext());
-            }
-        });
+              /* int i = PackageUtils.uninstall(getApplicationContext(),"com.wos");
+                if (i==PackageUtils.DELETE_SUCCEEDED){
+                    Toals.Say("-- 卸载 com.wos success --");
+                }*/
 
-       // CrashHandler.getInstance().init(getApplicationContext());
+                //放入system
+                String packagepath = getApplicationInfo().sourceDir;
+                if (packagepath.contains("/data/app")){
+
+                    String paramString=// "adb push MySMS.apk /system/app" +"\n"+
+                            "adb shell" +"\n"+
+                                    "su" +"\n"+
+                                    // "mount -o remount,rw -t yaffs2 /dev/block/mtdblock3 /system" +"\n"+
+                                    "mount -o remount,rw /system" +"\n"+
+                                    "cp "+packagepath+" /system/app/wosplayer.apk" +"\n"+
+                                    //"mount -o remount,ro -t yaffs2 /dev/block/mtdblock3 /system" +"\n"+
+                                    "mount -o remount,ro /system" +"\n"+
+                                    "reboot"+"\n"+
+                                    "exit" +"\n"+
+                                    "exit";
+
+                    log.e("root","# "+paramString);
+
+                    if(AppToSystem.haveRoot()){
+                        if(AppToSystem.execRootCmdSilent(paramString)==-1){
+
+                            log.e("root","安装不成功");
+                        }else{
+
+                            log.e("root","安装成功");
+                        }
+                    }else{
+                        log.e("root","没有root权限");
+                    }
+
+                }else{
+                    //创建桌面图标
+
+                    Intent intent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
+                    intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, getString(R.string.app_name));
+                    // 是否可以有多个快捷方式的副本，参数如果是true就可以生成多个快捷方式，如果是false就不会重复添加
+                    intent.putExtra("duplicate", false);
+
+                    Intent intent2 = new Intent(Intent.ACTION_MAIN);
+                    intent2.addCategory(Intent.CATEGORY_LAUNCHER);
+                    // 删除的应用程序的ComponentName，即应用程序包名+activity的名字
+                    intent2.setComponent(new ComponentName(wosPlayerApp.this.getPackageName(), wosPlayerApp.this.getPackageName() + ".DisplayActivity"));
+                    intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, intent2);
+                    intent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource.fromContext(wosPlayerApp.this,
+                            R.drawable.ic_launcher));
+                    sendBroadcast(intent);
+                }
+
+
+            }
+        }).start();
+
+
+
+        CrashHandler.getInstance().init(getApplicationContext());
         //检测sd卡
 
         //初始化 配置信息
         init();
-
-
     }
 
 
@@ -73,6 +131,8 @@ public class wosPlayerApp extends Application {
         config.put("companyid", GetKey("companyid", "999"));
         //心跳时间
         config.put("HeartBeatInterval", GetKey("HeartBeatInterval", "30"));
+        //重启时间
+        config.put("sleepTime", GetKey("sleepTime", "30"));
         //本地资源存储目录
         String basepath = GetKey("basepath", "/wos/wos/source/");
         if (!basepath.endsWith("/")) {
@@ -167,9 +227,9 @@ public class wosPlayerApp extends Application {
      HeartBeatTime = intent.getExtras().getLong("HeartBeatTime");
      */
 
-    public static void startCommunicationService() {
+    public static void startCommunicationService(Context mc) {
 
-        Intent intent = new Intent(appContext, CommunicationService.class);
+        Intent intent = new Intent(mc, CommunicationService.class);
         //传递参数
         Bundle b = new Bundle();
         b.putString("ip",config.GetStringDefualt("serverip","127.0.0.1"));
@@ -178,16 +238,16 @@ public class wosPlayerApp extends Application {
         b.putLong("HeartBeatTime",(config.GetIntDefualt("HeartBeatInterval",50) * 500));
         intent.putExtras(b);
         log.i("wosPlayerApp: 尝试开启通讯服务...");
-        appContext.startService(intent);
+        mc.startService(intent);
 
     }
 
     /**
      * 停止服务
      */
-    public static void stopCommunicationService(){
-        Intent server = new Intent(appContext, CommunicationService.class);
-        appContext.stopService(server);
+    public static void stopCommunicationService(Context mc){
+        Intent server = new Intent(mc, CommunicationService.class);
+        mc.stopService(server);
     }
 
 

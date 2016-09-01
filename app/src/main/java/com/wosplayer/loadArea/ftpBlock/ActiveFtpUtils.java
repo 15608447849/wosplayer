@@ -178,16 +178,19 @@ public class ActiveFtpUtils {
 
         try {
             files =  ftpClient.listFiles(serverPath); //远程服务器文件
+            if (files.length == 0) {
+                log.i(TAG,"服务器文件 不存在 : ["+ serverPath+"]");
+                listener.onDownLoadProgress(FTP_FILE_NOTEXISTS, 0,null, null);
+                return;
+            }else{
+                log.i(TAG,"服务器文件 存在 :"+ serverPath);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             return;
         }
-        if (files.length == 0) {
-            log.i(TAG,"服务器文件 不存存在 :"+ serverPath);
-            listener.onDownLoadProgress(FTP_FILE_NOTEXISTS, 0,null, null);
-            return;
-        }
-        log.i(TAG,"服务器文件 存在 :"+ serverPath);
+
+
 
         //创建本地文件夹
         File mkFile = new File(localPath);
@@ -199,9 +202,11 @@ public class ActiveFtpUtils {
         boolean isLoad = true;
         // 接着判断下载的文件是否能断点下载
         long serverSize = files[0].getSize(); // 获取远程文件的长度
-        log.i(TAG,"服务器文件长度 :"+ serverSize);
+        log.i(TAG,"# 服务器文件长度 :"+ serverSize);
+        log.d("# :"+localFilePath + " #");
+        log.d("# :"+tmp_localPath +" #");
         File localFile = new File(localFilePath);//本地文件
-        File tmp_localFile = new File(tmp_localPath);
+        File tmp_localFile = new File(tmp_localPath);//临时文件
 
         if(localFile.exists()){
             //如果有同名文件
@@ -217,11 +222,13 @@ public class ActiveFtpUtils {
                log.i(TAG,"删除一个同名文件:"+localFile.getName());
                localFile.delete();
            }
+        }else{
+            log.d("本地无同名文件");
         }
 
 
         long localSize = 0;
-        if (tmp_localFile.exists()) {   //如果 临时文件存在
+        if (tmp_localFile.exists()) { //如果 临时文件存在
             localSize = tmp_localFile.length(); // 获取 本地临时文件的长度
             log.i(TAG,"临时文件长度:"+localSize);
             if (localSize == serverSize) { //临时文件长度 和 服务器 的大小一样 不下载
@@ -230,40 +237,46 @@ public class ActiveFtpUtils {
             }if (localSize<serverSize){
                 log.i(TAG,"临时文件:"+tmp_localPath+",  大小:"+localSize+",  服务器存在大小:"+serverSize);
             }else if (localSize>serverSize){
-                log.i("FTP_","删除一个临时文件:"+tmp_localPath+",  大小:"+localSize+",  服务器存在大小:"+serverSize);
+                log.i(TAG,"删除一个临时文件:"+tmp_localPath+",  大小:"+localSize+",  服务器存在大小:"+serverSize);
                 File file = new File(tmp_localPath);
                 file.delete();
                 localSize = 0;
             }
+        }else{
+            log.d("# tmp_localFile  临时文件不存在 - "+ tmp_localFile);
         }
 
 
 
         if (isLoad) {//如果　没有下载过　准备下载．
-            log.i(TAG,"本地 未下载文件 :"+ localFilePath);
+            log.i(TAG,"准备下载 ...  本地未下载文件 :"+ localFilePath);
                     //下载前　设置下载中所需值
                     long step = serverSize / 100; //下标位置
                     long process = 0; // 进度
                     long currentSize = 0;//已下载大小
                     String speed =null;
 
-            // 输出到本地文件里流
+            // 输出到本地文件流
             OutputStream out = null;
             try {
+                log.d("# && :"+tmp_localPath +",tmp_localFile:"+tmp_localFile);
                 out = new FileOutputStream(tmp_localFile, true); //本地文件输出流
+
             } catch (FileNotFoundException e) {
-                listener.onDownLoadProgress(FTP_FILE_NOTEXISTS, 0,null, null);
+                log.e("ftp err : "+e.getMessage());
+                listener.onDownLoadProgress(FTP_DOWN_FAIL, 0,null, null);
                 return;
             }
 
-            //取出ftp文件流
+            //取出 ftp文件流
             InputStream input  = null;
             ftpClient.setRestartOffset(localSize);  //设置下载点
             try {
                 input = ftpClient.retrieveFileStream(serverPath);//远程ftp 文件输入流
             } catch (IOException e) {
-                e.printStackTrace();
+                log.e(TAG,"inputstream err :"+e.getMessage());
                 if (ReOpenConnectionFTP(serverPath, localPath, fileName, reconnectCount, listener)) {
+                    log.d("尝试重试");
                     return;
                 }
                 return;

@@ -96,7 +96,7 @@ public class ButtonContainer extends Container{
                 .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
                 .centerCrop()
                 .resize(w,h)
-                .placeholder(R.drawable.no_found)
+                .placeholder(R.drawable.loadding)
                 .error(R.drawable.error)
                 .into((ImageButton)view);
         log.i(TAG,"按钮背景加载完成");

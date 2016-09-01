@@ -211,7 +211,7 @@ try {
                     .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
 //                .centerCrop()
                     .fit().centerCrop()
-                    .placeholder(R.drawable.no_found)
+                    .placeholder(R.drawable.loadding)
                     .error(R.drawable.error)
                     .into(this);
             return;
@@ -224,7 +224,7 @@ try {
                 .centerCrop()
                 // .resize(this.getMeasuredWidth(), this.getMeasuredHeight())
                 .resize(w,h)
-                .placeholder(R.drawable.no_found)
+                .placeholder(R.drawable.loadding)
                 .error(R.drawable.error)
                 .into(this);
         /**.memoryPolicy(NO_CACHE, NO_STORE)

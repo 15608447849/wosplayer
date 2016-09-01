@@ -432,14 +432,16 @@ public class ScheduleSaver implements iCommand {
                     rootNode.addUriTast(bgmode_uri); //创建一个ftp任务
                 }
                 //ad
-              /*Element adElement = (Element) action_layoutElement.getElementsByTagName("ad").item(0);
-                if (adElement == null) return;
-                String ad_myXmlData = XmlHelper.getNodeToString(adElement);
-                HashMap<String, String> ad_xmldataList = Xmlparse.ParseXml("/ad", ad_myXmlData, Xmlparse.parseType.OnlyLeaf).get(0);
-                XmlNodeEntity interaction_layout_ad_node = interaction_layout_node.NewSettingNodeEntity();
-                interaction_layout_ad_node.Level = "interaction_layout_ad";
-                interaction_layout_ad_node.AddPropertyList(ad_xmldataList);
-                interaction_layout_ad_node.AddProperty("uuks", uuks);*/
+              Element adElement = (Element) action_layoutElement.getElementsByTagName("ad").item(0);
+                if (adElement != null) {
+                    String ad_myXmlData = XmlHelper.getNodeToString(adElement);
+                    HashMap<String, String> ad_xmldataList = Xmlparse.ParseXml("/ad", ad_myXmlData, Xmlparse.parseType.OnlyLeaf).get(0);
+                    XmlNodeEntity interaction_layout_ad_node = interaction_layout_node.NewSettingNodeEntity();
+                    interaction_layout_ad_node.Level = "interaction_layout_ad";
+                    interaction_layout_ad_node.AddPropertyList(ad_xmldataList);
+                    interaction_layout_ad_node.AddProperty("uuks", uuks);
+                }
+
 
 
                 //items 包含了 布局的东西

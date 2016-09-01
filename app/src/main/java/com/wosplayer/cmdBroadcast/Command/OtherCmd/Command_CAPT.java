@@ -30,32 +30,45 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
+
 /**
  * Created by user on 2016/7/29.
  * catch screen
  */
 public class Command_CAPT implements iCommand {
    private static String picpath = wosPlayerApp.config.GetStringDefualt("CAPTIMAGEPATH","");//path
-    String basepath = wosPlayerApp.config.GetStringDefualt("basepath","")+"screen0.png";
+   private String basepath = wosPlayerApp.config.GetStringDefualt("basepath","")+"screen0.png";;
     @Override
     public void Execute(String param) {
 
-        log.i("截屏準備中..."+Thread.currentThread().getName());
-        catchScreen();
-        log.i("截屏完成..."+Thread.currentThread().getName());
+        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+            @Override
+            public void call() {
+
+                log.i("截屏準備中..."+Thread.currentThread().getName());
+                catchScreen();
+                log.i("截屏完成..."+Thread.currentThread().getName());
+            }
+        });
+
     }
 
 
 
     private void catchScreen(){
+       log.d(" catch file path :"+ basepath);
 
-        String command = "screencap -p "+basepath;
+       String command = "screencap -p "+basepath;
         executeLiunx(command);
+
 
         File file = new File(basepath);
         Bitmap bgbmp = null;
 
         if (file.exists()){
+            log.d("file is exitsts :"+ basepath);
             file.delete();
         }
 
@@ -69,22 +82,35 @@ public class Command_CAPT implements iCommand {
         view.setDrawingCacheEnabled(true);//提高绘图速度
 
         bgbmp = Bitmap.createBitmap(view.getDrawingCache());
-
-        List<View> vList = getAllChildViews(DisplayActivity.baselayout);
+        log.d("------------------");
+        try{
+        List<View> vList = getAllChildViews(DisplayActivity.main);
+          log.d("sub view size :" + vList.size());
             // 视频截图
             for (View z : vList) {
+                log.d(" & "+ z.toString());
                 if (z instanceof MyVideoView) {
 
+                    log.d(" video start draw ...");
                     Bitmap videoImage = null;
                     MyVideoView cvv  = (MyVideoView)z;
                     videoImage = getVideoImage(cvv);
 
                     if (videoImage != null) {
+
+                        log.d("video point:("+z.getLeft()+","+z.getTop()+")");
                         bgbmp = composeImage(z.getLeft(), z.getTop(), bgbmp,videoImage);
+                        log.d("bgbmp size:("+bgbmp.getWidth()+","+bgbmp.getHeight()+")");
+                    }else{
+                        log.e(" video bitmap get err = "+bgbmp);
                     }
                 }
             }
 
+        }catch (Exception e){
+            log.e("video bitmap err:" + e.getMessage());
+        }
+        log.d("------------------ 1 -");
         //縮放
         bgbmp = resizeImage(bgbmp);
         synchronized (this) {
@@ -101,17 +127,25 @@ public class Command_CAPT implements iCommand {
                 log.e("截屏保存失败 :"+e.getMessage());
             }
         }
+        log.d("------------------ 2 -");
         synchronized (this) {
             // 向服务端上传图片
             String FilePath = picpath;
-            File uploadFile  = new File(FilePath);
-            String uri = wosPlayerApp.config.GetStringDefualt("CaptureURL", "");
-            boolean flag = uploadImage(uploadFile,uri);
-            if (flag){
-                log.i("catch screen success");
-            }else{
-                log.e("catch screen faild");
-            }
+            final File uploadFile  = new File(FilePath);
+            final String uri = wosPlayerApp.config.GetStringDefualt("CaptureURL", "");
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    boolean flag = uploadImage(uploadFile,uri);
+                    if (flag){
+                        log.i("catch screen success");
+                    }else{
+                        log.e("catch screen faild");
+                    }
+                }
+            }).start();
+
         }
 
         }
@@ -123,19 +157,20 @@ public class Command_CAPT implements iCommand {
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
         try {
             // 设置媒体文件
+            log.d(" * :"+cvv.getFileName());
             mmr.setDataSource(cvv.getFileName());
 
             // 获取播放点
             long pos = cvv.getCurrentPosition();
-
+            log.e(" *& : "+ pos);
             // 获取播放点的缩略图
             Bitmap bmp = mmr.getFrameAtTime(pos * 1000,
                     MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
             if (bmp != null) {
-
+                log.e(" *& size {"+ cvv.getViewWidth()+","+ cvv.getViewHeight()+"}");
                 // 根据播放器大小返回图
-                return Bitmap.createScaledBitmap(bmp, cvv.getViewWidth(),
-                        cvv.getViewHeight(), true);
+                return Bitmap.createScaledBitmap(bmp, cvv.getViewHeight(),
+                        cvv.getViewWidth(), true);
             }
 
         } catch (Exception e) {
@@ -163,14 +198,18 @@ public class Command_CAPT implements iCommand {
                 return null;
             if (videoImage == null)
                 return null;
+
             // 获取原图宽高
             int sw = bgbmp.getWidth();
             int sh = bgbmp.getHeight();
 
+            log.d("s bitmap:"+sw+","+sh);
             // 根据原图宽高创建新位图对象
             Bitmap newb = Bitmap.createBitmap(sw, sh, Bitmap.Config.ARGB_8888);
             // 根据新位图创建一个等大小的画布
             Canvas cv = new Canvas(newb);
+
+            log.d("&&*("+videoImage.getWidth()+"&"+videoImage.getHeight()+")");
             // 在画布上做新图
             cv.drawBitmap(bgbmp, 0, 0, null);
             cv.drawBitmap(videoImage, left, top, null);
@@ -193,8 +232,9 @@ public class Command_CAPT implements iCommand {
 
         float scaleFactor = 1f;
 
-        float scaleX = 480f / (float) imgWidth;
-        float scaleY = 360f / (float) imgHeight;
+        float scaleX = 360f / (float) imgWidth;
+        float scaleY = 480f / (float) imgHeight;
+
 
         if (scaleX >= scaleY && scaleX < 1) {
             scaleFactor = scaleX;
@@ -229,22 +269,39 @@ public class Command_CAPT implements iCommand {
      */
     private List<View> getAllChildViews(View view) {
         List<View> allchildren = new ArrayList<View>();
-        if (view instanceof ViewGroup) {
-            ViewGroup vp = (ViewGroup) view;
-            for (int i = 0; i < vp.getChildCount(); i++) {
-                View viewchild = vp.getChildAt(i);
-                allchildren.add(viewchild);
-                allchildren.addAll(getAllChildViews(viewchild));
-            }
-        }
+        getSubView(view,allchildren);
         return allchildren;
     }
+
+    private void getSubView(View vg,List<View> list){
+        if (vg instanceof ViewGroup) {
+            ViewGroup vp = (ViewGroup) vg;
+            log.d("#& f: "+vp.toString());
+            for (int i = 0; i < vp.getChildCount(); i++) {
+                View viewchild = vp.getChildAt(i);
+                log.d("#& :"+viewchild.toString());
+                if (viewchild instanceof ViewGroup){
+                    getSubView(viewchild,list);
+                }else {//视图 添加
+                    list.add(viewchild);
+                    list.addAll(getAllChildViews(viewchild));
+                }
+            }
+        }
+    }
+
 
     /**
      * upload
      *
      */
     private boolean uploadImage(File file,String url){
+
+        if (file==null){
+            log.e("bitmap file is null");
+            return false;
+        }
+
         try {
             HttpClient httpclient = new DefaultHttpClient();
             HttpPost httppost = new HttpPost(url);
@@ -262,6 +319,7 @@ public class Command_CAPT implements iCommand {
             ResponseHandler<String> responseHandler = new BasicResponseHandler();
 
             String result = httpclient.execute(httppost, responseHandler);
+
 
             if (result.equals("1\r\n")) {
                 log.i("post screeshot bitmap success");

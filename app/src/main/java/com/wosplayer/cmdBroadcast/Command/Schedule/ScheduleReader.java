@@ -235,7 +235,9 @@ public class ScheduleReader {
                 PreUUKS = uuks;
             }
             log.i(TAG," UUKS IS NOT SAME, start reader");
+                //
             Stop();
+
             log.i(TAG,"全部排期数量:"+list.size());
             Toals.Say("全部排期数量:"+list.size());
 

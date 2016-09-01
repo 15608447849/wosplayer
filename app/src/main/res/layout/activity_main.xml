@@ -1,17 +1,28 @@
 <AbsoluteLayout
-
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="horizontal"
     >
+  <FrameLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content">
+    <ImageButton
+        android:id="@+id/closeappbtn"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:background="@drawable/close_btn_img"
+        />
+  </FrameLayout>
 
+
+<!--  android:background="@drawable/notschedule" -->
   <AbsoluteLayout
       android:id="@+id/main"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:background="@drawable/notschedule"
       >
+
   </AbsoluteLayout>
 
   <FrameLayout
@@ -68,8 +79,8 @@
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:layout_gravity="center"
-              android:background="@drawable/back"
-              android:layout_margin="15dp"
+              android:background="@drawable/video_back"
+              android:layout_margin="85dp"
               android:onClick="FrameBtnEvent"
               />
         </FrameLayout>

@@ -30,11 +30,13 @@ import java.io.InputStream;
 import java.util.Calendar;
 
 import cn.trinea.android.common.util.PackageUtils;
+import installUtils.AppToSystem;
 
 /**
  * Created by user on 2016/8/1.
  */
 public class Command_UPDC implements iCommand {
+    private String packagename = "com.wosplayer";
     @Override
     public void Execute(String param) {
         log.i("更新app,远程版本号:"+param);
@@ -91,6 +93,10 @@ public class Command_UPDC implements iCommand {
         Element antivirus = document.getRootElement();
         String code = antivirus.element("code").getText();
         String path = antivirus.element("path").getText();
+        String spackagename = antivirus.element("packagename").getText();
+        if (spackagename!=null && !spackagename.equals("")){
+            packagename = spackagename ;
+        }
         compareVersion(Integer.parseInt(code),path);//比较版本
     }
 
@@ -173,7 +179,7 @@ private void installApk(String apkLocalPath) {
 
     Intent intent = new Intent();
     intent.setAction(RestartApplicationBroad.action);
-
+//    intent.putExtra(RestartApplicationBroad.IS_START,false);
     Calendar calendar = Calendar.getInstance();
     calendar.setTimeInMillis(System.currentTimeMillis());
     calendar.add(Calendar.SECOND, 10);
@@ -186,6 +192,14 @@ private void installApk(String apkLocalPath) {
     log.e(" execute install APK.. end progress");
     int code =  PackageUtils.install(DisplayActivity.activityContext,apkLocalPath);
     log.e("install requst code :"+code);
+    if (code == PackageUtils.INSTALL_SUCCEEDED){
+        //打开apk
+			String param =
+			"adb shell am start -n com.wosplayer/com.wosplayer.activity.DisplayActivity";
+			AppToSystem.execRootCmdSilent(param);
+
+        PackageUtils.startInstalledAppDetails(DisplayActivity.activityContext,packagename);
+    }
 
 }
 

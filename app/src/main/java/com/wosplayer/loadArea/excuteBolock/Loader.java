@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
+import installUtils.MD5Util;
 import rx.Scheduler;
 import rx.functions.Action0;
 import rx.schedulers.Schedulers;
@@ -28,6 +29,7 @@ import rx.schedulers.Schedulers;
  * Created by user on 2016/6/24.
  */
 public class Loader {
+    public static int loadcount = 2 ;
     private static final String TAG = "_Loader";
     private static ReentrantLock locker = new ReentrantLock();//同步锁
     private LoaderCaller other_caller;
@@ -91,7 +93,7 @@ public class Loader {
             muri = uri;
 
             //是否 加入 等待 ,如果进行中的任务数量已经满足了
-            if (loadingTaskList.size()>2){
+            if (loadingTaskList.size()>loadcount){
                 addWaitList(this);
                 return;
             }
@@ -145,7 +147,7 @@ public class Loader {
             ioThread.schedule(new Action0() {
                 @Override
                 public void call() {
-                    FTPload(host, name, password, path, filename, localPath);
+                    FTPload(host, name, password, path, filename, localPath,null);
                 }
             });
         }
@@ -208,9 +210,11 @@ public class Loader {
     }
 
     private void loadFileRecall(final String Filepath) {
+        log.d(" & loadFileRecall() ,"+ Filepath);
+
         if (Filepath.equals("loaderr")){
             log.e("文件:"+ Filepath+" - load faild");
-            ioThread.schedule(new Action0() {
+            notifyThread.schedule(new Action0() {
                 @Override
                 public void call() {
                     caller.Call("404");
@@ -218,7 +222,7 @@ public class Loader {
             });
         }else{
             //load success
-            ioThread.schedule(new Action0() {
+            notifyThread.schedule(new Action0() {
                 @Override
                 public void call() {
                     caller.Call(Filepath);
@@ -247,10 +251,12 @@ public class Loader {
      * @param fileName  要下载的文件名
      * @param localPath 本地路径
      */
-    private synchronized void FTPload(final String host, String user, String pass, String remotePath, final String fileName, String localPath){
+    private synchronized void FTPload(final String host, final String user, final String pass, final String remotePath, final String fileName, final String localPath, final Object ob){
         log.i(TAG, "FTP任务["+fileName+"],所在线程:"+ Thread.currentThread().getName());
 
-            ActiveFtpUtils ftp = new ActiveFtpUtils(host,21,user,pass);
+            final ActiveFtpUtils ftp = new ActiveFtpUtils(host,21,user,pass);
+
+
             ftp.downloadSingleFile(remotePath + fileName,
                     localPath,
                     fileName,
@@ -261,10 +267,36 @@ public class Loader {
 
                     if(currentStep.equals(ActiveFtpUtils.FTP_DOWN_SUCCESS)){
                         //成功
-                        log.i(TAG, fileName+"ftp下载succsee,线程 -:"+ Thread.currentThread().getName());
+                        log.i(TAG, "ftp下载succsee -"+fileName+" - 线程 - "+ Thread.currentThread().getName());
+
+                        if (fileName.contains(".md5")){
+
+                            String sp = ((File)ob).getAbsolutePath();
+                            String dp = file.getAbsolutePath();
+                            int sut =  MD5Util.FTPMD5(sp,dp);
+                            if (sut==0){
+                        loadFileRecall(sp);
+                        nitifyMsg(((File)ob).getName(),3);
+                            }else{
+
+                                log.e(TAG,"文件:"+((File)ob).getName()+ " md5 效验失败!");
+                                loadFileRecall("loaderr");
+                                nitifyMsg(((File)ob).getName(),4);
+                            }
+                        }else{
+                            File msd5file = MD5Util.getFileMD5String(file);
+                            //下载 md5
+                            FTPload(host,user,pass,remotePath,fileName+".md5",localPath,msd5file);
+                        }
+
+
+
+
+
+
 //                        caller.Call(file.getAbsolutePath());
-                        loadFileRecall(file.getAbsolutePath());
-                        nitifyMsg(fileName,3);
+                     /*   loadFileRecall(file.getAbsolutePath());
+                        nitifyMsg(fileName,3);*/
                     }
 
                     if (currentStep.equals(ActiveFtpUtils.FTP_DOWN_LOADING)){
@@ -483,7 +515,7 @@ public class Loader {
                     itr.remove();
                     i++;
 
-                    if (i==2){
+                    if (i==loadcount){
                         break;
                     }
                 }

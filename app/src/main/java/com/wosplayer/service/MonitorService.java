@@ -23,7 +23,7 @@ public class MonitorService extends Service {
 
 
     private boolean threadFlag = true;
-    private long interval = 60*1000;
+    private long interval = 10*1000;
     private Thread canAppThread = null;
     @Nullable
     @Override
@@ -43,6 +43,29 @@ public class MonitorService extends Service {
             sendBroadcast(mintent);*/
      //   }
 //        startTimer();
+        if (canAppThread!=null){
+            threadFlag = false;
+            canAppThread = null;
+        }
+
+        canAppThread =  new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(threadFlag){
+                    log.e("------------------------------------------監聽中---------------------------------");
+                    monitor();
+                    try {
+                        Thread.sleep(interval);
+                    } catch (InterruptedException e) {
+                        log.e("监听服务 监听线程 err:"+e.getMessage());
+                    }
+                    //   log.i("`````监听服务 监听线程 over..`````");
+                }
+
+            }
+        });
+        threadFlag = true;
+        canAppThread.start();
 
     }
 
@@ -63,15 +86,12 @@ public class MonitorService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        if (canAppThread!=null){
-            threadFlag = false;
-            canAppThread = null;
-        }
+
 
         log.e("- -监听服务-------------------------------- 开启- -");
 
 
-        canAppThread =  new Thread(new Runnable() {
+       /* canAppThread =  new Thread(new Runnable() {
             @Override
             public void run() {
                 while(threadFlag){
@@ -88,7 +108,7 @@ public class MonitorService extends Service {
             }
         });
         threadFlag = true;
-        canAppThread.start();
+        canAppThread.start();*/
 
 
         return super.onStartCommand(intent, flags, startId);
@@ -127,11 +147,17 @@ public class MonitorService extends Service {
 
         boolean flag =  serverUtils.isAppOnForeground(MonitorService.this.getApplicationContext());
         log.i("监听服务 监听结果 :"+flag);
-        if (flag){
-            return;
+        if (!flag){
+            log.e("app not foreground...");
+            Intent intent  = new Intent();
+            intent.setAction(RestartApplicationBroad.action);
+            intent.putExtra(RestartApplicationBroad.IS_START,false);
+            intent.putExtra(RestartApplicationBroad.KEYS, "0");
+            sendBroadcast(intent);
+            //            return;
         }
 
-        log.e("app not foreground...");
+
         //如果不是运行在前台
       /*  Intent intent = new Intent();
         intent.setClassName(MonitorService.this.getPackageName(), DisplayActivity.class.getName());
@@ -139,9 +165,9 @@ public class MonitorService extends Service {
 //                        | Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         getApplicationContext().startActivity(intent);*/
-        log.e("******************");
+      /*  log.e("******************");
         DisplayActivity.activityContext.finish();
-        log.e("-----******************-----");
+        log.e("-----******************-----");*/
 
     }
 

@@ -149,8 +149,8 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, L
             });
             fLayout = new FrameLayout(DisplayActivity.activityContext);
             fLayout.setLayoutParams(new AbsoluteLayout.LayoutParams(AbsoluteLayout.LayoutParams.WRAP_CONTENT, AbsoluteLayout.LayoutParams.WRAP_CONTENT,
-                    CanvasView.getLayoutParams().width -75,
-                    CanvasView.getLayoutParams().height -75));
+                    CanvasView.getLayoutParams().width -175,
+                    CanvasView.getLayoutParams().height -175));
             fLayout.addView(retenbtn);
         }
 
@@ -628,7 +628,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, L
                 .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
                 .centerCrop()
                 .resize(nw,nh)
-                .placeholder(R.drawable.no_found)
+                .placeholder(R.drawable.loadding)
                 .error(R.drawable.error)
                 .into(this);
     }
