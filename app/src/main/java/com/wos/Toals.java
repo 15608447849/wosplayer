@@ -1,7 +1,12 @@
 package com.wos;
 
+import android.widget.Toast;
+
 import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.log;
+
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 
 /**
  * Created by user on 2016/8/2.
@@ -16,11 +21,17 @@ public class Toals {
             log.e("toals err activity is null");
             return;
         }
-     /*  AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+
+      if (!DisplayActivity.isShowDialog){
+
+          return;
+      }
+
+      AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
             @Override
             public void call() {
                 Toast.makeText(DisplayActivity.activityContext,str,Toast.LENGTH_SHORT).show();
             }
-        });*/
+        });
     }
 }

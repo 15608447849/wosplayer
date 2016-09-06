@@ -47,6 +47,7 @@ public class DisplayActivity extends FragmentActivity {
     public static AbsoluteLayout frame_main = null; //隐藏图层上面的 容器图层
     public static DisplayActivity activityContext = null;
 
+    public static boolean isShowDialog = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,6 +78,12 @@ public class DisplayActivity extends FragmentActivity {
                 new Command_Close_App().Execute(null);
 
                 return false;
+            }
+        });
+        closebtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isShowDialog = !isShowDialog;
             }
         });
         log.d("--------create over-------------");

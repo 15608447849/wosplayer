@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.util.Log;
 
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.exception.HttpException;
@@ -30,7 +31,7 @@ import java.io.InputStream;
 import java.util.Calendar;
 
 import cn.trinea.android.common.util.PackageUtils;
-import installUtils.AppToSystem;
+import cn.trinea.android.common.util.ShellUtils;
 
 /**
  * Created by user on 2016/8/1.
@@ -93,9 +94,14 @@ public class Command_UPDC implements iCommand {
         Element antivirus = document.getRootElement();
         String code = antivirus.element("code").getText();
         String path = antivirus.element("path").getText();
-        String spackagename = antivirus.element("packagename").getText();
-        if (spackagename!=null && !spackagename.equals("")){
-            packagename = spackagename ;
+        try {
+            String spackagename = antivirus.element("packagename").getText();
+
+            if (spackagename != null && !spackagename.equals("")) {
+                packagename = spackagename;
+            }
+        }catch (Exception e){
+            Toals.Say("远程 未发送 包名信息 ");
         }
         compareVersion(Integer.parseInt(code),path);//比较版本
     }
@@ -110,6 +116,7 @@ public class Command_UPDC implements iCommand {
         log.i("upload  LocalVersion :"+ local+" remoteVersion:"+remote);
 
         Toals.Say("upload  LocalVersion :"+ local+" remoteVersion:"+remote);
+
         wosPlayerApp.sendMsgToServer("terminalNo:"+wosPlayerApp.config.GetStringDefualt("terminalNo","0000")+",localVersionNumber:"+local+",serverVersionNumber:"+remote);
 
         if (local<remote){
@@ -193,12 +200,19 @@ private void installApk(String apkLocalPath) {
     int code =  PackageUtils.install(DisplayActivity.activityContext,apkLocalPath);
     log.e("install requst code :"+code);
     if (code == PackageUtils.INSTALL_SUCCEEDED){
-        //打开apk
-			String param =
-			"adb shell am start -n com.wosplayer/com.wosplayer.activity.DisplayActivity";
-			AppToSystem.execRootCmdSilent(param);
 
-        PackageUtils.startInstalledAppDetails(DisplayActivity.activityContext,packagename);
+        String commands = "adb shell am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n com.wosplayer/com.wosplayer.activity.DisplayActivity";
+        ShellUtils.CommandResult cr = ShellUtils.execCommand(commands,false,true);
+
+        Log.e("",cr.result+"");
+
+
+//        //打开apk
+//			String param =
+//			"adb shell am start -n com.wosplayer/com.wosplayer.activity.DisplayActivity";
+//			AppToSystem.execRootCmdSilent(param);
+//
+//        PackageUtils.startInstalledAppDetails(DisplayActivity.activityContext,packagename);
     }
 
 }

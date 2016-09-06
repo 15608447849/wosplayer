@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import com.wos.Toals;
 import com.wosplayer.R;
 import com.wosplayer.service.CommunicationService;
 
@@ -20,6 +21,7 @@ import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.UUID;
 
+import cn.trinea.android.common.util.ShellUtils;
 import installUtils.ApkController;
 import installUtils.AppToSystem;
 
@@ -95,6 +97,25 @@ public class wosPlayerApp extends Application {
                             R.drawable.ic_launcher));
                     sendBroadcast(intent);
                 }
+
+
+                //预留远程端口号
+                String [] commands = {
+                        "su\n",
+                        "setprop service.adb.tcp.port 9999\n",
+                        "stop adbd\n",
+                        "start adbd\n"
+                };
+                ShellUtils.CommandResult cr = ShellUtils.execCommand(commands,true,true);
+
+                String strs = "远程端口开启结果: "+cr.result;
+                log.e(strs);
+                Toals.Say(strs);
+                strs = "本地ip: "+ getLocalIpAddress();
+                log.d(strs);
+
+
+
 
 
             }
