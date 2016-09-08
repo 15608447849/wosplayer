@@ -40,7 +40,7 @@ public class Command_UPDC implements iCommand {
     private String packagename = "com.wosplayer";
     @Override
     public void Execute(String param) {
-        log.i("更新app,远程版本号:"+param);
+        log.i("#####","更新app,远程版本号:"+param);
         Toals.Say("更新app");
         getRemoteVersionCode(param);
     }
@@ -61,7 +61,7 @@ public class Command_UPDC implements iCommand {
 
                     @Override
                     public void onSuccess(ResponseInfo<String> responseInfo) {
-                        log.i("upload version info:"+responseInfo.result);
+                        log.i("#####","upload version info:"+responseInfo.result);
                         parseRemoteInfo(responseInfo.result);
                     }
 
@@ -71,7 +71,7 @@ public class Command_UPDC implements iCommand {
 
                     @Override
                     public void onFailure(HttpException error, String msg) {
-                        log.i("upload version info:"+msg);
+                        log.i("#####","upload version info:"+msg);
                     }
                 });
     }
@@ -113,7 +113,7 @@ public class Command_UPDC implements iCommand {
         int local = getLocalVersionCode();
         int remote = remoteVersion;
 
-        log.i("upload  LocalVersion :"+ local+" remoteVersion:"+remote);
+        log.i("#####","upload  LocalVersion :"+ local+" remoteVersion:"+remote);
 
         Toals.Say("upload  LocalVersion :"+ local+" remoteVersion:"+remote);
 
@@ -155,7 +155,7 @@ public class Command_UPDC implements iCommand {
 private void installApk(String apkLocalPath) {
     File apkfile = new File(apkLocalPath);
     if (!apkfile.exists()) {
-        log.e("install apk is not exists...");
+        log.e("#####","install apk is not exists...");
         return;
     }
     // 通过Intent安装APK文件
@@ -196,15 +196,18 @@ private void installApk(String apkLocalPath) {
             .set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
 
     Toals.Say(calendar.getTime().toString()+",10 秒后 发送启动广播");
-    log.e(" execute install APK.. end progress");
+    log.e("#####"," execute install APK.. end progress");
+
     int code =  PackageUtils.install(DisplayActivity.activityContext,apkLocalPath);
-    log.e("install requst code :"+code);
+
+    log.e(" - - install requst code :"+code);
+
     if (code == PackageUtils.INSTALL_SUCCEEDED){
 
         String commands = "adb shell am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n com.wosplayer/com.wosplayer.activity.DisplayActivity";
         ShellUtils.CommandResult cr = ShellUtils.execCommand(commands,false,true);
 
-        Log.e("",cr.result+"");
+        Log.e("#####",cr.result+"");
 
 
 //        //打开apk
@@ -213,6 +216,26 @@ private void installApk(String apkLocalPath) {
 //			AppToSystem.execRootCmdSilent(param);
 //
 //        PackageUtils.startInstalledAppDetails(DisplayActivity.activityContext,packagename);
+    }else{
+        Log.e("#####path ",apkLocalPath);
+
+        String filane = apkLocalPath.substring(apkLocalPath.lastIndexOf("/")+1);
+        String [] param = {
+                "shell remount\n",
+                "adb shell\n",
+                "cp "+apkLocalPath+" /data/local/tmp/"+filane+"\n",
+                "chmod 777 /data/local/tmp/"+filane+"\n",
+                "pm install -r /data/local/tmp/"+filane+"\n",
+               // "rm /data/local/tmp.apk\n"
+        };
+        Log.e("#####","\n"+param[0]+param[1]+param[2]+param[3]);
+        ShellUtils.CommandResult cr = ShellUtils.execCommand(param,true,true);
+        Log.e("##### result"," -------------------  "+  cr.result+"  --------------------------------------------------");
+        if (cr.result == 0){
+            String p = "adb shell am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n com.wosplayer/com.wosplayer.activity.DisplayActivity\n";
+            ShellUtils.CommandResult cr1 = ShellUtils.execCommand(p,false,true);
+            Log.e("##### "," run result  "+  cr.result+" ^#");
+        }
     }
 
 }

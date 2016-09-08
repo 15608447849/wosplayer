@@ -269,12 +269,20 @@ public class Loader {
                         //成功
                         log.i(TAG, "ftp下载succsee -"+fileName+" - 线程 - "+ Thread.currentThread().getName());
 
+                        if (fileName.contains(".apk")){
+                        //caller.Call(file.getAbsolutePath());
+                        loadFileRecall(file.getAbsolutePath());
+                        nitifyMsg(fileName,3);
+                        return;
+                        }
+
                         if (fileName.contains(".md5")){
 
                             String sp = ((File)ob).getAbsolutePath();
                             String dp = file.getAbsolutePath();
                             int sut =  MD5Util.FTPMD5(sp,dp);
-                            if (sut==0){
+
+                        if (sut==0){
                         loadFileRecall(sp);
                         nitifyMsg(((File)ob).getName(),3);
                             }else{

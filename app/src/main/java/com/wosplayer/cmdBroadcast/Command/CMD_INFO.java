@@ -183,7 +183,8 @@ public final class CMD_INFO {
     /**
      * 关闭程序
      */
-    public static final String  SHDP="SHDP";
+    public static final String  SHDP="SHDP:";
+
     /**
      * SCRN
      描述：开始截图

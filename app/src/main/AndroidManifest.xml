@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.wosplayer"
-    android:versionCode="13"
-    android:versionName="13.0"
+    android:versionCode="4"
+    android:versionName="4.0"
     android:screenOrientation="portrait">
 
     <application
@@ -101,6 +101,7 @@
 
 
     <!-- 权限 -->
+    <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> <!-- 开机启动权限-->
     <uses-permission android:name="android.permission.WRITE_APN_SETTINGS"/>
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
@@ -121,7 +122,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.DELETE_PACKAGES" />
     <uses-permission android:name="android.permission.CLEAR_APP_CACHE" />
-    <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
+
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.READ_FRAME_BUFFER" />

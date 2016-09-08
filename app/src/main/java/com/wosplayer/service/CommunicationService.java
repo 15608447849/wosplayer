@@ -500,7 +500,10 @@ public class CommunicationService extends Service{
             @Override
             public void run() {
                     String msg = "HRBT:"+terminalNo;
+                   // msg += "#"+Command_UPDC.getLocalVersionCode();
                     sendMsgToService(msg);
+                    String msg2 = "hhhh:"+ "#"+Command_UPDC.getLocalVersionCode();
+                    sendMsgToService(msg2);
             }
         };
 

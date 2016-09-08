@@ -10,6 +10,7 @@ import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_CAPT;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Close_App;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Reboot_App;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Reboot_Sys;
+import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_SHDO;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_SYTI;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_UPDC;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_UPLG;
@@ -65,13 +66,14 @@ public class CmdPostTaskCenter extends BroadcastReceiver {
         commandList.put("UPDC:", new Command_UPDC());
 //        // 上传日志
         commandList.put("UPLG:", new Command_UPLG());
-
         // 重启程序
         commandList.put("UIRE:", new Command_Reboot_App());
         // 重启终端
         commandList.put("REBO:", new Command_Reboot_Sys());
-        // 关闭程序
-        commandList.put("SHDP:", new Command_Close_App());
+        // 关闭播放器
+        commandList.put(CMD_INFO.SHDP, new Command_Close_App());
+        //关闭终端
+        commandList.put(CMD_INFO.SHDO, new Command_SHDO());
     }
 
     private void postCmd(final String cmd, final String param){

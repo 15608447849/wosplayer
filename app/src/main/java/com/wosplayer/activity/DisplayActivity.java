@@ -75,7 +75,7 @@ public class DisplayActivity extends FragmentActivity {
             public boolean onLongClick(View v) {
                 Toals.Say("close app");
 
-                new Command_Close_App().Execute(null);
+                new Command_Close_App().Execute("true");
 
                 return false;
             }

@@ -52,7 +52,7 @@ public class wosPlayerApp extends Application {
 
                 //放入system
                 String packagepath = getApplicationInfo().sourceDir;
-                if (packagepath.contains("/data/app")){
+
 
                     String paramString=// "adb push MySMS.apk /system/app" +"\n"+
                             "adb shell" +"\n"+
@@ -63,12 +63,13 @@ public class wosPlayerApp extends Application {
                                     //"mount -o remount,ro -t yaffs2 /dev/block/mtdblock3 /system" +"\n"+
                                     "mount -o remount,ro /system" +"\n"+
                                     "reboot"+"\n"+
-                                    "exit" +"\n"+
-                                    "exit";
+                        "exit" +"\n"+
+                        "exit";
 
                     log.e("root","# "+paramString);
 
                     if(AppToSystem.haveRoot()){
+                        if (packagepath.contains("/data/app")){
                         if(AppToSystem.execRootCmdSilent(paramString)==-1){
 
                             log.e("root","安装不成功");
