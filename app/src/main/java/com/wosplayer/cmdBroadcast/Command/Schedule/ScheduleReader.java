@@ -817,9 +817,4 @@ public class ScheduleReader {
         return false;
     }
 
-
-
-
-
-
 }

@@ -8,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -304,13 +305,14 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
                 .config(Bitmap.Config.RGB_565)
                 .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
 //                .centerCrop()
-                .fit().centerCrop()
+                .fit().onlyScaleDown()
                 .placeholder(R.drawable.loadding)
                 .error(R.drawable.error)
                 .into(this);
     }
 
-
+    private WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+    private int defaultWidth = wm.getDefaultDisplay().getWidth();
 
     //重写系统方法
 

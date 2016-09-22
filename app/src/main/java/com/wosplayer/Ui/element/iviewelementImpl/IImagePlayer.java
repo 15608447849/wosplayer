@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
 import android.widget.ImageView;
 
@@ -28,6 +29,7 @@ import rx.functions.Action0;
 
 public class IImagePlayer extends ImageView implements IPlayer{
 
+    private WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
     private static final java.lang.String TAG = IImagePlayer.class.getName();
     private Loader loader;
     private Context mCcontext;
@@ -36,6 +38,7 @@ public class IImagePlayer extends ImageView implements IPlayer{
     private int y=0;
     private int h=0;
     private int w=0;
+    private int defaultWidth = wm.getDefaultDisplay().getWidth();
     private boolean isExistOnLayout = false;
 
 
@@ -59,7 +62,7 @@ public class IImagePlayer extends ImageView implements IPlayer{
             this.mp = mp;
             this.x = mp.GetIntDefualt("x", 0);
             this.y = mp.GetIntDefualt("y", 0);
-            this.w = mp.GetIntDefualt("width", 0);
+            this.w = mp.GetIntDefualt("width",defaultWidth );
             this.h = mp.GetIntDefualt("height", 0);
             this.localpath = mp.GetStringDefualt("localpath", "");
             this.uri = mp.GetStringDefualt("getcontents", "");
@@ -210,7 +213,7 @@ try {
                     .config(Bitmap.Config.RGB_565)
                     .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
 //                .centerCrop()
-                    .fit().centerCrop()
+                    .fit().onlyScaleDown()
                     .placeholder(R.drawable.loadding)
                     .error(R.drawable.error)
                     .into(this);
@@ -221,7 +224,7 @@ try {
                 .load(new File(filePath))
 //                .resize(w-1,h-1)
                 .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
-                .centerCrop()
+                .onlyScaleDown()
                 // .resize(this.getMeasuredWidth(), this.getMeasuredHeight())
                 .resize(w,h)
                 .placeholder(R.drawable.loadding)

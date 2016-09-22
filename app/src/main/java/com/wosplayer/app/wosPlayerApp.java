@@ -52,8 +52,6 @@ public class wosPlayerApp extends Application {
 
                 //放入system
                 String packagepath = getApplicationInfo().sourceDir;
-
-
                     String paramString=// "adb push MySMS.apk /system/app" +"\n"+
                             "adb shell" +"\n"+
                                     "su" +"\n"+

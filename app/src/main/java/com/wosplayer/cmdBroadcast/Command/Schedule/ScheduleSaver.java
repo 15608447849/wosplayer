@@ -423,7 +423,7 @@ public class ScheduleSaver implements iCommand {
                 //获取 缩略图 的地址
                 String layout_thumbnailpath = XmlHelper.getFirstChildNodeValue(action_layoutElement, "thumbnailpath");//封面图片文件名，完整路径需加前缀
                 if (layout_thumbnailpath==null || layout_thumbnailpath.equals("")) {
-                    log.e(TAG,"按钮 背景 解析错误:背景图片名不存在") ;
+                    log.e(TAG,"按钮 背景 解析错误:背景图片名不存在");
                     String errImageBgUri = "http://imgsrc.baidu.com/forum/w%3D580/sign=55460f6a367adab43dd01b4bbbd5b36b/269759ee3d6d55fb1fa4ca646d224f4a20a4dd16.jpg";
                     rootNode.addUriTast(errImageBgUri);
                 }else{
