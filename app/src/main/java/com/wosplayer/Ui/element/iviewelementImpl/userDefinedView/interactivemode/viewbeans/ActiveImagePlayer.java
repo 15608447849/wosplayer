@@ -305,7 +305,9 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
                 .config(Bitmap.Config.RGB_565)
                 .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
 //                .centerCrop()
-                .fit().onlyScaleDown()
+                .fit()
+                .centerInside()
+                //.onlyScaleDown()
                 .placeholder(R.drawable.loadding)
                 .error(R.drawable.error)
                 .into(this);

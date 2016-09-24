@@ -1,7 +1,6 @@
 package com.wosplayer.app;
 
 import android.app.Application;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -10,7 +9,6 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.wos.Toals;
-import com.wosplayer.R;
 import com.wosplayer.service.CommunicationService;
 
 import java.io.File;
@@ -82,7 +80,7 @@ public class wosPlayerApp extends Application {
                 }else{
                     //创建桌面图标
 
-                    Intent intent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
+                  /*  Intent intent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
                     intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, getString(R.string.app_name));
                     // 是否可以有多个快捷方式的副本，参数如果是true就可以生成多个快捷方式，如果是false就不会重复添加
                     intent.putExtra("duplicate", false);
@@ -94,7 +92,7 @@ public class wosPlayerApp extends Application {
                     intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, intent2);
                     intent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource.fromContext(wosPlayerApp.this,
                             R.drawable.ic_launcher));
-                    sendBroadcast(intent);
+                    sendBroadcast(intent);*/
                 }
 
 
@@ -108,14 +106,10 @@ public class wosPlayerApp extends Application {
                 ShellUtils.CommandResult cr = ShellUtils.execCommand(commands,true,true);
 
                 String strs = "远程端口开启结果: "+cr.result;
-                log.e(strs);
+                log.d("Remote",strs);
                 Toals.Say(strs);
                 strs = "本地ip: "+ getLocalIpAddress();
-                log.d(strs);
-
-
-
-
+                log.d("Remote",strs);
 
             }
         }).start();

@@ -35,8 +35,8 @@ public class CmdPostTaskCenter extends BroadcastReceiver {
     public static final String cmd = "toCmd";
     public static final String param = "toParam";
     private static final java.lang.String TAG =CmdPostTaskCenter.class.getName() ;
-    private static final Scheduler.Worker helper =  Schedulers.newThread().createWorker();
-
+    private static final Scheduler.Worker helper1 =  Schedulers.newThread().createWorker();
+    private static final Scheduler.Worker helper2 =  Schedulers.newThread().createWorker();
     @Override
     public void onReceive(Context context, Intent intent) {
         String msgCmd = intent.getExtras().getString(cmd);
@@ -80,13 +80,25 @@ public class CmdPostTaskCenter extends BroadcastReceiver {
 
         if (commandList.containsKey(cmd)) {
             log.i("执行指令:"+cmd +"所在线程:"+Thread.currentThread().getName()+" 当前线程数:"+Thread.getAllStackTraces().size());
-            helper.schedule(new Action0() {
-                @Override
-                public void call() {
-                    iCommand icommand = commandList.get(cmd);
-                    icommand.Execute(param); // 执行~
-                }
-            });
+            if (cmd.equals("REBO:") || cmd.equals("UIRE:") || cmd.equals("UPDC:") || cmd.equals(CMD_INFO.SHDO)){
+
+                helper1.schedule(new Action0() {
+                    @Override
+                    public void call() {
+                        iCommand icommand = commandList.get(cmd);
+                        icommand.Execute(param); // 执行~
+                    }
+                });
+            }else{
+                helper2.schedule(new Action0() {
+                    @Override
+                    public void call() {
+                        iCommand icommand = commandList.get(cmd);
+                        icommand.Execute(param); // 执行~
+                    }
+                });
+            }
+
         }
 
     }

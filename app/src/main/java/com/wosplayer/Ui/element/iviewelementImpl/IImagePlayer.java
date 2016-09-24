@@ -204,32 +204,44 @@ try {
     }
 
     private void picassoLoaderImager(String filePath) {
-    /*    log.i(TAG,"width:"+w);
+        log.e(TAG," loader image ---------------------------------");
+    /*  log.i(TAG,"width:"+w);
         log.i(TAG,"layoutparam w:"+this.getLayoutParams().width);
-        log.i(TAG,"getMeasuredWidth:"+this.getMeasuredWidth());*/
+        log.i(TAG,"getMeasuredWidth:"+this.getMeasuredWidth());
+        */
+
+        log.d(TAG,"w:"+w +","+h);
+        log.d(TAG,"this.getMeasuredWidth(), this.getMeasuredHeight() ==> "+ this.getMeasuredWidth()+" - "+this.getMeasuredHeight());
         if (w==AbsoluteLayout.LayoutParams.MATCH_PARENT || h == AbsoluteLayout.LayoutParams.MATCH_PARENT){
+
+
+        }
             Picasso.with(mCcontext)
                     .load(new File(filePath))
                     .config(Bitmap.Config.RGB_565)
                     .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
-//                .centerCrop()
-                    .fit().onlyScaleDown()
+                    .fit()
+                    //.centerCrop()
+                    .centerInside()
+                    //.onlyScaleDown()
                     .placeholder(R.drawable.loadding)
                     .error(R.drawable.error)
                     .into(this);
+            log.e(TAG," loader image --------------------------------- end 1");
             return;
-        }
+
         //纯用picasso 加载本地图片
-        Picasso.with(mCcontext)
+    /*    Picasso.with(mCcontext)
                 .load(new File(filePath))
 //                .resize(w-1,h-1)
                 .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
-                .onlyScaleDown()
-                // .resize(this.getMeasuredWidth(), this.getMeasuredHeight())
+               // .onlyScaleDown()
+                .resize(this.getMeasuredWidth(), this.getMeasuredHeight())
                 .resize(w,h)
                 .placeholder(R.drawable.loadding)
                 .error(R.drawable.error)
-                .into(this);
+                .into(this);*/
+       // log.e(TAG," loader image --------------------------------- end 2");
         /**.memoryPolicy(NO_CACHE, NO_STORE)
          * 其中memoryPolicy的NO_CACHE是指图片加载时放弃在内存缓存中查找，NO_STORE是指图片加载完不缓存在内存中。
          *        .transform(new Transformation(){
