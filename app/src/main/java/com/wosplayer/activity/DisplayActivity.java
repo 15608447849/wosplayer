@@ -9,8 +9,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.wos.Toals;
 import com.wosplayer.R;
@@ -19,6 +25,7 @@ import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Close_App;
+import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_PASD;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleReader;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleSaver;
 import com.wosplayer.service.MonitorService;
@@ -47,7 +54,17 @@ public class DisplayActivity extends FragmentActivity {
     public static AbsoluteLayout frame_main = null; //隐藏图层上面的 容器图层
     public static DisplayActivity activityContext = null;
 
+
+    private ImageButton closebtn ;
+    private LinearLayout psd_linear;
+    private EditText psd_in;
+    private Button psd_sure;
+    private ScrollView log_sl;
+    public static TextView log_out;
+
+
     public static boolean isShowDialog = false;
+    private boolean isShowPsdInput = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,10 +74,17 @@ public class DisplayActivity extends FragmentActivity {
 
         setContentView(R.layout.activity_main);//设置布局文件
         baselayout = (AbsoluteLayout) LayoutInflater.from(this).inflate(R.layout.activity_main,null);
-
         main = (AbsoluteLayout) this.findViewById(R.id.main);
         frame = (FrameLayout)this.findViewById(R.id.frame_layout);
         frame_main = (AbsoluteLayout)this.findViewById(R.id.frame_layout_main);
+
+        closebtn =  (ImageButton)findViewById(R.id.closeappbtn);
+        psd_linear = (LinearLayout) findViewById(R.id.pas_linear);
+         psd_in = (EditText) findViewById(R.id.psd_in);
+         psd_sure=(Button)findViewById(R.id.psd_sure);
+         log_sl = (ScrollView) findViewById(R.id.app_log_info);
+         log_out = (TextView) findViewById(R.id.app_log_info_text);
+
         activityContext = this;
         log.i(TAG,"onCreate() 正在执行的所有线程数:"+ Thread.getAllStackTraces().size());
 
@@ -69,23 +93,59 @@ public class DisplayActivity extends FragmentActivity {
         log.d(TAG," 开启<监听>服务");
         this.startService(intent);
 
-        ImageButton closebtn = (ImageButton)findViewById(R.id.closeappbtn);
+        //点击 显示/隐藏 信息输出
         closebtn.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Toals.Say("close app");
 
-                new Command_Close_App().Execute("true");
+                isShowDialog = !isShowDialog;
 
+
+                if (isShowDialog){
+                    log_sl.setVisibility(View.VISIBLE);
+                    Toals.Say("show info");
+                }else{
+                    log_sl.setVisibility(View.GONE);
+                }
                 return false;
             }
         });
+        //点击弹出密码输入
         closebtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                isShowDialog = !isShowDialog;
+
+
+                isShowPsdInput = !isShowPsdInput;
+                Toast.makeText(DisplayActivity.this,"显示值:"+isShowPsdInput,Toast.LENGTH_LONG).show();
+                if (isShowPsdInput){
+                    psd_linear.setVisibility(View.VISIBLE);
+                }else{
+                    psd_linear.setVisibility(View.GONE);
+                }
             }
         });
+
+        psd_sure.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //获取密码
+                String localPassword = Command_PASD.getUnlockPassword();
+                if (localPassword==null || localPassword.equals("")){
+                    Toast.makeText(DisplayActivity.this,"未找到本地密码,无法匹配",Toast.LENGTH_LONG).show();
+                    return;
+                }
+                //输入的密码
+                String inputPassword = psd_in.getText().toString();
+
+                if (inputPassword.equals(localPassword)){
+                    //关闭
+                Toals.Say("close app");
+                new Command_Close_App().Execute("true");
+                }
+            }
+        });
+
         log.d("--------create over-------------");
 
     }

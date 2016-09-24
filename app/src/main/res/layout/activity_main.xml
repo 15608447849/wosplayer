@@ -4,19 +4,81 @@
     android:layout_height="fill_parent"
     android:orientation="horizontal"
     >
-  <!--  android:background="@android:color/black"-->
+  <!--  android:background="@android:color/black"  悬浮在上面的一层-->
   <FrameLayout
-      android:layout_width="wrap_content"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
-
       >
-    <ImageButton
-        android:id="@+id/closeappbtn"
+    <!-- 隐藏区域-->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:background="@drawable/close_btn_img"
-        />
-  </FrameLayout>
+        android:orientation="vertical"
+
+        >
+      <!-- 影藏区域 上边区-->
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="horizontal"
+
+          >
+        <ImageButton
+            android:id="@+id/closeappbtn"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:background="@drawable/close_btn_img"
+            />
+        <LinearLayout
+            android:id="@+id/pas_linear"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="10dp"
+            android:background="@android:color/darker_gray"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            >
+          <!-- android:password="true"
+              android:inputType="textPassword"-->
+          <EditText
+              android:id="@+id/psd_in"
+              android:layout_width="0dp"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:background="@drawable/close_btn_img"
+              android:singleLine="true"
+              android:windowSoftInputMode="adjustUnspecified|stateHidden"
+              />
+          <Button
+              android:id="@+id/psd_sure"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="确定"
+              android:background="@drawable/close_btn_img"
+              />
+        </LinearLayout>
+      </LinearLayout>
+      <!-- 影藏区域 上边去 end -->
+      <!-- log显示-->
+      <ScrollView
+          android:id="@+id/app_log_info"
+          android:layout_width="match_parent"
+          android:layout_height="200dp"
+          android:visibility="gone"
+          >
+          <TextView
+              android:id="@+id/app_log_info_text"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:textSize="14sp"
+              android:background="@color/colorPrimary"
+              />
+      </ScrollView>
+    </LinearLayout>
+
+</FrameLayout>
 
 
 <!--  android:background="@drawable/notschedule" -->
@@ -24,9 +86,7 @@
       android:id="@+id/main"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-
       >
-
   </AbsoluteLayout>
 
   <FrameLayout
