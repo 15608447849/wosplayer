@@ -97,20 +97,22 @@ public class DisplayActivity extends FragmentActivity {
         closebtn.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+                if (isShowPsdInput){
+                return false;
+                }
+
 
                 isShowDialog = !isShowDialog;
-
-
                 if (isShowDialog){
                     log_sl.setVisibility(View.VISIBLE);
                     Toals.Say("show info");
                 }else{
                     log_sl.setVisibility(View.GONE);
                 }
-                return false;
+                return true;
             }
         });
-        //点击弹出密码输入
+        //点击弹出密码输入框
         closebtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -126,6 +128,7 @@ public class DisplayActivity extends FragmentActivity {
             }
         });
 
+        //密码确定
         psd_sure.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

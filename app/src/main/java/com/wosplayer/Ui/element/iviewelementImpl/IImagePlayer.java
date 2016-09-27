@@ -10,7 +10,6 @@ import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
 import android.widget.ImageView;
 
-import com.wosplayer.R;
 import com.wosplayer.Ui.element.IPlayer;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.log;
@@ -18,8 +17,6 @@ import com.wosplayer.loadArea.excuteBolock.Loader;
 
 import java.io.File;
 
-import it.sephiroth.android.library.picasso.MemoryPolicy;
-import it.sephiroth.android.library.picasso.Picasso;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 
@@ -40,6 +37,7 @@ public class IImagePlayer extends ImageView implements IPlayer{
     private int w=0;
     private int defaultWidth = wm.getDefaultDisplay().getWidth();
     private boolean isExistOnLayout = false;
+
 
 
     public IImagePlayer(Context context, ViewGroup mfatherView) {
@@ -66,6 +64,7 @@ public class IImagePlayer extends ImageView implements IPlayer{
             this.h = mp.GetIntDefualt("height", 0);
             this.localpath = mp.GetStringDefualt("localpath", "");
             this.uri = mp.GetStringDefualt("getcontents", "");
+
         }catch (Exception e){
             log.e(TAG, "loaddata() " + e.getMessage());
         }
@@ -131,31 +130,62 @@ public class IImagePlayer extends ImageView implements IPlayer{
             mfatherView.removeView(this);
             isExistOnLayout = false;
             //移除存在的图片资源
-            removeMyImage();
+            removeMyImage(this);
         }catch (Exception e){
             log.e(TAG,"停止:"+e.getMessage());
         }
     }
 
     //放入主线程
-    private void removeMyImage() {
+    public static void removeMyImage(ImageView imageView) {
+        log.i(TAG, "----------------------准备 释放资源----------------------------------" );
+
         //资源回调的地方
-        Drawable drawable = this.getDrawable();
+        Bitmap bitmap = null;
+            Drawable drawable = imageView.getDrawable();
+        if (drawable == null){
+            log.e(TAG,"释放资源失败,drawable is null 1");
+            drawable = imageView.getBackground();
+            if (drawable == null){
+                log.e(TAG,"释放资源失败,drawable is null 2");
+
+                imageView.setDrawingCacheEnabled(true);
+                    bitmap = imageView.getDrawingCache();
+                imageView.setDrawingCacheEnabled(false);
+
+                    if (bitmap==null){
+                        log.e(TAG,"释放资源失败,bitmap is null");
+                        return;
+                    }else{
+                        log.i(TAG,"getDrawingCache() :"+bitmap.toString());
+                    }
+
+            }
+        }
         if (drawable != null && drawable instanceof BitmapDrawable) {
+            log.e(TAG,"释放资源:" + drawable.toString());
             BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            Bitmap bitmap = bitmapDrawable.getBitmap();
-            if (bitmap != null && !bitmap.isRecycled()) {
+            bitmap = bitmapDrawable.getBitmap();
+        }
+
+        if (bitmap != null && !bitmap.isRecycled()) {
+            log.i(TAG,"-- bitmap is exitt --");
 //                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
 //                    @Override
 //                    public void call() {
-                        IImagePlayer.this.setBackgroundResource(0);
+            imageView.setBackgroundResource(0);
 //                    }
 //                });
+            if(drawable!=null){
                 drawable.setCallback(null);
-                bitmap.recycle();
-                log.i(TAG, IImagePlayer.this.toString()+" 释放资源..." );
             }
+
+            bitmap.recycle();
+            log.i(TAG, " 释放资源...end \n" );
+            return;
         }
+
+        log.e(TAG, " 释放资源...failt \n" );
     }
 
     @Override
@@ -203,68 +233,31 @@ try {
 
     }
 
+
     private void picassoLoaderImager(String filePath) {
+        //设置图片切换方式
+
+        ImageAttabuteAnimation.SttingAnimation(mCcontext,this);
+
         log.e(TAG," loader image ---------------------------------");
-    /*  log.i(TAG,"width:"+w);
-        log.i(TAG,"layoutparam w:"+this.getLayoutParams().width);
-        log.i(TAG,"getMeasuredWidth:"+this.getMeasuredWidth());
-        */
+
+        /**
+         *getMeasuredHeight()返回的是原始测量高度，与屏幕无关，getHeight()返回的是在屏幕上显示的高度。实际上在当屏幕可以包裹内容的时候，
+         * 他们的值是相等的，只有当view超出屏幕后，才能看出他们的区别。
+         * 当超出屏幕后，getMeasuredHeight()等于getHeight()加上屏幕之外没有显示的高度。
+         */
 
         log.d(TAG,"w:"+w +","+h);
-        log.d(TAG,"this.getMeasuredWidth(), this.getMeasuredHeight() ==> "+ this.getMeasuredWidth()+" - "+this.getMeasuredHeight());
-        if (w==AbsoluteLayout.LayoutParams.MATCH_PARENT || h == AbsoluteLayout.LayoutParams.MATCH_PARENT){
+        log.d(TAG,"width_height"+this.getWidth()+"#"+this.getHeight());
+        log.d(TAG,"this.getMeasuredWidth(), this.getMeasuredHeight() = "+ this.getMeasuredWidth()+" , "+this.getMeasuredHeight());
+
+        ImageViewPicassocLoader.loadImage(mCcontext,this,new File(filePath),new int[]{this.getWidth(),this.getHeight()});
+
+        log.e(TAG," loader image --------------------------------- end 1");
 
 
-        }
-            Picasso.with(mCcontext)
-                    .load(new File(filePath))
-                    .config(Bitmap.Config.RGB_565)
-                    .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
-                    .fit()
-                    //.centerCrop()
-                    .centerInside()
-                    //.onlyScaleDown()
-                    .placeholder(R.drawable.loadding)
-                    .error(R.drawable.error)
-                    .into(this);
-            log.e(TAG," loader image --------------------------------- end 1");
-            return;
-
-        //纯用picasso 加载本地图片
-    /*    Picasso.with(mCcontext)
-                .load(new File(filePath))
-//                .resize(w-1,h-1)
-                .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
-               // .onlyScaleDown()
-                .resize(this.getMeasuredWidth(), this.getMeasuredHeight())
-                .resize(w,h)
-                .placeholder(R.drawable.loadding)
-                .error(R.drawable.error)
-                .into(this);*/
-       // log.e(TAG," loader image --------------------------------- end 2");
-        /**.memoryPolicy(NO_CACHE, NO_STORE)
-         * 其中memoryPolicy的NO_CACHE是指图片加载时放弃在内存缓存中查找，NO_STORE是指图片加载完不缓存在内存中。
-         *        .transform(new Transformation(){
-
-        @Override
-        public Bitmap transform(Bitmap source) {
-        int size = Math.min(source.getWidth(), source.getHeight());
-        int x = (source.getWidth() - size) / 2;
-        int y = (source.getHeight() - size) / 2;
-        Bitmap result = Bitmap.createBitmap(source, x, y, size, size);
-        if (result != source) {
-        source.recycle();
-        }
-        return result;
-        }
-
-        @Override
-        public String key() {
-        return "square()";
-        }
-        })
-         */
     }
+
 
 
     //重写系统方法
@@ -273,14 +266,17 @@ try {
     protected void onDraw(Canvas canvas) {
         try {
             super.onDraw(canvas);
+            //log.i(TAG,"onDraw()被调用");
         } catch (Exception e) {
             log.e(TAG,"试图引用　一个　回收的图片 ["+e.getMessage()+"-----"+e.getCause()+"]");
+            loadMyImage();
         }
     }
     @Override
     protected void onDetachedFromWindow() {
         try {
             super.onDetachedFromWindow();
+           // log.i(TAG,"onDetachedFromWindow()被调用");
             setImageDrawable(null);
         }catch (Exception e){
             log.e(TAG,"onDetachedFromWindow:"+e.getMessage());

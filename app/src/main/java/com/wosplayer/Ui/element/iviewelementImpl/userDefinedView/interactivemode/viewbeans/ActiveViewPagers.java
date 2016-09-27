@@ -38,6 +38,7 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
     private static final java.lang.String TAG = ActiveViewPagers.class.getName();
     private ArrayList<View> myViewList = new ArrayList<View>();
     private View mCurrentView; //当前视图
+    private ViewpagerAttrAnimotion vpAnimo = null;
     /**
      * 适配器
      */
@@ -120,6 +121,25 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
         this.setBackgroundColor(Color.WHITE);
         this.setAdapter(pa); //适配器
         this.addOnPageChangeListener(new mVPageChangger());//滑动监听
+
+
+        //页面切换效果
+        this.setPageTransformer(true, new PageTransformer() {
+            /**
+             * 页面滑动时回调的方法,
+             * @param page 当前滑动的view
+             * @param position 当从右向左滑的时候,左边page的position是[0一-1]变化的
+             * 右边page的position是[1一0]变化的,再次滑动的时候,刚才变化到-1(即已经画出视野的page)將从-1变化到-2,
+             * 而当前可见的page和右边滑过来的page的position将再次从[0一-1]变化 和 [1一0]变化   但是我们关心是position是[-1一1]变化的
+             * page,所以处理动画的时候需要我们过滤一下
+             */
+            @Override
+            public void transformPage(View page, float position) {
+                if (vpAnimo!=null){
+                    vpAnimo.TranslationPager(page,position);
+                }
+            }
+        });
     }
 
     private Button left;
@@ -136,6 +156,8 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
             return;
         }
 
+        //切换动画
+        this.vpAnimo = ViewpagerAttrAnimotion.getInstands();
 
         //创建左右滑动按钮
         left = new Button(DisplayActivity.activityContext);
@@ -327,7 +349,7 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
                             AbsoluteLayout.LayoutParams.MATCH_PARENT,
                             0,
                             0));
-            loadLayout.setBackgroundColor(Color.YELLOW);//黄色
+            loadLayout.setBackgroundColor(Color.TRANSPARENT);//透明
             iview.addMeToFather(loadLayout);
 
         if(!myViewList.contains(loadLayout)){ //不存在

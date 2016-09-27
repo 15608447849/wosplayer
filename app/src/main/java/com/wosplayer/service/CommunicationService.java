@@ -47,6 +47,7 @@ public class CommunicationService extends Service{
     private ReentrantLock msgLock = new ReentrantLock();
     private boolean isReconnection = false;//是否可以尝试重连接
 
+    private boolean send_offline = true;
     private static final Scheduler.Worker connectHelper =  Schedulers.newThread().createWorker();
 
 
@@ -334,8 +335,10 @@ public class CommunicationService extends Service{
     private void stopCommunication(){
         //结束指令
         //发送下线通知
-        String msg = "OFLI:" + terminalNo;
-        sendMsgToService(msg);
+        if(send_offline){
+            String msg = "OFLI:" + terminalNo;
+            sendMsgToService(msg);
+        }
 
         //注销广播
         unregistSSendBroad();
@@ -346,6 +349,7 @@ public class CommunicationService extends Service{
 
         //结束链接
         desconnection();
+
     }
     /////////////////////////////////////////////////////////////////////////////////////
     //创建链接
@@ -374,8 +378,12 @@ public class CommunicationService extends Service{
             return;
         }
 
-        log.i("尝试重新链接中...");
-        stopCommunication();
+        log.i("尝试重新链接中..."); //停止, 发送广告,杀死自己
+        sendReconncetionBroad();
+        send_offline = false;
+        stopSelf();
+
+        /*   stopCommunication();
         try {
             Thread.sleep(30*1000);
         } catch (InterruptedException e) {
@@ -388,8 +396,20 @@ public class CommunicationService extends Service{
             public void call() {
                 startCommunication();
             }
-        });
+        });*/
     }
+
+    private void sendReconncetionBroad() {
+        int time = 30 * 1000;
+        log.i("发送下次重新链接服务器的 间隔时间 :"+time +" s");
+        Intent i = new Intent();
+        i.setAction(CommunicationReconnectBroad.ACTION);
+        Bundle b = new Bundle();
+        b.putInt(CommunicationReconnectBroad.sleepTilemKey,time);
+        i.putExtras(b);
+        getApplicationContext().sendBroadcast(i);
+    }
+
     /**
      *断开链接
      */

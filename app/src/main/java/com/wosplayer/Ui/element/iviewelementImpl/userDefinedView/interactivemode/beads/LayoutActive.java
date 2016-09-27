@@ -13,17 +13,16 @@ import android.widget.FrameLayout;
 
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.IinteractionPlayer;
+import com.wosplayer.Ui.element.iviewelementImpl.ImageViewPicassocLoader;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
-import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.loadArea.excuteBolock.Loader;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
 
+import java.io.File;
 import java.util.List;
 
-import it.sephiroth.android.library.picasso.MemoryPolicy;
-import it.sephiroth.android.library.picasso.Picasso;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 
@@ -39,6 +38,7 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
     public String id;
     public int w, h;
     private float wScale, hScale;
+    private int scale_w,scale_h;
     public int bgType;
     public String bgImagename;
     public List<ButtonActive> myItems;
@@ -98,10 +98,13 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
             return;
         }
 
+        scale_w =(int) ((float)this.w * wScale);
+        scale_h = (int) ((float)this.h * hScale);
+
         //设置宽高
         this.setLayoutParams(new LayoutParams(
-                (int) ((float)this.w * wScale),
-                (int) ((float)this.h * hScale),
+                scale_w,
+                scale_h,
                 0,
                 0));
     }
@@ -260,7 +263,7 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
                                                                        });
                 drawable.setCallback(null);
                 bitmap.recycle();
-                log.i(TAG, "释放资源...");
+                log.i(TAG, "layout 释放资源...");
             }
         }
     }
@@ -285,14 +288,16 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
                 Bitmap bitmap = null;
 //        releasSource();
                 try {
-                    bitmap = Picasso.with(DisplayActivity.activityContext)
+                    log.d(TAG,"互动 layout . scale after w,h = "+scale_w+","+scale_h);
+                    ImageViewPicassocLoader.loadImage(mcontext,new File(filePath),new int[]{scale_w,scale_h});
+                   /* bitmap = Picasso.with(mcontext)
                             .load(filePath)
                             .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
                             .config(Bitmap.Config.RGB_565)
-                            .get();
+                            .get();*/
                 } catch (Exception e) {
-                    log.e(TAG," call(): "+e.getMessage());
-                    bitmap = BitmapFactory.decodeResource(LayoutActive.this.getResources(), R.drawable.no_found);
+                    log.e(TAG,"layout call() err : "+e.getMessage());
+                    bitmap = BitmapFactory.decodeResource(mcontext.getResources(), R.drawable.no_found);
                 }
 
                 final Drawable dw = new BitmapDrawable(bitmap);

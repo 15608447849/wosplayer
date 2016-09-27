@@ -9,6 +9,7 @@ import com.lidroid.xutils.http.RequestParams;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
+import com.wos.Toals;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
 
@@ -42,7 +43,17 @@ public class logUploadService extends IntentService {
 
      //获取日志文件列表
         File[] filelist = getLogFileList();
+        if (filelist == null){
+            Toals.Say("上传日志_ 无日志文件 ,列表空");
+            return;
+        }
         needFileCount = filelist.length;
+        if (needFileCount == 0){
+            Toals.Say("上传日志_ 无日志文件 ,列表长度 0");
+            return;
+        }
+
+
 
       //上传日志 ->全部 成功 删除所有日志文件
         for (int i=0;i<filelist.length;i++){
@@ -55,6 +66,7 @@ public class logUploadService extends IntentService {
      * 获取 所有日志文件
      */
     private  File[]  getLogFileList(){
+        log.v("上传日志本地文件路径:"+serviceLog.LOG_PATH_SDCARD_DIR);
         File file = new File(serviceLog.LOG_PATH_SDCARD_DIR);
         if (file.isDirectory()) {
            return file.listFiles();
@@ -68,7 +80,7 @@ public class logUploadService extends IntentService {
     private void uploadFile(String uploadUrl, final String filePath, final logUploadService service){
         RequestParams params = new RequestParams(); // 默认编码UTF-8
 //        params.addHeader("name", "value");
-//        params.setContentType("application/octet-stream");
+//        params.setContentType("text/html");
 //        params.addBodyParameter("file",new File(filePath));
 
         params.addBodyParameter("cmd", "androidLogData");
@@ -112,7 +124,7 @@ public class logUploadService extends IntentService {
     private void resultCount(String filepath) {
 
       File f = new File(filepath);
-        f.delete();
+      //  f.delete();
         log.i("删除日志文件:"+filepath);
 
         if (needFileCount <=0){

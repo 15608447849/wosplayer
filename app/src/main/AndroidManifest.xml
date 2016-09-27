@@ -1,7 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.wosplayer"
-    android:versionCode="7"
-    android:versionName="7.0"
+    android:versionCode="10
+    "
+    android:versionName="10.0"
     android:screenOrientation="portrait">
 
     <application
@@ -30,12 +31,21 @@
 
         <!-- 通讯服务 -->
         <service android:name=".service.CommunicationService" />
-        <!-- 接受通讯服务的广播派发任务-->
+        <!-- 通讯服务 重新链接 广播-->
+        <receiver android:name=".service.CommunicationReconnectBroad">
+            <intent-filter>
+                <action android:name="com.communication.reconncetion.broad"></action>
+            </intent-filter>
+        </receiver>
+
+        <!-- 接受通讯服务的广播 -> 派发任务-->
         <receiver android:name=".cmdBroadcast.CmdPostTaskCenter">
             <intent-filter>
                 <action android:name="com.post.cmd.broad"></action>
             </intent-filter>
         </receiver>
+
+
         <!-- 接受下载 队列 -->
         <service android:name=".loadArea.loaderManager" />
 
@@ -51,7 +61,6 @@
                 <action android:name="com.wos.ui.refresh" />
             </intent-filter>
         </receiver>
-
 
 
 

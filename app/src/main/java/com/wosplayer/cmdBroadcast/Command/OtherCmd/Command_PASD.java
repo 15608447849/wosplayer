@@ -26,19 +26,19 @@ public class Command_PASD implements iCommand {
         }
         log.v(TAG,"param: " + param);
 
-        savaUnlockPassword(param);
+        boolean glag = savaUnlockPassword(param);
 
-
-
+        wosPlayerApp.sendMsgToServer("PASD:"+glag);
     }
 
     //保存密码
-    private void savaUnlockPassword(String password) {
+    private boolean savaUnlockPassword(String password) {
 
+        int ret = 0;
         SharedPreferences sp = wosPlayerApp.appContext.getSharedPreferences(sharedPreferences_txt,wosPlayerApp.appContext.MODE_PRIVATE);
         SharedPreferences.Editor mEditor = sp.edit();
         mEditor.putString(PASSWORD_KEY,password);
-        mEditor.commit();
+        return mEditor.commit();
 
     }
 

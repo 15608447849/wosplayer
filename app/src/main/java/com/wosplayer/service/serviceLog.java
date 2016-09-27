@@ -36,9 +36,9 @@ public class serviceLog extends IntentService {
      */
     public static String LOG_PATH_SDCARD_DIR = Environment.getExternalStorageDirectory().getAbsolutePath()
             + File.separator
-            + "wosplayer"
-            + File.separator
-            + "log";
+            + "wosplayer";
+           // + File.separator
+           // + "log";
 
 
     public serviceLog() {

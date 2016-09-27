@@ -15,6 +15,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.wosplayer.R;
+import com.wosplayer.Ui.element.iviewelementImpl.IImagePlayer;
+import com.wosplayer.Ui.element.iviewelementImpl.ImageViewPicassocLoader;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
 import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.log;
@@ -23,8 +25,6 @@ import com.wosplayer.loadArea.otherBlock.fileUtils;
 
 import java.io.File;
 
-import it.sephiroth.android.library.picasso.MemoryPolicy;
-import it.sephiroth.android.library.picasso.Picasso;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 
@@ -131,11 +131,13 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
                         //容器是个绝对布局的话
                         ((AbsoluteLayout) mFather).removeView(ActiveImagePlayer.this);
                         mFather = null;
+                        //异步释放视图
+                        releaseImageViewResouce();
+                        ImageViewPicassocLoader.clear(mcontext,new File(localPath));
                     }
                 });
 
-                        //异步释放视图
-                        releaseImageViewResouce();
+
 
 
             }
@@ -143,7 +145,7 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
     }
 
     private boolean existLoaddingBg = false;
-    Bitmap bitmap = null;
+    Bitmap bitmap_Loading = null;
     /**
      * 加载视图
      */
@@ -157,16 +159,16 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
             AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                 @Override
                 public void call() {
-                    if(bitmap==null){
+                    if(bitmap_Loading==null){
                         try {
-                            bitmap = BitmapFactory.decodeResource(ActiveImagePlayer.this.getResources(), R.drawable.loadding);
+                            bitmap_Loading = BitmapFactory.decodeResource(ActiveImagePlayer.this.getResources(), R.drawable.loadding);
                         } catch (Exception e) {
                            log.e("下载 时 图片 异常:"+e.getMessage());
 //                            return;
-                            bitmap = BitmapFactory.decodeResource(ActiveImagePlayer.this.getResources(), R.drawable.error);
+                            bitmap_Loading = BitmapFactory.decodeResource(ActiveImagePlayer.this.getResources(), R.drawable.error);
                         }
                     }
-                    BitmapDrawable bd = new BitmapDrawable(ActiveImagePlayer.this.getResources(), bitmap);
+                    BitmapDrawable bd = new BitmapDrawable(ActiveImagePlayer.this.getResources(), bitmap_Loading);
                     ActiveImagePlayer.this.setImageDrawable(bd);
                     existLoaddingBg = true;
                 }
@@ -210,23 +212,25 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
      * 资源释放
      */
     private void releaseImageViewResouce() {
-
-        Drawable drawable = this.getDrawable();
-        if (drawable != null && drawable instanceof BitmapDrawable) {
-            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            Bitmap bitmap = bitmapDrawable.getBitmap();
-            if (bitmap != null && !bitmap.isRecycled()) {
-                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-                    @Override
-                    public void call() {
-                        ActiveImagePlayer.this.setBackgroundResource(0);
-                    }
-                });
-                drawable.setCallback(null);
-                bitmap.recycle();
-                log.i(TAG, ActiveImagePlayer.this.toString()+" 释放资源..." );
-            }
-        }
+        log.i(TAG, "----------------------互动图片----------------------------------Thread: "+Thread.currentThread().getName() );
+        IImagePlayer.removeMyImage(this);
+        log.i(TAG, "----------------------互动图片 end----------------------------------Thread: "+Thread.currentThread().getName() );
+//        Drawable drawable = this.getDrawable();
+//        if (drawable != null && drawable instanceof BitmapDrawable) {
+//            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+//            Bitmap bitmap = bitmapDrawable.getBitmap();
+//            if (bitmap != null && !bitmap.isRecycled()) {
+//                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+//                    @Override
+//                    public void call() {
+//                        ActiveImagePlayer.this.setBackgroundResource(0);
+//                    }
+//                });
+//                drawable.setCallback(null);
+//                bitmap.recycle();
+//                log.i(TAG, ActiveImagePlayer.this.toString()+" 释放资源..." );
+//            }
+//        }
 
 
     }
@@ -242,18 +246,33 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
 
         isloading = false; //下载完毕
         if (existLoaddingBg){
-            releaseImageViewResouce();
-            if (bitmap!=null){
-                ActiveImagePlayer.this.setImageDrawable(null);
-                bitmap.recycle();
-                bitmap=null;
-            }
-            existLoaddingBg = false;
+            AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+                @Override
+                public void call() {
+                    //releaseImageViewResouce();
+                    if (bitmap_Loading!=null){
+                        ActiveImagePlayer.this.setImageDrawable(null);
+                        bitmap_Loading.recycle();
+                        bitmap_Loading=null;
+                    }
+                    existLoaddingBg = false;
+                }
+            });
+
         }
 
         if (mFather == null) {
         return;
         }
+
+        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+            @Override
+            public void call() {
+                releaseImageViewResouce();
+                picassoLoaderImager(filePath);
+            }
+        });
+
 
         //releaseImageViewResouce(); //释放资源
        /* Bitmap bitmap = null;
@@ -280,12 +299,6 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
                 ActiveImagePlayer.this.setImageDrawable(drawable);
             }
         });*/
-        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-            @Override
-            public void call() {
-                picassoLoaderImager(filePath);
-            }
-        });
 
     }
 
@@ -299,18 +312,19 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
      */
     private void picassoLoaderImager(String filePath) {
 
-        //纯用picasso 加载本地图片
-        Picasso.with(mcontext)
-                .load(new File(filePath))
-                .config(Bitmap.Config.RGB_565)
-                .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
-//                .centerCrop()
-                .fit()
-                .centerInside()
-                //.onlyScaleDown()
-                .placeholder(R.drawable.loadding)
-                .error(R.drawable.error)
-                .into(this);
+        //ImageAttabuteAnimation.SttingAnimation(mcontext,this);
+
+        log.e(TAG,"互动 -------  loadimageing ------- "+ filePath);
+        File file =new File(filePath);
+        if (file.exists()){
+            //ImageViewPicassocLoader.loadImage(mcontext,this,new File(filePath),null);
+            log.e("exists");
+        }else{
+            log.e("no exists");
+        }
+        ImageViewPicassocLoader.loadImage(mcontext,this,new File(filePath),null);
+
+        log.e(TAG,"互动 -------  loadimage end -------");
     }
 
     private WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
@@ -323,7 +337,8 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
         try {
             super.onDraw(canvas);
         } catch (Exception e) {
-            log.i(TAG,"试图引用　一个　回收的图片 ["+e.getMessage()+"-----"+e.getCause()+"]");
+            log.i(TAG,"试图引用　一个　回收的图片 ["+e.getMessage()+"-"+e.getCause()+"]");
+            picassoLoaderImager(localPath);
         }
     }
 

@@ -8,6 +8,7 @@ import com.wosplayer.app.log;
 import com.wosplayer.cmdBroadcast.Command.CMD_INFO;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_CAPT;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Close_App;
+import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_PASD;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Reboot_App;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Reboot_Sys;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_SHDO;
@@ -74,6 +75,8 @@ public class CmdPostTaskCenter extends BroadcastReceiver {
         commandList.put(CMD_INFO.SHDP, new Command_Close_App());
         //关闭终端
         commandList.put(CMD_INFO.SHDO, new Command_SHDO());
+        //设置密码
+        commandList.put("PASD:",new Command_PASD());
     }
 
     private void postCmd(final String cmd, final String param){

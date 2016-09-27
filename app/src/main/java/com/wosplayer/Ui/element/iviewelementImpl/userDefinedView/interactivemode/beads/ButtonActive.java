@@ -19,6 +19,7 @@ import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.IinteractionPlayer;
+import com.wosplayer.Ui.element.iviewelementImpl.ImageViewPicassocLoader;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.iCache.InteractionCache;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.ActiveViewPagers;
@@ -35,8 +36,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import it.sephiroth.android.library.picasso.MemoryPolicy;
-import it.sephiroth.android.library.picasso.Picasso;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 
@@ -618,19 +617,22 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, L
         });
     }
     private void picassoLoaderImager(String filePath) {
-        log.i(TAG,"width:"+w);
-        log.i(TAG,"current width :"+nw);
-        log.i(TAG,"layoutparam w:"+this.getLayoutParams().width);
-        log.i(TAG,"getMeasuredWidth:"+this.getMeasuredWidth());
+        log.i(TAG,"button _width:"+w);
+        log.i(TAG,"button _current width :"+nw);
+        log.i(TAG,"button _layoutparam w:"+this.getLayoutParams().width);
+        log.i(TAG,"button _getMeasuredWidth:"+this.getMeasuredWidth());
+
+        ImageViewPicassocLoader.loadImage(mcontext,this,new File(filePath),new int[]{nw,nh});
+
         //纯用picasso 加载本地图片
-        Picasso.with(mcontext)
+    /*    Picasso.with(mcontext)
                 .load(new File(filePath))
                 .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
                 .centerCrop()
                 .resize(nw,nh)
                 .placeholder(R.drawable.loadding)
                 .error(R.drawable.error)
-                .into(this);
+                .into(this);*/
     }
     @Override
     protected void onDraw(Canvas canvas) {

@@ -68,13 +68,16 @@ public class UiExcuter {
         _index = 0;
         clearProgramExcuter();
         contentTanslater.clearCache();
-        //隐藏层布局
-        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-            @Override
-            public void call() {
-                DisplayActivity.activityContext.goneLayoutdialog();
-            }
-        });
+        if(DisplayActivity.activityContext!=null){
+            //隐藏层布局
+            AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+                @Override
+                public void call() {
+                    DisplayActivity.activityContext.goneLayoutdialog();
+                }
+            });
+    }
+
         log.i(TAG,"ui执行者 清理完毕");
         isStoping =false;
     }
