@@ -139,11 +139,11 @@ public class MonitorService extends Service {
 
     private void monitor(){
         boolean f = serverUtils.isAppOnForeground(MonitorService.this.getApplicationContext());
-        log.d("isAppOnForeground():"+f);
+      //  log.d("isAppOnForeground():"+f);
         f = serverUtils.isRunningForeground(this.getApplicationContext(),this.getApplicationContext().getPackageName());
-        log.d("isRunningForeground():"+f);
+      //  log.d("isRunningForeground():"+f);
         f = serverUtils.isRunningToTaskTop(this.getApplicationContext(),DisplayActivity.class.getName());
-        log.d("isRunningToTaskTop():"+f);
+     //   log.d("isRunningToTaskTop():"+f);
 
         boolean flag =  serverUtils.isAppOnForeground(MonitorService.this.getApplicationContext());
         log.i("监听服务 监听结果 :"+flag);

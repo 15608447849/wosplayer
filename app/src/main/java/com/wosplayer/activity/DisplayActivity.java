@@ -97,10 +97,6 @@ public class DisplayActivity extends FragmentActivity {
         closebtn.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                if (isShowPsdInput){
-                return false;
-                }
-
 
                 isShowDialog = !isShowDialog;
                 if (isShowDialog){
@@ -109,7 +105,7 @@ public class DisplayActivity extends FragmentActivity {
                 }else{
                     log_sl.setVisibility(View.GONE);
                 }
-                return true;
+                return false;
             }
         });
         //点击弹出密码输入框

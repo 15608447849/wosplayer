@@ -109,6 +109,7 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
     };
 
 
+
     /**
      * 构造
      * @param context
@@ -352,13 +353,24 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
             loadLayout.setBackgroundColor(Color.TRANSPARENT);//透明
             iview.addMeToFather(loadLayout);
 
+
         if(!myViewList.contains(loadLayout)){ //不存在
+
             myViewList.add(loadLayout);
         }
 
         this.pa.notifyDataSetChanged();
 
     }
+
+
+
+
+
+
+
+
+
 
 
     /**
@@ -395,6 +407,13 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
         if (state==1){ // 正在滑动1 滑动完毕2 不动3空闲
 
         }else if (state==2){
+
+            View view = ((ViewGroup)mCurrentView).getChildAt(0);
+            log.d(TAG,"当前页:"+view.getTag());
+
+            if (view instanceof IviewPlayer){
+                ((IviewPlayer)view).AotuLoadingResource();
+            }
 
         }else if(state == ViewPager.SCROLL_STATE_IDLE){
 

@@ -237,7 +237,16 @@ try {
     private void picassoLoaderImager(String filePath) {
         //设置图片切换方式
 
-        ImageAttabuteAnimation.SttingAnimation(mCcontext,this);
+//        log.d(TAG,localpath);
+//        log.d(TAG,"w:"+w +","+h);
+//        log.d(TAG,"width_height"+this.getWidth()+"#"+this.getHeight());
+//        log.d(TAG,"this.getMeasuredWidth(), this.getMeasuredHeight() = "+ this.getMeasuredWidth()+" , "+this.getMeasuredHeight());
+//        log.d(TAG,"y:"+this.getY());
+//        log.d(TAG,"f y:"+mfatherView.getY());
+//        log.d(TAG,"m y:"+y+","+x);
+
+
+        ImageAttabuteAnimation.SttingAnimation(mCcontext,this,new int[]{x,y,w,h});
 
         log.e(TAG," loader image ---------------------------------");
 
@@ -247,11 +256,9 @@ try {
          * 当超出屏幕后，getMeasuredHeight()等于getHeight()加上屏幕之外没有显示的高度。
          */
 
-        log.d(TAG,"w:"+w +","+h);
-        log.d(TAG,"width_height"+this.getWidth()+"#"+this.getHeight());
-        log.d(TAG,"this.getMeasuredWidth(), this.getMeasuredHeight() = "+ this.getMeasuredWidth()+" , "+this.getMeasuredHeight());
 
-        ImageViewPicassocLoader.loadImage(mCcontext,this,new File(filePath),new int[]{this.getWidth(),this.getHeight()});
+
+        ImageViewPicassocLoader.loadImage(mCcontext,this,new File(filePath),new int[]{this.getWidth(),this.getHeight()},ImageViewPicassocLoader.TYPE_IIMAGE);
 
         log.e(TAG," loader image --------------------------------- end 1");
 

@@ -133,7 +133,7 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
                         mFather = null;
                         //异步释放视图
                         releaseImageViewResouce();
-                        ImageViewPicassocLoader.clear(mcontext,new File(localPath));
+
                     }
                 });
 
@@ -199,6 +199,10 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
     public void AotuLoadingResource() {
         if (fileUtils.checkFileExists(localPath)){
             log.e("互动 image 存在资源");
+            if (mFather == null) {
+                return;
+            }
+            Call(localPath);
           return;
         }
 
@@ -268,7 +272,7 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
         AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
             @Override
             public void call() {
-                releaseImageViewResouce();
+                //releaseImageViewResouce();
                 picassoLoaderImager(filePath);
             }
         });
@@ -322,7 +326,8 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
         }else{
             log.e("no exists");
         }
-        ImageViewPicassocLoader.loadImage(mcontext,this,new File(filePath),null);
+
+        ImageViewPicassocLoader.loadImage(mcontext,this,new File(filePath),null,ImageViewPicassocLoader.TYPE_ACTION_IIMAGE);
 
         log.e(TAG,"互动 -------  loadimage end -------");
     }

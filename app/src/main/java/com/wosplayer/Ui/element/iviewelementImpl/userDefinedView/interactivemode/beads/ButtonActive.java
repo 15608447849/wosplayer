@@ -622,7 +622,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, L
         log.i(TAG,"button _layoutparam w:"+this.getLayoutParams().width);
         log.i(TAG,"button _getMeasuredWidth:"+this.getMeasuredWidth());
 
-        ImageViewPicassocLoader.loadImage(mcontext,this,new File(filePath),new int[]{nw,nh});
+        ImageViewPicassocLoader.loadImage(mcontext,this,new File(filePath),new int[]{nw,nh},ImageViewPicassocLoader.TYPE_IIMAGE);
 
         //纯用picasso 加载本地图片
     /*    Picasso.with(mcontext)

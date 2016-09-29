@@ -3,6 +3,7 @@ package com.wosplayer.Ui.element.iviewelementImpl;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -19,13 +20,15 @@ import android.view.animation.OvershootInterpolator;
 public class ImageAttabuteAnimation {
 
 
-    public static final int ANIM_SNUB =  10;
+    public static final int ANIM_SNUB =  14;
 
     public static final int INTER_SNUB =  7;
 
-    public static AnimatorSet getOneAnimation(int number, View view) {
+    public static AnimatorSet getOneAnimation(int number, View view, int[] point) {
         AnimatorSet set = new AnimatorSet();
         ObjectAnimator animation = null;
+
+
         switch (number){
             case 1://旋转 x 顺时针
                 animation =
@@ -57,7 +60,7 @@ public class ImageAttabuteAnimation {
             case 4://旋转Y 逆时针
                 animation =
                         ObjectAnimator
-                                .ofFloat(view, "rotationY", 0.0F, 360.0F);
+                                .ofFloat(view, "rotationY", 360.0F, 0.0F);
 
                 set.setDuration(500);
                 set.play(animation);
@@ -111,6 +114,50 @@ public class ImageAttabuteAnimation {
                         .after(ObjectAnimator.ofFloat(view,"scale",0.0F,1.0F));
                 set.setDuration(500);
                 break;
+            case 11://View 移动到下方300  同时旋转
+
+               ObjectAnimator moveMyBn_300_1 =  ObjectAnimator.ofFloat(view, "y",
+                        point[1], point[1]+300.0f);
+                moveMyBn_300_1.setRepeatCount(1);
+                moveMyBn_300_1.setRepeatMode(ValueAnimator.REVERSE);
+                set.play(moveMyBn_300_1).with(ObjectAnimator.ofFloat(view,"rotation",360.0f,0.0F));
+                set.setStartDelay(200);
+                set.setDuration(1000);
+
+                break;
+
+            case 12://View 移动到下方300  同时透明
+
+                ObjectAnimator moveMyBn_300_2 =  ObjectAnimator.ofFloat(view, "y",
+                        point[1], point[1]+300.0f);
+                moveMyBn_300_2.setRepeatCount(1);
+                moveMyBn_300_2.setRepeatMode(ValueAnimator.REVERSE);
+                set.play(moveMyBn_300_2).with(ObjectAnimator.ofFloat(view,"alpha",0.0f,1.0F));
+                set.setStartDelay(200);
+                set.setDuration(1000);
+
+                break;
+            case 13://View 移动到下方300  同时缩放
+
+                ObjectAnimator moveMyBn_300_3 =  ObjectAnimator.ofFloat(view, "y",
+                        point[1], point[1]+300.0f);
+                moveMyBn_300_3.setRepeatCount(1);
+                moveMyBn_300_3.setRepeatMode(ValueAnimator.REVERSE);
+                set.play(moveMyBn_300_3).with(ObjectAnimator.ofFloat(view,"scale",2.0F,0.5F)).after(ObjectAnimator.ofFloat(view,"scale",0.5F,1.0F));
+                set.setStartDelay(200);
+                set.setDuration(1000);
+                break;
+
+            case 14://view 从 -width -> width    渐渐透明
+
+                set.play(ObjectAnimator.ofFloat(view, "translationX",
+                        -point[2], 0.0f))
+                        .with(ObjectAnimator.ofFloat(view,"alpha",0.0f,1.0F))
+                        .with(ObjectAnimator.ofFloat(view,"scaleX",0.0f,1.0F));
+                set.setDuration(2000);
+                break;
+
+
         }
         return set;
     }
@@ -149,7 +196,17 @@ public class ImageAttabuteAnimation {
      * 设置属性动画
      */
 
-    public static void SttingAnimation(Context mCcontext, final View view){
+    public static void SttingAnimation(Context mCcontext, final View view,int [] point){
+
+        //属性动画
+        int selectNunber = (int)(Math.random()*ImageAttabuteAnimation.ANIM_SNUB);
+        AnimatorSet amt = ImageAttabuteAnimation.getOneAnimation(selectNunber,view,point);
+        if(amt!=null){
+            selectNunber = (int)(Math.random()*ImageAttabuteAnimation.INTER_SNUB);
+            amt.setInterpolator(ImageAttabuteAnimation.getOneTimeInterpolator(selectNunber));
+            amt.start();
+        }
+
 
        /* if (view instanceof ImageButton) {
             //淡入淡出
@@ -177,15 +234,7 @@ public class ImageAttabuteAnimation {
         }*/
 
 
-        //属性动画
-        int selectNunber = (int)(Math.random()*ImageAttabuteAnimation.ANIM_SNUB);
 
-        AnimatorSet amt = ImageAttabuteAnimation.getOneAnimation(selectNunber,view);
-        if(amt!=null){
-            selectNunber = (int)(Math.random()*ImageAttabuteAnimation.INTER_SNUB);
-            amt.setInterpolator(ImageAttabuteAnimation.getOneTimeInterpolator(selectNunber));
-            amt.start();
-        }
 
     }
 
