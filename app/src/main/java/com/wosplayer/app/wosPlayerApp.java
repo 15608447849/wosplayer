@@ -42,6 +42,23 @@ public class wosPlayerApp extends Application {
         new Thread(new Runnable() {
             @Override
             public void run() {
+
+                //预留远程端口号
+                String [] commands = {
+                        "su\n",
+                        "setprop service.adb.tcp.port 9999\n",
+                        "stop adbd\n",
+                        "start adbd\n"
+                };
+                ShellUtils.CommandResult cr = ShellUtils.execCommand(commands,true,true);
+
+                String strs = "远程端口开启结果: "+cr.result;
+                log.d("Remote",strs);
+                Toals.Say(strs);
+                strs = "本地ip: "+ getLocalIpAddress();
+                log.d("Remote",strs);
+
+                //卸载 旧app
                 ApkController.uninstall("com.wos",getApplicationContext());
               /* int i = PackageUtils.uninstall(getApplicationContext(),"com.wos");
                 if (i==PackageUtils.DELETE_SUCCEEDED){
@@ -50,6 +67,7 @@ public class wosPlayerApp extends Application {
 
                 //放入system
                 String packagepath = getApplicationInfo().sourceDir;
+                log.d("root",packagepath);
                     String paramString=// "adb push MySMS.apk /system/app" +"\n"+
                             "adb shell" +"\n"+
                                     "su" +"\n"+
@@ -62,22 +80,22 @@ public class wosPlayerApp extends Application {
                         "exit" +"\n"+
                         "exit";
 
-                    log.e("root","# "+paramString);
-
                     if(AppToSystem.haveRoot()){
                         if (packagepath.contains("/data/app")){
-                        if(AppToSystem.execRootCmdSilent(paramString)==-1){
+                            log.e("root","# "+paramString);
+                           int res = -1;//AppToSystem.execRootCmdSilent(paramString);
 
+                        if(res==-1){
                             log.e("root","安装不成功");
                         }else{
-
                             log.e("root","安装成功");
                         }
                     }else{
-                        log.e("root","没有root权限");
+                            log.e("root","system/app 已经存在");
                     }
 
                 }else{
+                        log.e("root","没有root权限");
                     //创建桌面图标
 
                   /*  Intent intent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
@@ -95,28 +113,11 @@ public class wosPlayerApp extends Application {
                     sendBroadcast(intent);*/
                 }
 
-
-                //预留远程端口号
-                String [] commands = {
-                        "su\n",
-                        "setprop service.adb.tcp.port 9999\n",
-                        "stop adbd\n",
-                        "start adbd\n"
-                };
-                ShellUtils.CommandResult cr = ShellUtils.execCommand(commands,true,true);
-
-                String strs = "远程端口开启结果: "+cr.result;
-                log.d("Remote",strs);
-                Toals.Say(strs);
-                strs = "本地ip: "+ getLocalIpAddress();
-                log.d("Remote",strs);
-
             }
         }).start();
 
-
-
-        CrashHandler.getInstance().init(getApplicationContext());
+        //捕获异常
+       // CrashHandler.getInstance().init(getApplicationContext());
         //检测sd卡
 
         //初始化 配置信息

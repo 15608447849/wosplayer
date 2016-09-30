@@ -9,10 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 /**
  * 
@@ -35,34 +32,52 @@ public class MD5Util {
     }
     
     public static File getFileMD5String(File file) {
-    	FileWriter fw = null;
     	BufferedWriter bw = null;
     	File md5File = null;
         try{
+            if (!file.exists()){
+                log.e("生成MD5 资源文件不存在 :" + file.toString());
+                return null;
+            }
+
             FileInputStream in = new FileInputStream(file);
-            FileChannel ch = in.getChannel();
-            MappedByteBuffer byteBuffer = ch.map(FileChannel.MapMode.READ_ONLY, 0,file.length());
+
+            byte [] buffer =  new   byte [ 1024 ];
+            int  numRead =  0 ;
             MessageDigest messagedigest = MessageDigest.getInstance("MD5");
-            messagedigest.update(byteBuffer);
+            while  ((numRead = in.read(buffer)) >  0 ) {
+                messagedigest.update(buffer, 0 , numRead);
+            }
+            in.close();
+
+           /* FileChannel ch = in.getChannel();
+            MappedByteBuffer byteBuffer = ch.map(FileChannel.MapMode.READ_ONLY, 0,file.length());
+            messagedigest.update(byteBuffer);*/
+
             String md5Code = toHexString(messagedigest.digest());
+
             md5File = new File(file.getPath()+".md5");
-            fw = new FileWriter(md5File);
-            bw = new BufferedWriter(fw);
+            bw = new BufferedWriter(new FileWriter(md5File));
             bw.write(md5Code);
-        } catch (NoSuchAlgorithmException e) {
-        	
-        } catch (IOException e) {
-        	
+        } catch (Exception e){
+            log.e(e.getMessage());
         }finally{
         	try {
-				bw.close();
-				fw.close();
+                if (bw != null){
+                    bw.close();
+                }
 			} catch (IOException e) {
-				e.printStackTrace();
+				log.e(e.getMessage());
 			}
         }
         return md5File;
     }
+
+
+
+
+
+
 
 
     public static String readFileByLines(String fileName) {

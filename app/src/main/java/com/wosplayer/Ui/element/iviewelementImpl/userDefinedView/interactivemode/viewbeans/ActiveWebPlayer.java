@@ -121,6 +121,12 @@ public class ActiveWebPlayer extends WebView implements IviewPlayer {
         }
     }
 
+    @Override
+    public void addMeToFather(View view, boolean f) {
+        //NULL
+        addMeToFather(view);
+    }
+
     boolean isRemove = false;
     /**
      * 从父视图把自己移除
@@ -149,6 +155,12 @@ public class ActiveWebPlayer extends WebView implements IviewPlayer {
             }
         }
     }
+
+    @Override
+    public void removeMeToFather(boolean f) {
+
+    }
+
     @Override
     public void AotuLoadingResource() { //自动加载试图
 //        InitParam();

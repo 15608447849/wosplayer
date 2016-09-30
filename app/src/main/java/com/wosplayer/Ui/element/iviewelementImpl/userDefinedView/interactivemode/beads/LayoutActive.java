@@ -148,7 +148,10 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
         }
     }
 
-
+    @Override
+    public void addMeToFather(View view, boolean f) {
+        addMeToFather(view);
+    }
 
 
     /**
@@ -187,6 +190,11 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
                 releasedResource();
             }
         }
+
+    }
+
+    @Override
+    public void removeMeToFather(boolean f) {
 
     }
 
@@ -281,20 +289,24 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
             return;
         }
 
+
         IinteractionPlayer.worker.schedule(new Action0() {
             @Override
             public void call() {
 
-                Bitmap bitmap = null;
+        Bitmap bitmap = null;
 //        releasSource();
                 try {
                     log.d(TAG,"互动 layout . scale after w,h = "+scale_w+","+scale_h);
-                    ImageViewPicassocLoader.loadImage(mcontext,new File(filePath),new int[]{scale_w,scale_h});
+                    bitmap = ImageViewPicassocLoader.loadImage(mcontext,new File(filePath),new int[]{scale_w,scale_h});
                    /* bitmap = Picasso.with(mcontext)
                             .load(filePath)
                             .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
                             .config(Bitmap.Config.RGB_565)
                             .get();*/
+                    if (bitmap==null){
+                       throw new NullPointerException("filepath:"+filePath);
+                    }
                 } catch (Exception e) {
                     log.e(TAG,"layout call() err : "+e.getMessage());
                     bitmap = BitmapFactory.decodeResource(mcontext.getResources(), R.drawable.no_found);
@@ -304,7 +316,7 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
                 AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                     @Override
                     public void call() {
-                        log.i(TAG, " 互动布局设置背景图片");
+                        log.i(TAG, " 互动布局设置背景图片 ");
                         LayoutActive.this.setBackgroundDrawable(dw);
                         //addMeSubView();//添加子类视图
                     }

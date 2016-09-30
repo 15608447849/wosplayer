@@ -23,7 +23,7 @@ import rx.functions.Action0;
  */
 public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPlayer,Loader.LoaderCaller {
 
-    private static final java.lang.String TAG = ActiveVideoPlayerAndImage.class.getName();
+    private static final java.lang.String TAG = "_ActiveVideoPlayerAndImage";//ActiveVideoPlayerAndImage.class.getName();
     private Context mcontext ;
     //构造
     public ActiveVideoPlayerAndImage(Context context, String imageUri, String imageLoalPath, String uriPath, String localPath) {
@@ -91,7 +91,7 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
     /**
      * 图片加载者
      */
-    private ActiveImagePlayer imager;
+    private ActiveImagePlayer imager_One;
     private boolean image_Src_isOK = false;//视频资源是否加载成功
     private OnClickListener ImaerClickEvent = new OnClickListener() {
         @Override
@@ -146,7 +146,7 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
      */
     @Override
     public void AotuLoadingResource() {
-        log.e("视频 资源 加载 准备:"+UriPath+" 本地:"+videoFileLocalPath);
+        log.e(TAG,"视频 资源 加载 :"+UriPath+" 本地:"+videoFileLocalPath);
 
         if (load.fileIsExist(videoFileLocalPath)){
             Call(videoFileLocalPath);
@@ -156,24 +156,31 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
             isloading = true;
         }
     }
+    private Button playbtn = null;
     /**
      * 加载视图
      */
     private void loadingMyVideoView() {
         if (mFather == null) {
+            log.e(TAG,"loadingMyVideoView father is null");
             return;
         }
 
         //图片 播放者  出来吧!!!
-        if (imager == null){
-            imager = new ActiveImagePlayer(mcontext,imageUriPath,imageLoalPath);
+        if (imager_One == null){
+            log.d(TAG,"制作第一帧图片");
+            imager_One = new ActiveImagePlayer(mcontext,imageUriPath,imageLoalPath);//加载图片
+            imager_One.addMeToFather(ActiveVideoPlayerAndImage.this);//添加到绝对布局
         }
-        imager.addMeToFather(ActiveVideoPlayerAndImage.this);//添加到绝对布局
-        Button btn = imager.getPlayVideoBtn();
-        btn.setOnClickListener(ImaerClickEvent);
+        if (playbtn==null){
+            playbtn = imager_One.getPlayVideoBtn();//播放按钮
+            playbtn.setOnClickListener(ImaerClickEvent);//播放事件
+        }
 
 
-        if(isloading){//继续下载视频资源
+
+        if(isloading){//如果在下载中 继续下载视频资源
+            log.e(TAG,"正在下载资源中");
             return;
         }
         //  查看本地
@@ -187,16 +194,19 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
                 load.LoadingUriResource(UriPath,null);
             }
         }
-        ;
+
     }
     /**
      * 释放资源
      */
     public void releasedResource() {
-
-        if (imager != null){
-            imager.removeMeToFather();
-            imager = null;
+        log.e(TAG,"释放资源中... ");
+        if (imager_One != null){
+            imager_One.removeMeToFather();
+            imager_One = null;
+        }
+        if (playbtn!=null){
+            playbtn = null;
         }
         if (vplayer != null){
             vplayer.removeMeToFather();
@@ -249,6 +259,12 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
         }
     }
 
+    @Override
+    public void addMeToFather(View view, boolean f) {
+        //null
+        addMeToFather(view);
+    }
+
     /**
      * 从父容器中移除
      */
@@ -282,6 +298,11 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
         }
     }
 
+    @Override
+    public void removeMeToFather(boolean f) {
+
+    }
+
     /**
      * 资源回调
      * @param filePath
@@ -291,6 +312,5 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
         log.i(TAG, "一个视频 资源 下载结果传递了来了:" + filePath);
         isloading = false; //下载完毕
         image_Src_isOK = true;
-
     }
 }

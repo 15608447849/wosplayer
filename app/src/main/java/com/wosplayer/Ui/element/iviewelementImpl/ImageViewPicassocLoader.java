@@ -2,6 +2,7 @@ package com.wosplayer.Ui.element.iviewelementImpl;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -13,7 +14,14 @@ import com.wosplayer.R;
 import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.log;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 
 import it.sephiroth.android.library.picasso.MemoryPolicy;
 import it.sephiroth.android.library.picasso.NetworkPolicy;
@@ -51,12 +59,20 @@ public class ImageViewPicassocLoader {
 
     public static void loadImage(Context mContext, ImageView imageView,File tagerImageFile ,int [] sizeParam,int type){
 
-        log.d("picasso param",tagerImageFile.getAbsolutePath()+ " \n length:["+( sizeParam==null?"null":sizeParam.length )+"]");
+        log.d("load image",tagerImageFile.getAbsolutePath()+ " \n length:["+( sizeParam==null?"null":sizeParam.length )+"]");
         if (tagerImageFile.exists()){
             log.d("文件存在");
         }else{
             log.e("文件不存在");
         }
+
+        getBitmap(mContext,tagerImageFile,imageView);
+
+
+        if (true){
+            return;
+        }
+
 
 
         /**
@@ -79,7 +95,7 @@ public class ImageViewPicassocLoader {
          */
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
-        if (DisplayActivity.isShowDialog){
+        if (!DisplayActivity.isShowDialog){
 
             Picasso
                     .with(mContext)
@@ -137,11 +153,12 @@ public class ImageViewPicassocLoader {
                         .into(imageView);
             }
         }else{
-            log.d("glide ", " -- -- --- -- -- -- -- -- -- glide loading image ");
+            log.d("glide ", " -- -- --- -- -- -- -- -- -- glide loading image select");
 
             if (sizeParam != null && sizeParam.length > 0) {
                 log.d("glide _" ,"w " + sizeParam[0] + "\n h " +sizeParam[1]);
                 if (sizeParam[0] > 1 && sizeParam[1] > 1) {
+                    log.d("glide ", " -- -- --- -- -- -- -- -- -- glide loading image  1");
                     Glide.with(mContext)
                             .load(tagerImageFile)
                             .skipMemoryCache(true)
@@ -151,13 +168,15 @@ public class ImageViewPicassocLoader {
                             .centerCrop()
                             //.fitCenter()
                             //.override(600, 300)
-                            //.crossFade()
+                            .crossFade()
                             //.placeholder(R.drawable.no_found)
                             .error(R.drawable.error)
                             .into(imageView);
+
                     return;
                 }
             }
+            log.d("glide ", " -- -- --- -- -- -- -- -- -- glide loading image  2");
             Glide.with(mContext)
                     .load(tagerImageFile)
                     .skipMemoryCache(true)
@@ -237,6 +256,198 @@ public class ImageViewPicassocLoader {
     public static void clear(Context context,File file){
         Picasso.with(context).invalidate(file);
     }
+
+
+    public static void getBitmap(Context context,File file,ImageView iv) {
+        FileInputStream is = null;
+        Bitmap bitmap = null;
+       try{
+           if (file != null && file.exists()) {
+
+
+               /*is = new FileInputStream(file);
+               log.e("###############");
+               bitmap =  BitmapFactory.decodeStream(new FlushedInputStream(is));//BitmapFactory.decodeStream(is);
+              // bitmap = TanslationBitmapStream(is);
+               log.e("-------------");
+               iv.setScaleType(ImageView.ScaleType.FIT_XY);
+               iv.setImageBitmap(bitmap);
+               log.e("###############***");
+               bitmap=null;*/
+
+               log.e("-------------");
+
+             /*  BitmapFactory.Options options = getBitmapOption();
+               is = new FileInputStream(file);
+
+               bitmap = BitmapFactory.decodeFileDescriptor(is.getFD(),
+                       null, options);
+               iv.setScaleType(ImageView.ScaleType.FIT_XY);
+               iv.setImageBitmap(bitmap);
+               bitmap=null;*/
+
+               is = new FileInputStream(file);
+               bitmap = createImageThumbnail(is);
+               iv.setScaleType(ImageView.ScaleType.FIT_XY);
+               iv.setImageBitmap(bitmap);
+               bitmap = null;
+               log.e("###############***");
+
+           }
+       }catch (Exception e){
+           log.e("loading image err: "+e.getMessage());
+       }finally {
+           if (is != null) {
+               try {
+                   is.close();
+               } catch (IOException e) {
+                   e.printStackTrace();
+               }
+           }
+       }
+    }
+
+    public static BitmapFactory.Options getBitmapOption() {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.outWidth = 10;
+        options.outHeight = 10;
+        options.inSampleSize = 2;// 特别注意，这个值越大，相片质量越差，图像越小
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
+        options.inPurgeable = true;
+        options.inInputShareable = true;
+        options.inDither = false;
+        options.inTempStorage = new byte[12 * 1024];
+        return options;
+    }
+
+    //创建静态类FlushedInputStream
+    static class FlushedInputStream extends FilterInputStream {
+        public FlushedInputStream(InputStream inputStream) {
+            super(inputStream);
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+            long totalBytesSkipped = 0L;
+            while (totalBytesSkipped < n) {
+                long bytesSkipped = in.skip(n - totalBytesSkipped);
+                if (bytesSkipped == 0L) {
+                    int b = read();
+                    if (b < 0) {
+                        break;  // we reached EOF
+                    } else {
+                        bytesSkipped = 1; // we read one byte
+                    }
+                }
+                totalBytesSkipped += bytesSkipped;
+            }
+            return totalBytesSkipped;
+        }
+    }
+
+
+public static Bitmap TanslationBitmapStream(InputStream is){
+    BufferedInputStream bis = null;
+    ByteArrayOutputStream out =null;
+    try{
+        bis = new BufferedInputStream(is,1024 * 8);
+        bis = new BufferedInputStream(is,1024 * 8);
+        out = new ByteArrayOutputStream();
+
+
+        int len=0;
+        byte[] buffer = new byte[1024];
+        while((len = bis.read(buffer)) != -1){
+            out.write(buffer, 0, len);
+        }
+        out.close();
+        bis.close();
+
+    }catch (MalformedURLException e1) {
+        e1.printStackTrace();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+    byte[] data = out.toByteArray();
+    Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+    return bitmap;
+    }
+
+
+
+
+
+//
+
+    public static Bitmap createImageThumbnail(FileInputStream is){
+        Bitmap bitmap = null;
+        try {
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inJustDecodeBounds = true;
+        bitmap = BitmapFactory.decodeFileDescriptor(is.getFD(),
+                null, opts);
+
+        opts.inSampleSize = computeSampleSize(opts, -1, 1920*1080);
+        opts.inJustDecodeBounds = false;
+
+            opts.inPreferredConfig = Bitmap.Config.RGB_565;
+            opts.inPurgeable = true;
+            opts.inInputShareable = true;
+            opts.inDither = false;
+            opts.inTempStorage = new byte[12 * 1024];
+
+            bitmap =  BitmapFactory.decodeFileDescriptor(is.getFD(),
+                    null, opts);
+        }catch (Exception e) {
+            // TODO: handle exception
+            log.e(" create bitmap err:"+e.getMessage());
+        }
+        return bitmap;
+    }
+
+    public static int computeSampleSize(BitmapFactory.Options options, int minSideLength, int maxNumOfPixels) {// 最小边长 最大像素
+        int initialSize = computeInitialSampleSize(options, minSideLength, maxNumOfPixels);
+        int roundedSize;
+        if (initialSize <= 8) {
+            roundedSize = 1;
+            while (roundedSize < initialSize) {
+                roundedSize <<= 1;
+            }
+        } else {
+            roundedSize = (initialSize + 7) / 8 * 8;
+        }
+        return roundedSize;
+    }
+
+    private static int computeInitialSampleSize(BitmapFactory.Options options,int minSideLength, int maxNumOfPixels) {
+        double w = options.outWidth;
+        double h = options.outHeight;
+        int lowerBound = (maxNumOfPixels == -1) ? 1 : (int) Math.ceil(Math.sqrt(w * h / maxNumOfPixels));
+        int upperBound = (minSideLength == -1) ? 128 :(int) Math.min(Math.floor(w / minSideLength), Math.floor(h / minSideLength));
+        if (upperBound < lowerBound) {
+            // return the larger one when there is no overlapping zone.
+            return lowerBound;
+        }
+        if ((maxNumOfPixels == -1) && (minSideLength == -1)) {
+            return 1;
+        } else if (minSideLength == -1) {
+            return lowerBound;
+        } else {
+            return upperBound;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }

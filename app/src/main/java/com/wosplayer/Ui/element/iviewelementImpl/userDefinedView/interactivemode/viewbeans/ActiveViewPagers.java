@@ -312,6 +312,12 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
     }
 
     @Override
+    public void addMeToFather(View view, boolean f) {
+        //null
+        addMeToFather(view);
+    }
+
+    @Override
     public void removeMeToFather(){
         if (mFather!=null) {
             AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
@@ -336,8 +342,13 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
         }
     }
 
+    @Override
+    public void removeMeToFather(boolean f) {
+        removeMeToFather();
+    }
 
-        /**
+
+    /**
          * 添加子视图对象
          *
          */
@@ -351,11 +362,11 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
                             0,
                             0));
             loadLayout.setBackgroundColor(Color.TRANSPARENT);//透明
-            iview.addMeToFather(loadLayout);
+
+            iview.addMeToFather(loadLayout,false);
 
 
         if(!myViewList.contains(loadLayout)){ //不存在
-
             myViewList.add(loadLayout);
         }
 
@@ -408,12 +419,25 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
 
         }else if (state==2){
 
-            View view = ((ViewGroup)mCurrentView).getChildAt(0);
-            log.d(TAG,"当前页:"+view.getTag());
+            //释放别的view的bitmap
+            for (int i = 0;i<ActiveViewPagers.this.getChildCount();i++){
+                ViewGroup layout = (ViewGroup) ActiveViewPagers.this.getChildAt(i);
 
-            if (view instanceof IviewPlayer){
-                ((IviewPlayer)view).AotuLoadingResource();
+                View v = ((ViewGroup)mCurrentView).getChildAt(0);
+                if (v instanceof IviewPlayer){
+//                    ((IviewPlayer)v).removeMeToFather(false);
+                    ((IviewPlayer)v).AotuLoadingResource();
+                }
             }
+
+//            View view = ((ViewGroup)mCurrentView).getChildAt(0);
+//            log.d(TAG,"当前页 :"+view.getTag());
+//
+//            if (view instanceof IviewPlayer){
+//                ((IviewPlayer)view).AotuLoadingResource();
+//            }
+//            log.d(" \n\r \n\r");
+
 
         }else if(state == ViewPager.SCROLL_STATE_IDLE){
 

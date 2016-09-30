@@ -46,7 +46,7 @@ import rx.functions.Action0;
 
 public class ButtonActive extends ImageButton implements View.OnClickListener, Loader.LoaderCaller, IviewPlayer {
 
-    private static final java.lang.String TAG = ButtonActive.class.getName();
+    private static final java.lang.String TAG = "_ActionButotn";//ButtonActive.class.getName();
     public int x, y, w, h; //大小坐标
     public int bindtype; //绑定类型
     public String bindid; //绑定id
@@ -123,9 +123,10 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, L
             return;
         }
 
-        log.i(TAG, "按钮 click:[" + this.toString() +"] ,绑定id:"+bindid);
+        log.i(TAG, "按钮  ,绑定id:"+bindid);//click:[" + this.toString() +"]
+
         if (CanvasView == null) {
-            log.e(TAG," 互动模块容器 不存在");
+            log.e(TAG," 互动模块容器 不存在 ");
             return;
         }
 
@@ -192,6 +193,8 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, L
                     CanvasView.setmCurrentView((View) iv);
                     return;
                 }*/
+
+
                 if (mvp == null) {
                     //滑动控件是空的
                     mvp = new ActiveViewPagers(DisplayActivity.activityContext);//第一次创建滑动控件
@@ -359,6 +362,11 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, L
 
     }
 
+    @Override
+    public void addMeToFather(View view, boolean f) {
+        //null
+    }
+
 
     private int nw,nh,nx,ny;
     /**
@@ -404,6 +412,11 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, L
             });
 
         }
+    }
+
+    @Override
+    public void removeMeToFather(boolean f) {
+
     }
 
     /**

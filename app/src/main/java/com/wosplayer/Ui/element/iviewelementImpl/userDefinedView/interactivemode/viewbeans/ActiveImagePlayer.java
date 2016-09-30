@@ -81,7 +81,7 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
      * 添加自己到父控件
      */
     private View mFather;
-
+    public boolean isShow = true;
     @Override
     public void addMeToFather(View Father) {
         if (this.mFather != null) {
@@ -104,15 +104,22 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
                     }
                 });
 
+                if (isShow){
+                    //异步加载视图
+                    loadingMyImageView();
+                }
 
-                        //异步加载视图
-                        loadingMyImageView();
 
 
             }
         }
     }
 
+    @Override
+    public void addMeToFather(View view, boolean f) {
+        isShow=false;
+        addMeToFather(view);
+    }
 
 
     /**
@@ -142,6 +149,21 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
 
             }
         }
+    }
+
+    @Override
+    public void removeMeToFather(boolean f) {
+
+
+            AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+                @Override
+                public void call() {
+                    //异步释放视图
+                    releaseImageViewResouce();
+                }
+            });
+
+
     }
 
     private boolean existLoaddingBg = false;
@@ -272,7 +294,7 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
         AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
             @Override
             public void call() {
-                //releaseImageViewResouce();
+               // releaseImageViewResouce();
                 picassoLoaderImager(filePath);
             }
         });
@@ -328,7 +350,6 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
         }
 
         ImageViewPicassocLoader.loadImage(mcontext,this,new File(filePath),null,ImageViewPicassocLoader.TYPE_ACTION_IIMAGE);
-
         log.e(TAG,"互动 -------  loadimage end -------");
     }
 
@@ -358,6 +379,7 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
      */
     private Button playVideoBtn ;
     private RelativeLayout relative;
+
     public Button getPlayVideoBtn (){
         if (mFather!=null){
         if(playVideoBtn == null){
@@ -369,7 +391,7 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
             playVideoBtn.setBackgroundDrawable(bd); //背景图
 
             if (relative == null){
-                 relative = new RelativeLayout(DisplayActivity.activityContext);
+                relative = new RelativeLayout(DisplayActivity.activityContext);
                 relative.setLayoutParams(new AbsoluteLayout.LayoutParams(AbsoluteLayout.LayoutParams.MATCH_PARENT, AbsoluteLayout.LayoutParams.MATCH_PARENT,0,0));
             }
             RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
@@ -379,7 +401,6 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
             AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                 @Override
                 public void call() {
-
                     relative.addView(playVideoBtn); //添加到相对布局中
                     ((ViewGroup) ActiveImagePlayer.this.mFather).addView(relative);
                 }

@@ -185,6 +185,12 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loa
         }
     }
 
+    @Override
+    public void addMeToFather(View view, boolean f) {
+        //NULL
+        addMeToFather(view);
+    }
+
     /**
      * 从父容器中移除
      */
@@ -211,6 +217,11 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loa
 
             }
         }
+    }
+
+    @Override
+    public void removeMeToFather(boolean f) {
+
     }
 
     /**

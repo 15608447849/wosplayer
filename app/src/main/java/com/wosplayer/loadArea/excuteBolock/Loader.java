@@ -210,7 +210,7 @@ public class Loader {
     }
 
     private void loadFileRecall(final String Filepath) {
-        log.d(" & loadFileRecall() ,"+ Filepath);
+        log.d(" & loadFileRecall() 接受到一个文件路径: "+ Filepath);
 
         if (Filepath.equals("loaderr")){
             log.e("文件:"+ Filepath+" - load faild");
@@ -270,6 +270,7 @@ public class Loader {
                         log.i(TAG, "ftp下载succsee -"+fileName+" - 线程 - "+ Thread.currentThread().getName());
 
                         if (fileName.contains(".apk")){
+                            //APK文件
                         //caller.Call(file.getAbsolutePath());
                         loadFileRecall(file.getAbsolutePath());
                         nitifyMsg(fileName,3);
@@ -277,22 +278,35 @@ public class Loader {
                         }
 
                         if (fileName.contains(".md5")){
-
-                            String sp = ((File)ob).getAbsolutePath();
-                            String dp = file.getAbsolutePath();
+                            //MD5文件
+                            log.d(TAG,"资源文件 在服务器上 对应md5文件 : "+ file.getAbsolutePath());
+                            String sp = ((File)ob).getAbsolutePath();//源文件
+                            String dp = file.getAbsolutePath();//源文件MD5文件
                             int sut =  MD5Util.FTPMD5(sp,dp);
 
                         if (sut==0){
-                        loadFileRecall(sp);
-                        nitifyMsg(((File)ob).getName(),3);
+                                log.e(TAG,"文件:"+((File)ob).getName()+ " md5 效验成功");
+                                loadFileRecall(sp);
+                                nitifyMsg(((File)ob).getName(),3);
                             }else{
-
                                 log.e(TAG,"文件:"+((File)ob).getName()+ " md5 效验失败!");
                                 loadFileRecall("loaderr");
                                 nitifyMsg(((File)ob).getName(),4);
                             }
+
                         }else{
+                            //资源文件
+                            log.d(TAG,"资源文件 : "+ file.getAbsolutePath());
+
                             File msd5file = MD5Util.getFileMD5String(file);
+
+                            if (msd5file == null){
+                                log.e(TAG,"文件:"+((File)ob).getName()+ " 资源文件生成md5文件 失败 ");
+                                loadFileRecall("loaderr");
+                                nitifyMsg(((File)ob).getName(),4);
+                                return;
+                            }
+
                             //下载 md5
                             FTPload(host,user,pass,remotePath,fileName+".md5",localPath,msd5file);
                         }
@@ -382,7 +396,7 @@ public class Loader {
 
             log.i(TAG, "Call: 当前一个回调结果[ "+Loader.this.muri+" ]");
 
-            log.d(TAG, "loader Call(): 执行线程"+ Thread.currentThread().getName()+"\n\r thread size:"+ Thread.getAllStackTraces().size());
+            log.d(TAG, "loader Call(): 执行线程"+ Thread.currentThread().getName()+" \n thread size:"+ Thread.getAllStackTraces().size());
 
             if (other_caller!=null){
                     try {

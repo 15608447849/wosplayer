@@ -142,7 +142,8 @@ public class IImagePlayer extends ImageView implements IPlayer{
 
         //资源回调的地方
         Bitmap bitmap = null;
-            Drawable drawable = imageView.getDrawable();
+        Drawable drawable = imageView.getDrawable();
+
         if (drawable == null){
             log.e(TAG,"释放资源失败,drawable is null 1");
             drawable = imageView.getBackground();
@@ -173,18 +174,18 @@ public class IImagePlayer extends ImageView implements IPlayer{
 //                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
 //                    @Override
 //                    public void call() {
-            imageView.setBackgroundResource(0);
+
 //                    }
 //                });
             if(drawable!=null){
                 drawable.setCallback(null);
             }
-
             bitmap.recycle();
             log.i(TAG, " 释放资源...end \n" );
             return;
         }
-
+        imageView.setBackgroundResource(0);
+        imageView.setImageDrawable(null);
         log.e(TAG, " 释放资源...failt \n" );
     }
 
