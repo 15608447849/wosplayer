@@ -27,7 +27,7 @@ import rx.functions.Action0;
 public class IImagePlayer extends ImageView implements IPlayer{
 
     private WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
-    private static final java.lang.String TAG = IImagePlayer.class.getName();
+    private static final java.lang.String TAG = "iimagePlayer :";//IImagePlayer.class.getName();
     private Loader loader;
     private Context mCcontext;
     private ViewGroup mfatherView = null;

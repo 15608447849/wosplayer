@@ -71,10 +71,11 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
             //如果是多文件  设置false
             video.initVideoView(false);
             //自己完成播放完成监听
-            video.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            log.d(TAG," MyVideoView : IVideoplayer srtting OnCompletionListener ...");
+            video.setOnCompletionListener_ (new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    log.i(TAG,"video play over ... Completion");
+                    log.d(TAG," MyVideoView : IVideoplayer srtting OnCompletionListener _ onCompletion()");
                     currentIndex++;
                     if (currentIndex==multifileList.size()){
                         currentIndex = 0;

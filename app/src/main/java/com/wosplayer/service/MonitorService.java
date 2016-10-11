@@ -52,12 +52,12 @@ public class MonitorService extends Service {
             @Override
             public void run() {
                 while(threadFlag){
-                    log.e("------------------------------------------監聽中---------------------------------");
+                    //log.e("------------------------------------------監聽中---------------------------------");
                     monitor();
                     try {
                         Thread.sleep(interval);
                     } catch (InterruptedException e) {
-                        log.e("监听服务 监听线程 err:"+e.getMessage());
+                        //log.e("监听服务 监听线程 err:"+e.getMessage());
                     }
                     //   log.i("`````监听服务 监听线程 over..`````");
                 }
@@ -146,7 +146,7 @@ public class MonitorService extends Service {
      //   log.d("isRunningToTaskTop():"+f);
 
         boolean flag =  serverUtils.isAppOnForeground(MonitorService.this.getApplicationContext());
-        log.i("监听服务 监听结果 :"+flag);
+        //log.i("监听服务 监听结果 :"+flag);
         if (!flag){
             log.e("app not foreground...");
             Intent intent  = new Intent();

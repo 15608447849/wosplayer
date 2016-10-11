@@ -8,7 +8,7 @@ import com.wosplayer.app.wosPlayerApp;
  * Created by user on 2016/7/12.
  */
 public class InteractionCache {
-    private static final java.lang.String TAG = InteractionCache.class.getName();
+    private static final java.lang.String TAG = "互动缓存 : ";//InteractionCache.class.getName();
     public static String uid;
 
     //存

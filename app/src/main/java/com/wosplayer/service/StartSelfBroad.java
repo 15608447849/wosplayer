@@ -20,13 +20,20 @@ public class StartSelfBroad extends BroadcastReceiver {
         log.e(" installBroad ","["+intent.getAction()+"]");
         if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)){//"android.intent.action.BOOT_COMPLETED";
 
-            Toast.makeText(context, "boot completed action has got !!!", Toast.LENGTH_LONG).show();
+//            Toast.makeText(context, "start remote port !!!", Toast.LENGTH_LONG).show();
+//            AdbShellCommd.startRemoteport();
 
+           //打开app
+            Toast.makeText(context, "boot_completed action has got !!!", Toast.LENGTH_LONG).show();
             Intent ootStartIntent=new Intent(context,DisplayActivity.class);
-
             ootStartIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
             context.startActivity(ootStartIntent);
+
+
+
+
+            log.e("-----------------------------开机启动任务完成--------------------------------");
+
         }
     }
 }

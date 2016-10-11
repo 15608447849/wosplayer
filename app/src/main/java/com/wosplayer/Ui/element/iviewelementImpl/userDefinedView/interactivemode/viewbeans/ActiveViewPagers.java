@@ -347,6 +347,16 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
         removeMeToFather();
     }
 
+    @Override
+    public int getPlayDration(IviewPlayer iviewPlayer) {
+        return 0;
+    }
+
+    @Override
+    public void otherMother(Object object) {
+
+    }
+
 
     /**
          * 添加子视图对象

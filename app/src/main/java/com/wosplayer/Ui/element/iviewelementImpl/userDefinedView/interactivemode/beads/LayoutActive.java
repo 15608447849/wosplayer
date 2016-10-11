@@ -198,6 +198,18 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
 
     }
 
+    @Override
+    public int getPlayDration(IviewPlayer iviewPlayer) {
+        return 0;
+    }
+
+    @Override
+    public void otherMother(Object object) {
+
+    }
+
+
+
     /**
      * 转换背景颜色代码
      * @param colorValue

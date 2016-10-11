@@ -110,9 +110,16 @@ public class ActiveWebPlayer extends WebView implements IviewPlayer {
                 AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                     @Override
                     public void call() {
-                        ((AbsoluteLayout)mFather).removeView(ActiveWebPlayer.this);
-                        ((AbsoluteLayout)mFather).addView(ActiveWebPlayer.this);
-                        isRemove=false;
+
+                        try {
+                            ((AbsoluteLayout)mFather).removeView(ActiveWebPlayer.this);
+                            ((AbsoluteLayout)mFather).addView(ActiveWebPlayer.this);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }finally {
+                            isRemove=false;
+                        }
+
                     }
                 });
 
@@ -158,6 +165,16 @@ public class ActiveWebPlayer extends WebView implements IviewPlayer {
 
     @Override
     public void removeMeToFather(boolean f) {
+
+    }
+
+    @Override
+    public int getPlayDration(IviewPlayer iviewPlayer) {
+        return 0;
+    }
+
+    @Override
+    public void otherMother(Object object) {
 
     }
 

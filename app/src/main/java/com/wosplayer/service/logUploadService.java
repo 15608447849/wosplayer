@@ -124,7 +124,7 @@ public class logUploadService extends IntentService {
     private void resultCount(String filepath) {
 
       File f = new File(filepath);
-      //  f.delete();
+        f.delete();
         log.i("删除日志文件:"+filepath);
 
         if (needFileCount <=0){

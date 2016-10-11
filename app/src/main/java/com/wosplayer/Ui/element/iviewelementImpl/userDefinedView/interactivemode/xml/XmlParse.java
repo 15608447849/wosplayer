@@ -23,7 +23,7 @@ import java.util.List;
  */
 public class XmlParse {
 
-    private static final java.lang.String TAG = XmlParse.class.getName();
+    private static final java.lang.String TAG = "XmlParse : ";//XmlParse.class.getName();
 
     /**
      * 解析  互动

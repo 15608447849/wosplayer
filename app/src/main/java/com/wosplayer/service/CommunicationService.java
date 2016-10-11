@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
+import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.log;
 import com.wosplayer.cmdBroadcast.CmdPostTaskCenter;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_UPDC;
@@ -197,9 +198,11 @@ public class CommunicationService extends Service{
                     if (msg != null){
                         dataOutputStream.writeUTF(msg);
                         dataOutputStream.flush();
-                        log.e(" 发送一条信息到服务器 :" + msg);
+                        if (DisplayActivity.isShowDialog){
+                            log.e(" 发送一条信息到服务器 :" + msg);
+                        }
                     }
-                    Thread.sleep(1*500);//一秒发送两条信息
+                    Thread.sleep(1*50);//一秒发送两条信息
                 }catch (Exception e){
                     log.e("发送消息到服务器 错误 :"+ e.getMessage());//尝试重新链接
                     //重连接

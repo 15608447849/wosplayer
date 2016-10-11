@@ -253,7 +253,10 @@ public class ActiveFtpUtils {
                     //下载前　设置下载中所需值
                     long step = serverSize / 100; //下标位置
                     long process = 0; // 进度
-                    long currentSize = 0;//已下载大小
+                    long currentSize = 0;//当前总大小
+                    long oldSize = 0;
+                    long currentTime = 0;
+                    long oldTime = 0;
                     String speed =null;
 
             // 输出到本地文件流
@@ -286,15 +289,28 @@ public class ActiveFtpUtils {
 
                 byte[] b = new byte[1024];
                 int length = 0;
+                currentTime = System.currentTimeMillis();
                 while ((length = input.read(b)) != -1) {
                     out.write(b, 0, length);
                     out.flush();
+                    currentSize = currentSize + length; // 当前总大小 = 现在的大小 加上 写出来的大小
 
-                    currentSize = currentSize + length; // 当前大小 = 现在的大小加上写出来的大小
                     if (currentSize / step != process) { //如果 当前进度/下标 != 已有进度
                         process = currentSize / step;
-                        if (process % 2 == 0) {  //每隔%2的进度返回一次
-                            speed = String.format("%.1f", currentSize / (1024 * 1.0)) + "kb";
+                        if (process % 5 == 0) {  //每隔%2的进度返回一次
+
+                            oldTime = currentTime;//旧时间
+                            currentTime = System.currentTimeMillis();//当前时间
+                            double timeDiff = (currentTime-oldTime) / (1000 * 1.0) ;
+                            log.e("时间差:"+ timeDiff +"秒");
+
+
+                            double sizeDiff = (currentSize-oldSize)/(1024 * 1.0);
+                            log.e(fileName +" - 当前下载量:" + sizeDiff + " kb");
+                            double speedTem = sizeDiff/timeDiff ;
+                            oldSize = currentSize;
+                            log.e(fileName +" - 下载速度:" + speedTem +" kb/s");
+                            speed = String.format("%f",speedTem) + "kb/s";
                             listener.onDownLoadProgress(FTP_DOWN_LOADING, process, speed, null);
                         }
                     }

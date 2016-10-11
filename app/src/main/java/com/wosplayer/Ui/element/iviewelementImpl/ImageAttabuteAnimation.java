@@ -14,6 +14,8 @@ import android.view.animation.CycleInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 
+import com.wosplayer.app.log;
+
 /**
  * Created by user on 2016/9/27.
  */
@@ -24,10 +26,11 @@ public class ImageAttabuteAnimation {
 
     public static final int INTER_SNUB =  7;
 
+
+
     public static AnimatorSet getOneAnimation(int number, View view, int[] point) {
         AnimatorSet set = new AnimatorSet();
         ObjectAnimator animation = null;
-
 
         switch (number){
             case 1://旋转 x 顺时针
@@ -87,29 +90,28 @@ public class ImageAttabuteAnimation {
                 break;
             case 7: //透明度
                 ObjectAnimator animator =
-                        ObjectAnimator.ofFloat(view,"alpha",0F,1F);
-
+                        ObjectAnimator.ofFloat(view,"alpha",0.5F,1F);//1 不透明
                 set.setDuration(500);
                 set.play(animation);
                 break;
 
             case 8://透明 + 旋转
 
-                set.play(ObjectAnimator.ofFloat(view,"alpha",0F,1F))
+                set.play(ObjectAnimator.ofFloat(view,"alpha",0.5F,1F))
                         .with(ObjectAnimator.ofFloat(view,"rotation",0.0F,360.0F));// with  同时,支持,随着
                 set.setDuration(500);
                 break;
             case 9://透明 + 旋转 + 比例缩放
 
 
-                set.play( ObjectAnimator.ofFloat(view,"alpha",0F,1F))
+                set.play( ObjectAnimator.ofFloat(view,"alpha",0.5F,1F))
                         .with(ObjectAnimator.ofFloat(view,"rotation",0.0F,360.0F))
                         .with(ObjectAnimator.ofFloat(view,"scale",0.5F,1.0F));
                 set.setDuration(500);
                 break;
             case 10://透明 +比例缩放
 
-                set.play( ObjectAnimator.ofFloat(view,"alpha",0F,1F))
+                set.play( ObjectAnimator.ofFloat(view,"alpha",0.5F,1F))
                         .with(ObjectAnimator.ofFloat(view,"scale",1.5F,0.5F))
                         .after(ObjectAnimator.ofFloat(view,"scale",0.0F,1.0F));
                 set.setDuration(500);
@@ -152,7 +154,7 @@ public class ImageAttabuteAnimation {
 
                 set.play(ObjectAnimator.ofFloat(view, "translationX",
                         -point[2], 0.0f))
-                        .with(ObjectAnimator.ofFloat(view,"alpha",0.0f,1.0F))
+                        .with(ObjectAnimator.ofFloat(view,"alpha",0.2f,1.0F))
                         .with(ObjectAnimator.ofFloat(view,"scaleX",0.0f,1.0F));
                 set.setDuration(2000);
                 break;
@@ -197,13 +199,23 @@ public class ImageAttabuteAnimation {
      */
 
     public static void SttingAnimation(Context mCcontext, final View view,int [] point){
-
+        int selectNunber = 0;
         //属性动画
-        int selectNunber = (int)(Math.random()*ImageAttabuteAnimation.ANIM_SNUB);
+        if (point==null){
+            selectNunber = (int)(Math.random()*10) + 1;
+        }else{
+            selectNunber = (int)(Math.random()*ImageAttabuteAnimation.ANIM_SNUB) + 1;
+        }
+        log.d("属性动画 selectNunber : "+selectNunber );
         AnimatorSet amt = ImageAttabuteAnimation.getOneAnimation(selectNunber,view,point);
         if(amt!=null){
-            selectNunber = (int)(Math.random()*ImageAttabuteAnimation.INTER_SNUB);
-            amt.setInterpolator(ImageAttabuteAnimation.getOneTimeInterpolator(selectNunber));
+
+            if(point!=null){
+                selectNunber = (int)(Math.random()*ImageAttabuteAnimation.INTER_SNUB) + 1;
+                log.d("属性动画 运动轨迹 selectNunber : "+selectNunber );
+                amt.setInterpolator(ImageAttabuteAnimation.getOneTimeInterpolator(selectNunber));
+            }
+
             amt.start();
         }
 

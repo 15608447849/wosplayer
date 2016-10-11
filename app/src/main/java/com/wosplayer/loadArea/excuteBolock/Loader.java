@@ -171,16 +171,40 @@ public class Loader {
                 false,// 如果目标文件存在，接着未完成的部分继续下载。服务器不支持RANGE时将从新下载。
                 false,//如果从请求返回信息中获取到文件名，下载完成后自动重命名
                 new RequestCallBack<File>() {
+                    long currentTime = 0;
+                    long oldTime = 0;
+                    long oldLoadingSize = 0;
+                    String speed =null;
 
                     @Override
                     public void onStart() {
                         log.i(TAG,"启动http下载:"+ url+" on Thread : "+Thread.currentThread().getName());
                         nitifyMsg(url.substring(url.lastIndexOf("/")+1),1);
                         nitifyMsg(url.substring(url.lastIndexOf("/")+1),2);
+                        currentTime = System.currentTimeMillis();
                     }
                     @Override
                     public void onLoading(long total, long current, boolean isUploading) {
-                        notifyProgress(url.substring(url.lastIndexOf("/")+1),(current/total)+"",(current/1024)+" kb");
+                        log.e(url +"# 当前下载总量:" + current);
+                        oldTime = currentTime;
+                        currentTime = System.currentTimeMillis();
+
+                        long temSize = current-oldLoadingSize;
+                        log.e(url +"# 当前下载量:" + temSize);
+                        oldLoadingSize = current;
+
+
+
+
+
+
+
+
+                        double speedTem = (temSize/(1024 * 1.0))/((currentTime-oldTime)/(1000*1.0)) ;
+                        log.e(url +"# 当前速度:" + speedTem);
+                        speed = String.format("%f",speedTem)+"kb/s";
+
+                        notifyProgress(url.substring(url.lastIndexOf("/")+1),(current/total)+"",(speedTem/(1024 * 1.0))+" kb");
                     }
                     @Override
                     public void onSuccess(ResponseInfo<File> responseInfo) {

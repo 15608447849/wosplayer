@@ -3,7 +3,7 @@ package com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemod
 
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.ActiveImagePlayer;
-import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.ActiveVideoPlayerAndImage;
+import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.ActiveVideoPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.ActiveWebPlayer;
 import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.log;
@@ -27,7 +27,7 @@ import com.wosplayer.app.wosPlayerApp;
 
 public class FileActive {
 
-    private static final java.lang.String TAG = FileActive.class.getName();
+    private static final java.lang.String TAG = "_FileActive";//FileActive.class.getName();
     public int type;
     public int filetype;
     public String filepath;
@@ -53,15 +53,17 @@ public class FileActive {
            return new ActiveImagePlayer(DisplayActivity.activityContext, filepath, localPath);
         } else if (filetype == 1002) {//video 1002
 
-          // return new VideoPlayer(config.activity,filepath,localPath);
 
-            if(video_image_url.equals("") || video_image_url==null || video_image_url.equals("null")){
+           /*if(video_image_url.equals("") || video_image_url==null || video_image_url.equals("null")){
                 video_image_url = "http://desk.fd.zol-img.com.cn/t_s1920x1080c5/g5/M00/08/04/ChMkJleF7WeIdaxTABNpaaUXOW8AATeTwERcIwAE2mB274.jpg?downfile=146891502194.jpg";
             }
 
             String imagefn = video_image_url.substring(video_image_url.lastIndexOf("/") + 1);
             String imageLocalPath =  wosPlayerApp.config.GetStringDefualt("basepath", "")+imagefn;
-            return  new ActiveVideoPlayerAndImage(DisplayActivity.activityContext,video_image_url,imageLocalPath,filepath,localPath);
+            return  new ActiveVideoPlayerAndImage(DisplayActivity.activityContext,video_image_url,imageLocalPath,filepath,localPath);*/
+
+
+            return new ActiveVideoPlayer(DisplayActivity.activityContext,filepath,localPath);
 
         }
         return null;

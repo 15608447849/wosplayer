@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.wos.Toals;
 import com.wosplayer.service.CommunicationService;
 
 import java.io.File;
@@ -18,10 +17,6 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.UUID;
-
-import cn.trinea.android.common.util.ShellUtils;
-import installUtils.ApkController;
-import installUtils.AppToSystem;
 
 /**
  * Created by Administrator on 2016/7/19.
@@ -36,90 +31,13 @@ public class wosPlayerApp extends Application {
     public void onCreate() {
         super.onCreate();
         log.d("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wosPlayer app start~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-
-
-        //查看 老版本app 是否存在 存在 卸载
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                //预留远程端口号
-                String [] commands = {
-                        "su\n",
-                        "setprop service.adb.tcp.port 9999\n",
-                        "stop adbd\n",
-                        "start adbd\n"
-                };
-                ShellUtils.CommandResult cr = ShellUtils.execCommand(commands,true,true);
-
-                String strs = "远程端口开启结果: "+cr.result;
-                log.d("Remote",strs);
-                Toals.Say(strs);
-                strs = "本地ip: "+ getLocalIpAddress();
-                log.d("Remote",strs);
-
-                //卸载 旧app
-                ApkController.uninstall("com.wos",getApplicationContext());
-              /* int i = PackageUtils.uninstall(getApplicationContext(),"com.wos");
-                if (i==PackageUtils.DELETE_SUCCEEDED){
-                    Toals.Say("-- 卸载 com.wos success --");
-                }*/
-
-                //放入system
-                String packagepath = getApplicationInfo().sourceDir;
-                log.d("root",packagepath);
-                    String paramString=// "adb push MySMS.apk /system/app" +"\n"+
-                            "adb shell" +"\n"+
-                                    "su" +"\n"+
-                                    // "mount -o remount,rw -t yaffs2 /dev/block/mtdblock3 /system" +"\n"+
-                                    "mount -o remount,rw /system" +"\n"+
-                                    "cp "+packagepath+" /system/app/wosplayer.apk" +"\n"+
-                                    //"mount -o remount,ro -t yaffs2 /dev/block/mtdblock3 /system" +"\n"+
-                                    "mount -o remount,ro /system" +"\n"+
-                                    "reboot"+"\n"+
-                        "exit" +"\n"+
-                        "exit";
-
-                    if(AppToSystem.haveRoot()){
-                        if (packagepath.contains("/data/app")){
-                            log.e("root","# "+paramString);
-                           int res = -1;//AppToSystem.execRootCmdSilent(paramString);
-
-                        if(res==-1){
-                            log.e("root","安装不成功");
-                        }else{
-                            log.e("root","安装成功");
-                        }
-                    }else{
-                            log.e("root","system/app 已经存在");
-                    }
-
-                }else{
-                        log.e("root","没有root权限");
-                    //创建桌面图标
-
-                  /*  Intent intent = new Intent("com.android.launcher.action.INSTALL_SHORTCUT");
-                    intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, getString(R.string.app_name));
-                    // 是否可以有多个快捷方式的副本，参数如果是true就可以生成多个快捷方式，如果是false就不会重复添加
-                    intent.putExtra("duplicate", false);
-
-                    Intent intent2 = new Intent(Intent.ACTION_MAIN);
-                    intent2.addCategory(Intent.CATEGORY_LAUNCHER);
-                    // 删除的应用程序的ComponentName，即应用程序包名+activity的名字
-                    intent2.setComponent(new ComponentName(wosPlayerApp.this.getPackageName(), wosPlayerApp.this.getPackageName() + ".DisplayActivity"));
-                    intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, intent2);
-                    intent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource.fromContext(wosPlayerApp.this,
-                            R.drawable.ic_launcher));
-                    sendBroadcast(intent);*/
-                }
-
-            }
-        }).start();
-
         //捕获异常
-       // CrashHandler.getInstance().init(getApplicationContext());
-        //检测sd卡
+        CrashHandler.getInstance().init(getApplicationContext());
 
+        //放入系统目录
+        new AdbShellCommd(this.getApplicationContext(),true,true).start();//会重启
+//        new AdbShellCommd(this.getApplicationContext(),true,false).start();//不重启
+        //检测sd卡
         //初始化 配置信息
         init();
     }
@@ -223,7 +141,7 @@ public class wosPlayerApp extends Application {
                     InetAddress inetAddress = enumIpAddr.nextElement();
                     if (!inetAddress.isLoopbackAddress()
                             && (inetAddress instanceof Inet4Address)) {
-                        log.i("local ip: "+ inetAddress.getHostAddress().toString());
+                        log.i("getLocalIpAddress() _ local IP : "+ inetAddress.getHostAddress().toString());
                         return inetAddress.getHostAddress().toString();
                     }
                 }
@@ -280,3 +198,89 @@ public class wosPlayerApp extends Application {
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+////查看 老版本app 是否存在 存在 卸载
+//new Thread(new Runnable() {
+//@Override
+//public void run() {
+//
+//        //预留远程端口号
+//        String [] commands = {
+//        "su\n",
+//        "setprop service.adb.tcp.port 9999\n",
+//        "stop adbd\n",
+//        "start adbd\n"
+//        };
+//        ShellUtils.CommandResult cr = ShellUtils.execCommand(commands,true,true);
+//
+//        String strs = "远程端口开启结果: "+cr.result;
+//        log.d("Remote",strs);
+//        Toals.Say(strs);
+//        strs = "本地ip: "+ getLocalIpAddress();
+//        log.d("Remote",strs);
+//
+//        //卸载 旧app
+//        ApkController.uninstall("com.wos",getApplicationContext());
+//              /* int i = PackageUtils.uninstall(getApplicationContext(),"com.wos");
+//                if (i==PackageUtils.DELETE_SUCCEEDED){
+//                    Toals.Say("-- 卸载 com.wos success --");
+//                }*/
+//
+//        //放入system
+//        String packagepath = getApplicationInfo().sourceDir;
+//        log.d("root",packagepath);
+//        String paramString=// "adb push MySMS.apk /system/app" +"\n"+
+//        "adb shell" +"\n"+
+//        "su" +"\n"+
+//        // "mount -o remount,rw -t yaffs2 /dev/block/mtdblock3 /system" +"\n"+
+//        "mount -o remount,rw /system" +"\n"+
+//        "cp "+packagepath+" /system/app/wosplayer.apk" +"\n"+
+//        //"mount -o remount,ro -t yaffs2 /dev/block/mtdblock3 /system" +"\n"+
+//        "mount -o remount,ro /system" +"\n"+
+//        "reboot"+"\n"+
+//        "exit" +"\n"+
+//        "exit";
+//
+//        if(AppToSystem.haveRoot()){
+//        if (packagepath.contains("/data/app")){
+//        log.e("root","# "+paramString);
+//        int res = -1;//AppToSystem.execRootCmdSilent(paramString);
+//
+//        if(res==-1){
+//        log.e("root","安装不成功");
+//        }else{
+//        log.e("root","安装成功");
+//        }
+//        }else{
+//        log.e("root","system/app 已经存在");
+//        }
+//
+//        }else{
+//        log.e("root","没有root权限");
+//        }
+//
+//        }
+//        }).start();

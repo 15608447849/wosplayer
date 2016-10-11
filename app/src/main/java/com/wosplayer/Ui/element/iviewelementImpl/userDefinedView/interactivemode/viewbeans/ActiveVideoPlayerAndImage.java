@@ -303,6 +303,16 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
 
     }
 
+    @Override
+    public int getPlayDration(IviewPlayer iviewPlayer) {
+        return 1;
+    }
+
+    @Override
+    public void otherMother(Object object) {
+
+    }
+
     /**
      * 资源回调
      * @param filePath

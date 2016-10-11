@@ -11,4 +11,6 @@ public interface IviewPlayer {
     void addMeToFather(View view,boolean f);
     void removeMeToFather();
     void removeMeToFather(boolean f);
+    int getPlayDration(IviewPlayer iviewPlayer);
+    void otherMother(Object object);
 }

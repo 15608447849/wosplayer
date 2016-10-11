@@ -10,6 +10,7 @@ import com.wosplayer.service.logUploadService;
 
 /**
  * Created by user on 2016/8/1.
+ *
  */
 public class Command_UPLG implements iCommand {
     @Override
@@ -18,6 +19,10 @@ public class Command_UPLG implements iCommand {
         String uri = param;
         log.i("开启 日志上传 服务 "+ uri);
         if (uri==null || uri.equals("")) return;
+        if (!uri.contains("http://")){
+            log.e("upload log err :  uri is error ("+ uri +")");
+            return;
+        }
 
        log.i("start log upload server ...");
         //开启 日志上传服务

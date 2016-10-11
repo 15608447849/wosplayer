@@ -22,7 +22,7 @@ import com.wosplayer.Ui.element.iviewelementImpl.IinteractionPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.ImageViewPicassocLoader;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.iCache.InteractionCache;
-import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.ActiveViewPagers;
+import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.InteractionContentShowExer;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.xml.XmlParse;
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.activity.DisplayActivity;
@@ -89,7 +89,8 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, L
     private IinteractionPlayer CanvasView; //按钮绑定的视图 显示的 容器
     private List<IviewPlayer> myBindFileViews;//绑定的文件视图
     private LayoutActive myBindLayoutView;
-    private ActiveViewPagers mvp;//滑动控件　－　当绑定类型是文件　使用！
+    //private ActiveViewPagers mvp;//滑动控件　－　当绑定类型是文件　使用！
+    private InteractionContentShowExer mvp = null;
     private Button retenbtn;//返回按钮
     private FrameLayout fLayout;//存放返回按钮
 
@@ -140,6 +141,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, L
             retenbtn.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    log.e(" ---------------------- 点击了 返回按钮 -------------------------");
                     //删除自己的存在
                     CanvasView.removeView(fLayout);
                     //返回上一个视图
@@ -197,12 +199,13 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, L
 
                 if (mvp == null) {
                     //滑动控件是空的
-                    mvp = new ActiveViewPagers(DisplayActivity.activityContext);//第一次创建滑动控件
+/*                    mvp = new ActiveViewPagers(DisplayActivity.activityContext);//第一次创建滑动控件
                     //加载需要显示的资源
                         for(IviewPlayer iview:myBindFileViews){
                             log.i(TAG,"滑动控件 添加: "+iview);
                             mvp.addMeSubView(iview);
-                        }
+                        }*/
+                    mvp = new InteractionContentShowExer(mcontext,myBindFileViews);
                 }
 
                 mvp.setMyReturnBtn(fLayout);//添加返回键
@@ -419,6 +422,16 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, L
 
     }
 
+    @Override
+    public int getPlayDration(IviewPlayer iviewPlayer) {
+        return 0;
+    }
+
+    @Override
+    public void otherMother(Object object) {
+
+    }
+
     /**
      * 获取xml资源文件
      *
@@ -517,7 +530,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, L
      * 加载自己的绑定的视图 或者 文件夹
      * 请放入其他线程
      */
-    private void loadMeBindView(String xml) {
+    private void loadMeBindView(final String xml) {
         log.i(TAG," 互动执行者 绑定的视图...的子项...按钮..加载自己的子项");
         //解析 得到 子视图信息
         try {
@@ -525,11 +538,25 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, L
             case 0: //排版 传进来的 排版的xml数据
             case 2:
 
-               myBindLayoutView =  XmlParse.interactionParse_one(xml); //1 先解析
-                log.i(TAG,"获取到一个 绑定布局视图:"+myBindLayoutView);
-                //在 需要显示的时候 去加载他的 子资源
-                this.setEnabled(true);
-                log.i(TAG, bindid+"可以点击了");
+                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+                    @Override
+                    public void call() {
+                        try {
+                            log.d(TAG,"线程1: " + Thread.currentThread().getName());
+                            myBindLayoutView =  XmlParse.interactionParse_one(xml); //1 先解析
+                            log.i(TAG,"获取到一个 绑定布局视图:"+myBindLayoutView);
+                            log.d(TAG,"线程2: " + Thread.currentThread().getName());
+                            //在 需要显示的时候 去加载他的 子资源
+                            ButtonActive.this.setEnabled(true);
+                            log.i(TAG, bindid+"可以点击了");
+                        } catch (Exception e) {
+                            log.e(TAG,"loadMeBindView() _ case 2: err: "+ e.getMessage());
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+
                 break;
 
             case 1://文件夹

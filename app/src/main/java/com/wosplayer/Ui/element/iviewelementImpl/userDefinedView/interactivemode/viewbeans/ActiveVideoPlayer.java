@@ -2,6 +2,8 @@ package com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemod
 
 import android.content.Context;
 import android.graphics.Color;
+import android.media.MediaPlayer;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
@@ -20,25 +22,41 @@ import rx.functions.Action0;
  * Created by user on 2016/7/4.
  */
 public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loader.LoaderCaller {
-    private static final java.lang.String TAG = ActiveVideoPlayer.class.getName();
+    private static final java.lang.String TAG = "_VIDEOPLAYER";//ActiveVideoPlayer.class.getName();
     private MyVideoView video;
     private long mCurrentSeek;
     //构造
     public ActiveVideoPlayer(Context context, String uri, String localpath) {
         super(context);
-        log.e("互动 视频播放者 创建");
+        log.e(TAG,"互动 视频播放者 创建");
         InitSettting(uri,localpath);
         video = new MyVideoView(context,this);
     }
 
 
+    private IviewPlayer iviewPlayer = null;//互动接口对象  回调对象 附加功能
 
     private void mInitStart(String filePath) {
         video.setMyLayout(0,0,LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT);
-        video.initVideoView(true);
-        log.i("videoPlayer","- -start video- - ");
+
+
+        Log.d(TAG,"不循环播放视频");
+        video.initVideoView(false);//不循环
+        log.d(TAG,"设置准备完成监听事件");
+        video.setOnPreparedListener_(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                log.e(TAG,"setOnPreparedListener_()");
+                if (iviewPlayer!=null){
+                   iviewPlayer.otherMother(mp.getDuration());
+                }
+
+            }
+        });
+
+        log.d(TAG,"- -start video- - ");
         video.loadRouce(filePath);
-        log.d("videoPlayer","videoPlayer call video.start()");
+        log.d(TAG,"videoPlayer call video.start()");
         video.start();
     }
 
@@ -72,7 +90,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loa
         //初始化 资源加载者
         load = new Loader();
         load.settingCaller(this);
-        log.e("互动 视频 初始化:"+uriPath+"; "+localPath);
+        log.e(TAG,"互动 视频 初始化:"+uriPath+"; "+localPath);
     }
 
     /**
@@ -108,7 +126,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loa
     public void AotuLoadingResource() {
         //本地如果存在 不加载
         if (load.fileIsExist(videoFileLocalPath)){
-            log.e("video 资源 本地存在");
+            log.e(TAG,"video 资源 本地存在");
             return;
         }
 
@@ -120,7 +138,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loa
      */
     private void loadingMyVideoView() {
         if (mFather == null) {
-            log.e("video viewGroup is null");
+            log.e(TAG,"video viewGroup is null");
             return;
         }
               //  查看本地
@@ -130,7 +148,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loa
         } else {
 
             if(isloading){//在下载
-                log.e("video 正在下载中");
+                log.e(TAG,"video 正在下载中");
                 return;
             }
             //访问网络
@@ -174,7 +192,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loa
                             mFather.addView(ActiveVideoPlayer.this.returnBtn);
                         }
                         isremove = false;
-                        log.e("互动 video player 添加到 视图 ,video 还没有添加");
+                        log.e(TAG,"互动 video player 添加到 视图 ,video 还没有添加");
                     }
                 });
 
@@ -224,6 +242,17 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loa
 
     }
 
+    @Override
+    public int getPlayDration(IviewPlayer iviewPlayer) {
+        this.iviewPlayer = iviewPlayer;
+        return -1;
+    }
+
+    @Override
+    public void otherMother(Object object) {
+
+    }
+
     /**
      * 资源回调
      * @param filePath
@@ -233,7 +262,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loa
         log.i(TAG, "videoplayer  一个视频 资源 下载结果传递了来了:" + filePath);
         isloading = false; //下载完毕
         if (mFather == null) {
-            log.e("video - >vp is null");
+            log.e(TAG,"video - >vp is null");
             return;
         }
 

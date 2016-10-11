@@ -23,16 +23,13 @@ public class Toals {
       if (!DisplayActivity.isShowDialog){
           return;
       }
-        if (DisplayActivity.log_out == null){
-            return;
-        }
+
 
       AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
             @Override
             public void call() {
 //                Toast.makeText(DisplayActivity.activityContext,str,Toast.LENGTH_SHORT).show();
-                String nstr = DisplayActivity.log_out.getText().toString()+"\n"+str;
-                DisplayActivity.log_out.setText(nstr);
+
             }
         });
     }

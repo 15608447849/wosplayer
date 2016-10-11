@@ -32,7 +32,7 @@ import rx.schedulers.Schedulers;
 
 public class IinteractionPlayer extends AbsoluteLayout implements IPlayer{
 
-    private static final java.lang.String TAG = IinteractionPlayer.class.getName();
+    private static final java.lang.String TAG ="互动布局(IinteractionPlayer): " ;//IinteractionPlayer.class.getName();
     private Context mCcontext;
     private ViewGroup mfatherView = null;
     private int x=0;

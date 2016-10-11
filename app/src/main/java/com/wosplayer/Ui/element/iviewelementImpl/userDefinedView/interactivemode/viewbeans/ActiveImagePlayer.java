@@ -34,7 +34,7 @@ import rx.functions.Action0;
 public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller, IviewPlayer {
 
 
-    private static final java.lang.String TAG = "ActiveImagePlayer.class.getName()";
+    private static final java.lang.String TAG = "_ActiveImagePlayer";//.class.getName()";
     private Loader load;
     private boolean isloading = false;//是否正在下载中
     private String uriPath;  //网络 uri 地址
@@ -129,15 +129,21 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
     public void removeMeToFather() {
 
         if (mFather != null) {
-            if (mFather instanceof AbsoluteLayout) {
-                releativePlayBtn((AbsoluteLayout) mFather);//释放 播放 按钮
+            if (mFather instanceof ViewGroup) {
+                releativePlayBtn((ViewGroup) mFather);//释放 播放 按钮
 
                 AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                     @Override
                     public void call() {
                         //容器是个绝对布局的话
-                        ((AbsoluteLayout) mFather).removeView(ActiveImagePlayer.this);
+
+                        try {
+                            ((ViewGroup) mFather).removeView(ActiveImagePlayer.this);
+                        } catch (Exception e) {
+                           log.e(TAG," "+mFather +"- "+this+" & "+ e.getMessage());
+                        }
                         mFather = null;
+                        log.e(TAG,"移除自己视图成功");
                         //异步释放视图
                         releaseImageViewResouce();
 
@@ -163,6 +169,16 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
                 }
             });
 
+
+    }
+
+    @Override
+    public int getPlayDration(IviewPlayer iviewPlayer) {
+        return 15*1000;
+    }
+
+    @Override
+    public void otherMother(Object object) {
 
     }
 
@@ -338,7 +354,7 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
      */
     private void picassoLoaderImager(String filePath) {
 
-        //ImageAttabuteAnimation.SttingAnimation(mcontext,this);
+//        ImageAttabuteAnimation.SttingAnimation(mcontext,this,null);
 
         log.e(TAG,"互动 -------  loadimageing ------- "+ filePath);
         File file =new File(filePath);
@@ -414,7 +430,7 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
     /**
      * 释放 播放 按钮
      */
-    private void releativePlayBtn(final AbsoluteLayout view){
+    private void releativePlayBtn(final ViewGroup view){
         if (playVideoBtn == null){
             return;
         }

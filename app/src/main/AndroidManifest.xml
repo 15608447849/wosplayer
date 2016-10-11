@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.wosplayer"
-    android:versionCode="16"
-    android:versionName="5.0"
+    android:versionCode="9"
+    android:versionName="9"
     android:screenOrientation="portrait">
 
     <application
@@ -28,6 +28,8 @@
             </intent-filter>
         </activity>
 
+
+
         <!-- 通讯服务 -->
         <service android:name=".service.CommunicationService" />
         <!-- 通讯服务 重新链接 广播-->
@@ -47,6 +49,7 @@
 
         <!-- 接受下载 队列 -->
         <service android:name=".loadArea.loaderManager" />
+
 
         <!-- 下载完成 广播-->
         <receiver android:name=".loadArea.completeTaskListBroadcast">

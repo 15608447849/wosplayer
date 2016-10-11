@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -56,6 +57,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
      * 是否准备完成
      */
     private boolean mIsPrepared;
+
 
     private int mVideoWidth; //视频宽
     private int mVideoHeight;  // 视频高
@@ -237,7 +239,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
      * 初始化
      */
     public void initVideoView(boolean isLoop) {
-        log.d("myvideoplayer initViderView ,isloop - "+isLoop );
+        log.d(TAG,"myvideoplayer initViderView ,isloop - " + isLoop );
         mVideoWidth = 0; //视频宽度
         mVideoHeight = 0;   //视频高度
         getHolder().addCallback(mySurfaceHolderCallback); //表层回调
@@ -245,20 +247,25 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
         setFocusable(false);//设置焦点
         setFocusableInTouchMode(false);//设置焦点触摸
 
-        if (!isLoop){
-            log.d(TAG,"不循环");
-            return;
+
+
+        if (isLoop){
+            Log.d(TAG,"循环播放");
+           setOnCompletionListener_(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    log.d(TAG,"video play over ... Completion");
+                    //设置循环播放
+                    setVideoPath(filename);
+                    start();
+                    log.d(TAG,"initVideoView this.setOnCompletionListener complete!");
+                }
+            });
+            log.d(TAG,"设置循环成功");
+        }else{
+            log.d(TAG,"未设置循环播放");
         }
-        this.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                log.i(TAG,"video play over ... Completion");
-                //设置循环播放
-                setVideoPath(filename);
-                start();
-                log.d(TAG,"initVideoView this.setOnCompletionListener complete!");
-            }
-        });
+
 
     }
 
@@ -275,7 +282,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
         //如果 播放路径不存在 或者 表层持有者 不存在
         if (mUri == null || mSurfaceHolder == null) {
             // not ready for playback just yet, will try again later (没有准备好回放,稍后会再试一次)
-            log.e(TAG,"not ready for playback just yet, will try again later");
+            log.e(TAG,"如果 播放路径不存在 或者 表层持有者 不存在,not ready for playback just yet, will try again later");
             return;
         }
         // 发送广播，关掉系统的音乐播放器
@@ -301,29 +308,32 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
             mMediaPlayer.setOnPreparedListener(mPreparedListener); //准备监听
             log.d(TAG," 设置准备监听完成");
             mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);//改变监听
-            log.d(TAG,"设置改变监听完成");
+            log.d(TAG," 设置改变监听完成");
             mDuration = -1; //持续时间
-            mMediaPlayer.setOnCompletionListener(mCompletionListener);//播放完成
-            log.d(TAG,"设置播放完成监听 完成");
+
             mMediaPlayer.setOnErrorListener(mErrorListener);//错误监听
-            log.d(TAG,"错误监听完成");
+            log.d(TAG," 错误监听完成");
+
+            mMediaPlayer.setOnCompletionListener(mCompletionListener);//播放完成
+            log.d(TAG," 设置播放完成监听 完成 setOnCompletionListener() "+mCompletionListener);
+
             mMediaPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);//缓冲更新
-            log.d(TAG,"缓冲更新完成");
+            log.d(TAG," 缓冲更新完成");
             mCurrentBufferPercentage = 0;//缓冲百分比 per cent age
             mMediaPlayer.setDataSource(mContext, mUri); //设置数据源
-            log.d(TAG,"设置数据源完成");
+            log.d(TAG," 设置数据源完成");
             mSurfaceHolder.setSizeFromLayout();//设置surface大小来自布局
-            log.d(TAG,"设置大小来源布局 完成");
+            log.d(TAG," 设置大小来源布局 完成");
             mMediaPlayer.setDisplay(getHolder());//设置播放器图层显示在哪
-            log.d(TAG,"设置视频图片显示层对象 完成");
+            log.d(TAG," 设置视频图片显示层对象 完成");
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);//设置播放器音频流
-            log.d(TAG,"设置音频流 完成");
+            log.d(TAG," 设置音频流 完成");
             mMediaPlayer.setScreenOnWhilePlaying(true);//设置屏幕回放
-            log.d(TAG,"设置 屏幕 回放中完成");
+            log.d(TAG," 设置 设置是否使用 SurfaceHolder 显示 true");
             mMediaPlayer.setLooping(true);
-            log.d(TAG,"设置loop 完成");
+            log.d(TAG," 设置loop 完成->设置是否循环播放");
             mMediaPlayer.prepareAsync();//异步准备
-            log.d(TAG,"异步准备 被调用 完成");
+            log.d(TAG," 异步准备 被调用 完成");
         } catch (Exception e) {
             // TODO Auto-generated catch block
             //e.printStackTrace();
@@ -343,6 +353,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
      */
     public int getDuration() {
 
+        log.e(TAG,"getDuration() "+ mMediaPlayer+ "- "+mIsPrepared);
         if (mMediaPlayer != null && mIsPrepared) {
             if (mDuration > 0) { //如果时长大于初始点
                 return mDuration;
@@ -351,8 +362,10 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
             return mDuration;
         }
         mDuration = -1;
+        log.e(TAG,"视频时长:"+mDuration);
         return mDuration;
     }
+
 
 
     /**
@@ -511,30 +524,37 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
 
             mIsPrepared = true; //准备完成
             log.d(TAG,"mIsPrepared setting true");
-            log.i(TAG,"mPreparedListener 执行完毕");
+            log.d(TAG,"mPreparedListener 执行完毕");
 
         }
     };
 
     //设置准备完成监听
-    public void setOnPreparedListener(MediaPlayer.OnPreparedListener l) {
+    public void setOnPreparedListener_(MediaPlayer.OnPreparedListener l) {
+        log.d(TAG,"准备完成 setOnPreparedListener()");
         mOnPreparedListener = l;
     }
 
     /**
      * 播放完成监听事件
      */
-    private MediaPlayer.OnCompletionListener mOnCompletionListener;
+    private MediaPlayer.OnCompletionListener mOnCompletionListener = null;
     private MediaPlayer.OnCompletionListener mCompletionListener=new MediaPlayer.OnCompletionListener() {
         public void onCompletion(MediaPlayer mp) {
+            log.e(TAG,"video mCompletionListener() _ onCompletion() "+ mOnCompletionListener);
+
             if (mOnCompletionListener != null) {
+
                 mOnCompletionListener.onCompletion(mMediaPlayer);
             }
         }
     };
     //设置播放监听
-    public void setOnCompletionListener(MediaPlayer.OnCompletionListener l) {
+    public void setOnCompletionListener_ (MediaPlayer.OnCompletionListener l) {
+        log.e(TAG,"video setOnCompletionListener_()   "+ l);
         mOnCompletionListener = l;
+        log.e(TAG,"video setOnCompletionListener_()  mOnCompletionListener: "+ l);
+        log.e(TAG,"video setOnCompletionListener_()  mCompletionListener: "+ mCompletionListener);
     }
 
     /**
