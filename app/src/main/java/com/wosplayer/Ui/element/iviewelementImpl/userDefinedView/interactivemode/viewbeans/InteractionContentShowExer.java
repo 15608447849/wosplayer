@@ -112,6 +112,7 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
 
 
     private void cancalTimer() {
+        log.d(TAG,"停止定时任务");
         if (timerTask != null){
             timerTask.cancel();
             timerTask=null;
@@ -157,7 +158,9 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
     private void removeResoure(){
         try {
             cancalTimer();
-            contentList.get(currentIndex).removeMeToFather();
+            if (contentList!=null || contentList.size()>0){
+                contentList.get(currentIndex).removeMeToFather();
+            }
 
             this.removeAllViews();//删除全部的视图
             left = null;
