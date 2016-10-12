@@ -291,7 +291,7 @@ public class ImageViewPicassocLoader {
                iv.setScaleType(ImageView.ScaleType.FIT_XY);
                iv.setImageBitmap(bitmap);
                bitmap = null;
-               log.e("###############***");
+               log.d("获取完毕 一个 bitmap _success ");
 
            }
        }catch (Exception e){

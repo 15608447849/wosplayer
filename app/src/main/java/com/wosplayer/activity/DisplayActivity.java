@@ -105,6 +105,7 @@ public class DisplayActivity extends FragmentActivity {
     public void onStart() {
         log.d(TAG,"onStart");
         super.onStart();
+
     }
 
     @Override
@@ -115,6 +116,9 @@ public class DisplayActivity extends FragmentActivity {
         wosPlayerApp.startCommunicationService(this);
         if (activityContext!=null){
             try {
+                ScheduleSaver.clear();
+                ScheduleReader.clear();
+
                 ScheduleReader.Start(false);
             } catch (Exception e) {
                log.e(TAG,"activity 开始执行读取排期 时 err:"+ e.getMessage());
@@ -127,28 +131,39 @@ public class DisplayActivity extends FragmentActivity {
     protected void onPause() {
         super.onPause();
         log.d(TAG,"onPause");
-        wosPlayerApp.stopCommunicationService(this); //关闭服务
-        ScheduleSaver.clear();
-        ScheduleReader.clear();
+        try {
+            wosPlayerApp.stopCommunicationService(this); //关闭服务
+            ScheduleSaver.clear();
+            ScheduleReader.clear();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            finish();
+        }
+
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        finish();
         log.d(TAG,"onStop");
-    }
+
+      }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         log.d(TAG,"onDestroy");
-        if(isSendRestartBroad){
-            Intent intent  = new Intent();
-            intent.setAction(RestartApplicationBroad.action);
-            intent.putExtra(RestartApplicationBroad.IS_START,false);
-            intent.putExtra(RestartApplicationBroad.KEYS,wosPlayerApp.config.GetStringDefualt("sleepTime","10"));
-            sendBroadcast(intent);
+        try {
+            if(isSendRestartBroad){
+                Intent intent  = new Intent();
+                intent.setAction(RestartApplicationBroad.action);
+                intent.putExtra(RestartApplicationBroad.IS_START,false);
+                intent.putExtra(RestartApplicationBroad.KEYS,wosPlayerApp.config.GetStringDefualt("sleepTime","10"));
+                sendBroadcast(intent);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

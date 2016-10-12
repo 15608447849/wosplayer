@@ -179,8 +179,13 @@ public class wosPlayerApp extends Application {
      * 停止服务
      */
     public static void stopCommunicationService(Context mc){
-        Intent server = new Intent(mc, CommunicationService.class);
-        mc.stopService(server);
+
+        try {
+            Intent server = new Intent(mc, CommunicationService.class);
+            mc.stopService(server);
+        } catch (Exception e) {
+            log.e("停止通讯服务Err:" +e.getMessage());
+        }
     }
 
 

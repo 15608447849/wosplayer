@@ -158,7 +158,7 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
     private void removeResoure(){
         try {
             cancalTimer();
-            if (contentList!=null || contentList.size()>0){
+            if (contentList!=null && contentList.size()>currentIndex){
                 contentList.get(currentIndex).removeMeToFather();
             }
 

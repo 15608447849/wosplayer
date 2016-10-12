@@ -10,8 +10,8 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AnticipateInterpolator;
 import android.view.animation.BounceInterpolator;
-import android.view.animation.CycleInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
 
 import com.wosplayer.app.log;
@@ -31,6 +31,7 @@ public class ImageAttabuteAnimation {
     public static AnimatorSet getOneAnimation(int number, View view, int[] point) {
         AnimatorSet set = new AnimatorSet();
         ObjectAnimator animation = null;
+
 
         switch (number){
             case 1://旋转 x 顺时针
@@ -90,14 +91,14 @@ public class ImageAttabuteAnimation {
                 break;
             case 7: //透明度
                 ObjectAnimator animator =
-                        ObjectAnimator.ofFloat(view,"alpha",0.5F,1F);//1 不透明
+                        ObjectAnimator.ofFloat(view,"alpha",0.2F,1F);//1 不透明
                 set.setDuration(500);
                 set.play(animation);
                 break;
 
             case 8://透明 + 旋转
 
-                set.play(ObjectAnimator.ofFloat(view,"alpha",0.5F,1F))
+                set.play(ObjectAnimator.ofFloat(view,"alpha",0.1F,1F))
                         .with(ObjectAnimator.ofFloat(view,"rotation",0.0F,360.0F));// with  同时,支持,随着
                 set.setDuration(500);
                 break;
@@ -106,14 +107,16 @@ public class ImageAttabuteAnimation {
 
                 set.play( ObjectAnimator.ofFloat(view,"alpha",0.5F,1F))
                         .with(ObjectAnimator.ofFloat(view,"rotation",0.0F,360.0F))
-                        .with(ObjectAnimator.ofFloat(view,"scale",0.5F,1.0F));
+                        .with(ObjectAnimator.ofFloat(view,"scaleY",0.5F,1.0F))
+                        .with(ObjectAnimator.ofFloat(view,"scaleX",0.5F,1.0F));
                 set.setDuration(500);
                 break;
             case 10://透明 +比例缩放
 
-                set.play( ObjectAnimator.ofFloat(view,"alpha",0.5F,1F))
-                        .with(ObjectAnimator.ofFloat(view,"scale",1.5F,0.5F))
-                        .after(ObjectAnimator.ofFloat(view,"scale",0.0F,1.0F));
+                set.play( ObjectAnimator.ofFloat(view,"alpha",0.2F,1F))
+                        .with(ObjectAnimator.ofFloat(view,"scaleX",2.0F,1.0F))
+                        .with(ObjectAnimator.ofFloat(view,"scaleY",2.0F,1.0F));
+
                 set.setDuration(500);
                 break;
             case 11://View 移动到下方300  同时旋转
@@ -145,7 +148,10 @@ public class ImageAttabuteAnimation {
                         point[1], point[1]+300.0f);
                 moveMyBn_300_3.setRepeatCount(1);
                 moveMyBn_300_3.setRepeatMode(ValueAnimator.REVERSE);
-                set.play(moveMyBn_300_3).with(ObjectAnimator.ofFloat(view,"scale",2.0F,0.5F)).after(ObjectAnimator.ofFloat(view,"scale",0.5F,1.0F));
+                set
+                        .play(moveMyBn_300_3)
+                        .with(ObjectAnimator.ofFloat(view,"scaleX",2.0F,1.0F))
+                        .with(ObjectAnimator.ofFloat(view,"scaleY",0.5F,1.0F));
                 set.setStartDelay(200);
                 set.setDuration(1000);
                 break;
@@ -155,7 +161,8 @@ public class ImageAttabuteAnimation {
                 set.play(ObjectAnimator.ofFloat(view, "translationX",
                         -point[2], 0.0f))
                         .with(ObjectAnimator.ofFloat(view,"alpha",0.2f,1.0F))
-                        .with(ObjectAnimator.ofFloat(view,"scaleX",0.0f,1.0F));
+                        .with(ObjectAnimator.ofFloat(view,"scaleX",0.2f,1.0F))
+                        .with(ObjectAnimator.ofFloat(view,"scaleY",0.2f,1.0F));
                 set.setDuration(2000);
                 break;
 
@@ -164,30 +171,36 @@ public class ImageAttabuteAnimation {
         return set;
     }
 
-
+    /**
+     *  new CycleInterpolator(selectNunber); 动画循环播放特定的次数，速率改变沿着正弦曲线
+     * LinearInterpolator   以常量速率改变
+     * @param selectNunber
+     * @return
+     */
     public static TimeInterpolator getOneTimeInterpolator(int selectNunber) {
         TimeInterpolator v = null;
         switch (selectNunber){
-            case 1: //自由落体
+            case 1://
+                v = new LinearInterpolator();
+                break;
+            case 2: //自由落体   动画结束的时候弹起
                 v =  new BounceInterpolator();
                 break;
-            case 2:
-                v = new OvershootInterpolator();
-                break;
-            case 3:
+
+            case 3://在动画开始的地方快然后慢
                 v = new DecelerateInterpolator();
                 break;
-            case 4:
+            case 4://开始的时候向后然后向前甩一定值后返回最后的值
                 v = new AnticipateInterpolator();
                 break;
-            case 5:
+            case 5://在动画开始的地方速率改变比较慢，然后开始加速
                 v= new AccelerateInterpolator();
                 break;
-            case 6 :
+            case 6 ://在动画开始与结束的地方速率改变比较慢，在中间的时候加速
                 v =new AccelerateDecelerateInterpolator();
                 break;
-            case 7:
-                v = new CycleInterpolator(selectNunber);
+            case 7://向前甩一定值后再回到原来位置
+                v = new OvershootInterpolator();
                 break;
         }
         return v;

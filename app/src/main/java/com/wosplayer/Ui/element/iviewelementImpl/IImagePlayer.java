@@ -27,7 +27,7 @@ import rx.functions.Action0;
 public class IImagePlayer extends ImageView implements IPlayer{
 
     private WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
-    private static final java.lang.String TAG = "iimagePlayer :";//IImagePlayer.class.getName();
+    private static final java.lang.String TAG = "_iimagePlayer ";//IImagePlayer.class.getName();
     private Loader loader;
     private Context mCcontext;
     private ViewGroup mfatherView = null;
@@ -249,7 +249,7 @@ try {
 
         ImageAttabuteAnimation.SttingAnimation(mCcontext,this,new int[]{x,y,w,h});
 
-        log.e(TAG," loader image ---------------------------------");
+        log.i(TAG,"  ---------------------------------loader image ---------------------------------");
 
         /**
          *getMeasuredHeight()返回的是原始测量高度，与屏幕无关，getHeight()返回的是在屏幕上显示的高度。实际上在当屏幕可以包裹内容的时候，
@@ -260,8 +260,7 @@ try {
 
 
         ImageViewPicassocLoader.loadImage(mCcontext,this,new File(filePath),new int[]{this.getWidth(),this.getHeight()},ImageViewPicassocLoader.TYPE_IIMAGE);
-
-        log.e(TAG," loader image --------------------------------- end 1");
+        log.i(TAG," ---------------------------------loader image --------------------------------- end 1");
 
 
     }

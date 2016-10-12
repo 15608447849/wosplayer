@@ -66,8 +66,8 @@ public class UiExcuter {
         //清理 : 1 存在的定时器 2.初始化_index 3.清理节目执行者
         clearTimer();
         _index = 0;
-        clearProgramExcuter();
         contentTanslater.clearCache();
+        clearProgramExcuter();
         if(DisplayActivity.activityContext!=null){
             //隐藏层布局
             AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {

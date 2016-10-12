@@ -1,6 +1,7 @@
 package com.wosplayer.Ui.element.iviewelementImpl;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
@@ -21,6 +22,7 @@ import com.wosplayer.app.log;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import rx.Scheduler;
 import rx.functions.Action0;
@@ -32,7 +34,7 @@ import rx.schedulers.Schedulers;
 
 public class IinteractionPlayer extends AbsoluteLayout implements IPlayer{
 
-    private static final java.lang.String TAG ="互动布局(IinteractionPlayer): " ;//IinteractionPlayer.class.getName();
+    private static final java.lang.String TAG ="IinteractionPlayer" ;//IinteractionPlayer.class.getName();
     private Context mCcontext;
     private ViewGroup mfatherView = null;
     private int x=0;
@@ -68,12 +70,16 @@ public class IinteractionPlayer extends AbsoluteLayout implements IPlayer{
     }
     @Override
     public void setlayout() {
+        log.d(TAG,"设置布局 isExistOnLayout :"+isExistOnLayout);
         try {
             if (!isExistOnLayout){
+                this.setBackgroundColor(Color.BLACK);
+                mfatherView.removeView(this);
                 mfatherView.addView(this);
                 isExistOnLayout = true;
+                log.d(TAG,"添加到父布局上 成功");
             }
-
+            log.d(TAG,"设置布局:"+x+"-"+y+"-"+w+"-"+h);
             AbsoluteLayout.LayoutParams lp = (AbsoluteLayout.LayoutParams) this
                     .getLayoutParams();
             lp.x = x;
@@ -81,9 +87,26 @@ public class IinteractionPlayer extends AbsoluteLayout implements IPlayer{
             lp.width = w;
             lp.height = h;
             this.setLayoutParams(lp);
+
         } catch (Exception e) {
             log.e(TAG,"设置布局:" + e.getMessage());
         }
+        /*finally {
+            boolean f = false;
+            for (int i=0;i<mfatherView.getChildCount();i++){
+                if (mfatherView.getChildAt(i).equals(this)){
+                    log.d(TAG,"************************");
+                    f = true;
+                    break;
+                }
+            }
+            if (!f){
+                log.d(TAG,"f "+f);
+                this.setBackgroundColor(Color.RED);
+                mfatherView.removeView(this);
+                mfatherView.addView(this);
+            }
+        }*/
     }
 
     @Override
@@ -100,11 +123,13 @@ public class IinteractionPlayer extends AbsoluteLayout implements IPlayer{
     @Override
     public void stop() {
         try {
+            log.d(TAG,"清理视图 开始");
             //移除父视图
             mfatherView.removeView(this);
             isExistOnLayout = false;
             stopActive();
             // 移除 互动模块
+            log.d(TAG,"清理视图 结束");
         }catch (Exception e){
             log.e(TAG,"停止:"+e.getMessage());
         }
@@ -120,16 +145,24 @@ public class IinteractionPlayer extends AbsoluteLayout implements IPlayer{
 
     //执行互动加载工作
     public static final Scheduler.Worker worker = Schedulers.io().createWorker();
+    private static ReentrantLock lock = new ReentrantLock();
 
     //开始 互动
     private void startActive(){
-
-        worker.schedule(new Action0() {
-            @Override
-            public void call() {
-                execute();
-            }
-        });
+        try {
+            lock.lock();
+            worker.schedule(new Action0() {
+                @Override
+                public void call() {
+                    log.i(TAG,IinteractionPlayer.this.toString()+"开始执行互动..." + Thread.currentThread().getName());
+                    execute();
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            lock.unlock();
+        }
     };
     //停止互动
     private void stopActive(){
@@ -185,19 +218,21 @@ private void releasedResource() {
      * @param uri
      */
     private void getXMLdata(String uri) {
+
+        log.d(TAG," 互动布局name:"+name+"+uri"+uri);
+
+
         final String result = InteractionCache.pull(uri);
         if (result!=null){
            worker.schedule(new Action0() {
                 @Override
                 public void call() {
-                    ParseResultXml(result);
+                    ParseResultXml(result,1);
                 }
             });
             return;
         }
         final String key = uri;
-
-        log.e(TAG," 互动布局name:"+name+"+uri"+uri);
 
         http.send(
                 HttpRequest.HttpMethod.GET,
@@ -205,10 +240,10 @@ private void releasedResource() {
                 new RequestCallBack<String>() {
                     @Override
                     public void onSuccess(ResponseInfo<String> responseInfo) {
-                        log.i(TAG, "互动模块 第一次 : " + responseInfo.result);
+                        log.d(TAG, "互动模块 第一次 : " + responseInfo.result);
                         InteractionCache.push(key,responseInfo.result);//存
                         //进行XML解析
-                        ParseResultXml(responseInfo.result);
+                        ParseResultXml(responseInfo.result,0);
                     }
 
                     @Override
@@ -228,8 +263,8 @@ private void releasedResource() {
      *            第一次 第一层 布局
      * @return
      */
-    private void ParseResultXml(String xml) {
-        log.i(TAG," 互动执行者 解析 信息中...");
+    private void ParseResultXml(String xml,int source) {
+        log.d(TAG," 互动执行者 解析 信息中...\n xml来源:"+(source==1?"本地缓存":"网络") );
         try {
             myBindView = XmlParse.interactionParse_one(xml);
         } catch (Exception e) {
@@ -237,7 +272,7 @@ private void releasedResource() {
             return;
         }
         if (myBindView != null) {
-            log.i(TAG," 互动执行者 获取绑定的视图");
+            log.i(TAG," 互动执行者 获取绑定的视图 - "+myBindView.toString());
             myBindView.addMeToFather(this);
             setmCurrentView(myBindView);//设置当前视图
         }
