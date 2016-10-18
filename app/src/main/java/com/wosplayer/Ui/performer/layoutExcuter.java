@@ -98,6 +98,10 @@ public class layoutExcuter {
      */
     private void startContent(XmlNodeEntity content) {
         //重新组合数据 -> 生成 datalist
+        if(content==null){
+            log.e(TAG,"布局 开始 生成 内容 err："+content);
+            return;
+        }
         Object[] dataArr = ReorganizationData(content);
         createContent((DataList) dataArr[0],dataArr[1]);//自动执行
     }
