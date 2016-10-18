@@ -7,9 +7,12 @@ import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 
 import java.io.DataOutputStream;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,15 +55,64 @@ public class Command_SYTI implements iCommand {
 			log.e(TAG,"Sync server time err-> param not atches" + param);
 			return;
 		}
+
+		if(justTime(param,null,true)){
+			return;
+		};
+
+
+
+
 		disableSystemSyncTime();
 		String settingTime = param.replaceAll("-", "").replace(":","").replaceAll(" ", ".");
 		log.i(TAG,settingTime);
-		liunx_SU_syncTimeCmd(settingTime);
+		String newTime = null;
+
+
+
+		newTime = liunx_SU_syncTimeCmd(settingTime,"GMT+08:00");
+		log.e(TAG,"srtting zone GMT+08:00 ");
+		if(!justTime(param,newTime,false)){
+			liunx_SU_syncTimeCmd(settingTime,"GMT-08:00");
+			log.e(TAG,"srtting zone GMT-08:00 ");
+		}
 
 	}
 
+	private boolean justTime(String param,String nt,boolean flag) {
+		DateFormat dataFormatUtils = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()); // 格式化 时间 工具
+		try {
+			long systemTime = dataFormatUtils.parse(param).getTime();
 
-	private void  liunx_SU_syncTimeCmd(String param){
+			long currentTime = 0;
+			if (flag){
+				//当前时间
+				currentTime = new Date().getTime();
+				if (Math.abs(currentTime-systemTime) < (10 * 1000)){
+					log.e(TAG, "不需要 同步时间");
+					return true;
+				}
+
+			}else{
+				currentTime = dataFormatUtils.parse(nt).getTime();
+
+				if (Math.abs(currentTime-systemTime) < (30 * 1000)){
+					log.e(TAG, "同步时间 正确");
+					return true;
+				}
+
+			}
+
+
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+
+		return false;
+	}
+
+
+	private String  liunx_SU_syncTimeCmd(String param,String timeZone){
 				log.i(TAG,"yyyyMMdd.HHmmss ==>"+param);
 				Process process = null;
 				DataOutputStream os = null;
@@ -68,16 +120,20 @@ public class Command_SYTI implements iCommand {
 					process = Runtime.getRuntime().exec("su");
 					String datetime=param;//"20131023.112800" _测试的设置的时间【时间格式 yyyyMMdd.HHmmss】
 					os = new DataOutputStream(process.getOutputStream());
-					os.writeBytes("setprop persist.sys.timezone GMT\n");
+					os.writeBytes("setprop persist.sys.timezone "+ timeZone+"\n");
 					os.writeBytes("/system/bin/date -s "+datetime+"\n");
 					os.writeBytes("clock -w\n");
 					os.writeBytes("exit\n");
 					os.flush();
 					process.waitFor();
 					log.i(TAG,"时间同步成功:"+getSystemTime());
+
+					return getSystemTime();
+
+
 				}catch (Exception e) {
 					log.e(TAG,"time sync \"su\" cmd err");
-					return;
+					return "";
 				}finally {
 					try {
 						if (os != null) {
