@@ -200,9 +200,9 @@ public class ScheduleReader {
             String summary = entity.getXmldata().get("summary");
             boolean flag = addScheduleToMap(type,entity);
            if(flag){
-               log.i(TAG,"summary:"+summary+",type" +"=="+type+"[1=轮播,2=点播,3=重复,4=插播,5=重复],添加success");
+               log.i(TAG,"summary:"+summary+",type" +"=="+type+"[1=轮播,2=点播,3=重复,4=插播,5=默认],添加success");
            }else{
-               log.e(TAG,"summary:"+summary+",type" +"=="+type+"[1=轮播,2=点播,3=重复,4=插播,5=重复],添加failure");
+               log.e(TAG,"summary:"+summary+",type" +"=="+type+"[1=轮播,2=点播,3=重复,4=插播,5=默认],添加failure");
            }
         }
     }
@@ -227,7 +227,7 @@ public class ScheduleReader {
                 }
                 if (PreUUKS!=null){
                     if (PreUUKS.equals(uuks)){
-                        log.e(TAG," 读取排期 uuks is same :"+ uuks+",UUKS:"+ PreUUKS);
+                        log.e(TAG," ------------读取排期 uuks is same -----------------------\n ;新排期:"+ uuks+"\n 本地保存的UUKS:"+ PreUUKS);
                         return;
                     }
                 }
