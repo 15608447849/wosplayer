@@ -97,22 +97,36 @@ public class ScheduleSaver implements iCommand {
 
     private void getXMLdata(String uri, final int callType, final Object Obj) {
         String result = uriTranslationXml(uri);
+        if (result!=null && result.equals("")){
+            isNextLoad = false;
+            log.e(TAG," getXMLdata() result 不存在");
+            return;
+        }
         ParseResultXml(callType,result, Obj);
     }
-    private static boolean isNextLoad = true;
+    private static boolean isNextLoad = false;
     private void startWork(final String uri){
 
 //        helper.schedule(new Action0() {
 //            @Override
 //            public void call() {
 
-                isNextLoad = true;
 
-                Long startTime = System.currentTimeMillis();
-                getXMLdata(uri,ROOT_PARSE,null); //解析数据
-                Long endTime = System.currentTimeMillis();
 
-                log.e(TAG,"解析用时:"+(endTime - startTime)+"毫秒");
+
+        isNextLoad = true;
+        try {
+            Long startTime = System.currentTimeMillis();
+            getXMLdata(uri,ROOT_PARSE,null); //解析数据
+            Long endTime = System.currentTimeMillis();
+            log.e(TAG,"解析用时 : "+(endTime - startTime)+" 毫秒");
+        } catch (Exception e) {
+            e.printStackTrace();
+            isNextLoad=false;
+        }
+
+
+
 
                 log.e(TAG,"是否开启下载:"+isNextLoad);
                 if (isNextLoad){
