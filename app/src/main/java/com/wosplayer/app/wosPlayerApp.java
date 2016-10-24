@@ -20,6 +20,8 @@ import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.UUID;
 
+import wosTools.ToolsUtils;
+
 /**
  * Created by Administrator on 2016/7/19.
  */
@@ -29,10 +31,13 @@ public class wosPlayerApp extends Application {
 
     public static DataList config = new DataList();
     public static Context appContext ;
+    public static boolean isReadMeInfo = true;
     @Override
     public void onCreate() {
         super.onCreate();
+
         log.d("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wosPlayer app start~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        appContext = wosPlayerApp.this.getApplicationContext();
         //捕获异常
         CrashHandler.getInstance().init(getApplicationContext());
 
@@ -42,17 +47,19 @@ public class wosPlayerApp extends Application {
         new AdbShellCommd(this.getApplicationContext(),false,true).start();//不开远程端口
         //检测sd卡
         //初始化 配置信息
-        init();
+
+        //init(false);
     }
 
 
 
 
     /**
-     *
+     * false 读取 com.wos.tools 下面的信息
+     *   true 读取自己app下面的初始化信息
      */
-    private void init() {
-        appContext = wosPlayerApp.this.getApplicationContext();
+    public void init(boolean flag) {
+        isReadMeInfo = flag;
         //终端id
         config.put("terminalNo", GetKey("terminalNo", ""));
         //通信模式
@@ -94,7 +101,7 @@ public class wosPlayerApp extends Application {
     }
 
     public static String GetKey(String key, String defualtValue) {
-        String value = appTools.readShareDataTools(appContext,key).trim();
+        String value = isReadMeInfo? ToolsUtils.readShareData(appContext,key):appTools.readShareDataTools(appContext,key).trim();
         return (value != "") ? value : defualtValue;
     }
     /**

@@ -41,6 +41,15 @@ public class ScheduleSaver implements iCommand {
     private final int I_LAYOUT_PARSE = 14;
     private final int I_FILE_PARSE = 15;
 
+    //替换
+    public static String compeleVar = "192.168.6.66";
+    public static String newVar = "118.249.153.45";
+    public static void repeatedVar(String str){
+        if (str.contains(compeleVar)){
+            str.replace(compeleVar,newVar);
+        }
+    };
+
     public static enum ContentTypeEnum {
         interactive, webpage, url, rss, text, video, image, flash;
 
@@ -72,7 +81,7 @@ public class ScheduleSaver implements iCommand {
     public void Execute(String param) {
         log.i("获取排期信息,当前线程名:"+Thread.currentThread().getName());
         Toals.Say("排期地址 =  "+ param);
-
+        //repeatedVar(param);
 
         saveData(param);
     }
