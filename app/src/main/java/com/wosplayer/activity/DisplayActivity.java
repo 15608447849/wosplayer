@@ -1,14 +1,21 @@
 package com.wosplayer.activity;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -24,6 +31,11 @@ import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleSaver;
 import com.wosplayer.service.MonitorService;
 import com.wosplayer.service.RestartApplicationBroad;
 
+import wosTools.DataListEntiy;
+import wosTools.RequstTerminal;
+import wosTools.ToolsActivity;
+import wosTools.ToolsHandler;
+
 /**
  *  Timer timer = new Timer();
  timer.schedule(new TimerTask() {
@@ -36,7 +48,7 @@ wosPlayerApp.sendMsgToServer(msg);
 },5000);
  */
 
-public class DisplayActivity extends FragmentActivity {
+public class DisplayActivity extends Activity {
 
     private static final java.lang.String TAG = DisplayActivity.class.getName();
     public static boolean isSendRestartBroad = true;
@@ -74,27 +86,36 @@ public class DisplayActivity extends FragmentActivity {
 
         //开启监听服务
        Intent intent = new Intent(this, MonitorService.class);
-        log.d(TAG," 开启<监听>服务");
+        log.d(TAG,"-------------------------------------------------------------- 开启<监听>服务 -----------------------------------------------------------");
         this.startService(intent);
 
-        //点击 显示/隐藏 信息输出
-        closebtn.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
 
-                isShowDialog = !isShowDialog;
-                Toast.makeText(DisplayActivity.this,"长按 isShowDialog 显示值:"+isShowPsdInput,Toast.LENGTH_LONG).show();
-
-                return false;
-            }
-        });
-        //点击弹出密码输入框
+        //弹出密码输入框
         closebtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                inputPassWordDialog.ShowDialog(DisplayActivity.this);
             }
         });
+
+
+        //长按 显示/隐藏 信息输出
+        /*setOnLongClickListener中return的值决定是否在长按后再加一个短按动作
+                true为不加短按,false为加入短按*/
+        closebtn.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                // isShowDialog = !isShowDialog;
+                //  Toast.makeText(DisplayActivity.this,"长按 isShowDialog 显示值:"+isShowPsdInput,Toast.LENGTH_LONG).show();
+                //  Intent toTools = new Intent(DisplayActivity.this, ToolsActivity.class);
+                //  startActivity(toTools);
+                settingServerInfo(false);
+                Toast.makeText(DisplayActivity.this,"--- 下次将进入设置服务器信息 ---",Toast.LENGTH_LONG).show();
+                return true;
+            }
+        });
+
+
 
 
         log.d("--------create over-------------");
@@ -105,41 +126,38 @@ public class DisplayActivity extends FragmentActivity {
     public void onStart() {
         log.d(TAG,"onStart");
         super.onStart();
-
+        if(isSettingServerInfo()){
+            ((wosPlayerApp)this.getApplication()).init(true);
+        }
     }
 
     @Override
     public void onResume() {
        super.onResume();
         log.d(TAG,"onResume");
-        //开启通讯服务
-        wosPlayerApp.startCommunicationService(this);
-        if (activityContext!=null){
-            try {
-                ScheduleSaver.clear();
-                ScheduleReader.clear();
+        //是否已经设置了服务器信息?
+     //开始工作
 
-                ScheduleReader.Start(false);
-            } catch (Exception e) {
-               log.e(TAG,"activity 开始执行读取排期 时 err:"+ e.getMessage());
+        if (isSettingServerInfo()){
+            startWork();
+        }else{
+            //设置服务器信息
+            settingServerInfoDialog();
 
-            }
         }
+
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         log.d(TAG,"onPause");
-        try {
-            wosPlayerApp.stopCommunicationService(this); //关闭服务
-            ScheduleSaver.clear();
-            ScheduleReader.clear();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }finally {
-            finish();
+        //结束工作
+        if (isSettingServerInfo()){
+            endWork();
         }
+
 
     }
 
@@ -280,15 +298,229 @@ public class DisplayActivity extends FragmentActivity {
             }
         }
     }
+    //-----------------------------------------------------------------------
+
+
+    //开始工作
+    private void startWork(){
+        if (activityContext!=null){
+            //开启通讯服务
+            wosPlayerApp.startCommunicationService(this);
+            try {
+                ScheduleSaver.clear();
+                ScheduleReader.clear();
+
+                ScheduleReader.Start(false);
+            } catch (Exception e) {
+                log.e(TAG,"activity 开始执行读取排期 时 err:"+ e.getMessage());
+
+            }
+        }
+    }
+
+
+    //结束工作
+    private void endWork(){
+        try {
+            wosPlayerApp.stopCommunicationService(this); //关闭服务
+//            ScheduleSaver.clear();
+//            ScheduleReader.clear();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            finish();
+        }
+
+    }
 
 
 
 
 
 
+    //--------------------------------------
 
 
 
+    /**
+     * 设置服务器信息成功 true
+     * 失败 false
+     * @param flag
+     */
+    private void settingServerInfo(boolean flag){
+        SharedPreferences preferences = this.getSharedPreferences(DisplayActivity.this.getLocalClassName(), Context.MODE_WORLD_READABLE + Context.MODE_WORLD_WRITEABLE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean("flag", flag);
+        editor.commit();
+    }
+    /**
+     * 读取 是否设置服务器信息
+     */
+    private boolean isSettingServerInfo(){
+        SharedPreferences preferences =this.getSharedPreferences(DisplayActivity.this.getLocalClassName(), Context.MODE_WORLD_READABLE + Context.MODE_WORLD_WRITEABLE);
+        return preferences.getBoolean("flag", false);
+    }
+
+
+
+
+    //------------------------------------------------------------------------------------//
+    private EditText serverip;
+    private EditText      serverport;
+    private EditText      companyid;
+    private EditText      terminalNo;
+    private EditText      BasePath;
+    private EditText      heartbeattime;
+//    private Button btnGetID;
+//    private Button        btnSaveData;
+    private void settingServerInfoDialog() {
+        //设置布局文件
+        setContentView(R.layout.activity_wostools);
+        //设置handle
+        ToolsHandler.woshandler=new ToolsHandler(this);
+        //加载配置
+        InitConfig();
+        //加载布局
+        InitView();
+        //初始化控件数据
+        InitValue();
+
+    }
+
+    /**
+     * 加载布局
+     */
+    public void InitView()
+    {
+        try
+        {
+            serverip=(EditText)this.findViewById(R.id.serverip);
+            serverport=(EditText)this.findViewById(R.id.serverport);
+
+            companyid=(EditText)this.findViewById(R.id.companyid);
+            terminalNo=(EditText)this.findViewById(R.id.terminalNo);
+            BasePath=(EditText)this.findViewById(R.id.BasePath);
+            heartbeattime=(EditText)this.findViewById(R.id.HeartBeatInterval);
+
+//            btnGetID=(Button)this.findViewById(R.id.btnGetID);
+//            btnSaveData=(Button)this.findViewById(R.id.btnSaveData);
+
+        }catch(Exception e)
+        {
+            log.e("InitView() err:"+e.getMessage());
+        }
+    }
+    public DisplayMetrics m_dm;
+    public DataListEntiy dataList;
+    /**
+     *
+     */
+    /**
+     * 加载配置
+     */
+    public  void InitConfig()
+    {
+        log.i("toolsActivity", "开始加载数据");
+        m_dm = new DisplayMetrics();
+        //获取手机分辨率
+        this.getWindowManager().getDefaultDisplay().getMetrics(m_dm);
+        dataList=new DataListEntiy();
+        dataList.ReadShareData();
+    }
+
+    /**
+     *  加载数据
+     */
+    public void InitValue()
+    {
+        try
+        {
+            serverip.setText(dataList.GetStringDefualt("serverip", "127.0.0.1"));
+            serverport.setText(dataList.GetStringDefualt("serverport", "8000"));
+            companyid.setText(dataList.GetStringDefualt("companyid", "999"));
+            terminalNo.setText(dataList.GetStringDefualt("terminalNo", ""));
+            heartbeattime.setText(dataList.GetStringDefualt("HeartBeatInterval", "30"));
+            BasePath.setText(dataList.GetStringDefualt("basepath", "mnt/sdcard"));
+            //焦点默认在这个控件上
+            serverip.setFocusable(true);
+
+        }catch(Exception e)
+        {
+            Log.e("ToolsActivity ", e.getMessage());
+        }
+    }
+
+
+    /**
+     * 获取控件传入的数据并封装
+     */
+    public void GetViewValue()
+    {
+        dataList.put("terminalNo",terminalNo.getText().toString());
+        dataList.put("serverip",  serverip.getText().toString());
+        dataList.put("serverport",  serverport.getText().toString());
+        dataList.put("companyid",  companyid.getText().toString());
+        dataList.put("HeartBeatInterval",  heartbeattime.getText().toString());
+        String basepath=BasePath.getText().toString();
+        if(!basepath.endsWith("/"))
+        {
+            basepath=basepath+"/";
+        }
+        dataList.put("basepath",  basepath);
+    }
+
+
+    /**
+     * 保存
+     */
+
+    /**
+     * 点击获取id
+     * @param view
+     */
+    public void getId(View view){
+        if(dataList!=null && m_dm!=null){
+            //结束线程
+            RequstTerminal.EndRequst();
+            //把数据封装到集合中
+            GetViewValue();
+            //开启线程
+            RequstTerminal.BeginRequst(dataList,m_dm);
+        }
+    }
+
+    /**
+     * 点击保存数据
+     * @param view
+     */
+    public void saveData(View view){
+        GetViewValue();
+        dataList.SaveShareData();
+        if (!"".equals(terminalNo.getText().toString())){
+            settingServerInfo(true);
+        }
+        this.finish();
+    }
+
+    public void outText(String text)
+    {
+        Toast.makeText(this, text,Toast.LENGTH_LONG ).show();
+    }
+    public void setcompanyid(String value)
+    {
+        try
+        {
+            terminalNo.setText(value);
+            dataList.put("terminalNo", value);
+            outText("申请终端ID成功");
+
+            terminalNo.setFocusable(true);
+
+        }catch(Exception e)
+        {
+            Log.e("ToolsActivity", e.getMessage());
+        }
+    }
 
 
 }
