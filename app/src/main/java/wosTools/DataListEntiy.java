@@ -1,7 +1,5 @@
 package wosTools;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.wosplayer.app.log;
@@ -10,8 +8,6 @@ import com.wosplayer.app.wosPlayerApp;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import static com.wosplayer.app.wosPlayerApp.config;
 
 /**
  * Created by Administrator on 2016/10/19.
@@ -67,7 +63,10 @@ public class DataListEntiy {
     {
         map.put(key, value);
     }
-    //
+
+    /**
+     * 保存数据到本地app的 "_Data"
+     */
     public void SaveShareData()
     {
         Iterator iter = map.entrySet().iterator();
@@ -85,22 +84,28 @@ public class DataListEntiy {
 
     /**
      * 读取封装配置文档
+     * true 本地
+     * false -> com.wos.tools
      */
-    public void ReadShareData()
+    public void ReadShareData(boolean isMeInfo)
     {
-        map.put("connectionType",ToolsUtils.GetKey("connectionType", "socket"));
-        //map.put("keyText", ToolsUtils.GetKey("keyText", "999"));
-        map.put("mac",  ToolsUtils.GetMac());
+
+        map.put("connectionType",ToolsUtils.GetKey(isMeInfo,"connectionType", "socket"));
         //ui配置项
-        map.put("terminalNo",ToolsUtils.GetKey("terminalNo", ""));
-        map.put("serverip",  ToolsUtils.GetKey("serverip", "192.168.1.178"));
-        map.put("serverport",  ToolsUtils.GetKey("serverport", "8000"));
-        map.put("companyid",  ToolsUtils.GetKey("companyid", "999"));
-        map.put("HeartBeatInterval",  ToolsUtils.GetKey("HeartBeatInterval", "30"));
-        map.put("basepath",  ToolsUtils.GetKey("basepath", "/mnt/sdcard/"));
+        map.put("terminalNo",ToolsUtils.GetKey(isMeInfo,"terminalNo", ""));
+        map.put("serverip",  ToolsUtils.GetKey(isMeInfo,"serverip", "127.0.0.1"));
+        map.put("serverport",  ToolsUtils.GetKey(isMeInfo,"serverport", "8000"));
+        map.put("companyid",  ToolsUtils.GetKey(isMeInfo,"companyid", "999"));
+        map.put("HeartBeatInterval",  ToolsUtils.GetKey(isMeInfo,"HeartBeatInterval", "30"));
+        map.put("basepath",  ToolsUtils.GetKey(isMeInfo,"basepath", "/mnt/sdcard/"));
+        map.put("sleepTime",ToolsUtils.GetKey(isMeInfo,"sleepTime", "30"));
         //获取本地ip
         String LocalIpAddress=ToolsUtils.getLocalIpAddress();
         map.put("tip",  (LocalIpAddress=="")?"127.0.0.1":LocalIpAddress);
+        //mac
+        map.put("mac",  ToolsUtils.GetMac());
+
+
         log.i("DataListEntiy_ReadShareData() ", "--------------------------------------------------读取配置信息------------------------------- \n 成功");
     }
 

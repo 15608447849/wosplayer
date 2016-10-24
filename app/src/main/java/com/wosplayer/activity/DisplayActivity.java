@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -18,6 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.wosplayer.R;
@@ -31,9 +31,11 @@ import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleSaver;
 import com.wosplayer.service.MonitorService;
 import com.wosplayer.service.RestartApplicationBroad;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import wosTools.DataListEntiy;
 import wosTools.RequstTerminal;
-import wosTools.ToolsActivity;
 import wosTools.ToolsHandler;
 
 /**
@@ -143,7 +145,6 @@ public class DisplayActivity extends Activity {
         }else{
             //设置服务器信息
             settingServerInfoDialog();
-
         }
 
 
@@ -364,13 +365,14 @@ public class DisplayActivity extends Activity {
 
 
 
-    //------------------------------------------------------------------------------------//
+    //-------------------------------------------------wosTools -----------------------------------//
     private EditText serverip;
     private EditText      serverport;
     private EditText      companyid;
     private EditText      terminalNo;
     private EditText      BasePath;
     private EditText      heartbeattime;
+    private LinearLayout restartLayout;
 //    private Button btnGetID;
 //    private Button        btnSaveData;
     private void settingServerInfoDialog() {
@@ -384,7 +386,25 @@ public class DisplayActivity extends Activity {
         InitView();
         //初始化控件数据
         InitValue();
+        //是否设置定时器
+        initTimer();
 
+    }
+
+    private void initTimer() {
+        if (wosPlayerApp.isWosToolsDataTranslation){
+            log.e(TAG,"--- initTimer() ---");
+            //有数据转移
+            new Timer().schedule(
+                    new TimerTask() {
+                @Override
+                public void run() {
+                save();
+                wosPlayerApp.isWosToolsDataTranslation =false;
+                DisplayActivity.activityContext.finish();
+                }
+            },15*1000);
+        }
     }
 
     /**
@@ -404,6 +424,8 @@ public class DisplayActivity extends Activity {
 
 //            btnGetID=(Button)this.findViewById(R.id.btnGetID);
 //            btnSaveData=(Button)this.findViewById(R.id.btnSaveData);
+
+            restartLayout = (LinearLayout)findViewById(R.id.layotu_restartbeattime);
 
         }catch(Exception e)
         {
@@ -425,7 +447,7 @@ public class DisplayActivity extends Activity {
         //获取手机分辨率
         this.getWindowManager().getDefaultDisplay().getMetrics(m_dm);
         dataList=new DataListEntiy();
-        dataList.ReadShareData();
+        dataList.ReadShareData(true);
     }
 
     /**
@@ -473,7 +495,13 @@ public class DisplayActivity extends Activity {
     /**
      * 保存
      */
-
+    public void save(){
+        GetViewValue();
+        dataList.SaveShareData();
+        if (!"".equals(terminalNo.getText().toString())){
+            settingServerInfo(true);
+        }
+    }
     /**
      * 点击获取id
      * @param view
@@ -494,14 +522,35 @@ public class DisplayActivity extends Activity {
      * @param view
      */
     public void saveData(View view){
-        GetViewValue();
-        dataList.SaveShareData();
-        if (!"".equals(terminalNo.getText().toString())){
-            settingServerInfo(true);
-        }
+        save();
         this.finish();
     }
 
+    /**
+     * 点击设置重启时间
+     */
+    public void restartTime(View view){
+        //如果布局不存在
+        if (restartLayout.getVisibility()==View.GONE){
+            //显示出来
+            restartLayout.setVisibility(View.VISIBLE);
+            Button sure = (Button) findViewById(R.id.btnRestartComplete);
+            sure.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //保存数据
+                   dataList.put("sleepTime",((EditText)findViewById(R.id.RestartBeatInterval)).getText().toString());
+                    outText("已设置重启间隔: "+((EditText)findViewById(R.id.RestartBeatInterval)).getText().toString() );
+                    restartLayout.setVisibility(View.GONE);
+                }
+            });
+        }else{
+            //隐藏起来
+            restartLayout.setVisibility(View.GONE);
+        }
+    }
+
+    //反射调用
     public void outText(String text)
     {
         Toast.makeText(this, text,Toast.LENGTH_LONG ).show();

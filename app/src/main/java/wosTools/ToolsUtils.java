@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.wosplayer.app.appTools;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
 
@@ -31,7 +32,7 @@ import java.net.URLConnection;
 public class ToolsUtils {
 
     public static void writeShareData(Context context, String key, String value) {
-        SharedPreferences preferences = context.getSharedPreferences("wosplayer_Data", Context.MODE_WORLD_READABLE + Context.MODE_WORLD_WRITEABLE);
+        SharedPreferences preferences = context.getSharedPreferences("_Data", Context.MODE_WORLD_READABLE + Context.MODE_WORLD_WRITEABLE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(key, value);
         editor.commit();
@@ -43,20 +44,21 @@ public class ToolsUtils {
      * @return
      */
     public static String readShareData(Context context,  String key) {
-        SharedPreferences preferences =context.getSharedPreferences("wosplayer_Data", Context.MODE_WORLD_READABLE + Context.MODE_WORLD_WRITEABLE);
+        SharedPreferences preferences =context.getSharedPreferences("_Data", Context.MODE_WORLD_READABLE + Context.MODE_WORLD_WRITEABLE);
         String result = preferences.getString(key, "");
         return result;
     }
 
     /**
      * 获取key，没有获取就使用默认的
+     * @param f true本地 false -> com.wos.tools
      * @param key
      * @param defualtValue
      * @return
      */
-    public static String GetKey(String key,String defualtValue)
+    public static String GetKey(boolean f,String key,String defualtValue)
     {
-        String value=readShareData(wosPlayerApp.appContext,key).trim();
+        String value= f?readShareData(wosPlayerApp.appContext,key).trim() : appTools.readShareDataTools(wosPlayerApp.appContext,key).trim();;
         return  (value!="")?value:defualtValue;
     }
     /**
@@ -142,7 +144,7 @@ public class ToolsUtils {
             Log.e("CloseInputStream", e.getMessage());
         }
 
-        log.i("tools_utils err: http请求成功 -\n "+xml);
+        log.i("ToolsUtils httpGetString() : -\n " + xml);
         return xml;
     }
 
@@ -152,7 +154,7 @@ public class ToolsUtils {
         try {
             doc = DocumentHelper.parseText(xml);
         } catch (Exception e) {
-            Log.e("GetXmlRoot", e.getMessage());
+            Log.e("UtilsTools_GetXmlRoot()", e.getMessage());
             return null;
         }
         return doc.getRootElement();

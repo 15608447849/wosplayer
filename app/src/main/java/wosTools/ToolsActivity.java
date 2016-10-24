@@ -1,7 +1,6 @@
 package wosTools;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -84,7 +83,7 @@ public class ToolsActivity extends Activity {
         //获取手机分辨率
         this.getWindowManager().getDefaultDisplay().getMetrics(m_dm);
         dataList=new DataListEntiy();
-        dataList.ReadShareData();
+        dataList.ReadShareData(true);
     }
 
    /**

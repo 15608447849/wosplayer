@@ -88,18 +88,20 @@ public class AdbShellCommd extends Thread{
 
 
         //卸载 旧app
-        ApkController.uninstall("com.wos",context);
+        if (ApkController.uninstall("com.wos",context)){
+            log.d("检测 卸载 老版本 APP - com.wos - 完成");
+        }
+        if (ApkController.uninstall("com.wos.tools",context)){
+            log.d("检测 卸载 老版本 APP - com.wos.tools - 完成");
+        }
 
         //放入system
         if (isrun_2){
             log.d("_APP_Path",packagepath);
                     if (packagepath.contains("/data/app")){
-
                         String paramString = getParam(packagepath);
                         log.e("执行 copy App ,/data/app -> /system/app 请稍后...\n" + paramString);
-
                         //ShellUtils.CommandResult cmdResult = ShellUtils.execCommand(paramString,true,true);
-
                         int cmdResult = AppToSystem.execRootCmdSilent(paramString);
                         log.e("执行回执 : "+ cmdResult);
                         if(cmdResult == -1){

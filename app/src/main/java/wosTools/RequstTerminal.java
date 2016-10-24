@@ -118,7 +118,7 @@ public class RequstTerminal extends Thread{
                     sleep(1000 * 6);
                 }
             } catch (Exception e) {
-                log.e("RequstTreminal () - ",e.getMessage());
+                log.e("","RequstTreminal () err: "+e.getMessage());
             }
         }
         ToolsHandler

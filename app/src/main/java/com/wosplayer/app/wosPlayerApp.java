@@ -20,6 +20,7 @@ import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.UUID;
 
+import wosTools.DataListEntiy;
 import wosTools.ToolsUtils;
 
 /**
@@ -39,12 +40,17 @@ public class wosPlayerApp extends Application {
         log.d("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wosPlayer app start~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         appContext = wosPlayerApp.this.getApplicationContext();
         //捕获异常
-        CrashHandler.getInstance().init(getApplicationContext());
+        //CrashHandler.getInstance().init(getApplicationContext());
+
+        //数据转移
+        translationWosToolsData();
+
 
         //放入系统目录
-       // new AdbShellCommd(this.getApplicationContext(),true,true).start();//会重启
-//        new AdbShellCommd(this.getApplicationContext(),true,false).start();//不重启
-        new AdbShellCommd(this.getApplicationContext(),false,true).start();//不开远程端口
+        new AdbShellCommd(this.getApplicationContext(),true,true).start();//会开端口,会重启
+        //new AdbShellCommd(this.getApplicationContext(),true,false).start();//开端口,不重启
+        //new AdbShellCommd(this.getApplicationContext(),false,true).start();//不开远程端口.会重启
+        //new AdbShellCommd(this.getApplicationContext(),false,false).start();//不开远程端口,不重启
         //检测sd卡
         //初始化 配置信息
 
@@ -55,7 +61,7 @@ public class wosPlayerApp extends Application {
 
 
     /**
-     * false 读取 com.wos.tools 下面的信息
+     *   false 读取 com.wos.tools 下面的信息
      *   true 读取自己app下面的初始化信息
      */
     public void init(boolean flag) {
@@ -104,6 +110,37 @@ public class wosPlayerApp extends Application {
         String value = isReadMeInfo? ToolsUtils.readShareData(appContext,key):appTools.readShareDataTools(appContext,key).trim();
         return (value != "") ? value : defualtValue;
     }
+
+    /**
+     * 是否存在初始数据转移
+     */
+    public static boolean isWosToolsDataTranslation = false;
+    /**
+     * 数据 转移
+     */
+    public void translationWosToolsData(){
+        try{
+            Context wosToolsContext = appContext.createPackageContext("com.wos.tools", Context.CONTEXT_IGNORE_SECURITY);
+            if (wosToolsContext!=null){
+                log.d("#  WosTools Context 存在");
+                //转移数据
+                DataListEntiy toolsdataList = new DataListEntiy();
+                toolsdataList.ReadShareData(false);
+                toolsdataList.SaveShareData();
+                isWosToolsDataTranslation = true;
+            }else{
+                log.d("#  WosTools Context 不存在");
+            }
+        }catch (Exception e){
+            log.e("启动 转移数据 异常 : " + e.getMessage());
+        }
+
+    }
+
+
+
+
+
     /**
      * 创建文件
      *
