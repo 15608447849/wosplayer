@@ -46,7 +46,10 @@ public class ScheduleReader {
 
 
     public static void clear(){
+        log.i(TAG," 当前存储的uuks == "+PreUUKS);
         PreUUKS = null;
+        currentEntity = null;
+        log.e(TAG,"--------------------------------------清理 读取排期--------------------------------------------");
     }
 
 
@@ -154,7 +157,7 @@ public class ScheduleReader {
      */
     private static void deleteOnlySchedule(XmlNodeEntity schedule){
         String type = schedule.getXmldata().get("type");
-        log.e(TAG,"删除:"+schedule.getXmldata().get("summary")+",类型:"+type);
+        log.e(TAG,"删除 \n id =="+schedule.getXmldata().get("id")+"\n排期summary == "+schedule.getXmldata().get("summary")+" \n 类型:"+type);
         scheduleMap.get(type).remove(schedule);
         log.i(TAG,scheduleMap.toString());
     }
@@ -209,6 +212,11 @@ public class ScheduleReader {
 
     private static ReentrantLock lock = new ReentrantLock();
     private static XmlNodeEntity currentEntity = null;
+
+    /**
+     *
+     * @param iserr  true 上次读取排期时 读取到一个错误的排期 再次尝试
+     */
     public static void Start(boolean iserr){
         try {
             lock.lock();
@@ -217,12 +225,21 @@ public class ScheduleReader {
             ArrayList<XmlNodeEntity> list =  getAllSchedule();
             //判断当前uuks 是否和上一个相同
             if(list==null || list.size()==0){
-                log.e(TAG," 无排期 ");
+                log.e(TAG,"-- 无排期列表 --");
                 return;
             }else{
-                String uuks = list.get(0).getXmldata().get("uuks");
+                if (currentEntity!=null){
+                    currentEntity = null;
+                }
+                currentEntity =  list.get(0);
+                if (currentEntity==null){
+                    log.e(TAG,"排期读取错误- 获取不到当前排期 ");
+                    return;
+                }
+                log.e(TAG,currentEntity.getXmldata().toString());
+                String uuks = currentEntity.getXmldata().get("uuks");
                 if (uuks==null || uuks.equals("") || uuks.length()==0){
-                    log.e(TAG,"reader ,uuks is null");
+                    log.e(TAG,"最新xml 读取排期时 获取uuks 失败 \n reader ,uuks is null :"+uuks);
                     return;
                 }
                 if (PreUUKS!=null){
@@ -234,7 +251,7 @@ public class ScheduleReader {
                 //执行到这里 代表 上一个uuks 不存在或者 上一个uuks 和当前uuks 不相同
                 PreUUKS = uuks;
             }
-            log.i(TAG," UUKS IS NOT SAME, start reader");
+            log.i(TAG," UUKS IS NOT SAME, start reader exe_ing");
                 //
             Stop();
 
@@ -242,31 +259,32 @@ public class ScheduleReader {
             Toals.Say("全部排期数量:"+list.size());
 
             filterScheduleList(list);
-            log.i(TAG,"分组全部排期完成"+scheduleMap.toString());
+            log.i(TAG,"过滤 分组 全部排期完成 : \n"+scheduleMap.toString());
             }
 
 
-            XmlNodeEntity entity = querySchedule();
-            currentEntity = entity;
-
-            if (entity==null){
+            //XmlNodeEntity entity = querySchedule();
+            currentEntity = querySchedule();
+            if (currentEntity==null){
                 log.e(TAG," 空排期 ");
+                clear();
                 UiExcuter.getInstancs().StopExcuter();
                 return;
             }
 
+
            /* clearScheduleMap();
             log.i(TAG,"清理完全部排期");*/
 
-            log.i(TAG,"今天要播放的排期 type:"+entity.getXmldata().get("type")+"name:"+entity.getXmldata().get("summary"));
-            Toals.Say("当前排期的类型:"+entity.getXmldata().get("type")+"最后修改时间:"+entity.getXmldata().get("modifydt"));
+            log.i(TAG,"今天要播放的排期 type:"+currentEntity.getXmldata().get("type")+"name:"+currentEntity.getXmldata().get("summary"));
+            log.i(TAG,"当前排期最后修改时间:"+currentEntity.getXmldata().get("modifydt"));
 
 
             boolean isExistes = false;//是否存在排期
             boolean isUploadUI = true;
-            if (entity != null){
+            if (currentEntity != null){
                 isExistes = true;
-                isUploadUI = makeTimerTask(entity);
+                isUploadUI = makeTimerTask(currentEntity);
             }
             //false 不存在任何排期
             //播放默认的图片
@@ -276,7 +294,7 @@ public class ScheduleReader {
         if (isUploadUI){
             //更新ui
             //发送广播 通知视图更新
-            notificationUIexcuter(isExistes,entity);
+            notificationUIexcuter(isExistes,currentEntity);
         }else{
             log.e(TAG,"不更新ui 获取低优先级的任务");
             deleteOnlySchedule(currentEntity);
@@ -806,14 +824,18 @@ public class ScheduleReader {
 
             }
         }
-        log.i(TAG," - - - -determineTime hh");
+        log.i(TAG," - 确定时间 - determineTime() start ");
 
         if ( currentData.getTime()-startTime.getTime()==0 || currentData.after(startTime) && currentData.before(endTime)){
-            log.i(TAG,"在当前时间存在有效排期");
+            log.i(TAG,"在当前时间存在有效排期 √ \n " +
+                    "id == " + current.getXmldata().get("id") + "\n"+
+                    "type == "+ current.getXmldata().get("type") +"\n"+
+                    "termtype == "+ current.getXmldata().get("termtype") +"\n"+
+                    "summary ==" + current.getXmldata().get("summary"));
             return true;
         }
 
-        log.i(TAG," - - - -determineTime over");
+        log.i(TAG," - 确定时间 - determineTime() end");
         return false;
     }
 

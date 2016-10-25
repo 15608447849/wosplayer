@@ -138,9 +138,8 @@ public class DisplayActivity extends Activity {
        super.onResume();
         log.d(TAG,"onResume");
         //是否已经设置了服务器信息?
-     //开始工作
-
         if (isSettingServerInfo()){
+            //开始工作
             startWork();
         }else{
             //设置服务器信息
@@ -310,7 +309,6 @@ public class DisplayActivity extends Activity {
             try {
                 ScheduleSaver.clear();
                 ScheduleReader.clear();
-
                 ScheduleReader.Start(false);
             } catch (Exception e) {
                 log.e(TAG,"activity 开始执行读取排期 时 err:"+ e.getMessage());

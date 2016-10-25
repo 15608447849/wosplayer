@@ -4,6 +4,7 @@ import android.text.format.Time;
 
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
+import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleReader;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 
 import java.io.DataOutputStream;
@@ -57,8 +58,9 @@ public class Command_SYTI implements iCommand {
 		}
 
 		if(justTime(param,null,true)){
+			log.i(TAG,"不需要时间同步");
 			return;
-		};
+		}
 
 
 
@@ -69,13 +71,16 @@ public class Command_SYTI implements iCommand {
 		String newTime = null;
 
 
-
-		newTime = liunx_SU_syncTimeCmd(settingTime,"GMT+08:00");
 		log.e(TAG,"srtting zone GMT+08:00 ");
+		newTime = liunx_SU_syncTimeCmd(settingTime,"GMT+08:00");
+
 		if(!justTime(param,newTime,false)){
-			liunx_SU_syncTimeCmd(settingTime,"GMT-08:00");
 			log.e(TAG,"srtting zone GMT-08:00 ");
+			liunx_SU_syncTimeCmd(settingTime,"GMT-08:00");
 		}
+		//再次执行排期读取
+		ScheduleReader.clear();
+		ScheduleReader.Start(false);
 
 	}
 

@@ -207,7 +207,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
      */
     public void pause() {
         if (isDestroy){
-            log.e("video 是销毁的");
+            log.e(TAG,"video 是销毁的");
             return;
         }
         if (mMediaPlayer != null && mIsPrepared) {//如果媒体播放器存在,并且准备完成的
@@ -293,8 +293,10 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
         // 播放器存在
         if (mMediaPlayer != null) { //释放
             log.e(TAG," 播放器 已存在") ;
+            mMediaPlayer.stop();
             mMediaPlayer.reset(); //重置释放
             mMediaPlayer.release();
+
             mMediaPlayer = null; //置为空
             log.e(TAG,"释放底层播放器 成功");
         }
@@ -468,7 +470,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
     private MediaPlayer.OnPreparedListener mPreparedListener = new MediaPlayer.OnPreparedListener(){
 
         public void onPrepared(MediaPlayer mp) {
-            log.d("--准备完成 监听事件--开始执行");
+            log.d("-- 准备完成 -- 监听事件 -- 开始执行 --");
 
             if (mOnPreparedListener != null) {//如果准备监听不为空
                 log.d(TAG,"mOnPreparedListener 存在");
@@ -551,10 +553,10 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
     };
     //设置播放监听
     public void setOnCompletionListener_ (MediaPlayer.OnCompletionListener l) {
-        log.e(TAG,"video setOnCompletionListener_()   "+ l);
+       // log.e(TAG,"video setOnCompletionListener_()   "+ l);
         mOnCompletionListener = l;
-        log.e(TAG,"video setOnCompletionListener_()  mOnCompletionListener: "+ l);
-        log.e(TAG,"video setOnCompletionListener_()  mCompletionListener: "+ mCompletionListener);
+      //  log.e(TAG,"video setOnCompletionListener_()  mOnCompletionListener: "+ l);
+      //  log.e(TAG,"video setOnCompletionListener_()  mCompletionListener: "+ mCompletionListener);
     }
 
     /**

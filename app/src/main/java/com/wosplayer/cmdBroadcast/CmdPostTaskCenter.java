@@ -13,6 +13,7 @@ import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Reboot_App;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Reboot_Sys;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_SHDO;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_SYTI;
+import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_TSLT;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_UPDC;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_UPLG;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_VOLU;
@@ -58,32 +59,37 @@ public class CmdPostTaskCenter extends BroadcastReceiver {
         //syncTime
         commandList.put(CMD_INFO.SYTI,new Command_SYTI());
         // 抓图
-        commandList.put("SCRN:", new Command_CAPT());
+        commandList.put(CMD_INFO.SCRN, new Command_CAPT());
         // 抓图
-        commandList.put("CAPT:", new Command_CAPT());
+        commandList.put(CMD_INFO.CAPT, new Command_CAPT());
         // 音量控制
-        commandList.put("VOLU:", new Command_VOLU());
+        commandList.put(CMD_INFO.VOLU, new Command_VOLU());
 //        // 更新apk
-        commandList.put("UPDC:", new Command_UPDC());
+        commandList.put(CMD_INFO.UPDC, new Command_UPDC());
 //        // 上传日志
-        commandList.put("UPLG:", new Command_UPLG());
+        commandList.put(CMD_INFO.UPLG, new Command_UPLG());
         // 重启程序
-        commandList.put("UIRE:", new Command_Reboot_App());
+        commandList.put(CMD_INFO.UIRE, new Command_Reboot_App());
         // 重启终端
-        commandList.put("REBO:", new Command_Reboot_Sys());
+        commandList.put(CMD_INFO.REBO, new Command_Reboot_Sys());
         // 关闭播放器
         commandList.put(CMD_INFO.SHDP, new Command_Close_App());
         //关闭终端
         commandList.put(CMD_INFO.SHDO, new Command_SHDO());
         //设置密码
-        commandList.put("PASD:",new Command_PASD());
+        commandList.put(CMD_INFO.PASD,new Command_PASD());
+        //建行对接接口
+        commandList.put(CMD_INFO.TSLT,new Command_TSLT());
     }
 
     private void postCmd(final String cmd, final String param){
 
         if (commandList.containsKey(cmd)) {
-            log.i("执行指令:"+cmd +"所在线程:"+Thread.currentThread().getName()+" 当前线程数:"+Thread.getAllStackTraces().size());
-            if (cmd.equals("REBO:") || cmd.equals("UIRE:") || cmd.equals("UPDC:") || cmd.equals(CMD_INFO.SHDO)){
+            log.i("准备 执行指令:"+cmd +" 所在线程:"+Thread.currentThread().getName()+"- 当前线程数:"+Thread.getAllStackTraces().size());
+            if (cmd.equals(CMD_INFO.REBO) || cmd.equals(CMD_INFO.UIRE) || cmd.equals(CMD_INFO.UPDC)
+                    || cmd.equals(CMD_INFO.SHDO) || cmd.equals(CMD_INFO.SHDP) || cmd.equals(CMD_INFO.UPLG)
+                    || cmd.equals(CMD_INFO.SCRN) || cmd.equals(CMD_INFO.CAPT) || cmd.equals(CMD_INFO.TSLT)
+                    ){
 
                 helper1.schedule(new Action0() {
                     @Override

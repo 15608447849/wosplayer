@@ -91,9 +91,10 @@ public class loaderManager extends IntentService implements Loader.LoaderCaller{
             return;
         }
         isLoadding = true;
+        Loader loader = null;
         for (int i = 0;i<TaskList.size();i++){
-            log.i(TAG," 準備下載["+TaskList.get(i) +"] index:"+i+"\n\r");
-            Loader loader = new Loader();
+            log.d(TAG,"--- 下載任务名["+TaskList.get(i) +"]  - index [ "+i+" ] ---");
+            loader = new Loader();
             loader.settingCaller(this);//设置回调
             loader.LoadingUriResource((String) TaskList.get(i),null);// 开始任务
         }

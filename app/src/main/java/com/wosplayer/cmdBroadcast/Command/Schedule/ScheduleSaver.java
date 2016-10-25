@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.wos.Toals;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlHelper;
@@ -67,6 +66,9 @@ public class ScheduleSaver implements iCommand {
 
     public static void clear(){
         uuks = null;
+        rootNode.Clear();
+        isNextLoad = false;//不可以下载
+        log.e(TAG," --清理--");
     }
 
 
@@ -79,8 +81,8 @@ public class ScheduleSaver implements iCommand {
      */
     @Override
     public void Execute(String param) {
-        log.i("获取排期信息,当前线程名:"+Thread.currentThread().getName());
-        Toals.Say("排期地址 =  "+ param);
+        log.i("获取 排期 信息, 当前线程名:"+Thread.currentThread().getName());
+
         //repeatedVar(param);
 
         saveData(param);
@@ -92,18 +94,22 @@ public class ScheduleSaver implements iCommand {
 
         try {
             lock.lock();
-
-            log.i(TAG," root uri:"+ uri);
+            log.i(TAG," root uri == "+ uri);
             startWork(uri);
         } catch (Exception e) {
-            log.e(TAG, " " + e.getMessage());
+            log.e(TAG, "saveData() " + e.getMessage());
         }finally {
             lock.unlock();
         }
     }
 
 
-
+    /**
+     * 获取xml 数据
+     * @param uri
+     * @param callType
+     * @param Obj
+     */
     private void getXMLdata(String uri, final int callType, final Object Obj) {
         String result = uriTranslationXml(uri);
         if (result!=null && result.equals("")){
@@ -111,8 +117,13 @@ public class ScheduleSaver implements iCommand {
             log.e(TAG," getXMLdata() result 不存在");
             return;
         }
+        log.d(TAG," xml data == \n "+result);
         ParseResultXml(callType,result, Obj);
     }
+
+    /**
+     * 是否开启下载
+     */
     private static boolean isNextLoad = false;
     private void startWork(final String uri){
 
@@ -120,32 +131,25 @@ public class ScheduleSaver implements iCommand {
 //            @Override
 //            public void call() {
 
-
-
-
-        isNextLoad = true;
+//            }
+//        });
+        Long startTime = System.currentTimeMillis();
         try {
-            Long startTime = System.currentTimeMillis();
             getXMLdata(uri,ROOT_PARSE,null); //解析数据
-            Long endTime = System.currentTimeMillis();
-            log.e(TAG,"解析用时 : "+(endTime - startTime)+" 毫秒");
         } catch (Exception e) {
             e.printStackTrace();
             isNextLoad=false;
         }
+        Long endTime = System.currentTimeMillis();
+        log.e(TAG,"解析用时 : "+(endTime - startTime)+" 毫秒");
 
+        log.e(TAG,"是否开启下载:"+isNextLoad);
+        if (isNextLoad){
+            //开启后台下载线程
+            log.i("当前的任务数:"+rootNode.getFtplist().size()+"\n "+rootNode.getFtplist().toString());
+            sendloadTask();
+        }
 
-
-
-                log.e(TAG,"是否开启下载:"+isNextLoad);
-                if (isNextLoad){
-                    //开启后台下载线程
-                    log.i("当前的任务数:"+rootNode.getFtplist().size()+"-->"+rootNode.getFtplist().toString());
-                    sendloadTask();
-                }
-
-//            }
-//        });
     }
 
     /**
@@ -185,34 +189,39 @@ public class ScheduleSaver implements iCommand {
                 rootNode.Level="root";
                 try {
                     String ruuks = XmlHelper.getFirstChildNodeValue(root, "uuks");
-                    if (ruuks.equals("")) throw new Exception("uuks  is null");
-                    Toals.Say("Lc:"+uuks+";Rm:"+ruuks);
-                    if (uuks==null || !uuks.equals(ruuks)){
-                        log.i(TAG," muuks is null OR local uuks != remote UUKS"+uuks+","+ruuks);
-                        rootNode.Clear();//清楚数据
-                        uuks = ruuks;
-                    }else{
-                        throw new Exception("排期无改变.uuks 无变化");
+                    if (ruuks.equals("")) throw new Exception("最新xml - uuks  is null");
+
+                    if (uuks==null){
+                        log.i(TAG," 本地uuks is null ...  \n 本地 :"+uuks+"  - 最新uuks :"+ruuks);
+
+                    }else if(uuks != null  && !uuks.equals(ruuks)){//本地uuks is null 或者
+                        log.i(TAG," 本地uuks 不等于 最新uuks  ...  \n 本地 :"+uuks+"  - 最新uuks :"+ruuks);
+                        clear();
+                    }else{ //uuks == ruuks
+                        throw new Exception("排期判定 无改变 ,因为uuks 无变化 ");
                     }
+
                     url = null;
                     url = XmlHelper.getFirstChildNodeValue(root, "url");
+                    uuks = ruuks;
                     if (url.equals("")) throw new Exception("url is null");
 
                 } catch (Exception e) {
                     log.e(TAG,e.getMessage());
-                    isNextLoad = false;
                     return;
                 }
-                //图片 视频 错误时 所需
+
+                /*图片 视频 错误时 所需
                 //图片
-                //String errImage = "http://e.hiphotos.baidu.com/zhidao/pic/item/9345d688d43f8794f8bb0d5bd61b0ef41bd53a7a.jpg";
-                //rootNode.addUriTast(errImage); //创建一个ftp任务
+                String errImage = "http://e.hiphotos.baidu.com/zhidao/pic/item/9345d688d43f8794f8bb0d5bd61b0ef41bd53a7a.jpg";
+                rootNode.addUriTast(errImage); //创建一个ftp任务
                 //视频
-              /*  String errVideo = "http://static.zqgame.com/html/playvideo.html?name=http://lom.zqgame.com/v1/video/LOM_Promo~2.flv";
-                rootNode.addUriTast(errVideo); //创建一个ftp任务*/
+                //String errVideo = "http://static.zqgame.com/html/playvideo.html?name=http://lom.zqgame.com/v1/video/LOM_Promo~2.flv";
+                //rootNode.addUriTast(errVideo); //创建一个ftp任务*/
+
                 NodeList scheduleList = root.getElementsByTagName("schedule");
                 if (scheduleList.getLength() == 0) return;
-                log.i(TAG,"当前排期总数:"+scheduleList.getLength());
+                log.i(TAG," - 当前排期总数: "+scheduleList.getLength());
                 for (int i = scheduleList.getLength() - 1; i > -1; i--) {
                     Element scheduleElement = (Element) scheduleList.item(i);
                     Short type = null;
@@ -231,18 +240,26 @@ public class ScheduleSaver implements iCommand {
                     NodeList programsList = scheduleElement.getElementsByTagName("program"); //节目
                     if(programsList.getLength()==0) continue;
 
-                    log.i(TAG,schedule_xmldata_map.get("id")+" 这个排期下面的 节目总数:"+programsList.getLength());
+                    log.i(TAG,"排期 id :"+schedule_xmldata_map.get("id")+"\n" +
+                            "排期 类型" + schedule_xmldata_map.get("type")+"\n"+
+                            "排期名: "+schedule_xmldata_map.get("summary")+"\n"+
+                            " 这个排期下面的 节目总数:"+programsList.getLength());
+                    String progUri = null;
                     for (int i1 = 0; i1 < programsList.getLength(); i1++) {
                         Element program_Element = (Element) programsList.item(i1);
                         String pId = XmlHelper.getFirstChildNodeValue(program_Element, "id");
                         if (pId.equals("")) continue;
-                        Log.i(TAG, "now to parse program url :" + url + pId );
+
+                        progUri = url.trim() + pId.trim();
+                        Log.i(TAG, "now to parse program url :" + progUri );
                         //解析 节目:
-                        getXMLdata(url + pId, SCHEDU_PROG_PARSE, schedule_node.NewSettingNodeEntity());// 下一节点 实体
+                        getXMLdata(progUri, SCHEDU_PROG_PARSE, schedule_node.NewSettingNodeEntity());// 下一节点 实体
                         log.i(TAG,"解析完一个节目\n\r");
                     }
                     log.i(TAG,"解析完一个排期\n\r");
                 }
+                isNextLoad = true;
+                log.d(TAG,"----------------------------------------------------------------全部解析完成---------------------------------------------------------------------------------");
                 break;
 
 
@@ -552,7 +569,7 @@ public class ScheduleSaver implements iCommand {
      * @param urlString
      * @return the xml data or "" if catch Exception
      */
-    public String uriTranslationXml(String urlString) {
+    public static String uriTranslationXml(String urlString) {
         URL url;
         try {
             url = new URL(urlString);

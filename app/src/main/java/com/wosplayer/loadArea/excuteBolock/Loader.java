@@ -1,5 +1,7 @@
 package com.wosplayer.loadArea.excuteBolock;
 
+import android.util.Log;
+
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.HttpHandler;
@@ -10,7 +12,10 @@ import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.loadArea.ftpBlock.ActiveFtpUtils;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -111,10 +116,9 @@ public class Loader {
             String fps = localFileDir + fns;//全路径
 
             final String finalFps = fps;
-            if (fileIsExist(fps)) {
-
-
-                log.i(TAG, "任务:" + uri + "-> 本地所在路径: " + finalFps + " -> exist!");
+            if (!uri.trim().startsWith("file://") && fileIsExist(fps)) {
+                log.i(TAG, "文件存在 \n 任务:" + uri + "\n" +
+                        " 本地所在路径" + finalFps + "");
                 ioThread.schedule(new Action0() {
                     @Override
                     public void call() {
@@ -128,7 +132,7 @@ public class Loader {
                 return;
             }
 
-    log.e(" ! -- -- -- -- ! " );
+    log.e(" ------------------------------开始访问网络---------------- " );
 
         //判断路径i
         if (uri.startsWith("http://")) {
@@ -150,6 +154,20 @@ public class Loader {
                     FTPload(host, name, password, path, filename, localPath,null);
                 }
             });
+        }else if (uri.startsWith("file://")){
+
+            File jhFile = new File( new URI(uri));
+            //本地文件
+//            File jhFile = new File(uri);
+            if (jhFile.exists()){
+                Log.e(TAG,"建行资源文件:\n"+jhFile.getAbsolutePath());
+                FileUtils.copyFile(jhFile, new File(fps));
+                loadFileRecall(fps);
+            }else{
+                Log.e(TAG,"建行资源文件不存在:\n"+uri);
+                loadFileRecall("loaderr");
+            }
+
         }
 
         }catch (Exception e){

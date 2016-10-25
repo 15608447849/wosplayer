@@ -66,12 +66,12 @@ public class ImageViewPicassocLoader {
             log.e("文件不存在");
         }
 
-        getBitmap(mContext,tagerImageFile,imageView);
+        boolean f = getBitmap(mContext,tagerImageFile,imageView);
 
-
-        if (true){
+        if (f){
             return;
         }
+
 
 
 
@@ -257,14 +257,13 @@ public class ImageViewPicassocLoader {
         Picasso.with(context).invalidate(file);
     }
 
-
-    public static void getBitmap(Context context,File file,ImageView iv) {
+    /**获取一个 bitmap 成功返回turn*/
+    public static boolean getBitmap(Context context,File file,ImageView iv) {
+        boolean f = false;
         FileInputStream is = null;
         Bitmap bitmap = null;
        try{
            if (file != null && file.exists()) {
-
-
                /*is = new FileInputStream(file);
                log.e("###############");
                bitmap =  BitmapFactory.decodeStream(new FlushedInputStream(is));//BitmapFactory.decodeStream(is);
@@ -274,8 +273,6 @@ public class ImageViewPicassocLoader {
                iv.setImageBitmap(bitmap);
                log.e("###############***");
                bitmap=null;*/
-
-               log.e("-------------");
 
              /*  BitmapFactory.Options options = getBitmapOption();
                is = new FileInputStream(file);
@@ -293,6 +290,7 @@ public class ImageViewPicassocLoader {
                bitmap = null;
                log.d("获取完毕 一个 bitmap _success ");
 
+               f = true;
            }
        }catch (Exception e){
            log.e("loading image err: "+e.getMessage());
@@ -305,6 +303,7 @@ public class ImageViewPicassocLoader {
                }
            }
        }
+        return f;
     }
 
     public static BitmapFactory.Options getBitmapOption() {

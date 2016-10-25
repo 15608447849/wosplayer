@@ -226,4 +226,15 @@ public final class CMD_INFO {
      *更行apk
      */
     public static final String UPDC = "UPDC:";
+
+    /**
+     * 设置 关闭app 密码
+     *
+     */
+    public static String PASD = "PASD:";
+
+    /**
+     * 建行xml数据 转换 本地xml数据
+     */
+    public static String TSLT = "TSLT:";
 }
