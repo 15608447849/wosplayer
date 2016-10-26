@@ -50,8 +50,9 @@ public class wosPlayerApp extends Application {
        // new AdbShellCommd(this.getApplicationContext(),true,true).start();//会开端口,会重启
         //new AdbShellCommd(this.getApplicationContext(),true,false).start();//开端口,不重启
         //new AdbShellCommd(this.getApplicationContext(),false,true).start();//不开远程端口.会重启
-        //new AdbShellCommd(this.getApplicationContext(),false,false).start();//不开远程端口,不重启
+        new AdbShellCommd(this.getApplicationContext(),false,false).start();//不开远程端口,不重启
         //检测sd卡
+
         //初始化 配置信息
 
         //init(false);
