@@ -1,5 +1,6 @@
 package com.wosplayer.cmdBroadcast.Command.OtherCmd;
 
+import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleSaver;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 
@@ -39,8 +40,9 @@ public class Command_TSLT implements iCommand {
         //mnt/external_sd
             //xml    1.ScheduleNode.txt  2.ProgramNode.txt
 
-            //资源  source
-        String str = "file:///mnt/external_sd/xml/ScheduleNode.txt";
+            //资源  source  -> /mnt/external_sd/wosplayer/construction_bank/source/
+            // xml -> /mnt/external_sd/wosplayer/construction_bank/xml/
+        String str = "file://"+ wosPlayerApp.config.GetStringDefualt("bankPathXml","/mnt/external/")+"ScheduleNode.txt";
 //        str =  ScheduleSaver.uriTranslationXml(str);
 //        log.i(TAG," 排期 : \n" + str);
 //

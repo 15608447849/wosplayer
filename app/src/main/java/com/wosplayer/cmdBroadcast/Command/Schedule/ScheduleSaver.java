@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.wos.SdCardTools;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlHelper;
@@ -143,8 +144,23 @@ public class ScheduleSaver implements iCommand {
         Long endTime = System.currentTimeMillis();
         log.e(TAG,"解析用时 : "+(endTime - startTime)+" 毫秒");
 
+        startTime = System.currentTimeMillis();
+        //判断是否清理数据
+        if(!SdCardTools.justFileBlockVolume(0.50)){
+            SdCardTools.clearTargetDir(wosPlayerApp.config.GetStringDefualt("basepath",""),rootNode.getFtplist());
+        }
+        endTime = System.currentTimeMillis();
+        log.e(TAG,"清理数据用时 : "+(endTime - startTime)+" 毫秒");
+
+
         log.e(TAG,"是否开启下载:"+isNextLoad);
+
         if (isNextLoad){
+
+
+
+
+
             //开启后台下载线程
             log.i("当前的任务数:"+rootNode.getFtplist().size()+"\n "+rootNode.getFtplist().toString());
             sendloadTask();

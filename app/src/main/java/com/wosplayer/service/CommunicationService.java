@@ -156,14 +156,17 @@ public class CommunicationService extends Service{
         }
         @Override
         public void run() {
+            String msg = null;
+            String cmd = null;
+            String param = null;
             while(isConnected && isStart){
                 //只要是连接中
                 try {
                     if (dataInputStream.available() > 0) {
-                        String msg = dataInputStream.readUTF();
+                        msg = dataInputStream.readUTF();
                         log.i(" 收到 服务器 参数: " + msg);
-                        String cmd = msg.substring(0, 5);
-                        String param = msg.substring(5);
+                       cmd = msg.substring(0, 5);
+                        param = msg.substring(5);
                         postTask(cmd,param);
                     }
                 }catch (Exception e){
@@ -472,7 +475,7 @@ public class CommunicationService extends Service{
     //广播
     private CommunicationServiceReceiveNotification broad = null;
     /**
-     * 请注册在使用
+     *  请注册在使用
      */
     public class CommunicationServiceReceiveNotification extends BroadcastReceiver{
 

@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import com.wos.SdCardTools;
 import com.wosplayer.service.CommunicationService;
 
 import java.io.BufferedReader;
@@ -40,7 +41,7 @@ public class wosPlayerApp extends Application {
         log.d("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wosPlayer app start~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         appContext = wosPlayerApp.this.getApplicationContext();
         //捕获异常
-        //CrashHandler.getInstance().init(getApplicationContext());
+        CrashHandler.getInstance().init(getApplicationContext());
 
         //数据转移
         translationWosToolsData();
@@ -52,13 +53,42 @@ public class wosPlayerApp extends Application {
         //new AdbShellCommd(this.getApplicationContext(),false,true).start();//不开远程端口.会重启
         new AdbShellCommd(this.getApplicationContext(),false,false).start();//不开远程端口,不重启
         //检测sd卡
-
+        checkSdCard();
         //初始化 配置信息
-
         //init(false);
     }
 
+    /**
+     * 检测sd card
+     *
+        # /mnt/internal_sd
+        # /mnt/external_sd
+        # /mnt/usb_storage
+     */
+    private void checkSdCard() {
+        String tags = "#filesacard";
+        if(!SdCardTools.existSDCard()){
+            log.e(tags," sdcard is no exist ! ");
+            System.exit(0);
+            return;
+        }
 
+
+        String [] paths = SdCardTools.getVolumePaths(appContext);
+        if (paths!=null && paths.length>0){
+            log.i(tags,"---------------------------------- sd card path info ------------------------------------");
+            log.i(tags," 当前 sdcard path:"+SdCardTools.getSDPath());
+            SdCardTools.appSourcePath = SdCardTools.getSDPath();
+            for (String path : paths){
+                log.i(tags," # "+ path);
+                if (path.equals("/mnt/external_sd")){
+                    SdCardTools.appSourcePath = path;
+                    break;
+                }
+            }
+            SdCardTools.appSourcePath+="/wosplayer";
+        }
+    }
 
 
     /**
@@ -84,12 +114,16 @@ public class wosPlayerApp extends Application {
         //重启时间
         config.put("sleepTime", GetKey("sleepTime", "30"));
         //本地资源存储目录
-        String basepath = GetKey("basepath", "/wos/wos/source/");
-        if (!basepath.endsWith("/")) {
+        String basepath = GetKey("basepath", "/wos/source/");
+        if (!basepath.startsWith("/")){
+            basepath = "/"+basepath;
+        }
+
+       if (!basepath.endsWith("/")) {
             basepath = basepath + "/";
         }
-        basepath = basepath + "playlist/";
-        // 创建一个目录用于存储资源
+        basepath = SdCardTools.appSourcePath+basepath;
+        //创建一个目录用于存储资源
         MkDir(basepath);
         config.put("basepath", basepath);
         //机器码
@@ -105,6 +139,15 @@ public class wosPlayerApp extends Application {
                 GetKey("serverip", "192.168.1.60"),
                 GetKey("serverport", "80"));
         config.put("CaptureURL", CaptureURL);
+        //建设银行接口资源下载位置
+        basepath = SdCardTools.appSourcePath+"/construction_bank/source/";
+        config.put("bankPathSource",basepath);
+        //创建一个目录用于存储资源
+        MkDir(basepath);
+        basepath = SdCardTools.appSourcePath+"/construction_bank/xml/";
+        MkDir(basepath);
+        config.put("bankPathXml",basepath);
+
     }
 
     public static String GetKey(String key, String defualtValue) {

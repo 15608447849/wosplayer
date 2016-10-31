@@ -94,16 +94,15 @@ public class CmdPostTaskCenter extends BroadcastReceiver {
                 helper1.schedule(new Action0() {
                     @Override
                     public void call() {
-                        iCommand icommand = commandList.get(cmd);
-                        icommand.Execute(param); // 执行~
+                        commandList.get(cmd).Execute(param);
                     }
                 });
             }else{
                 helper2.schedule(new Action0() {
                     @Override
                     public void call() {
-                        iCommand icommand = commandList.get(cmd);
-                        icommand.Execute(param); // 执行~
+
+                        commandList.get(cmd).Execute(param);
                     }
                 });
             }

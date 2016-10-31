@@ -14,53 +14,47 @@
         android:sharedUserId="android.uid.system"
         android:hardwareAccelerated="true">
 
-        <!-- 启动activity -->
+        <!-- 启动activity  <intent-filter>
+                <action android:name="com.wos.launcher.show" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>-->
         <activity android:name=".activity.DisplayActivity"
             android:launchMode="singleTask">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="com.wos.launcher.show" />
-                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <!-- 申请终端Activity-->
         <activity android:name="wosTools.ToolsActivity" android:label="MBS_TOOLS" />
 
-
-
-        <!-- 通讯服务 -->
-        <service android:name=".service.CommunicationService" />
+        <!-- 通讯服务 android:process=":remote_communication" -->
+        <service android:name=".service.CommunicationService" android:process=":remote_communication"/>
         <!-- 通讯服务 重新链接 广播-->
-        <receiver android:name=".service.CommunicationReconnectBroad">
+        <receiver android:name=".service.CommunicationReconnectBroad" android:process=":remote_communication">
             <intent-filter>
-                <action android:name="com.communication.reconncetion.broad"></action>
+                <action android:name="com.communication.reconncetion.broad" />
             </intent-filter>
         </receiver>
 
         <!-- 接受通讯服务的广播 -> 派发任务-->
         <receiver android:name=".cmdBroadcast.CmdPostTaskCenter">
             <intent-filter>
-                <action android:name="com.post.cmd.broad"></action>
+                <action android:name="com.post.cmd.broad" />
             </intent-filter>
         </receiver>
 
-
-        <!-- 接受下载 队列 -->
-        <service android:name=".loadArea.loaderManager" />
-
+        <!-- 接受下载 队列 android:process=":remote_loader" -->
+        <service android:name=".loadArea.loaderManager" android:process=":remote_loader"/>
 
         <!-- 下载完成 广播-->
-        <receiver android:name=".loadArea.completeTaskListBroadcast">
+        <receiver android:name=".loadArea.completeTaskListBroadcast" >
             <intent-filter>
                 <action android:name="com.complete.taskList"/>
             </intent-filter>
         </receiver>
         <!-- 通知ui执行者 广播接受-->
-        <receiver android:name=".Ui.uiBroadcast.UibrocdCastReceive">
+        <receiver android:name=".Ui.uiBroadcast.UibrocdCastReceive" >
             <intent-filter>
                 <action android:name="com.wos.ui.refresh" />
             </intent-filter>
@@ -69,29 +63,28 @@
 
 
         <!--监听服务  android:enabled="true"  android:process=".MonitorService"-->
-        <service android:name="com.wosplayer.service.MonitorService" />
-        <receiver android:name=".service.RestartApplicationBroad">
+        <service android:name="com.wosplayer.service.MonitorService" android:process=":remote_monitorService"/>
+        <receiver android:name=".service.RestartApplicationBroad" >
             <intent-filter>
                 <action android:name="com.wos.restartbroad" />
             </intent-filter>
         </receiver>
 
         <!-- log-->
-        <!-- 记录日志sever-->
+        <!-- 记录日志sever  android:process=":remote_log_upload"-->
         <service
-            android:name=".service.serviceLog" />
-        <!-- 日志上传-->
+            android:name=".service.serviceLog"  android:process=":remote_log_upload"/>
+        <!-- 日志上传  android:process=":remote_log_upload"-->
         <service
-            android:name=".service.logUploadService"/>
+            android:name=".service.logUploadService"  android:process=":remote_log_upload"/>
 
         <!-- 开机自启动广播-->
-        <receiver android:name="com.wosplayer.service.StartSelfBroad">
+        <receiver android:name="com.wosplayer.service.StartSelfBroad" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
-
 
         <!-- 安装卸载等广播-->
         <receiver android:name="com.wosplayer.service.installBroad">
@@ -147,11 +140,16 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+    <!-- 往SDCard写入数据权限 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <!-- 在SDCard中创建与删除文件权限 -->
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
+    <!-- 媒体重新挂载-->
+    <uses-permission android:name="android.intent.action.MEDIA_MOUNTED"/>
+
     <uses-permission android:name="adnroid.permission.ACCESS_CHECKIN_PROPERTTES" />
-    <!-- wos_Tools xml -->
+    <!-- ###################################################wos_Tools xml####################################################################################### -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
     <uses-permission android:name="android.permission.READ_OWNER_DATA"/>
