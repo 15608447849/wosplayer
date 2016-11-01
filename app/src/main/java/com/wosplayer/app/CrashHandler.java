@@ -10,6 +10,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.wosplayer.service.RestartApplicationBroad;
@@ -205,11 +206,12 @@ public class CrashHandler implements UncaughtExceptionHandler {
 			String time = formatter.format(new Date());
 			String fileName = "crash-" + time + "-" + timestamp + ".log";
 			if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-				String path = Environment.getExternalStorageDirectory()+"/wosplayer/crash";
+				String path = Environment.getExternalStorageDirectory()+"/wosplayer/crash/";
 				File dir = new File(path);
 				if (!dir.exists()) {
 					dir.mkdirs();
 				}
+				Log.e(""," CrashHandler _ error file dir path: "+ dir.getAbsolutePath());
 				FileOutputStream fos = new FileOutputStream(path + fileName);
 				fos.write(sb.toString().getBytes());
 				fos.close();

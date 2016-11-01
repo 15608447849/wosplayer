@@ -20,6 +20,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.wos.SdCardTools;
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.MyVideoView;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
@@ -37,6 +38,8 @@ import java.util.TimerTask;
 import wosTools.DataListEntiy;
 import wosTools.RequstTerminal;
 import wosTools.ToolsHandler;
+
+import static com.wosplayer.app.wosPlayerApp.config;
 
 /**
  *  Timer timer = new Timer();
@@ -117,11 +120,7 @@ public class DisplayActivity extends Activity {
             }
         });
 
-
-
-
         log.d("--------create over-------------");
-
     }
 
     @Override
@@ -145,8 +144,6 @@ public class DisplayActivity extends Activity {
             //设置服务器信息
             settingServerInfoDialog();
         }
-
-
     }
 
     @Override
@@ -157,8 +154,6 @@ public class DisplayActivity extends Activity {
         if (isSettingServerInfo()){
             endWork();
         }
-
-
     }
 
     @Override
@@ -177,7 +172,7 @@ public class DisplayActivity extends Activity {
                 Intent intent  = new Intent();
                 intent.setAction(RestartApplicationBroad.action);
                 intent.putExtra(RestartApplicationBroad.IS_START,false);
-                intent.putExtra(RestartApplicationBroad.KEYS,wosPlayerApp.config.GetStringDefualt("sleepTime","10"));
+                intent.putExtra(RestartApplicationBroad.KEYS, config.GetStringDefualt("sleepTime","10"));
                 sendBroadcast(intent);
             }
         } catch (Exception e) {
@@ -339,8 +334,6 @@ public class DisplayActivity extends Activity {
 
     //--------------------------------------
 
-
-
     /**
      * 设置服务器信息成功 true
      * 失败 false
@@ -370,7 +363,9 @@ public class DisplayActivity extends Activity {
     private EditText      terminalNo;
     private EditText      BasePath;
     private EditText      heartbeattime;
+    private EditText     StorageLimits;
     private LinearLayout restartLayout;
+
 //    private Button btnGetID;
 //    private Button        btnSaveData;
     private void settingServerInfoDialog() {
@@ -419,6 +414,8 @@ public class DisplayActivity extends Activity {
             terminalNo=(EditText)this.findViewById(R.id.terminalNo);
             BasePath=(EditText)this.findViewById(R.id.BasePath);
             heartbeattime=(EditText)this.findViewById(R.id.HeartBeatInterval);
+            StorageLimits=(EditText)this.findViewById(R.id.StorageLimits);
+
 
 //            btnGetID=(Button)this.findViewById(R.id.btnGetID);
 //            btnSaveData=(Button)this.findViewById(R.id.btnSaveData);
@@ -461,6 +458,7 @@ public class DisplayActivity extends Activity {
             terminalNo.setText(dataList.GetStringDefualt("terminalNo", ""));
             heartbeattime.setText(dataList.GetStringDefualt("HeartBeatInterval", "30"));
             BasePath.setText(dataList.GetStringDefualt("basepath", "mnt/sdcard"));
+            StorageLimits.setText(dataList.GetStringDefualt("storageLimits","50"));
             //焦点默认在这个控件上
             serverip.setFocusable(true);
 
@@ -476,17 +474,35 @@ public class DisplayActivity extends Activity {
      */
     public void GetViewValue()
     {
-        dataList.put("terminalNo",terminalNo.getText().toString());
-        dataList.put("serverip",  serverip.getText().toString());
-        dataList.put("serverport",  serverport.getText().toString());
-        dataList.put("companyid",  companyid.getText().toString());
-        dataList.put("HeartBeatInterval",  heartbeattime.getText().toString());
-        String basepath=BasePath.getText().toString();
+        dataList.put("terminalNo",terminalNo.getText().toString());//终端id
+        dataList.put("serverip",  serverip.getText().toString());//服务器ip
+        dataList.put("serverport",  serverport.getText().toString());//终端端口
+        dataList.put("companyid",  companyid.getText().toString());//公司id
+        dataList.put("HeartBeatInterval",  heartbeattime.getText().toString());//心跳
+        dataList.put("storageLimits",StorageLimits.getText().toString());//sdcard 清理阔值
+
+        String basepath=BasePath.getText().toString();//资源存储的 文件名
+//      例: xxx前缀 /basepath/资源1
+        if (!basepath.startsWith("/")){
+            basepath = "/"+basepath;
+        }
         if(!basepath.endsWith("/"))
         {
             basepath=basepath+"/";
         }
+
+        basepath = SdCardTools.appSourcePath+basepath;
         dataList.put("basepath",  basepath);
+
+        //建设银行接口资源下载位置
+        basepath = SdCardTools.appSourcePath+SdCardTools.Construction_Bank_dir_source;
+        dataList.put("bankPathSource",basepath);
+
+        basepath = SdCardTools.appSourcePath+SdCardTools.Construction_Bank_dir_xmlfile;
+        dataList.put("bankPathXml",basepath);
+
+
+
     }
 
 
@@ -520,6 +536,7 @@ public class DisplayActivity extends Activity {
      * @param view
      */
     public void saveData(View view){
+
         save();
         this.finish();
     }

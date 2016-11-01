@@ -70,6 +70,8 @@ public class loaderManager extends IntentService implements Loader.LoaderCaller{
         log.i("-------------------------------------------loaderManager destroy----------------------------------------------------------");
     }
 
+    private String terminalNo ;
+    private String savepath ;
     private ArrayList<CharSequence> TaskList = null;
     @Override
     protected void onHandleIntent(Intent intent) {
@@ -80,8 +82,9 @@ public class loaderManager extends IntentService implements Loader.LoaderCaller{
         if (TaskList == null || TaskList.size() == 0) return;
         Log.i(TAG,"收到一个 下载任务, 队列大小:"+TaskList.size());
 
+        terminalNo = intent.getExtras().getString("terminalNo","0000");
+        savepath = intent.getExtras().getString("savepath","0000");
         WorkEvent();
-
     }
 
     private void WorkEvent() {
@@ -94,7 +97,7 @@ public class loaderManager extends IntentService implements Loader.LoaderCaller{
         Loader loader = null;
         for (int i = 0;i<TaskList.size();i++){
             log.d(TAG,"--- 下載任务名["+TaskList.get(i) +"]  - index [ "+i+" ] ---");
-            loader = new Loader();
+            loader = new Loader(savepath,terminalNo);
             loader.settingCaller(this);//设置回调
             loader.LoadingUriResource((String) TaskList.get(i),null);// 开始任务
         }

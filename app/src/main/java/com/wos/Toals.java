@@ -12,15 +12,16 @@ import rx.functions.Action0;
 public class Toals {
     public static void Say(final String str){
         if (str==null || str.equals("")){
-            log.e("toals err message is null");
+            log.e("Toals_Say() err: - toals err message is null");
             return;
         }
         if (DisplayActivity.activityContext ==null){
-            log.e("toals err activity is null");
+            log.e("Toals_Say() err: - toals err activity is null");
             return;
         }
 
       if (!DisplayActivity.isShowDialog){
+          log.e("Toals_Say() err: - DisplayActivity.isShowDialog=="+DisplayActivity.isShowDialog);
           return;
       }
 

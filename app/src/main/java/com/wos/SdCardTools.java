@@ -10,8 +10,6 @@ import android.os.StatFs;
 import android.os.storage.StorageManager;
 import android.util.Log;
 
-import com.wosplayer.app.log;
-
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -73,6 +71,9 @@ import java.util.List;
  */
 public class SdCardTools {
 
+    public static final String app_dir ="/wosplayer";
+    public static  final String Construction_Bank_dir_source ="/construction_bank/source/";
+    public static  final String Construction_Bank_dir_xmlfile ="/construction_bank/xml/";
     public static String appSourcePath = null;
 
     //Volume 体积 量
@@ -192,7 +193,17 @@ public class SdCardTools {
      *  小于或者等于 scope false
      *  目录不存在 false
      */
-    public static boolean justFileBlockVolume(double scope){
+    public static boolean justFileBlockVolume(String scopetxt){
+        double scope = 0;
+        try{
+            scope = Double.valueOf(scopetxt);
+
+        }catch (Exception e){
+            e.printStackTrace();
+            scope = 30;
+        }
+            scope = scope * (0.01);
+
 
         long blockSize; //块大小
         long totalBlocks;// 总块数
@@ -274,28 +285,42 @@ public class SdCardTools {
         if (dir.isDirectory()) {
             String[] children = dir.list();
             File subFile = null;
-            Log.d("","总数量:"+children.length);
+            Log.d(""," 资源文件 总数量:"+children.length);
             for (int i=0; i<children.length; i++) {
 
                 if (fileList.contains(children[i])){
-                    log.d("","保留 - "+children[i]);
+                    //log.d("","保留 - "+children[i]);
                         continue;
                 }
                 subFile = new File(dir_path+children[i]);
                 if (subFile.exists()){
-                    log.d("","准备删除 - "+children[i]);
-                    subFile.delete();
+                  //  log.d("","准备删除 - "+children[i]);
+                    if(justFileLastModified(subFile)){
+                        subFile.delete();
+                    };
                 }
 
             }
 
-
-
         }
+               }
 
-        dir = new File(dir_path);
-        Log.d("","#总数量:"+dir.list().length);
+    /**
+     * 如果最后修改时间 在 三天内 不删除 返回 false
+     * @param subFile
+     * @return
+     */
+    private static boolean justFileLastModified(File subFile) {
+        long lastmodifiedTime = subFile.lastModified();
+        long currentTime = System.currentTimeMillis();
+
+        if (lastmodifiedTime<(currentTime - (1000 * 60 * 60 * 24 * 3))){
+            return true;
+        }else{
+            return false;
+        }
     }
+
 
     /**
      * 获取所有准备下载的文件的文件名

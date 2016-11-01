@@ -11,7 +11,6 @@ import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
 import com.wos.Toals;
 import com.wosplayer.app.log;
-import com.wosplayer.app.wosPlayerApp;
 
 import java.io.File;
 
@@ -29,14 +28,19 @@ public class logUploadService extends IntentService {
     private int needFileCount = -1;
     private int beOnFileCount = 0;
 
+    private String uri;
+    private String terminalNo;
     @Override
     protected void onHandleIntent(Intent intent) {
 
-        log.i("日志文件开始上传服务准备");
+
+        log.i("------------------------------------------------------------日志文件开始上传服务准备----------------------------------------------------------------------------------");
 
         //获取uri
-        String uri = intent.getExtras().getString(uriKey);
+        uri = intent.getExtras().getString(uriKey);
         if(uri.equals("") || uri==null) return;
+
+        terminalNo = intent.getExtras().getString("terminalNo","0000");
 
       //停止日志写入
         log.isWrite = false;
@@ -75,7 +79,7 @@ public class logUploadService extends IntentService {
     }
 
 
-    private HttpUtils httpUtils;
+//    private HttpUtils httpUtils;
 
     private void uploadFile(String uploadUrl, final String filePath, final logUploadService service){
         RequestParams params = new RequestParams(); // 默认编码UTF-8
@@ -84,7 +88,7 @@ public class logUploadService extends IntentService {
 //        params.addBodyParameter("file",new File(filePath));
 
         params.addBodyParameter("cmd", "androidLogData");
-        params.addBodyParameter("terminalId", wosPlayerApp.config.GetStringDefualt("terminalNo",""));
+        params.addBodyParameter("terminalId",terminalNo);
        // params.setBodyEntity(new FileUploadEntity(new File(filePath),"application/octet-stream"));//"binary/octet-stream"));//"binary/octet-stream"));//,
         params.addBodyParameter("file",new File(filePath));
 

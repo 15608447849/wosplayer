@@ -97,14 +97,15 @@ public class DataListEntiy {
         map.put("serverport",  ToolsUtils.GetKey(isMeInfo,"serverport", "8000"));
         map.put("companyid",  ToolsUtils.GetKey(isMeInfo,"companyid", "999"));
         map.put("HeartBeatInterval",  ToolsUtils.GetKey(isMeInfo,"HeartBeatInterval", "30"));
-        map.put("basepath",  ToolsUtils.GetKey(isMeInfo,"basepath", "/mnt/sdcard/"));
+        map.put("basepath",  ToolsUtils.GetKey(isMeInfo,"basepath", "playlist"));
+
         map.put("sleepTime",ToolsUtils.GetKey(isMeInfo,"sleepTime", "30"));
+        map.put("storageLimits",ToolsUtils.GetKey(isMeInfo,"storageLimits","50"));//sdka 容量达到多少时 会清理资源
         //获取本地ip
         String LocalIpAddress=ToolsUtils.getLocalIpAddress();
         map.put("tip",  (LocalIpAddress=="")?"127.0.0.1":LocalIpAddress);
         //mac
         map.put("mac",  ToolsUtils.GetMac());
-
 
         log.i("DataListEntiy_ReadShareData() ", "--------------------------------------------------读取配置信息------------------------------- \n 成功");
     }

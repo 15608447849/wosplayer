@@ -73,7 +73,6 @@ public class wosPlayerApp extends Application {
             return;
         }
 
-
         String [] paths = SdCardTools.getVolumePaths(appContext);
         if (paths!=null && paths.length>0){
             log.i(tags,"---------------------------------- sd card path info ------------------------------------");
@@ -86,7 +85,7 @@ public class wosPlayerApp extends Application {
                     break;
                 }
             }
-            SdCardTools.appSourcePath+="/wosplayer";
+            SdCardTools.appSourcePath+=SdCardTools.app_dir;
         }
     }
 
@@ -113,41 +112,42 @@ public class wosPlayerApp extends Application {
         config.put("HeartBeatInterval", GetKey("HeartBeatInterval", "30"));
         //重启时间
         config.put("sleepTime", GetKey("sleepTime", "30"));
-        //本地资源存储目录
-        String basepath = GetKey("basepath", "/wos/source/");
-        if (!basepath.startsWith("/")){
-            basepath = "/"+basepath;
-        }
+        //sdcard 清理阔值
+        config.put("storageLimits",GetKey("storageLimits","50"));
 
-       if (!basepath.endsWith("/")) {
-            basepath = basepath + "/";
-        }
-        basepath = SdCardTools.appSourcePath+basepath;
-        //创建一个目录用于存储资源
-        MkDir(basepath);
-        config.put("basepath", basepath);
+
         //机器码
         config.put("mac", GetMac());
         //本地ip
         String LocalIpAddress = getLocalIpAddress();
         config.put("tip", (LocalIpAddress == "") ? "127.0.0.1"
                 : LocalIpAddress);
-        config.put("CAPTIMAGEPATH", config.GetStringDefualt("basepath","") + "screen.png");//截图本地位置
+
         //访问服务端的URL
         String CaptureURL = String.format(
                 "http://%s:%s/wos/captureManagerServlet",
-                GetKey("serverip", "192.168.1.60"),
-                GetKey("serverport", "80"));
+                GetKey("serverip", "192.168.6.66"),
+                GetKey("serverport", "8000"));
         config.put("CaptureURL", CaptureURL);
-        //建设银行接口资源下载位置
-        basepath = SdCardTools.appSourcePath+"/construction_bank/source/";
-        config.put("bankPathSource",basepath);
+
+
+        //本地资源存储目录
+        String basepath = GetKey("basepath", "mnt/sdcard/sourceList");
+        config.put("basepath", basepath);
         //创建一个目录用于存储资源
         MkDir(basepath);
-        basepath = SdCardTools.appSourcePath+"/construction_bank/xml/";
-        MkDir(basepath);
-        config.put("bankPathXml",basepath);
+        config.put("CAPTIMAGEPATH", config.GetStringDefualt("basepath","") + "screen.png");//截图本地位置
 
+        //建设银行接口资源下载位置
+        basepath =  GetKey("bankPathSource", "mnt/sdcard"+SdCardTools.Construction_Bank_dir_source);
+        config.put("bankPathSource",basepath);
+        MkDir(basepath);
+        basepath = GetKey("bankPathXml", "mnt/sdcard"+SdCardTools.Construction_Bank_dir_xmlfile);
+        config.put("bankPathXml",basepath);
+        MkDir(basepath);
+
+        log.i("app config init complete " );
+        config.printData();
     }
 
     public static String GetKey(String key, String defualtValue) {

@@ -2,8 +2,11 @@ package com.wosplayer.app;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2016/7/19.
@@ -20,7 +23,9 @@ public class DataList implements Parcelable {
         return key;
     }
     protected HashMap<String, String> map = new HashMap<String, String>();
-
+    public HashMap<String, String> getMap(){
+        return map;
+    }
 
 
     public String GetStringDefualt(String key, String defualtValue) {
@@ -108,4 +113,23 @@ public class DataList implements Parcelable {
             return new DataList[size];
         }
     };
+
+    /**
+     *打印数据
+     */
+    /**
+     * 保存数据到本地app的 "_Data"
+     */
+    public void printData()
+    {
+        Iterator iter = map.entrySet().iterator();
+        while (iter.hasNext())
+        {
+            Map.Entry entry = (Map.Entry) iter.next();
+            Object key = entry.getKey();
+            Object val = entry.getValue();
+            Log.i(""," ["+key + " ->  "+val+" ]");
+        }
+       log.i("","********************************************************************************************************************************************");
+    }
 }

@@ -34,6 +34,7 @@ import rx.schedulers.Schedulers;
  * Created by user on 2016/6/24.
  */
 public class Loader {
+
     public static int loadcount = 2 ;
     private static final String TAG = "_Loader";
     private static ReentrantLock locker = new ReentrantLock();//同步锁
@@ -44,6 +45,29 @@ public class Loader {
     private static List<String> loadingTaskList = Collections.synchronizedList(new LinkedList<String>());
     private final static Scheduler.Worker ioThread = Schedulers.io().createWorker();
     private final static Scheduler.Worker notifyThread = Schedulers.io().createWorker();
+
+    //资源保存的路径
+    private String savepath ;
+
+    //终端id
+    private String terminalNo ;
+
+    public Loader(){
+        if (savepath==null || savepath.equals("")){
+            savepath = wosPlayerApp.config.GetStringDefualt("basepath", "/sdcard/mnt/playlist");
+        }
+        if (terminalNo==null ||  terminalNo.equals("")){
+            terminalNo = wosPlayerApp.config.GetStringDefualt("terminalNo","0000");
+        }
+
+
+    }
+
+    public Loader(String savepath,String terminalNo){
+        this.savepath = savepath;
+        this.terminalNo = terminalNo;
+    }
+
     /**
      * 添加一个任务
      * @param Task
@@ -112,7 +136,7 @@ public class Loader {
 //            log.i(TAG, Loader.this.toString()+" -> 加载资源 ->"+uri );
 
             String fns = uri.substring(uri.lastIndexOf("/") + 1);//文件名
-            String localFileDir =  wosPlayerApp.config.GetStringDefualt("basepath", "/sdcard/mnt/playlist");//本地路径
+            String localFileDir =  savepath;//wosPlayerApp.config.GetStringDefualt("basepath", "/sdcard/mnt/playlist");//本地路径
             String fps = localFileDir + fns;//全路径
 
             final String finalFps = fps;
@@ -370,7 +394,7 @@ public class Loader {
 
                     if (currentStep.equals(ActiveFtpUtils.FTP_FILE_NOTEXISTS)){
                         //ftp远程文件不存在
-                        log.e(TAG,"ftp服务器 不存在文件");
+                        log.e(TAG,"ftp服务器 不存在文件 <<" + fileName+">>");
                         loadFileRecall("loaderr");
                         nitifyMsg(fileName,4);
                     }
@@ -407,15 +431,16 @@ public class Loader {
      */
     private void nitifyMsg(String filename, int type){
 
-        String TERMINAL_NO = wosPlayerApp.config.GetStringDefualt("terminalNo","0000");
+//        String TERMINAL_NO = wosPlayerApp.config.GetStringDefualt("terminalNo","0000");
 
-        wosPlayerApp.sendMsgToServer("FTPS:"+TERMINAL_NO+";" + filename+ ";"+type);
+        wosPlayerApp.sendMsgToServer("FTPS:"+terminalNo+";" + filename+ ";"+type);
 
     }
 
     private void notifyProgress(String filename, String process, String speed){
 
-        String command = "PRGS:" +  wosPlayerApp.config.GetStringDefualt("terminalNo", "0000") + "," + filename + ","
+        String command = "PRGS:" +  terminalNo //wosPlayerApp.config.GetStringDefualt("terminalNo", "0000")
+                + "," + filename + ","
                 + process + "," + speed;
         wosPlayerApp.sendMsgToServer(command);
     }

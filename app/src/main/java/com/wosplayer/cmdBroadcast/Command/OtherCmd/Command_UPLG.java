@@ -24,11 +24,12 @@ public class Command_UPLG implements iCommand {
             return;
         }
 
-       log.i("start log upload server ...");
+       log.i(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  start log upload server ...");
         //开启 日志上传服务
         Intent mintent = new Intent(wosPlayerApp.appContext,logUploadService.class);
         Bundle b = new Bundle();
         b.putString(logUploadService.uriKey,uri);
+        b.putString("terminalNo", wosPlayerApp.config.GetStringDefualt("terminalNo","0000"));
         mintent.putExtras(b);
         wosPlayerApp.appContext.startService(mintent);
 

@@ -88,7 +88,7 @@ public class MonitorService extends Service {
 
 
 
-        log.e("- -监听服务-------------------------------- 开启- -");
+        log.e(">>>监听服务 ----------------------------------------------------------------------------------------\n 开启- -");
 
 
        /* canAppThread =  new Thread(new Runnable() {
@@ -117,7 +117,7 @@ public class MonitorService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        log.i(" 监听服务 结束");
+        log.i(" ################################################################监听服务 结束#######################################################################");
 //        stopTimer();
 
         if (canAppThread!=null){
@@ -148,7 +148,7 @@ public class MonitorService extends Service {
         boolean flag =  serverUtils.isAppOnForeground(MonitorService.this.getApplicationContext());
         //log.i("监听服务 监听结果 :"+flag);
         if (!flag){
-            log.e("app not foreground...");
+            log.e("!!!! app not foreground...");
             Intent intent  = new Intent();
             intent.setAction(RestartApplicationBroad.action);
             intent.putExtra(RestartApplicationBroad.IS_START,false);

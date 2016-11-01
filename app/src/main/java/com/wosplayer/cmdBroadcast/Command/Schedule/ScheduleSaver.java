@@ -124,16 +124,16 @@ public class ScheduleSaver implements iCommand {
 
     /**
      * 是否开启下载
+     * //        helper.schedule(new Action0() {
+     //            @Override
+     //            public void call() {
+
+     //            }
+     //        });
      */
     private static boolean isNextLoad = false;
     private void startWork(final String uri){
 
-//        helper.schedule(new Action0() {
-//            @Override
-//            public void call() {
-
-//            }
-//        });
         Long startTime = System.currentTimeMillis();
         try {
             getXMLdata(uri,ROOT_PARSE,null); //解析数据
@@ -142,39 +142,30 @@ public class ScheduleSaver implements iCommand {
             isNextLoad=false;
         }
         Long endTime = System.currentTimeMillis();
-        log.e(TAG,"解析用时 : "+(endTime - startTime)+" 毫秒");
+        log.e(TAG,"解析用时 : "+(endTime - startTime)+" 毫秒 \n # \n # \n#");
 
         startTime = System.currentTimeMillis();
         //判断是否清理数据
-        if(!SdCardTools.justFileBlockVolume(0.50)){
+
+        if(!SdCardTools.justFileBlockVolume(wosPlayerApp.config.GetStringDefualt("storageLimits","50"))){
             SdCardTools.clearTargetDir(wosPlayerApp.config.GetStringDefualt("basepath",""),rootNode.getFtplist());
         }
         endTime = System.currentTimeMillis();
-        log.e(TAG,"清理数据用时 : "+(endTime - startTime)+" 毫秒");
-
-
+        log.e(TAG,"清理数据用时 : "+(endTime - startTime)+" 毫秒 \n" +
+                "------------------------------------------------------");
         log.e(TAG,"是否开启下载:"+isNextLoad);
-
         if (isNextLoad){
-
-
-
-
-
             //开启后台下载线程
-            log.i("当前的任务数:"+rootNode.getFtplist().size()+"\n "+rootNode.getFtplist().toString());
+            log.i(TAG,"当前的任务数:"+rootNode.getFtplist().size()+"\n "+rootNode.getFtplist().toString());
             sendloadTask();
         }
-
     }
 
     /**
      * 通知 开始 下载 资源
      */
     private void sendloadTask() {
-
         ArrayList<CharSequence> tasklist = new ArrayList<CharSequence>();
-
         for (int i = 0; i<rootNode.getFtplist().size();i++){
             tasklist.add(rootNode.getFtplist().get(i));
         }
@@ -182,6 +173,8 @@ public class ScheduleSaver implements iCommand {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         Bundle bundle = new Bundle();
         bundle.putCharSequenceArrayList(loaderManager.taskKey,tasklist);
+        bundle.putString("terminalNo", wosPlayerApp.config.GetStringDefualt("terminalNo","0000"));
+        bundle.putString("savepath", wosPlayerApp.config.GetStringDefualt("basepath", "/sdcard/mnt/playlist"));
         intent.putExtras(bundle);
         wosPlayerApp.appContext.startService(intent);
     }
