@@ -113,7 +113,7 @@ public class loaderManager extends IntentService implements Loader.LoaderCaller{
             log.e(TAG,"load faild :["+filePath +"]-\n\r");
         }
 
-        if (SuccessCount == TaskList.size()){
+            if (SuccessCount == TaskList.size()){
             log.i(TAG,"任务完成 发送通知");
             Toals.Say("下载任务全部完成 发送通知");
             //发送完成通知

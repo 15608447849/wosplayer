@@ -59,8 +59,6 @@ public class Loader {
         if (terminalNo==null ||  terminalNo.equals("")){
             terminalNo = wosPlayerApp.config.GetStringDefualt("terminalNo","0000");
         }
-
-
     }
 
     public Loader(String savepath,String terminalNo){
@@ -85,7 +83,6 @@ public class Loader {
             addRepeatTask(this);
             return false;
         }
-
     }
     /**
      * 删除一个任务
@@ -510,7 +507,7 @@ public class Loader {
             l.existRepeatList = true;
 
         }catch (Exception e){
-
+            e.printStackTrace();
         }finally {
 //            lock_repeat.unlock();
         }
@@ -550,7 +547,6 @@ public class Loader {
         }finally {
             lock_repeat.unlock();
         }
-
     }
 
     /**
