@@ -9,7 +9,6 @@ import com.lidroid.xutils.http.RequestParams;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
-import com.wos.Toals;
 import com.wosplayer.app.log;
 
 import java.io.File;
@@ -48,12 +47,10 @@ public class logUploadService extends IntentService {
      //获取日志文件列表
         File[] filelist = getLogFileList();
         if (filelist == null){
-            Toals.Say("上传日志_ 无日志文件 ,列表空");
             return;
         }
         needFileCount = filelist.length;
         if (needFileCount == 0){
-            Toals.Say("上传日志_ 无日志文件 ,列表长度 0");
             return;
         }
 

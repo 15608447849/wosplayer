@@ -12,7 +12,6 @@ import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
-import com.wos.Toals;
 import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.AdbShellCommd;
 import com.wosplayer.app.log;
@@ -45,7 +44,6 @@ public class Command_UPDC implements iCommand {
     @Override
     public void Execute(String param) {
         log.i(TAG,"更新app,远程版本号:"+param);
-        Toals.Say("更新app");
         getRemoteVersionCode(param);
     }
 
@@ -105,7 +103,7 @@ public class Command_UPDC implements iCommand {
                 packagename = spackagename;
             }
         }catch (Exception e){
-            Toals.Say("远程 未发送 包名信息 ");
+            e.printStackTrace();
         }
         compareVersion(Integer.parseInt(code),path);//比较版本
     }
@@ -119,7 +117,6 @@ public class Command_UPDC implements iCommand {
 
         log.i(TAG,"upload  LocalVersion :"+ local+" remoteVersion:"+remote);
 
-        Toals.Say("upload  LocalVersion :"+ local+" remoteVersion:"+remote);
 
         wosPlayerApp.sendMsgToServer("terminalNo:"+wosPlayerApp.config.GetStringDefualt("terminalNo","0000")+",localVersionNumber:"+local+",serverVersionNumber:"+remote);
 
@@ -169,7 +166,6 @@ private void installApk(String apkLocalPath) {
 
 //		System.exit(0);
 
-    Toals.Say("install start ...");
    //Intent intent = new Intent(DisplayActivity.activityContext,  DisplayActivity.class);
     // 创建PendingIntent对象
   /*  final PendingIntent pi = PendingIntent.getActivity(DisplayActivity.activityContext, 0, intent, 0);
@@ -199,7 +195,6 @@ private void installApk(String apkLocalPath) {
     ((AlarmManager) DisplayActivity.activityContext.getSystemService(Context.ALARM_SERVICE))
             .set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
 
-    Toals.Say(calendar.getTime().toString()+",10 秒后 发送启动广播");
     log.e(TAG," execute install APK.. end progress");
 
     int code =  PackageUtils.install(DisplayActivity.activityContext,apkLocalPath);

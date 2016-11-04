@@ -1,6 +1,5 @@
 package com.wosplayer.cmdBroadcast.Command.OtherCmd;
 
-import com.wos.Toals;
 import com.wosplayer.app.log;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 
@@ -17,7 +16,6 @@ public class Command_SHDO implements iCommand {
         log.e("SHDO:" + param);
 
         if (param.equals("false")){
-            Toals.Say("close tel param :"+param);
             return;
         }
 
@@ -30,6 +28,5 @@ public class Command_SHDO implements iCommand {
 
         String strs = "即将关机: "+cr.result;
         log.e(strs);
-        Toals.Say(strs);
      }
 }

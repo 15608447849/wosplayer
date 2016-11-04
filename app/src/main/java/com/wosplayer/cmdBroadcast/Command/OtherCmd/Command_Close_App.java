@@ -2,7 +2,6 @@ package com.wosplayer.cmdBroadcast.Command.OtherCmd;
 
 import android.content.Intent;
 
-import com.wos.Toals;
 import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
@@ -17,7 +16,6 @@ public class Command_Close_App implements iCommand {
     public void Execute(String param) {
 
         if (param.equals("false")){
-            Toals.Say("close app param :"+param);
             return;
         }
         log.i("stop runing app...");

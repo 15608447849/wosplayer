@@ -147,11 +147,6 @@ public class wosPlayerApp extends Application {
 
     }
 
-
-
-
-
-
     /**
      * get mac
      */

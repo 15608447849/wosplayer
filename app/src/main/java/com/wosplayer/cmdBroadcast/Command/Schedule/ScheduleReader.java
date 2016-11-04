@@ -3,7 +3,6 @@ package com.wosplayer.cmdBroadcast.Command.Schedule;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.wos.Toals;
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.Ui.uiBroadcast.UibrocdCastReceive;
 import com.wosplayer.app.log;
@@ -69,8 +68,6 @@ public class ScheduleReader {
                 @Override
                 public void run() {
                     //重新读取排期
-                    Toals.Say("一个延时任务到时间了,开始执行");
-                    log.e(TAG,"一个延时任务到时间了,开始执行");
                     PreUUKS = null;
                     Start(false);
                 }
@@ -85,7 +82,6 @@ public class ScheduleReader {
                 @Override
                 public void run() {
                     //重新读取排期
-                    Toals.Say("一个定时任务到时间了,开始执行");
                     log.e(TAG,"一个定时任务到时间了,开始执行");
                     PreUUKS = null;
                     Start(false);
@@ -95,8 +91,6 @@ public class ScheduleReader {
             timer.schedule(timerTask,millisecond);
             log.i(TAG,"开始已经在当前段时间 的 定时任务 ,延时毫秒数:" +millisecond);
         }
-
-        Toals.Say("时间器任务,延时秒数:" +millisecond/1000);
 
     }
 
@@ -121,7 +115,6 @@ public class ScheduleReader {
                timer.cancel();
                timer = null;
            }
-        Toals.Say("停止 所有 定时任务");
     }
 
     private static final java.lang.String TAG = ScheduleReader.class.getName();
@@ -256,7 +249,6 @@ public class ScheduleReader {
             Stop();
 
             log.i(TAG,"全部排期数量:"+list.size());
-            Toals.Say("全部排期数量:"+list.size());
 
             filterScheduleList(list);
             log.i(TAG,"过滤 分组 全部排期完成 : \n"+scheduleMap.toString());
@@ -365,10 +357,8 @@ public class ScheduleReader {
             }
             //开始时间 > 现在的时间 ?
             if (startTime.after(currentData)){
-                Toals.Say("重复类型,还 未到 时间段");
 
                 dalay =  getTimeMillsecondes(start) - getTimeMillsecondes(current);
-                Toals.Say("持续秒数:"+ dalay/1000);
 
                 //现在 - 开始 的时间, 这期间 播放低优先级的? 还没想好怎么处理 - - 再说吧;
                 isNotTo = true;//未到时间的任务
@@ -379,7 +369,6 @@ public class ScheduleReader {
 
                     //计算 结束时间- 当前时间的时间差 ,立即更新视图
                     dalay =  getTimeMillsecondes(end) - getTimeMillsecondes(current);
-                    Toals.Say("持续秒数:"+ dalay/1000);
                 }
                 if (endTime.before(currentData)){
                     log.e(TAG,"排期 结束时间 在 当前时间 之前");
@@ -394,7 +383,6 @@ public class ScheduleReader {
             String current = dataFormatUtils.format(new Date());
             String startcron = entity.getXmldata().get("startcron");//entity.getXmldata().get("startcron");
             String endcron = entity.getXmldata().get("endcron");
-            Toals.Say("点播开始时间:"+startcron+"点播结束时间:"+endcron +"; 当前时间:"+current);
 
             Date startTime = null;
             Date currentData = null;
@@ -409,16 +397,12 @@ public class ScheduleReader {
 
             //判断 当前时间 < 开始时间?
            if (startTime.after(currentData)){
-               Toals.Say("还未到点播时间段");
                dalay =  getTimeMillsecondes(startcron) - getTimeMillsecondes(current);
-               Toals.Say("持续秒数:"+ dalay/1000);
                isNotTo = true;//未到时间的任务
                flag = false;
            }else{
                //"endcron" -> "2016-08-23 23:30:00"
-               Toals.Say("当前 时间段 点播");
                dalay = getTimeMillsecondes(endcron) - getTimeMillsecondes(current);
-               Toals.Say("持续秒数:"+ dalay/1000);
            }
 
         }
@@ -813,9 +797,7 @@ public class ScheduleReader {
 
         // 判断 当前的时间 是不是 符合: 在开始 - 结束 的范围内 ,如果是点播类型 2 ,判断 他的开始时间 是不是在当前时间之后,是的话,也返回true
         if (type.equals("2")){
-            Toals.Say("点播类型,开始:"+schedule_startTimeText+"  当前:"+currentTimeText);
             boolean f = startTime.after(currentData);
-            Toals.Say("开始时间 > 当前时间 :"+ f);
             log.e(TAG,"点播 开始时间 > 当前时间 ? ->"+ f);
             if (f){
                 return true;

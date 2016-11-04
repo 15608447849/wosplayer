@@ -25,8 +25,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- 申请终端Activity-->
-        <activity android:name="wosTools.ToolsActivity" android:label="MBS_TOOLS" />
+
 
         <!-- 通讯服务 android:process=":remote_communication" -->
         <service android:name=".service.CommunicationService" android:process=":remote_communication"/>

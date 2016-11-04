@@ -583,41 +583,41 @@ public class Loader {
         log.i(TAG,"加入等待队列 : [" + loader.muri + "] ");
         waitList.add(loader);
     }
+    private static ReentrantLock waitlistLock = new ReentrantLock();
     /**
      * 通知 等待隊列 執行
      */
     private static void notifyWaitList(){
-        //如果存在 每次只執行 至多 5 個
-        if (loadingTaskList.size()==0){
-            if (waitList.size()>0){
-                //ArrayList<Loader> waitload = new ArrayList<Loader>();
-                Iterator<Loader> itr = waitList.iterator();
-                int i = 0;
-                while(itr.hasNext()){
-                    Loader o = itr.next();
+        try{
+            waitlistLock.lock();
+            //如果存在 每次只執行 至多 5 個
+            if (loadingTaskList.size()==0){
+                if (waitList.size()>0){
+                    //ArrayList<Loader> waitload = new ArrayList<Loader>();
+                    Iterator<Loader> itr = waitList.iterator();
+                    int i = 0;
+                    while(itr.hasNext()){
+                        Loader o = itr.next();
 //                    waitload.add(o);
-                    o.LoadingUriResource(o.muri,null);
-                    itr.remove();
-                    i++;
+                        o.LoadingUriResource(o.muri,null);
+                        itr.remove();
+                        i++;
 
-                    if (i==loadcount){
-                        break;
+                        if (i==loadcount){
+                            break;
+                        }
                     }
-                }
 
-               /* if (waitload.size() == 0){
-                    waitload = null;
-                    return;
+                    log.i(TAG," ----------------------- 完成一次 等待隊列的執行 ----------------------------------------");
                 }
-                for (Loader loader:waitload){
-
-                    loader.LoadingUriResource(loader.muri,null);
-                }*/
-//                waitload.clear();
-//                waitload = null;
-                log.i(TAG," ----------------------- 完成一次 等待隊列的執行 ----------------------------------------");
             }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            waitlistLock.unlock();
         }
+
+
     }
 
 

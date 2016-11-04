@@ -2,8 +2,6 @@ package com.wosplayer.app;
 
 import android.content.Context;
 
-import com.wos.Toals;
-
 import java.util.concurrent.locks.ReentrantLock;
 
 import cn.trinea.android.common.util.ShellUtils;
@@ -109,9 +107,7 @@ public class AdbShellCommd extends Thread{
                         }else{
                             log.e("执行成功 即将重启 ... ");
                             AppToSystem.execRootCmdSilent("reboot");
-//                          AppToSystem.execRootCmd(commands_startApp);
-                           // ShellUtils.CommandResult  r = ShellUtils.execCommand(commands_startApp,true,true);
-                          //  log.e("---------------- " +r.result);
+
                         }
 
                     }else{
@@ -149,7 +145,6 @@ public class AdbShellCommd extends Thread{
 
         String strs = "远程端口开启结果: "+cr.result;
         log.d("Remote",strs);
-        Toals.Say(strs);
         strs = "本地ip: "+ wosPlayerApp.getLocalIpAddress();
         log.d("Remote",strs);
     }
