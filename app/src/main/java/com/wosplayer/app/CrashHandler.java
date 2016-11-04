@@ -89,12 +89,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
 				log.e(TAG, "error : ", e);
 			}
 
-			/*//发送广播
-			Intent intent  = new Intent();
-			intent.setAction(RestartApplicationBroad.action);
-			intent.putExtra(RestartApplicationBroad.IS_START,false);
-			intent.putExtra(RestartApplicationBroad.KEYS,wosPlayerApp.config.GetStringDefualt("sleepTime","10"));
-			mContext.sendBroadcast(intent);*/
+
 
 
 			Intent intenta = new Intent();

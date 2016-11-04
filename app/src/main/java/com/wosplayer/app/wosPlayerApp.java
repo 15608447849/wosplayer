@@ -12,7 +12,6 @@ import com.wos.SdCardTools;
 import com.wosplayer.service.CommunicationService;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -53,41 +52,12 @@ public class wosPlayerApp extends Application {
         //new AdbShellCommd(this.getApplicationContext(),false,true).start();//不开远程端口.会重启
         new AdbShellCommd(this.getApplicationContext(),false,false).start();//不开远程端口,不重启
         //检测sd卡
-        checkSdCard();
+        SdCardTools.checkSdCard(appContext);
         //初始化 配置信息
         //init(false);
     }
 
-    /**
-     * 检测sd card
-     *
-        # /mnt/internal_sd
-        # /mnt/external_sd
-        # /mnt/usb_storage
-     */
-    private void checkSdCard() {
-        String tags = "#filesacard";
-        if(!SdCardTools.existSDCard()){
-            log.e(tags," sdcard is no exist ! ");
-            System.exit(0);
-            return;
-        }
 
-        String [] paths = SdCardTools.getVolumePaths(appContext);
-        if (paths!=null && paths.length>0){
-            log.i(tags,"---------------------------------- sd card path info ------------------------------------");
-            log.i(tags," 当前 sdcard path:"+SdCardTools.getSDPath());
-            SdCardTools.appSourcePath = SdCardTools.getSDPath();
-            for (String path : paths){
-                log.i(tags," # "+ path);
-                if (path.equals("/mnt/external_sd")){
-                    SdCardTools.appSourcePath = path;
-                    break;
-                }
-            }
-            SdCardTools.appSourcePath+=SdCardTools.app_dir;
-        }
-    }
 
 
     /**
@@ -111,11 +81,9 @@ public class wosPlayerApp extends Application {
         //心跳时间
         config.put("HeartBeatInterval", GetKey("HeartBeatInterval", "30"));
         //重启时间
-        config.put("sleepTime", GetKey("sleepTime", "30"));
+        config.put("RestartBeatInterval", GetKey("RestartBeatInterval", "30"));//
         //sdcard 清理阔值
         config.put("storageLimits",GetKey("storageLimits","50"));
-
-
         //机器码
         config.put("mac", GetMac());
         //本地ip
@@ -129,22 +97,20 @@ public class wosPlayerApp extends Application {
                 GetKey("serverip", "192.168.6.66"),
                 GetKey("serverport", "8000"));
         config.put("CaptureURL", CaptureURL);
-
-
         //本地资源存储目录
         String basepath = GetKey("basepath", "mnt/sdcard/sourceList");
         config.put("basepath", basepath);
         //创建一个目录用于存储资源
-        MkDir(basepath);
+        SdCardTools.MkDir(basepath);
         config.put("CAPTIMAGEPATH", config.GetStringDefualt("basepath","") + "screen.png");//截图本地位置
 
         //建设银行接口资源下载位置
         basepath =  GetKey("bankPathSource", "mnt/sdcard"+SdCardTools.Construction_Bank_dir_source);
         config.put("bankPathSource",basepath);
-        MkDir(basepath);
+        SdCardTools.MkDir(basepath);
         basepath = GetKey("bankPathXml", "mnt/sdcard"+SdCardTools.Construction_Bank_dir_xmlfile);
         config.put("bankPathXml",basepath);
-        MkDir(basepath);
+        SdCardTools.MkDir(basepath);
 
         log.i("app config init complete " );
         config.printData();
@@ -185,21 +151,7 @@ public class wosPlayerApp extends Application {
 
 
 
-    /**
-     * 创建文件
-     *
-     * @param pathdir
-     */
-    public static void MkDir(String pathdir) {
-        try {
-            File file = new File(pathdir);
-            if (!file.exists()) {
-                file.mkdirs();
-            }
-        } catch (Exception e) {
-            Log.i("MkDir", e.getMessage());
-        }
-    }
+
     /**
      * get mac
      */

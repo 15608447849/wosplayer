@@ -13,11 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.wos.SdCardTools;
@@ -172,7 +170,7 @@ public class DisplayActivity extends Activity {
                 Intent intent  = new Intent();
                 intent.setAction(RestartApplicationBroad.action);
                 intent.putExtra(RestartApplicationBroad.IS_START,false);
-                intent.putExtra(RestartApplicationBroad.KEYS, config.GetStringDefualt("sleepTime","10"));
+                intent.putExtra(RestartApplicationBroad.KEYS, config.GetStringDefualt("RestartBeatInterval","10"));
                 sendBroadcast(intent);
             }
         } catch (Exception e) {
@@ -364,7 +362,7 @@ public class DisplayActivity extends Activity {
     private EditText      BasePath;
     private EditText      heartbeattime;
     private EditText     StorageLimits;
-    private LinearLayout restartLayout;
+    private EditText     RestartBeatInterval;
 
 //    private Button btnGetID;
 //    private Button        btnSaveData;
@@ -415,12 +413,10 @@ public class DisplayActivity extends Activity {
             BasePath=(EditText)this.findViewById(R.id.BasePath);
             heartbeattime=(EditText)this.findViewById(R.id.HeartBeatInterval);
             StorageLimits=(EditText)this.findViewById(R.id.StorageLimits);
-
+            RestartBeatInterval=(EditText)this.findViewById(R.id.RestartBeatInterval);
 
 //            btnGetID=(Button)this.findViewById(R.id.btnGetID);
 //            btnSaveData=(Button)this.findViewById(R.id.btnSaveData);
-
-            restartLayout = (LinearLayout)findViewById(R.id.layotu_restartbeattime);
 
         }catch(Exception e)
         {
@@ -457,8 +453,9 @@ public class DisplayActivity extends Activity {
             companyid.setText(dataList.GetStringDefualt("companyid", "999"));
             terminalNo.setText(dataList.GetStringDefualt("terminalNo", ""));
             heartbeattime.setText(dataList.GetStringDefualt("HeartBeatInterval", "30"));
-            BasePath.setText(dataList.GetStringDefualt("basepath", "mnt/sdcard"));
+            BasePath.setText(catPathfile(dataList.GetStringDefualt("basepath", "mnt/sdcard/source")));
             StorageLimits.setText(dataList.GetStringDefualt("storageLimits","50"));
+            RestartBeatInterval.setText(dataList.GetStringDefualt("RestartBeatInterval","30"));
             //焦点默认在这个控件上
             serverip.setFocusable(true);
 
@@ -466,6 +463,9 @@ public class DisplayActivity extends Activity {
         {
             Log.e("ToolsActivity ", e.getMessage());
         }
+    }
+    private String catPathfile(String path){
+        return path.substring(path.lastIndexOf("/")+1);
     }
 
 
@@ -479,6 +479,7 @@ public class DisplayActivity extends Activity {
         dataList.put("serverport",  serverport.getText().toString());//终端端口
         dataList.put("companyid",  companyid.getText().toString());//公司id
         dataList.put("HeartBeatInterval",  heartbeattime.getText().toString());//心跳
+        dataList.put("RestartBeatInterval",RestartBeatInterval.getText().toString()); //重启时间
         dataList.put("storageLimits",StorageLimits.getText().toString());//sdcard 清理阔值
 
         String basepath=BasePath.getText().toString();//资源存储的 文件名
@@ -491,14 +492,14 @@ public class DisplayActivity extends Activity {
             basepath=basepath+"/";
         }
 
-        basepath = SdCardTools.appSourcePath+basepath;
+        basepath = SdCardTools.getAppSourceDir(this)+basepath;
         dataList.put("basepath",  basepath);
 
         //建设银行接口资源下载位置
-        basepath = SdCardTools.appSourcePath+SdCardTools.Construction_Bank_dir_source;
+        basepath = SdCardTools.getAppSourceDir(this)+SdCardTools.Construction_Bank_dir_source;
         dataList.put("bankPathSource",basepath);
 
-        basepath = SdCardTools.appSourcePath+SdCardTools.Construction_Bank_dir_xmlfile;
+        basepath = SdCardTools.getAppSourceDir(this)+SdCardTools.Construction_Bank_dir_xmlfile;
         dataList.put("bankPathXml",basepath);
 
 
@@ -541,29 +542,7 @@ public class DisplayActivity extends Activity {
         this.finish();
     }
 
-    /**
-     * 点击设置重启时间
-     */
-    public void restartTime(View view){
-        //如果布局不存在
-        if (restartLayout.getVisibility()==View.GONE){
-            //显示出来
-            restartLayout.setVisibility(View.VISIBLE);
-            Button sure = (Button) findViewById(R.id.btnRestartComplete);
-            sure.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //保存数据
-                   dataList.put("sleepTime",((EditText)findViewById(R.id.RestartBeatInterval)).getText().toString());
-                    outText("已设置重启间隔: "+((EditText)findViewById(R.id.RestartBeatInterval)).getText().toString() );
-                    restartLayout.setVisibility(View.GONE);
-                }
-            });
-        }else{
-            //隐藏起来
-            restartLayout.setVisibility(View.GONE);
-        }
-    }
+
 
     //反射调用
     public void outText(String text)

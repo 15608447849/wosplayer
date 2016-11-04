@@ -142,12 +142,14 @@ public class ScheduleSaver implements iCommand {
             isNextLoad=false;
         }
         Long endTime = System.currentTimeMillis();
-        log.e(TAG,"解析用时 : "+(endTime - startTime)+" 毫秒 \n # \n # \n#");
+        log.e(TAG,"解析用时 : "+(endTime - startTime)+" 毫秒");
 
         startTime = System.currentTimeMillis();
         //判断是否清理数据
 
-        if(!SdCardTools.justFileBlockVolume(wosPlayerApp.config.GetStringDefualt("storageLimits","50"))){
+        if(SdCardTools.justFileBlockVolume(wosPlayerApp.config.GetStringDefualt("basepath",""),
+                wosPlayerApp.config.GetStringDefualt("storageLimits","50"))){
+
             SdCardTools.clearTargetDir(wosPlayerApp.config.GetStringDefualt("basepath",""),rootNode.getFtplist());
         }
         endTime = System.currentTimeMillis();

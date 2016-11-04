@@ -74,8 +74,16 @@ public class SdCardTools {
     public static final String app_dir ="/wosplayer";
     public static  final String Construction_Bank_dir_source ="/construction_bank/source/";
     public static  final String Construction_Bank_dir_xmlfile ="/construction_bank/xml/";
-    public static String appSourcePath = null;
-
+    private static String appSourcePath = null;
+    public static void setAppSourceDir(String path){
+        appSourcePath = path;
+    }
+    public static String getAppSourceDir(Context context){
+        return appSourcePath==null?getDataDataAppDir(context):appSourcePath;
+    }
+    private static String getDataDataAppDir(Context context){
+        return context.getFilesDir().getAbsolutePath();
+    }
     //Volume 体积 量
     public static String[] getVolumePaths(Context mContext) {
         String[] paths = null;
@@ -193,57 +201,55 @@ public class SdCardTools {
      *  小于或者等于 scope false
      *  目录不存在 false
      */
-    public static boolean justFileBlockVolume(String scopetxt){
-        double scope = 0;
-        try{
-            scope = Double.valueOf(scopetxt);
+    public static boolean justFileBlockVolume(String dirpath,String scopetxt){
 
-        }catch (Exception e){
-            e.printStackTrace();
-            scope = 30;
-        }
+        boolean isClear = false;
+        try {
+            double scope = 0;
+            scope = Double.valueOf(scopetxt);
             scope = scope * (0.01);
 
+            long blockSize; //块大小
+            long totalBlocks;// 总块数
+            long availableBlocks;//有效块数
 
-        long blockSize; //块大小
-        long totalBlocks;// 总块数
-        long availableBlocks;//有效块数
+            File dir = new File(dirpath);
+            if (!dir.exists()){
+                Log.e(""," justFileBlockVolume() is err ,bacause dir is not exists");
+                return false;
+            }
 
-        File dir = new File(appSourcePath);
-        if (!dir.exists()){
-            Log.e(""," justFileBlockVolume() is err ,bacause dir is not exists");
-            return false;
+            //得到总大小
+            StatFs stat = new StatFs(dir.getPath());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2)
+            {
+                blockSize = stat.getBlockSizeLong();
+                totalBlocks = stat.getBlockCountLong();
+                availableBlocks = stat.getAvailableBlocksLong();
+            }
+            else
+            {
+                blockSize = stat.getBlockSize();
+                totalBlocks = stat.getBlockCount();
+                availableBlocks = stat.getAvailableBlocks();
+            }
+
+            double totalText = blockSize * totalBlocks;//总大小
+            double availableText = blockSize * availableBlocks;//可用空间大小
+
+            double scale = availableText / totalText;// 比值
+
+            Log.d("","总大小 :"+totalText+"\n有效大小 :"+availableText+"\n文件容量 比值 :"+ scale +"\n目标阔值 :"+scope);
+
+            if (scope>scale){
+                Log.e("","准备清理");
+                isClear =  true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            isClear =false;
         }
-
-        //得到总大小
-        StatFs stat = new StatFs(dir.getPath());
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2)
-        {
-            blockSize = stat.getBlockSizeLong();
-            totalBlocks = stat.getBlockCountLong();
-            availableBlocks = stat.getAvailableBlocksLong();
-        }
-        else
-        {
-            blockSize = stat.getBlockSize();
-            totalBlocks = stat.getBlockCount();
-            availableBlocks = stat.getAvailableBlocks();
-        }
-
-        double totalText = blockSize * totalBlocks;//总大小
-        double availableText = blockSize * availableBlocks;//可用空间大小
-
-          /*  totalText = formatSize(totalText);
-            availableText = formatSize(availableText);*/
-        double scale = availableText / totalText;
-
-        Log.d("","总大小:"+totalText+"\n有效大小:"+availableText+"\n文件容量 比值 :"+ scale );
-
-        if (scale>scope){
-            return  true;
-        }else{
-            return false;
-        }
+        return isClear;
     }
 
     private static double formatSize(double size) {
@@ -285,7 +291,7 @@ public class SdCardTools {
         if (dir.isDirectory()) {
             String[] children = dir.list();
             File subFile = null;
-            Log.d(""," 资源文件 总数量:"+children.length);
+            Log.d(""," 资源文件 总数量:"+children.length+"\n 保留文件列表数量:"+fileList.size());
             for (int i=0; i<children.length; i++) {
 
                 if (fileList.contains(children[i])){
@@ -339,4 +345,56 @@ public class SdCardTools {
     }
 
 
+    /**
+     * 检测sd card
+     *
+     # /mnt/internal_sd
+     # /mnt/external_sd
+     # /mnt/usb_storage
+     */
+    public static void checkSdCard(Context context) {
+        String tags = "#file_sdcard";
+        if(!SdCardTools.existSDCard()){
+            Log.e(tags," sdcard is no exist ! ");
+
+            Log.e(tags," application store dir-> "+getAppSourceDir(context));
+//            System.exit(0);
+        }else{
+            String [] paths = SdCardTools.getVolumePaths(context);
+            if (paths!=null && paths.length>0){
+                Log.i(tags,"---------------------------------- sd card path info ------------------------------------");
+                Log.i(tags," 当前 sdcard path:"+ getSDPath());
+
+                SdCardTools.setAppSourceDir(getSDPath());
+                for (String path : paths){
+                    Log.i(tags," # "+ path);
+                    if (path.equals("/mnt/external_sd")){
+                        SdCardTools.setAppSourceDir(path);
+                        break;
+                    }
+                }
+            }
+        }
+
+
+        SdCardTools.setAppSourceDir(getAppSourceDir(context)+SdCardTools.app_dir);
+        MkDir(appSourcePath);
+    }
+
+
+    /**
+     * 创建文件
+     *
+     * @param pathdir
+     */
+    public static void MkDir(String pathdir) {
+        try {
+            File file = new File(pathdir);
+            if (!file.exists()) {
+                file.mkdirs();
+            }
+        } catch (Exception e) {
+            Log.i("MkDir", e.getMessage());
+        }
+    }
 }
