@@ -97,7 +97,7 @@ public class DataListEntiy {
         map.put("serverport",  ToolsUtils.GetKey(isMeInfo,"serverport", "8000"));
         map.put("companyid",  ToolsUtils.GetKey(isMeInfo,"companyid", "999"));
         map.put("HeartBeatInterval",  ToolsUtils.GetKey(isMeInfo,"HeartBeatInterval", "30"));
-        map.put("basepath",  ToolsUtils.GetKey(isMeInfo,"basepath", "sdcard/playlist"));
+        map.put("basepath",  ToolsUtils.GetKey(isMeInfo,"basepath", "/playlist"));
 
         map.put("RestartBeatInterval",ToolsUtils.GetKey(isMeInfo,"RestartBeatInterval", "30"));
         map.put("storageLimits",ToolsUtils.GetKey(isMeInfo,"storageLimits","50"));//sdka 容量达到多少时 会清理资源

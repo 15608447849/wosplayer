@@ -78,6 +78,15 @@
             </intent-filter>
         </receiver>
 
+        <!-- 拨叉sdcard 广播 -->
+        <receiver android:name="com.wos.SdcardBroad">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.MEDIA_MOUNTED"/>
+                <action android:name="android.intent.action.MEDIA_EJECT" />
+                <data android:scheme="file"/>
+            </intent-filter>
+        </receiver>
+
         <!-- 安装卸载等广播-->
         <receiver android:name="com.wosplayer.service.installBroad">
             <intent-filter>

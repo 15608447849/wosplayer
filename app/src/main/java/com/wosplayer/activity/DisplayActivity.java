@@ -53,7 +53,7 @@ wosPlayerApp.sendMsgToServer(msg);
 
 public class DisplayActivity extends Activity {
 
-    private static final java.lang.String TAG = DisplayActivity.class.getName();
+    private static final java.lang.String TAG = "_DisplayerActivity";
     public static boolean isSendRestartBroad = true;
     public static AbsoluteLayout baselayout = null;
 
@@ -62,9 +62,7 @@ public class DisplayActivity extends Activity {
     public static AbsoluteLayout frame_main = null; //隐藏图层上面的 容器图层
     public static DisplayActivity activityContext = null;
 
-
     private ImageButton closebtn ;//左上角 隐藏的 按钮
-
 
     private boolean isShowPsdInput = false;
     @Override
@@ -120,6 +118,7 @@ public class DisplayActivity extends Activity {
     public void onStart() {
         log.i(TAG,"onStart");
         super.onStart();
+
         if(isSettingServerInfo()){
             ((wosPlayerApp)this.getApplication()).init(true);
         }
@@ -402,7 +401,6 @@ public class DisplayActivity extends Activity {
         {
             serverip=(EditText)this.findViewById(R.id.serverip);
             serverport=(EditText)this.findViewById(R.id.serverport);
-
             companyid=(EditText)this.findViewById(R.id.companyid);
             terminalNo=(EditText)this.findViewById(R.id.terminalNo);
             BasePath=(EditText)this.findViewById(R.id.BasePath);
@@ -432,6 +430,8 @@ public class DisplayActivity extends Activity {
         m_dm = new DisplayMetrics();
         //获取手机分辨率
         this.getWindowManager().getDefaultDisplay().getMetrics(m_dm);
+        //检测sd卡
+        SdCardTools.checkSdCard(getApplicationContext());
         dataList=new DataListEntiy();
         dataList.ReadShareData(true);
     }
@@ -448,7 +448,7 @@ public class DisplayActivity extends Activity {
             companyid.setText(dataList.GetStringDefualt("companyid", "999"));
             terminalNo.setText(dataList.GetStringDefualt("terminalNo", ""));
             heartbeattime.setText(dataList.GetStringDefualt("HeartBeatInterval", "30"));
-            BasePath.setText(catPathfile(dataList.GetStringDefualt("basepath", "mnt/sdcard/source")));
+            BasePath.setText(catPathfile(dataList.GetStringDefualt("basepath", "")));
             StorageLimits.setText(dataList.GetStringDefualt("storageLimits","50"));
             RestartBeatInterval.setText(dataList.GetStringDefualt("RestartBeatInterval","30"));
             //焦点默认在这个控件上
@@ -460,7 +460,11 @@ public class DisplayActivity extends Activity {
         }
     }
     private String catPathfile(String path){
-        return path.substring(path.lastIndexOf("/")+1);
+        if (path.contains("/")){
+            path = path.substring(0,path.lastIndexOf("/"));
+            path = path.substring(path.lastIndexOf("/")+1);
+        }
+        return path.equals("")?"playlist":path;
     }
 
 
@@ -476,7 +480,6 @@ public class DisplayActivity extends Activity {
         dataList.put("HeartBeatInterval",  heartbeattime.getText().toString());//心跳
         dataList.put("RestartBeatInterval",RestartBeatInterval.getText().toString()); //重启时间
         dataList.put("storageLimits",StorageLimits.getText().toString());//sdcard 清理阔值
-
         String basepath=BasePath.getText().toString();//资源存储的 文件名
 //      例: xxx前缀 /basepath/资源1
         if (!basepath.startsWith("/")){
@@ -496,8 +499,6 @@ public class DisplayActivity extends Activity {
 
         basepath = SdCardTools.getAppSourceDir(this)+SdCardTools.Construction_Bank_dir_xmlfile;
         dataList.put("bankPathXml",basepath);
-
-
 
     }
 
@@ -551,7 +552,6 @@ public class DisplayActivity extends Activity {
             terminalNo.setText(value);
             dataList.put("terminalNo", value);
             outText("申请终端ID成功");
-
             terminalNo.setFocusable(true);
 
         }catch(Exception e)

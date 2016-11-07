@@ -153,10 +153,8 @@ public class ActiveFtpUtils {
          * @throws IOException
          */
     public synchronized  void downloadSingleFile(String serverPath, String localPath, String fileName, int reconnectCount, DownLoadProgressListener listener){
-        log.i(TAG,"准备下载 :"+ localPath+fileName);
-
+        log.i(TAG,"准备下载 :"+serverPath +"\n ip:"+hostName+":"+serverPort+"\n user: "+userName+" - "+password);
         String localFilePath = localPath+fileName ;
-
         String tem = ".tem"; //临时文件后缀
         String tmp_localPath = localPath + fileName+tem;
 
@@ -166,6 +164,7 @@ public class ActiveFtpUtils {
             this.openConnect();
             listener.onDownLoadProgress(FTP_CONNECT_SUCCESSS, 0,null, null);
         } catch (IOException e1) {
+            e1.printStackTrace();
             if (ReOpenConnectionFTP(serverPath, localPath, fileName, reconnectCount, listener)) {
                 return;
             }
@@ -187,6 +186,9 @@ public class ActiveFtpUtils {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            if (ReOpenConnectionFTP(serverPath, localPath, fileName, reconnectCount, listener)) {
+                return;
+            }
             return;
         }
 
@@ -202,9 +204,9 @@ public class ActiveFtpUtils {
         boolean isLoad = true;
         // 接着判断下载的文件是否能断点下载
         long serverSize = files[0].getSize(); // 获取远程文件的长度
-        log.i(TAG,"# 服务器文件长度 :"+ serverSize);
-        log.d("# :"+localFilePath + " #");
-        log.d("# :"+tmp_localPath +" #");
+        log.i(TAG,serverPath +" -> 服务器文件长度 :"+ serverSize);
+        log.d(TAG,"本地路径 :"+localFilePath );
+        log.d(TAG,"临时文件路径 :"+tmp_localPath);
         File localFile = new File(localFilePath);//本地文件
         File tmp_localFile = new File(tmp_localPath);//临时文件
 
@@ -223,7 +225,7 @@ public class ActiveFtpUtils {
                localFile.delete();
            }
         }else{
-            log.d("本地无同名文件");
+            log.d(TAG,"本地无同名文件");
         }
 
 
@@ -243,7 +245,7 @@ public class ActiveFtpUtils {
                 localSize = 0;
             }
         }else{
-            log.d("# tmp_localFile  临时文件不存在 - "+ tmp_localFile);
+            log.i(TAG,tmp_localFile+"临时文件不存在");
         }
 
 
@@ -262,7 +264,6 @@ public class ActiveFtpUtils {
             // 输出到本地文件流
             OutputStream out = null;
             try {
-                log.d("# && :"+tmp_localPath +",tmp_localFile:"+tmp_localFile);
                 out = new FileOutputStream(tmp_localFile, true); //本地文件输出流
 
             } catch (FileNotFoundException e) {
@@ -279,7 +280,6 @@ public class ActiveFtpUtils {
             } catch (IOException e) {
                 log.e(TAG,"inputstream err :"+e.getMessage());
                 if (ReOpenConnectionFTP(serverPath, localPath, fileName, reconnectCount, listener)) {
-                    log.d("尝试重试");
                     return;
                 }
                 return;
@@ -295,6 +295,10 @@ public class ActiveFtpUtils {
                     out.flush();
                     currentSize = currentSize + length; // 当前总大小 = 现在的大小 加上 写出来的大小
 
+                    if (step==0){
+                        continue;
+                    }
+
                     if (currentSize / step != process) { //如果 当前进度/下标 != 已有进度
                         process = currentSize / step;
                         if (process % 5 == 0) {  //每隔%2的进度返回一次
@@ -302,14 +306,13 @@ public class ActiveFtpUtils {
                             oldTime = currentTime;//旧时间
                             currentTime = System.currentTimeMillis();//当前时间
                             double timeDiff = (currentTime-oldTime) / (1000 * 1.0) ;
-                            log.e("时间差:"+ timeDiff +"秒");
-
+                            log.d(TAG,"时间差:"+ timeDiff +"秒");
 
                             double sizeDiff = (currentSize-oldSize)/(1024 * 1.0);
-                            log.e(fileName +" - 当前下载量:" + sizeDiff + " kb");
+                            log.d(TAG,fileName +" - 当前下载量:" + sizeDiff + " kb");
                             double speedTem = sizeDiff/timeDiff ;
                             oldSize = currentSize;
-                            log.e(fileName +" - 下载速度:" + speedTem +" kb/s");
+                            log.d(TAG,fileName +" - 下载速度:" + speedTem +" kb/s");
                             speed = String.format("%f",speedTem) + "kb/s";
                             listener.onDownLoadProgress(FTP_DOWN_LOADING, process, speed, null);
                         }
@@ -327,7 +330,7 @@ public class ActiveFtpUtils {
                 String nNmae = tmp_localPath.substring(0,tmp_localPath.lastIndexOf("."));//正式文件名
         fileUtils.renamefile(tmp_localPath,nNmae);//转换名字
                 File Nf = new File(nNmae);
-        log.i(TAG,"新文件名:"+nNmae+",转换前"+tmp_localPath);
+        log.i(TAG,"转换前"+tmp_localPath+"\n新文件名"+nNmae);
 
                 listener.onDownLoadProgress(FTP_DOWN_SUCCESS, 0,null,Nf);
                 // 下载完成之后关闭连接

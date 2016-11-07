@@ -7,7 +7,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.security.MessageDigest;
 
@@ -31,12 +30,13 @@ public class MD5Util {
         return sb.toString();
     }
     
-    public static File getFileMD5String(File file) {
+    public static String getFileMD5String(File file) {
     	BufferedWriter bw = null;
-    	File md5File = null;
+//    	File md5File = null;
+        String md5Code = null;
         try{
             if (!file.exists()){
-                log.e("生成MD5 资源文件不存在 :" + file.toString());
+                log.e("生成MD5 的 资源文件不存在 :" + file.toString());
                 return null;
             }
 
@@ -49,16 +49,11 @@ public class MD5Util {
                 messagedigest.update(buffer, 0 , numRead);
             }
             in.close();
+            md5Code = toHexString(messagedigest.digest());
 
-           /* FileChannel ch = in.getChannel();
-            MappedByteBuffer byteBuffer = ch.map(FileChannel.MapMode.READ_ONLY, 0,file.length());
-            messagedigest.update(byteBuffer);*/
-
-            String md5Code = toHexString(messagedigest.digest());
-
-            md5File = new File(file.getPath()+".md5");
-            bw = new BufferedWriter(new FileWriter(md5File));
-            bw.write(md5Code);
+//            md5File = new File(file.getPath()+".md5");
+//            bw = new BufferedWriter(new FileWriter(md5File));
+//            bw.write(md5Code);
         } catch (Exception e){
             log.e(e.getMessage());
         }finally{
@@ -70,7 +65,7 @@ public class MD5Util {
 				log.e(e.getMessage());
 			}
         }
-        return md5File;
+        return md5Code;
     }
 
 
@@ -112,11 +107,11 @@ public class MD5Util {
         return sb.toString();
     }
 
-    public static int FTPMD5(String sp, String dp) {
-        String strs = readFileByLines(sp);
-        String dstr = readFileByLines(dp);
-        if (strs.equals(dstr)){
-            deleteFile(dp);
+    public static int FTPMD5(String sourcefile_md5code, String dirFile) {
+//        String strs = readFileByLines(sp);
+        String dstr = readFileByLines(dirFile);
+        if (sourcefile_md5code.equals(dstr)){
+            deleteFile(dirFile);
             return 0;
         }else{
             return 1;

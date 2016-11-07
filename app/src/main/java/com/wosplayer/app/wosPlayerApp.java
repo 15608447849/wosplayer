@@ -36,12 +36,11 @@ public class wosPlayerApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
+        appContext = getApplicationContext();
         log.e("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wosPlayer app start~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         appContext = wosPlayerApp.this.getApplicationContext();
         //捕获异常
         CrashHandler.getInstance().init(getApplicationContext());
-
     }
 
     public void startAppInit(){
@@ -52,13 +51,9 @@ public class wosPlayerApp extends Application {
         //new AdbShellCommd(this.getApplicationContext(),true,false).start();//开端口,不重启
         //new AdbShellCommd(this.getApplicationContext(),false,true).start();//不开远程端口.会重启
 //        new AdbShellCommd(this.getApplicationContext(),false,false).start();//不开远程端口,不重启
-        //检测sd卡
-        SdCardTools.checkSdCard(appContext);
         //初始化 配置信息
         //init(false);
     }
-
-
     /**
      *   false 读取 com.wos.tools 下面的信息
      *   true 读取自己app下面的初始化信息

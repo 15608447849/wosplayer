@@ -54,7 +54,7 @@ public class Loader {
 
     public Loader(){
         if (savepath==null || savepath.equals("")){
-            savepath = wosPlayerApp.config.GetStringDefualt("basepath", "/sdcard/mnt/playlist");
+            savepath = wosPlayerApp.config.GetStringDefualt("basepath", "/sdcard/mnt/playlist/");
         }
         if (terminalNo==null ||  terminalNo.equals("")){
             terminalNo = wosPlayerApp.config.GetStringDefualt("terminalNo","0000");
@@ -64,6 +64,7 @@ public class Loader {
     public Loader(String savepath,String terminalNo){
         this.savepath = savepath;
         this.terminalNo = terminalNo;
+        Log.i(TAG,"Loader() - "+savepath+" - "+terminalNo);
     }
 
     /**
@@ -333,7 +334,7 @@ public class Loader {
                         log.i(TAG, "ftp下载succsee -"+fileName+" - 线程 - "+ Thread.currentThread().getName());
 
                         if (fileName.contains(".apk")){
-                            //APK文件
+                         //APK文件
                         //caller.Call(file.getAbsolutePath());
                         loadFileRecall(file.getAbsolutePath());
                         nitifyMsg(fileName,3);
@@ -342,36 +343,36 @@ public class Loader {
 
                         if (fileName.contains(".md5")){
                             //MD5文件
-                            log.d(TAG,"资源文件 在服务器上 对应md5文件 : "+ file.getAbsolutePath());
-                            String sp = ((File)ob).getAbsolutePath();//源文件
-                            String dp = file.getAbsolutePath();//源文件MD5文件
-                            int sut =  MD5Util.FTPMD5(sp,dp);
+                            log.d(TAG,"资源文件 在服务器上 对应md5文件 : "+file.getAbsolutePath());
 
-                        if (sut==0){
+                            if (ob == null) {
+                                    Log.e(TAG,"资源文件 对比 md5 失败,资源文件未传递");
+                                    loadFileRecall("loaderr");
+                                    nitifyMsg(((File)ob).getName(),4);
+                                    return;
+                            }
+                                String source_file = MD5Util.getFileMD5String((File)ob).trim();// 源文件本地生成的md5 code
+                                if (source_file == null){
+                                    log.e(TAG,"文件: "+((File)ob).getName()+ "- 资源文件生成 md5 code失败 ");
+                                    loadFileRecall("loaderr");
+                                    nitifyMsg(((File)ob).getName(),4);
+                                    return;
+                                }
+                        //源文件MD5文件(服务器上的)
+                            if (MD5Util.FTPMD5(source_file, file.getAbsolutePath()) ==0 ){
                                 log.e(TAG,"文件:"+((File)ob).getName()+ " md5 效验成功");
-                                loadFileRecall(sp);
+                                loadFileRecall(((File)ob).getAbsolutePath());
                                 nitifyMsg(((File)ob).getName(),3);
                             }else{
                                 log.e(TAG,"文件:"+((File)ob).getName()+ " md5 效验失败!");
                                 loadFileRecall("loaderr");
                                 nitifyMsg(((File)ob).getName(),4);
                             }
-
                         }else{
                             //资源文件
                             log.d(TAG,"资源文件 : "+ file.getAbsolutePath());
-
-                            File msd5file = MD5Util.getFileMD5String(file);
-
-                            if (msd5file == null){
-                                log.e(TAG,"文件:"+((File)ob).getName()+ " 资源文件生成md5文件 失败 ");
-                                loadFileRecall("loaderr");
-                                nitifyMsg(((File)ob).getName(),4);
-                                return;
-                            }
-
-                            //下载 md5
-                            FTPload(host,user,pass,remotePath,fileName+".md5",localPath,msd5file);
+                            //下载 md5  这个资源文件的 md5文件名, 和 资源文件本身
+                            FTPload(host,user,pass,remotePath,fileName+".md5",localPath,file);
                         }
 
 

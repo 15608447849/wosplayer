@@ -145,8 +145,7 @@ public class SdCardTools {
      * 判断sdcard 是否存在
      */
     public static boolean existSDCard() {
-        if (android.os.Environment.getExternalStorageState().equals(
-                android.os.Environment.MEDIA_MOUNTED)) {
+        if (android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED)) {
             return true;
         } else
             return false;
@@ -353,12 +352,12 @@ public class SdCardTools {
      # /mnt/usb_storage
      */
     public static void checkSdCard(Context context) {
+
         String tags = "#file_sdcard";
         if(!SdCardTools.existSDCard()){
             Log.e(tags," sdcard is no exist ! ");
-
             Log.e(tags," application store dir-> "+getAppSourceDir(context));
-//            System.exit(0);
+//            checkSdCard(context);
         }else{
             String [] paths = SdCardTools.getVolumePaths(context);
             if (paths!=null && paths.length>0){
