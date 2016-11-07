@@ -73,7 +73,7 @@ public class AdbShellCommd extends Thread{
         this.packagepath = context.getApplicationInfo().sourceDir;
         this.isrun_1 = isrun_1;
         this.isrun_2 = isrun_2;
-        log.d("adb shell thread is ok");
+        log.i("adb shell thread is create ");
     }
 
     @Override
@@ -82,8 +82,7 @@ public class AdbShellCommd extends Thread{
 //            mLock.lock();
 
     if(AppToSystem.haveRoot()){
-        log.d("------------------------------------------拥有root权限--------------------------------------------------------------------\n");
-
+        log.e("拥有root权限\n");
 
         //卸载 旧app
         if (ApkController.uninstall("com.wos",context)){

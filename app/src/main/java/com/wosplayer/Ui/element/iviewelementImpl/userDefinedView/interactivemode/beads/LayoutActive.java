@@ -311,11 +311,6 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
                 try {
                     log.d(TAG,"互动 layout . scale after w,h = "+scale_w+","+scale_h);
                     bitmap = ImageViewPicassocLoader.loadImage(mcontext,new File(filePath),new int[]{scale_w,scale_h});
-                   /* bitmap = Picasso.with(mcontext)
-                            .load(filePath)
-                            .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
-                            .config(Bitmap.Config.RGB_565)
-                            .get();*/
                     if (bitmap==null){
                        throw new NullPointerException("filepath:"+filePath);
                     }

@@ -21,28 +21,29 @@ import java.util.Date;
  * Created by user on 2016/7/19.
  */
 public class serviceLog extends IntentService {
-
-    public static final String action = "com.log.logSaveService";
-    public static final String backageName = "com.log.serviceLog";
+    private static final String TAG = "logSaveServer:";
     /**
      * sd卡中日志文件的最多保存天数
      */
-    private static final int SDCARD_LOG_FILE_SAVE_DAYS = 1;
+    private static final int SDCARD_LOG_FILE_SAVE_DAYS = 30;
 
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");// 日志名称格式
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");// 日志名称格式
 
     /**
      * 日志文件在sdcard中的路径
      */
     public static String LOG_PATH_SDCARD_DIR = Environment.getExternalStorageDirectory().getAbsolutePath()
             + File.separator
-            + "wosplayer";
-           // + File.separator
-           // + "log";
+            + "wosplayer"
+            +File.separator
+            +"crashlist"
+            +File.separator;
 
 
+    /**
+     * 必须定义一个无参数的构造方法，并调用super(name)进行初始化，否则出错。
+     */
     public serviceLog() {
-        // 必须定义一个无参数的构造方法，并调用super(name)进行初始化，否则出错。
         super("serviceLog");
     }
 
@@ -59,7 +60,7 @@ public class serviceLog extends IntentService {
             }
         }
     }
-    private static final String TAG = "logSaveServer:";
+
     /**
      * 删除内存下过期的日志
      */
@@ -163,7 +164,6 @@ public class serviceLog extends IntentService {
             log.e(TAG," log msg is null ,unwrite to file");
             return;
         }
-
         writeLog(saveLogMsg);
     }
 

@@ -15,9 +15,10 @@ import com.wosplayer.service.logUploadService;
 public class Command_UPLG implements iCommand {
     @Override
     public void Execute(String param) {
+
         //获取 uri
         String uri = param;
-        log.i("开启 日志上传 服务 "+ uri);
+        log.i("Command_UPLG_开启 日志上传 服务 "+ uri);
         if (uri==null || uri.equals("")) return;
         if (!uri.contains("http://")){
             log.e("upload log err :  uri is error ("+ uri +")");
@@ -26,12 +27,12 @@ public class Command_UPLG implements iCommand {
 
        log.i(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  start log upload server ...");
         //开启 日志上传服务
-        Intent mintent = new Intent(wosPlayerApp.appContext,logUploadService.class);
+        Intent logIntent = new Intent(wosPlayerApp.appContext,logUploadService.class);
         Bundle b = new Bundle();
         b.putString(logUploadService.uriKey,uri);
         b.putString("terminalNo", wosPlayerApp.config.GetStringDefualt("terminalNo","0000"));
-        mintent.putExtras(b);
-        wosPlayerApp.appContext.startService(mintent);
+        logIntent.putExtras(b);
+        wosPlayerApp.appContext.startService(logIntent);
 
     }
 }

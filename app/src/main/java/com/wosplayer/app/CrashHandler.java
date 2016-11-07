@@ -14,6 +14,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.wosplayer.service.RestartApplicationBroad;
+import com.wosplayer.service.serviceLog;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -201,7 +202,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
 			String time = formatter.format(new Date());
 			String fileName = "crash-" + time + "-" + timestamp + ".log";
 			if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-				String path = Environment.getExternalStorageDirectory()+"/wosplayer/crash/";
+				String path = serviceLog.LOG_PATH_SDCARD_DIR;//Environment.getExternalStorageDirectory()+"/wosplayer/crash/";
 				File dir = new File(path);
 				if (!dir.exists()) {
 					dir.mkdirs();

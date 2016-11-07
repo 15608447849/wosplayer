@@ -19,7 +19,7 @@ import java.util.Map;
  * Created by user on 2016/7/25.
  */
 public final class contentTanslater {
-    private static final String TAG = "_contentTanslater";
+    private static final String TAG = "content Tanslater";
 
     /**
      * 初始化 反射具体内容 的映射信息

@@ -8,8 +8,8 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
-import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.log;
 import com.wosplayer.cmdBroadcast.CmdPostTaskCenter;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_UPDC;
@@ -19,16 +19,13 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
-
-import rx.Scheduler;
-import rx.functions.Action0;
-import rx.schedulers.Schedulers;
 
 /**
  * Created by Administrator on 2016/7/19.
@@ -45,97 +42,100 @@ public class CommunicationService extends Service{
     private String terminalNo;
     private long HeartBeatTime;
     private boolean isConnected = false;
-    private ReentrantLock msgLock = new ReentrantLock();
-    private boolean isReconnection = false;//是否可以尝试重连接
-
-    private boolean send_offline = true;
-    private static final Scheduler.Worker connectHelper =  Schedulers.newThread().createWorker();
-
-
-    private static ReentrantLock msgStoreLock = new ReentrantLock();//消息存储锁
-    private List<String> msgWatiList = null;//消息过多时 存储消息
-    private List<String> msgSendingList = null; //消息待发送队列
-    private int sendCount = 10;
+    private boolean send_offline = true;//发送下线通知
+    private ReentrantLock msgStoreLock = new ReentrantLock();//消息队列锁
+    private List<String> msgSendingList = Collections.synchronizedList(new LinkedList<String>()); //消息待发送队列
 
         //添加一个消息
         private void addMsgToSend(String msg){
-
             try {
                 msgStoreLock.lock();
-                //log.i(TAG,"准备添加消息: "+ msg);
-
+//                log.i(TAG,"准备添加消息: "+ msg);
                 //如果发送队列消息过多 进入存储
-                if (msgSendingList!=null && msgSendingList.size()<10){
-                    //log.i(TAG,"添加消息到 发送等待队列");
+                if (msgSendingList!=null ){
+//                    log.i(TAG,"添加消息到 发送队列");
                     msgSendingList.add(msg);
-                }else{
-                    if (msgWatiList!=null){
-                        //log.i(TAG,"添加消息到 等待队列");
-                        msgWatiList.add(msg);
-                    }
                 }
             }catch (Exception e){
-                log.e(TAG,e.getMessage());
+              e.printStackTrace();
             }finally {
                 msgStoreLock.unlock();
             }
         }
-
         //获取一个消息
         private String getMsg(){
-            String msg = null;
+            String message = null;
             try{
                 msgStoreLock.lock();
                 if (msgSendingList!=null && msgSendingList.size()>0){
-
                     Iterator<String> itr = msgSendingList.iterator();
                     if (itr.hasNext()){
-                        msg = itr.next();
+                        message = itr.next();
                         itr.remove();
-                    }
-                    //log.i(TAG,"获取 到 发送等待队列消息:"+msg);
-                }
-                else if (msgSendingList!=null && msgSendingList.size()==0){
-                    //log.i(TAG,"发送等待无消息");
-                    if (msgWatiList!=null && msgWatiList.size()>0){
-                        int index = 0;
-                        Iterator<String> itr = msgWatiList.iterator();
-                        while(itr.hasNext()){
-                            if (index == sendCount){
-                                break;
-                            }
-                            String str = itr.next();
-                            msgSendingList.add(str);
-                            itr.remove();
-                            index++;
-                        }
-                        //log.i(TAG," 重等待队列 获取 消息 到发送队列中 over");
+//                        log.i(TAG,"获取 到 发送队列消息:"+message);
                     }
                 }
-
-            }catch (Exception e){
-                log.e(e.getMessage());
+            }catch (Exception e) {
+               e.printStackTrace();
             }finally {
                 msgStoreLock.unlock();
             }
-            return msg;
+            return message;
         }
-
-
-
-
+    /**
+     * 绑定
+     * @param intent
+     * @return
+     */
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
+    /**
+     * 创建
+     */
     @Override
     public void onCreate() {
         super.onCreate();
-        log.i("-------------------------------------------开启通讯服务-------------------------------------------------------------------------");
-        isReconnection = true;
-        msgWatiList = new LinkedList<String>();
-        msgSendingList = new LinkedList<String>();
+        log.i("----------------------onCreate---------------------开启通讯服务-------------------------------------------------------------------------");
+
+    }
+    /**
+     * 返回值
+     从Android官方文档中，知道onStartCommand有4种返回值：
+     START_STICKY：如果service进程被kill掉，保留service的状态为开始状态，但不保留递送的intent对象。随后系统会尝试重新创建service，由于服务状态为开始状态，所以创建服务后一定会调用onStartCommand(Intent,int,int)方法。如果在此期间没有任何启动命令被传递到service，那么参数Intent将为null。
+     START_NOT_STICKY：“非粘性的”。使用这个返回值时，如果在执行完onStartCommand后，服务被异常kill掉，系统不会自动重启该服务。
+     START_REDELIVER_INTENT：重传Intent。使用这个返回值时，如果在执行完onStartCommand后，服务被异常kill掉，系统会自动重启该服务，并将Intent的值传入。
+     START_STICKY_COMPATIBILITY：START_STICKY的兼容版本，但不保证服务被kill后一定能重启。
+     */
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent == null){
+            log.e(TAG,"連接服務 未傳遞 intent,启动失败");
+        }else{
+            ip =  intent.getExtras().getString("ip");
+            port = intent.getExtras().getInt("port");
+            terminalNo = intent.getExtras().getString("terminalNo");
+            HeartBeatTime = intent.getExtras().getLong("HeartBeatTime") * 1000;
+            log.i(TAG,"ip: "+ip+"\n端口: "+port+"\n终端号: "+terminalNo+"\n心跳时间 :"+ HeartBeatTime);
+            if (ip==null || terminalNo==null){
+                log.e(TAG,"連接服務  intent 參數不正確");
+            }else{
+               openConnServerThread();
+            }
+        }
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    /**
+     * 结束
+     */
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        log.e("--------------------------------------------------------------通讯服务 停止-------------------------------------------------------------------------");
+        stopCommunication();
     }
 /////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -159,7 +159,7 @@ public class CommunicationService extends Service{
             String msg = null;
             String cmd = null;
             String param = null;
-            while(isConnected && isStart){
+            while(isStart && isConnected){
                 //只要是连接中
                 try {
                     if (dataInputStream.available() > 0) {
@@ -171,15 +171,14 @@ public class CommunicationService extends Service{
                     }
                 }catch (Exception e){
                     log.e("接受服务端消息 错误 :"+ e.getMessage());
-                 //   CommunicationService.this.stopSelf();
                     reConnection();
                 }
             }
         }
     }
-
+/**************************************************************************/
     private sendThread sendmsgThread = null;
-    //发送消息 线程
+    //发送 消息 线程
     private class sendThread extends Thread{
 
         private volatile boolean isStart = false;
@@ -190,57 +189,38 @@ public class CommunicationService extends Service{
             isStart =false;
         }
 
+        private  String msg = null;
         @Override
         public void run() {
             while(isConnected && isStart){
                 //在连接中 并且 开始了
                 try{
-                    msgLock.lock();
+
+                    msg = null;
                     //获取一个消息
-                  String msg =  getMsg();
+                    msg =  getMsg();
                     if (msg != null){
                         dataOutputStream.writeUTF(msg);
                         dataOutputStream.flush();
-                        if (DisplayActivity.isShowDialog){
-                            log.e(" 发送一条信息到服务器 :" + msg);
-                        }
+                        log.w(TAG," 发送一条信息到服务器 :" + msg);
+//                        Thread.sleep(10);
                     }
-                    Thread.sleep(1*50);//一秒发送两条信息
                 }catch (Exception e){
-                    log.e("发送消息到服务器 错误 :"+ e.getMessage());//尝试重新链接
+                    log.e(TAG,"发送消息到服务器 错误 :\n"+ e.getMessage());//尝试重新链接
+                    e.printStackTrace();
                     //重连接
                     reConnection();
-                }finally {
-                    msgLock.unlock();
                 }
             }
         }
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+///////////////////////////////////////////////////////////////////////
     /**
-     * 开启 接受
+     * 开启 接受消息,发送消息
      */
-    private void startReceiveThread(){
-        stopReceiveThread();
+    private void startReceiveThreadAndSendThread(){
+        stopReceiveThreadAndSendThread();
         receiveMsg = new receiveThread();
         receiveMsg.startMe();
         receiveMsg.start();
@@ -250,9 +230,9 @@ public class CommunicationService extends Service{
         sendmsgThread.start();
     }
     /**
-     * 关闭接受
+     * 关闭接受消息发送消息
      */
-    private void stopReceiveThread(){
+    private void stopReceiveThreadAndSendThread(){
         if (receiveMsg != null){
             receiveMsg.stopMe();
             receiveMsg = null;
@@ -265,16 +245,18 @@ public class CommunicationService extends Service{
         }
     }
 /////////////////////////////////////////////////////////////////////////////////////
+    Intent i = new Intent();
+
+    Bundle b = new Bundle();
     /**
-     * 分发任务
+     * 接收到服务器的命令,分发任务
      * @param cmd
      * @param param
      */
     private void postTask(String cmd, String param) {
-        log.i("派发任务:"+cmd);
-        Intent i = new Intent();
+        b.clear();
+        log.i("命令:"+cmd+" 参数"+param);
         i.setAction(CmdPostTaskCenter.action);
-        Bundle b = new Bundle();
         b.putString(CmdPostTaskCenter.cmd,cmd);
         b.putString(CmdPostTaskCenter.param,param);
         i.putExtras(b);
@@ -282,49 +264,26 @@ public class CommunicationService extends Service{
     }
 /////////////////////////////////////////////////////////////////////////////////////
     /**
-     * 返回值
-     从Android官方文档中，知道onStartCommand有4种返回值：
-     START_STICKY：如果service进程被kill掉，保留service的状态为开始状态，但不保留递送的intent对象。随后系统会尝试重新创建service，由于服务状态为开始状态，所以创建服务后一定会调用onStartCommand(Intent,int,int)方法。如果在此期间没有任何启动命令被传递到service，那么参数Intent将为null。
-     START_NOT_STICKY：“非粘性的”。使用这个返回值时，如果在执行完onStartCommand后，服务被异常kill掉，系统不会自动重启该服务。
-     START_REDELIVER_INTENT：重传Intent。使用这个返回值时，如果在执行完onStartCommand后，服务被异常kill掉，系统会自动重启该服务，并将Intent的值传入。
-     START_STICKY_COMPATIBILITY：START_STICKY的兼容版本，但不保证服务被kill后一定能重启。
+     * 创建连接
      */
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-         if (intent == null){
-             log.e(TAG,"連接服務 未傳遞 intent");
-             stopSelf();
-             return START_REDELIVER_INTENT;
-         }
-        ip =  intent.getExtras().getString("ip");
-        port = intent.getExtras().getInt("port");
-        terminalNo = intent.getExtras().getString("terminalNo");
-        HeartBeatTime = intent.getExtras().getLong("HeartBeatTime");
-        if (ip==null || terminalNo==null){
-            log.e(TAG,"連接服務  intent 參數不正確");
-           return START_STICKY;
+    private boolean createConnect(){
+        log.i(TAG,"创建连接中...createConnect()");
+        //连接
+        createrSocketConnect();
+        if (!isConnected){ //如果没连接上
+            //尝试重新链接
+            log.i(TAG,"创建连接失败,稍后在尝试");
+            return false;
         }
-        connectHelper.schedule(new Action0() {
-            @Override
-            public void call() {
-                startCommunication();
-            }
-        });
-        return super.onStartCommand(intent, flags, startId);
+        return true;
     }
     /**
      * 开始通讯
      */
     private void startCommunication(){
-        log.i(TAG,"当前所在线程:"+Thread.currentThread().getName()+"当前线程数量:"+Thread.getAllStackTraces().size());
-        //连接
-        CreaterSocket();
-        if (!isConnected){ //如果没连接上 可以滚蛋了
-             return;
-        }
-
-        //创建接受消息线程
-        startReceiveThread();
+        log.i(TAG,"startCommunication() >>>\n当前所在线程:"+Thread.currentThread().getName()+"\n当前线程数量:"+Thread.getAllStackTraces().size());
+        //创建接受消息线程,发送消息线程
+        startReceiveThreadAndSendThread();
         //注册发送消息的广播
         registSendBroad();
         //开始心跳
@@ -339,93 +298,68 @@ public class CommunicationService extends Service{
      * 结束通讯
      */
     private void stopCommunication(){
-        //结束指令
-        //发送下线通知
+        //结束心跳
+        stopHeartbeat();
+        //是否发送下线通知
         if(send_offline){
             String msg = "OFLI:" + terminalNo;
             sendMsgToService(msg);
         }
-
         //注销广播
         unregistSSendBroad();
-        //断开 接受消息 线程
-        stopReceiveThread();
-        //结束心跳
-        stopHeartbeat();
-
+        //断开 接受消息 线程,断开发送消息线程
+        stopReceiveThreadAndSendThread();
         //结束链接
-        desconnection();
-
+        desConnection();
+        log.i(TAG,"---结束通讯---");
     }
     /////////////////////////////////////////////////////////////////////////////////////
     //创建链接
-    private void CreaterSocket() {
+    private void createrSocketConnect() {
         //如果已连接 断开连接
         if (isConnected){
-            desconnection();
+            desConnection();
         }
         try {
-            socket = new Socket(ip , port);
-            dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-            dataInputStream    = new DataInputStream(socket.getInputStream());
-            isConnected=true;
-            log.i("Communication connectToServer :" +ip+":"+port);
+            if (socket==null){
+                log.i(TAG,"尝试创建socket 连接...");
+                socket = new Socket(ip , port);
+                dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+                dataInputStream    = new DataInputStream(socket.getInputStream());
+                isConnected=true;
+                log.i("Communication connectToServer success : \n" +ip+":"+port);
+            }
         } catch (IOException e) {
-            log.e(" socket connection err:"+ e.getMessage());
-            isConnected=false;
-            reConnection();//重新链接
+            log.e(" socket connection err: "+ e.getMessage());
+            e.printStackTrace();
+            isConnected=false;//完成连接
         }
     }
+    private boolean isReconne = false; //是否重新连接中
     //尝试重新链接
     private void reConnection() {
-
-        if (!isReconnection){
-            log.i("不可连接");
+        if (isReconne){
+            log.i("正在尝试连接,不要重复尝试...");
             return;
         }
-
-        log.i("尝试重新链接中..."); //停止, 发送广告,杀死自己
-        sendReconncetionBroad();
-        send_offline = false;
-        stopSelf();
-
-        /*   stopCommunication();
-        try {
-            Thread.sleep(30*1000);
-        } catch (InterruptedException e) {
-            log.e("重新链接失败"+e.getMessage());
-            reConnection();
-            return;
-        }
-        connectHelper.schedule(new Action0() {
-            @Override
-            public void call() {
-                startCommunication();
-            }
-        });*/
+        isReconne = true;
+        log.i("尝试重新链接中...");
+        send_offline = false;//不发送下线通知
+        stopCommunication();
+        openConnServerThread();
+        isReconne =false;
     }
-
-    private void sendReconncetionBroad() {
-        int time = 30 * 1000;
-        log.i("发送下次重新链接服务器的 间隔时间 :"+time +" s");
-        Intent i = new Intent();
-        i.setAction(CommunicationReconnectBroad.ACTION);
-        Bundle b = new Bundle();
-        b.putInt(CommunicationReconnectBroad.sleepTilemKey,time);
-        i.putExtras(b);
-        getApplicationContext().sendBroadcast(i);
-    }
-
     /**
      *断开链接
      */
-    private void desconnection(){
+    private void desConnection(){
+        log.i(TAG,"断开连接中....");
         if (socket != null) {
             try {
                 socket.close();
                 socket=null;
             } catch (Exception e) {
-                log.e("Communication disconnect error :" + e.getMessage());
+                log.e("Communication disconnect error : " + e.getMessage());
             }
         }
         if (dataOutputStream != null) {
@@ -433,7 +367,7 @@ public class CommunicationService extends Service{
                 dataOutputStream.close();
                 dataOutputStream=null;
             } catch (Exception e) {
-                log.e("Communication disconnect error :" + e.getMessage());
+                log.e("Communication disconnect error : " + e.getMessage());
             }
         }
         if (dataInputStream != null) {
@@ -441,35 +375,17 @@ public class CommunicationService extends Service{
                 dataInputStream.close();
                 dataInputStream=null;
             } catch (IOException e) {
-                log.e("Communication disconnect error :" + e.getMessage());
+                log.e("Communication disconnect error : " + e.getMessage());
             }
         }
-        isConnected = false;
+        isConnected = false;//不在连接中
     }
-
     /**
      *  发送信息
      */
     private void sendMsgToService(final String msg){
-
         //添加消息到消息队列
         addMsgToSend(msg);
-
-      /*  if (isConnected){
-            try {
-            msgLock.lock();
-            dataOutputStream.writeUTF(msg);
-            dataOutputStream.flush();
-            log.i("发送一条信息到服务器 :" + msg);
-            } catch (Exception e) {
-                e.printStackTrace();
-                log.e("发送信息失败 error :" + e.getMessage());
-                //重连接
-                reConnection();
-            }finally {
-            msgLock.unlock();
-            }
-        }*/
     }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //广播
@@ -478,16 +394,15 @@ public class CommunicationService extends Service{
      *  请注册在使用
      */
     public class CommunicationServiceReceiveNotification extends BroadcastReceiver{
-
         public static final String action = "com.send.message.broad";
         public static final String key = "toService";
-
+        private String msg = null;
     @Override
     public void onReceive(Context context, Intent intent) {
-        String msg = intent.getExtras().getString(key);
-//        log.i("收到一个广播..."+msg);
+        msg = intent.getExtras().getString(key);
         if (msg==null) return;
         sendMsgToService(msg);
+        msg = null;
     }
 }
     /**
@@ -514,46 +429,81 @@ public class CommunicationService extends Service{
     /////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////
     //发送心跳定时器
-   private Timer timer = null;
-    private TimerTask timertask = null;
-
-
+   private static Timer timer = null;
+   private static TimerTask timertask = null;
     //开启 心跳
     private void startHeartbeat(){
+
         stopHeartbeat();
+        Log.i(TAG,"- -开始心跳- - ");
         timer = new Timer();
         timertask  =  new TimerTask() {
             @Override
             public void run() {
-                    String msg = "HRBT:"+terminalNo;
-                   // msg += "#"+Command_UPDC.getLocalVersionCode();
-                    sendMsgToService(msg);
-//                    String msg2 = "version:"+ "#"+Command_UPDC.getLocalVersionCode();
-//                    sendMsgToService(msg2);
+//                    Log.i(TAG,"- -心跳中- - ");
+                    sendMsgToService("HRBT:"+terminalNo);
             }
         };
-
         //创建定时器任务 发送心跳
-        timer.schedule(timertask, 100, HeartBeatTime);
+        timer.schedule(timertask,HeartBeatTime, HeartBeatTime);//心跳中HeartBeatTime
     }
     //关闭心跳
     private void stopHeartbeat(){
+        Log.i(TAG,"- - 结束心跳 - - ");
+        if (timertask!=null){
+            timertask.cancel();
+            timertask = null;
+        }
         if (timer != null){
             //关闭定时器
             timer.cancel();
             timer = null;
         }
-        if (timertask!=null){
-            timertask.cancel();
-            timertask = null;
-        }
     }
     /////////////////////////////////////////////////////////////////////////////////////
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        isReconnection = false;
-        log.e("--------------------------------------------------------------通讯服务 停止了-------------------------------------------------------------------------");
-       stopCommunication();
+    /**
+     * 连接服务器线程
+     */
+    private class ConnectServerThread extends Thread{
+        private volatile boolean isStart = false;
+        public void startMe(){
+            isStart =true;
+        }
+        public void stopMe(){
+            isStart =false;
+        }
+        private boolean isCreateConne = false;
+        private int reCreateConnTime = 10 * 1000;
+        @Override
+        public void run() {
+            while(isStart){
+                if (isCreateConne){
+                    //已经创建链接
+                    //打开通讯
+                    startCommunication();
+                    stopMe();
+                    log.i(TAG,"ConnectServerThread 完成任务");
+                }else{
+                    //创建链接
+                    isCreateConne = createConnect();
+                    try {
+                        Thread.sleep(reCreateConnTime);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+    private ConnectServerThread connHelper = null;
+    //开启 链接服务器的 助手
+    private void openConnServerThread(){
+        if (connHelper!=null){
+            connHelper.stopMe();
+            connHelper = null;
+        }
+        connHelper = new ConnectServerThread();
+        connHelper.startMe();
+        connHelper.start();
     }
 }

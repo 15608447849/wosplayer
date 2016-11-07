@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.wosplayer"
-    android:versionCode="1"
-    android:versionName="1"
+    android:versionCode="9"
+    android:versionName="9.0"
     android:screenOrientation="portrait">
 
     <application
@@ -29,13 +29,6 @@
 
         <!-- 通讯服务 android:process=":remote_communication" -->
         <service android:name=".service.CommunicationService" android:process=":remote_communication"/>
-        <!-- 通讯服务 重新链接 广播-->
-        <receiver android:name=".service.CommunicationReconnectBroad" android:process=":remote_communication">
-            <intent-filter>
-                <action android:name="com.communication.reconncetion.broad" />
-            </intent-filter>
-        </receiver>
-
         <!-- 接受通讯服务的广播 -> 派发任务-->
         <receiver android:name=".cmdBroadcast.CmdPostTaskCenter">
             <intent-filter>

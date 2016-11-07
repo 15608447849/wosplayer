@@ -37,27 +37,26 @@ public class wosPlayerApp extends Application {
     public void onCreate() {
         super.onCreate();
 
-        log.d("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wosPlayer app start~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        log.e("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wosPlayer app start~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         appContext = wosPlayerApp.this.getApplicationContext();
         //捕获异常
         CrashHandler.getInstance().init(getApplicationContext());
 
+    }
+
+    public void startAppInit(){
         //数据转移
         translationWosToolsData();
-
-
         //放入系统目录
-       // new AdbShellCommd(this.getApplicationContext(),true,true).start();//会开端口,会重启
+         new AdbShellCommd(this.getApplicationContext(),true,true).start();//会开端口,会重启
         //new AdbShellCommd(this.getApplicationContext(),true,false).start();//开端口,不重启
         //new AdbShellCommd(this.getApplicationContext(),false,true).start();//不开远程端口.会重启
-        new AdbShellCommd(this.getApplicationContext(),false,false).start();//不开远程端口,不重启
+//        new AdbShellCommd(this.getApplicationContext(),false,false).start();//不开远程端口,不重启
         //检测sd卡
         SdCardTools.checkSdCard(appContext);
         //初始化 配置信息
         //init(false);
     }
-
-
 
 
     /**
@@ -112,7 +111,7 @@ public class wosPlayerApp extends Application {
         config.put("bankPathXml",basepath);
         SdCardTools.MkDir(basepath);
 
-        log.i("app config init complete " );
+        log.i("--- app config init complete ---" );
         config.printData();
     }
 
@@ -144,7 +143,6 @@ public class wosPlayerApp extends Application {
         }catch (Exception e){
             log.e("启动 转移数据 异常 : " + e.getMessage());
         }
-
     }
 
     /**
@@ -263,17 +261,24 @@ public class wosPlayerApp extends Application {
 
     public static void startCommunicationService(Context mc) {
 
-        Intent intent = new Intent(mc, CommunicationService.class);
-        //传递参数
-        Bundle b = new Bundle();
-        b.putString("ip",config.GetStringDefualt("serverip","127.0.0.1"));
-        b.putInt("port",6666);
-        b.putString("terminalNo",config.GetStringDefualt("terminalNo","127.0.0.1"));
-        b.putLong("HeartBeatTime",(config.GetIntDefualt("HeartBeatInterval",50) * 500));
-        intent.putExtras(b);
-        log.i("wosPlayerApp: 尝试开启通讯服务...");
-        mc.startService(intent);
+        try {
+            if (mc instanceof wosPlayerApp){
+                ((wosPlayerApp)mc).init(true);
+            }
 
+            Intent intent = new Intent(mc, CommunicationService.class);
+            //传递参数
+            Bundle b = new Bundle();
+            b.putString("ip",config.GetStringDefualt("serverip","127.0.0.1"));
+            b.putInt("port",6666);
+            b.putString("terminalNo",config.GetStringDefualt("terminalNo","127.0.0.1"));
+            b.putLong("HeartBeatTime",(config.GetIntDefualt("HeartBeatInterval",10)));
+            intent.putExtras(b);
+            log.i("wosPlayerApp: 尝试开启通讯服务...");
+            mc.startService(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**

@@ -20,7 +20,7 @@ import rx.functions.Action0;
  * 执行布局
  */
 public class layoutExcuter {
-    private static final java.lang.String TAG = layoutExcuter.class.getName();
+    private static final java.lang.String TAG = "layout Excuter";
     private XmlNodeEntity layout ;
     private IPlayer currentIplayer=null ;
     private ArrayList<XmlNodeEntity> contentArr = null;

@@ -11,7 +11,7 @@ import java.util.ArrayList;
  */
 public class programExcuter {
 
-    private static final java.lang.String TAG = programExcuter.class.getName();
+    private static final java.lang.String TAG = "program Excuter";
     private XmlNodeEntity program = null;
     private ArrayList<layoutExcuter> layoutList = null;
     public programExcuter(XmlNodeEntity program) {

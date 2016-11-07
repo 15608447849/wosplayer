@@ -20,7 +20,7 @@ import rx.functions.Action0;
  */
 
 public class UiExcuter {
-    private static final java.lang.String TAG = UiExcuter.class.getName();
+    private static final java.lang.String TAG = "Ui Excute";
     private static UiExcuter uiExcuter = null;
     private UiExcuter() {
         log.i(TAG,"ui excuter create");

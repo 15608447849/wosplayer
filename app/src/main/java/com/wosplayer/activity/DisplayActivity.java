@@ -65,17 +65,14 @@ public class DisplayActivity extends Activity {
 
     private ImageButton closebtn ;//左上角 隐藏的 按钮
 
-    public static boolean isShowDialog = false;
+
     private boolean isShowPsdInput = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /*getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
-                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);*/
+        ((wosPlayerApp)getApplication()).startAppInit();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//保持屏幕常亮
-
         setContentView(R.layout.activity_main);//设置布局文件
-
         baselayout = (AbsoluteLayout) LayoutInflater.from(this).inflate(R.layout.activity_main,null);
         main = (AbsoluteLayout) this.findViewById(R.id.main);
         frame = (FrameLayout)this.findViewById(R.id.frame_layout);
@@ -89,9 +86,8 @@ public class DisplayActivity extends Activity {
 
         //开启监听服务
        Intent intent = new Intent(this, MonitorService.class);
-        log.d(TAG,"-------------------------------------------------------------- 开启<监听>服务 -----------------------------------------------------------");
+        log.e(TAG,"-------------------------------------------------------------- 开启<监听>服务 -----------------------------------------------------------");
         this.startService(intent);
-
 
         //弹出密码输入框
         closebtn.setOnClickListener(new View.OnClickListener() {
@@ -100,7 +96,6 @@ public class DisplayActivity extends Activity {
                inputPassWordDialog.ShowDialog(DisplayActivity.this);
             }
         });
-
 
         //长按 显示/隐藏 信息输出
         /*setOnLongClickListener中return的值决定是否在长按后再加一个短按动作
@@ -118,12 +113,12 @@ public class DisplayActivity extends Activity {
             }
         });
 
-        log.d("--------create over-------------");
+        log.i("activity --------create over-------------");
     }
 
     @Override
     public void onStart() {
-        log.d(TAG,"onStart");
+        log.i(TAG,"onStart");
         super.onStart();
         if(isSettingServerInfo()){
             ((wosPlayerApp)this.getApplication()).init(true);
@@ -133,7 +128,7 @@ public class DisplayActivity extends Activity {
     @Override
     public void onResume() {
        super.onResume();
-        log.d(TAG,"onResume");
+        log.i(TAG,"onResume");
         //是否已经设置了服务器信息?
         if (isSettingServerInfo()){
             //开始工作
@@ -147,7 +142,7 @@ public class DisplayActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        log.d(TAG,"onPause");
+        log.i(TAG,"onPause");
         //结束工作
         if (isSettingServerInfo()){
             endWork();
@@ -157,14 +152,14 @@ public class DisplayActivity extends Activity {
     @Override
     public void onStop() {
         super.onStop();
-        log.d(TAG,"onStop");
+        log.i(TAG,"onStop");
 
       }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        log.d(TAG,"onDestroy");
+        log.i(TAG,"onDestroy");
         try {
             if(isSendRestartBroad){
                 Intent intent  = new Intent();

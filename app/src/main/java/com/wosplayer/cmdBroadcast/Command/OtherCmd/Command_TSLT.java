@@ -21,7 +21,7 @@ import com.wosplayer.cmdBroadcast.Command.iCommand;
  某个图片的Uri：content://media/external/images/media/4
  */
 public class Command_TSLT implements iCommand {
-    private static final String TAG = "建行数据对接测试";
+    private static final String TAG = "_建行数据对接测试";
     ScheduleSaver saver = null;
     @Override
     public void Execute(String param) {

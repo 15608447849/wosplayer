@@ -2,7 +2,6 @@ package com.wosplayer.app;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -128,8 +127,7 @@ public class DataList implements Parcelable {
             Map.Entry entry = (Map.Entry) iter.next();
             Object key = entry.getKey();
             Object val = entry.getValue();
-            Log.i(""," ["+key + " ->  "+val+" ]");
+            System.out.println(key + " ->  "+val);
         }
-       log.i("","********************************************************************************************************************************************");
     }
 }

@@ -129,17 +129,17 @@ public class MD5Util {
      * @param fileName
      * @return
      */
-    public static boolean deleteFile(String fileName) {
+    public static void deleteFile(String fileName) {
         try {
+            log.e("MD5"," 删除文件 - "+fileName);
             File file = new File(fileName);
             if (file.exists()) {
-                return file.delete();
+                log.e("MD5"," 删除文件 - "+fileName +" * success");
+                file.delete();
             }
-            return true;
         } catch (Exception e) {
             log.e("util", "delete file error with exception" + e.toString()
                     + "on file:" + fileName);
-            return false;
         }
     }
 }

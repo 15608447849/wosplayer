@@ -282,7 +282,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
         //如果 播放路径不存在 或者 表层持有者 不存在
         if (mUri == null || mSurfaceHolder == null) {
             // not ready for playback just yet, will try again later (没有准备好回放,稍后会再试一次)
-            log.e(TAG,"如果 播放路径不存在 或者 表层持有者 不存在,not ready for playback just yet, will try again later");
+            log.e(TAG,"如果 播放路径不存在 或者 表层持有者 不存在,not ready for playback just yet, will try again later \nmUri = "+mUri);
             return;
         }
         // 发送广播，关掉系统的音乐播放器

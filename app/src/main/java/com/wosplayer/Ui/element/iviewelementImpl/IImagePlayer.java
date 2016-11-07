@@ -145,17 +145,14 @@ public class IImagePlayer extends ImageView implements IPlayer{
         Drawable drawable = imageView.getDrawable();
 
         if (drawable == null){
-            log.e(TAG,"释放资源失败,drawable is null 1");
             drawable = imageView.getBackground();
             if (drawable == null){
-                log.e(TAG,"释放资源失败,drawable is null 2");
 
                 imageView.setDrawingCacheEnabled(true);
                     bitmap = imageView.getDrawingCache();
                 imageView.setDrawingCacheEnabled(false);
 
                     if (bitmap==null){
-                        log.e(TAG,"释放资源失败,bitmap is null");
                         return;
                     }else{
                         log.i(TAG,"getDrawingCache() :"+bitmap.toString());
@@ -181,12 +178,12 @@ public class IImagePlayer extends ImageView implements IPlayer{
                 drawable.setCallback(null);
             }
             bitmap.recycle();
-            log.i(TAG, " 释放资源...end \n" );
+            log.i(TAG, " 释放资源 success" );
             return;
         }
         imageView.setBackgroundResource(0);
         imageView.setImageDrawable(null);
-        log.e(TAG, " 释放资源...failt \n" );
+        log.e(TAG, " 释放资源 failt" );
     }
 
     @Override
@@ -249,7 +246,6 @@ try {
 
         ImageAttabuteAnimation.SttingAnimation(mCcontext,this,new int[]{x,y,w,h});
 
-        log.i(TAG,"  ---------------------------------loader image ---------------------------------");
 
         /**
          *getMeasuredHeight()返回的是原始测量高度，与屏幕无关，getHeight()返回的是在屏幕上显示的高度。实际上在当屏幕可以包裹内容的时候，
@@ -260,7 +256,7 @@ try {
 
 
         ImageViewPicassocLoader.loadImage(mCcontext,this,new File(filePath),new int[]{this.getWidth(),this.getHeight()},ImageViewPicassocLoader.TYPE_IIMAGE);
-        log.i(TAG," ---------------------------------loader image --------------------------------- end 1");
+        log.i(TAG," ---------------------------------loader image --------------------------------- over");
 
 
     }

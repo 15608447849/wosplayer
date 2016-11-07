@@ -48,7 +48,7 @@ public class ScheduleReader {
         log.i(TAG," 当前存储的uuks == "+PreUUKS);
         PreUUKS = null;
         currentEntity = null;
-        log.e(TAG,"--------------------------------------清理 读取排期--------------------------------------------");
+        log.e(TAG,"--------------------------------------清理 排期读取--------------------------------------------");
     }
 
 
@@ -178,7 +178,7 @@ public class ScheduleReader {
             return null;
         }
 
-        log.i(TAG,"all schedule :" + allScheduleList);
+        log.i(TAG,"all schedule_list size:" + allScheduleList.size());
 
         return allScheduleList;
     }
@@ -229,7 +229,7 @@ public class ScheduleReader {
                     log.e(TAG,"排期读取错误- 获取不到当前排期 ");
                     return;
                 }
-                log.e(TAG,currentEntity.getXmldata().toString());
+
                 String uuks = currentEntity.getXmldata().get("uuks");
                 if (uuks==null || uuks.equals("") || uuks.length()==0){
                     log.e(TAG,"最新xml 读取排期时 获取uuks 失败 \n reader ,uuks is null :"+uuks);
@@ -530,7 +530,7 @@ public class ScheduleReader {
                         log.i(TAG,"重复类型 每月的某天播放");
                         return true;
                     }else{
-                        log.e("^^^^^^^^^");
+                        log.e(TAG,"^^^^^err^^^^");
                       //  return false;
                     }
                 }
@@ -557,7 +557,7 @@ public class ScheduleReader {
                         log.i(TAG,"重复类型 每年播放");
                         return true;
                     }else{
-                        log.e("^^^^^^^^^");
+                        log.e("^^^^^err^^^^");
                        // return false;
                     }
                 }
@@ -606,7 +606,7 @@ public class ScheduleReader {
                     log.i(TAG,"重复类型 每个星期播放");
                     return true;
                 }else{
-                    log.e("^^^^^^^^^");
+                    log.e("^^^err^^^^^^");
                     //return false;
                 }
             }
@@ -635,7 +635,7 @@ public class ScheduleReader {
                 log.i(TAG,"重复类型 每个星期播放");
                 return true;
             }else{
-                log.e("^^^^^^^^^");
+                log.e("^^^^^err^^^^");
                 //return false;
             }
         }
@@ -809,11 +809,11 @@ public class ScheduleReader {
         log.i(TAG," - 确定时间 - determineTime() start ");
 
         if ( currentData.getTime()-startTime.getTime()==0 || currentData.after(startTime) && currentData.before(endTime)){
-            log.i(TAG,"在当前时间存在有效排期 √ \n " +
+            log.i(TAG,"在当前时间存在有效排期 √\n" +
                     "id == " + current.getXmldata().get("id") + "\n"+
                     "type == "+ current.getXmldata().get("type") +"\n"+
                     "termtype == "+ current.getXmldata().get("termtype") +"\n"+
-                    "summary ==" + current.getXmldata().get("summary"));
+                    "summary == " + current.getXmldata().get("summary"));
             return true;
         }
 
