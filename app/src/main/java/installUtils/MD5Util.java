@@ -32,7 +32,6 @@ public class MD5Util {
     
     public static String getFileMD5String(File file) {
     	BufferedWriter bw = null;
-//    	File md5File = null;
         String md5Code = null;
         try{
             if (!file.exists()){
@@ -50,11 +49,7 @@ public class MD5Util {
             }
             in.close();
             md5Code = toHexString(messagedigest.digest());
-
-//            md5File = new File(file.getPath()+".md5");
-//            bw = new BufferedWriter(new FileWriter(md5File));
-//            bw.write(md5Code);
-        } catch (Exception e){
+            } catch (Exception e){
             log.e(e.getMessage());
         }finally{
         	try {

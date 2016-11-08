@@ -147,9 +147,10 @@ public class Actioner extends AbsoluteLayout implements IPlayer{
         return null;
     }
 
-    @Override
-    public void Call(String filePath) {
-        //null
-    }
 
+
+    @Override
+    public void downloadResult(String filePath) {
+
+    }
 }

@@ -429,4 +429,8 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
     }
 
 
+    @Override
+    public void downloadResult(String filePath) {
+
+    }
 }

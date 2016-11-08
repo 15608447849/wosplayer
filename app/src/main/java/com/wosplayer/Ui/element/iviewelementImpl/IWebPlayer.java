@@ -142,7 +142,7 @@ public class IWebPlayer extends android.webkit.WebView  implements IPlayer {
      }
     }
     @Override
-    public void Call(String filePath) {
+    public void downloadResult(String filePath) {
         //未使用
     }
 }

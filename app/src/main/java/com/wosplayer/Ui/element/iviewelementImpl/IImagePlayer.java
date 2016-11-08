@@ -113,7 +113,6 @@ public class IImagePlayer extends ImageView implements IPlayer{
     private void loadMyImage() {
         //先判断文件是不是存在
         if (loader.fileIsExist(localpath)){
-//            Call(localpath);
             picassoLoaderImager(localpath);
             return;
         }
@@ -187,78 +186,31 @@ public class IImagePlayer extends ImageView implements IPlayer{
     }
 
     @Override
-    public void Call(final String filePath) {
+    public void downloadResult(final String filePath) {
         log.i(TAG," 图片资源回传:" + filePath +" 当前所在线程:"+Thread.currentThread().getName()+"正在执行的所有线程数:"+ Thread.getAllStackTraces().size());
-
-      /*  Bitmap bitmap = null;
-        if (filePath.equals("404")) {//如果找不到资源
-            bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.no_found);
-        }else{
             try {
-                bitmap =  Picasso.with(mCcontext).load(filePath).memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE).config(Bitmap.Config.RGB_565).get();//memoryPolicy(MemoryPolicy.NO_CACHE,MemoryPolicy.NO_STORE)
-
-            } catch (Exception e) {
-                log.e(TAG,"Call() "+e.getMessage() );
+                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+                    @Override
+                    public void call() {
+                        picassoLoaderImager(filePath);
+                    }
+                });
+            }catch (Exception e){
+                log.e(TAG,""+e.getMessage());
             }
-            if (bitmap==null){
-                return;
-            }
-            log.i(TAG, "call() bitmap:" + bitmap.toString());
-
-            final BitmapDrawable drawable = new BitmapDrawable(bitmap);
-            AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-                @Override
-                public void call() {
-                    IImagePlayer.this.setImageDrawable(drawable);
-                }
-            });
-        }*/
-
-
-try {
-    AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-        @Override
-        public void call() {
-            picassoLoaderImager(filePath);
-        }
-    });
-}catch (Exception e){
-    log.e(TAG,""+e.getMessage());
-}
-
-
-
-
     }
 
 
     private void picassoLoaderImager(String filePath) {
         //设置图片切换方式
-
-//        log.d(TAG,localpath);
-//        log.d(TAG,"w:"+w +","+h);
-//        log.d(TAG,"width_height"+this.getWidth()+"#"+this.getHeight());
-//        log.d(TAG,"this.getMeasuredWidth(), this.getMeasuredHeight() = "+ this.getMeasuredWidth()+" , "+this.getMeasuredHeight());
-//        log.d(TAG,"y:"+this.getY());
-//        log.d(TAG,"f y:"+mfatherView.getY());
-//        log.d(TAG,"m y:"+y+","+x);
-
-
         ImageAttabuteAnimation.SttingAnimation(mCcontext,this,new int[]{x,y,w,h});
-
-
         /**
          *getMeasuredHeight()返回的是原始测量高度，与屏幕无关，getHeight()返回的是在屏幕上显示的高度。实际上在当屏幕可以包裹内容的时候，
          * 他们的值是相等的，只有当view超出屏幕后，才能看出他们的区别。
          * 当超出屏幕后，getMeasuredHeight()等于getHeight()加上屏幕之外没有显示的高度。
          */
-
-
-
-        ImageViewPicassocLoader.loadImage(mCcontext,this,new File(filePath),new int[]{this.getWidth(),this.getHeight()},ImageViewPicassocLoader.TYPE_IIMAGE);
+        ImageViewPicassocLoader.loadImage(mCcontext,this,new File(filePath),new int[]{this.getWidth(),this.getHeight()});
         log.i(TAG," ---------------------------------loader image --------------------------------- over");
-
-
     }
 
 

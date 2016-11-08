@@ -31,7 +31,7 @@ import rx.functions.Action0;
 /**
  * Created by user on 2016/6/30.
  */
-public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller, IviewPlayer {
+public class ActiveImagePlayer extends ImageView implements IviewPlayer {
 
 
     private static final java.lang.String TAG = "_ActiveImagePlayer";//.class.getName()";
@@ -219,7 +219,7 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
         //  查看本地
         if (fileUtils.checkFileExists(localPath)) {
             //存在
-            Call(localPath);
+            downloadResult(localPath);
         } else {
             //访问网络
             if (!isloading) {
@@ -240,7 +240,7 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
             if (mFather == null) {
                 return;
             }
-            Call(localPath);
+            downloadResult(localPath);
           return;
         }
 
@@ -283,7 +283,7 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
      * @param filePath
      */
     @Override
-    public void Call(final String filePath) {
+    public void downloadResult(final String filePath) {
         log.i(TAG, "  一个图片 资源 下载结果传递了来了:" + filePath);
 
         isloading = false; //下载完毕
@@ -365,7 +365,7 @@ public class ActiveImagePlayer extends ImageView implements Loader.LoaderCaller,
             log.e("no exists");
         }
 
-        ImageViewPicassocLoader.loadImage(mcontext,this,new File(filePath),null,ImageViewPicassocLoader.TYPE_ACTION_IIMAGE);
+        ImageViewPicassocLoader.loadImage(mcontext,this,new File(filePath),null);
         log.e(TAG,"互动 -------  loadimage end -------");
     }
 

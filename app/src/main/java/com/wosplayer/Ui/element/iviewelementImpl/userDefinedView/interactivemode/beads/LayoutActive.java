@@ -31,7 +31,7 @@ import rx.functions.Action0;
  * 互动模块 层布局
  */
 
-public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.LoaderCaller {
+public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
 
     private static final java.lang.String TAG = "_LayoutActive";//LayoutActive.class.getName();
     public String bgImagelurl;
@@ -256,7 +256,7 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
             String localpath = wosPlayerApp.config.GetStringDefualt("basepath", "/sdcard/") + bgImagename; //本地路径
 
             if (fileUtils.checkFileExists(localpath)) { //资源是否存在
-              Call(localpath);
+              downloadResult(localpath);
             } else {
               loader.LoadingUriResource(uriLoad,null);
             }
@@ -294,7 +294,7 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer, Loader.
      * @param filePath
      */
     @Override
-    public void Call(final String filePath) {
+    public void downloadResult(final String filePath) {
         log.i(TAG, " 一个布局 资源 下载结果传递了来了:" + filePath + " - "+Thread.currentThread().getName()+"-count:"+Thread.getAllStackTraces().size());
         if (mFather == null) {
             log.i(TAG, this.toString()+"_Layout Active 没有父容器:");

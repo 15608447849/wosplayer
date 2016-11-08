@@ -156,7 +156,7 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
                  }
                 }
                 currentIndex =0 ;
-                Call(multifileList.get(currentIndex));
+                downloadResult(multifileList.get(currentIndex));
                //当前播放的下标 //使用时判断 如果 currentIndex == list的最大值 , 下次播放 从0 开始
 
             }
@@ -184,7 +184,7 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
     }
 
     @Override
-    public void Call(final String filePath) {
+    public void downloadResult(final String filePath) {
 
         try {
             //播放

@@ -44,7 +44,7 @@ import rx.functions.Action0;
  * button
  */
 
-public class ButtonActive extends ImageButton implements View.OnClickListener, Loader.LoaderCaller, IviewPlayer {
+public class ButtonActive extends ImageButton implements View.OnClickListener, IviewPlayer {
 
     private static final java.lang.String TAG = "_ActionButotn";//ButtonActive.class.getName();
     public int x, y, w, h; //大小坐标
@@ -519,7 +519,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, L
 
             if (fileUtils.checkFileExists(loacPath)) {
                 //存在 直接设置
-                Call(loacPath);
+                downloadResult(loacPath);
             } else {
                 //下载
                 loader.LoadingUriResource(myBgUri,null);
@@ -625,30 +625,13 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, L
      * @param filePath
      */
     @Override
-    public void Call(final String filePath) {
+    public void downloadResult(final String filePath) {
         log.i(TAG, "Button Active  一个图片 资源 下载结果传递了来了:" + filePath);
 
         if (mFather == null) {
             log.e(TAG,"互动模块 button 无父容器");
             return;
         }
-//        releaseBgImage();
-    /*    Bitmap bitmap = null;
-            try {
-                bitmap =  Picasso.with(DisplayActivity.activityContext).load(filePath).memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE).get();//.config(Bitmap.Config.RGB_565)
-            } catch (Exception e) {
-                log.e(TAG,""+e.getMessage());
-                bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.no_found);
-            }
-
-        final BitmapDrawable drawable = new BitmapDrawable(bitmap);
-        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-            @Override
-            public void call() {
-                ButtonActive.this.setBackgroundDrawable(drawable);
-            }
-        });*/
-
         AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
             @Override
             public void call() {
@@ -656,23 +639,14 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, L
             }
         });
     }
+
     private void picassoLoaderImager(String filePath) {
         log.i(TAG,"button _width:"+w);
         log.i(TAG,"button _current width :"+nw);
         log.i(TAG,"button _layoutparam w:"+this.getLayoutParams().width);
         log.i(TAG,"button _getMeasuredWidth:"+this.getMeasuredWidth());
 
-        ImageViewPicassocLoader.loadImage(mcontext,this,new File(filePath),new int[]{nw,nh},ImageViewPicassocLoader.TYPE_IIMAGE);
-
-        //纯用picasso 加载本地图片
-    /*    Picasso.with(mcontext)
-                .load(new File(filePath))
-                .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
-                .centerCrop()
-                .resize(nw,nh)
-                .placeholder(R.drawable.loadding)
-                .error(R.drawable.error)
-                .into(this);*/
+        ImageViewPicassocLoader.loadImage(mcontext,this,new File(filePath),new int[]{nw,nh});
     }
     @Override
     protected void onDraw(Canvas canvas) {

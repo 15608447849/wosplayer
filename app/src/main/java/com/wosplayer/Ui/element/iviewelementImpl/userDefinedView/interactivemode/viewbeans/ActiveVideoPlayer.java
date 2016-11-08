@@ -21,7 +21,7 @@ import rx.functions.Action0;
 /**
  * Created by user on 2016/7/4.
  */
-public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loader.LoaderCaller {
+public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer{
     private static final java.lang.String TAG = "_VIDEOPLAYER";//ActiveVideoPlayer.class.getName();
     private MyVideoView video;
     private long mCurrentSeek;
@@ -144,7 +144,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loa
               //  查看本地
         if (fileUtils.checkFileExists(videoFileLocalPath)) {
             //存在
-            Call(videoFileLocalPath);
+            downloadResult(videoFileLocalPath);
         } else {
 
             if(isloading){//在下载
@@ -258,7 +258,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer,Loa
      * @param filePath
      */
     @Override
-    public void Call(final String filePath) {
+    public void downloadResult(final String filePath) {
         log.i(TAG, "videoplayer  一个视频 资源 下载结果传递了来了:" + filePath);
         isloading = false; //下载完毕
         if (mFather == null) {

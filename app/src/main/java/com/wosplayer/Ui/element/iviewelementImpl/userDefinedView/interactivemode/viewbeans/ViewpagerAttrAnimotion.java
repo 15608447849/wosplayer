@@ -7,6 +7,7 @@ import com.wosplayer.app.log;
 
 /**
  * Created by user on 2016/9/27.
+ *  view pager 属性动画
  */
 public class ViewpagerAttrAnimotion {
 

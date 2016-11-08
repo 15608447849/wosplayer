@@ -21,7 +21,7 @@ import rx.functions.Action0;
 /**
  * Created by user on 2016/7/4.
  */
-public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPlayer,Loader.LoaderCaller {
+public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPlayer {
 
     private static final java.lang.String TAG = "_ActiveVideoPlayerAndImage";//ActiveVideoPlayerAndImage.class.getName();
     private Context mcontext ;
@@ -146,10 +146,10 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
      */
     @Override
     public void AotuLoadingResource() {
-        log.e(TAG,"视频 资源 加载 :"+UriPath+" 本地:"+videoFileLocalPath);
+        log.i(TAG,"视频 资源 加载 : "+UriPath+"\n 本地 : "+videoFileLocalPath);
 
         if (load.fileIsExist(videoFileLocalPath)){
-            Call(videoFileLocalPath);
+            downloadResult(videoFileLocalPath);
             return;
         }else{
             load.LoadingUriResource(UriPath,null);//视频资源
@@ -186,7 +186,7 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
         //  查看本地
         if (fileUtils.checkFileExists(videoFileLocalPath)) {
             //存在
-            Call(videoFileLocalPath);//回调 视频资源
+            downloadResult(videoFileLocalPath);//回调 视频资源
         } else {
             //访问网络
             if (!isloading) {
@@ -318,7 +318,7 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
      * @param filePath
      */
     @Override
-    public void Call(final String filePath) {
+    public void downloadResult(final String filePath) {
         log.i(TAG, "一个视频 资源 下载结果传递了来了:" + filePath);
         isloading = false; //下载完毕
         image_Src_isOK = true;

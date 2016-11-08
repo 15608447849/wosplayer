@@ -38,8 +38,8 @@ public class Loader {
     public static int loadcount = 2 ;
     private static final String TAG = "_Loader";
     private static ReentrantLock locker = new ReentrantLock();//同步锁
-    private LoaderCaller other_caller;
-    public void settingCaller(LoaderCaller calle){
+    private LoaderCall other_caller;
+    public void settingCaller(LoaderCall calle){
         this.other_caller = calle;
     }
     private static List<String> loadingTaskList = Collections.synchronizedList(new LinkedList<String>());
@@ -129,7 +129,7 @@ public class Loader {
             if(!f){
                 log.e("重复任务");
                 return;
-            };
+            }
 
 //            log.i(TAG, Loader.this.toString()+" -> 加载资源 ->"+uri );
 
@@ -144,7 +144,7 @@ public class Loader {
                 ioThread.schedule(new Action0() {
                     @Override
                     public void call() {
-                        caller.Call(finalFps);
+                        caller.downloadResult(finalFps);
                         nitifyMsg(uri.substring(uri.lastIndexOf("/") + 1), 1);
                         nitifyMsg(uri.substring(uri.lastIndexOf("/") + 1), 2);
                         nitifyMsg(uri.substring(uri.lastIndexOf("/") + 1), 3);
@@ -189,11 +189,9 @@ public class Loader {
                 Log.e(TAG,"建行资源文件不存在:\n"+uri);
                 loadFileRecall("loaderr");
             }
-
         }
-
         }catch (Exception e){
-            log.e(TAG,e.getMessage());
+            e.printStackTrace();
     }finally {
         locker.unlock();
     }
@@ -233,13 +231,6 @@ public class Loader {
                         log.e(url +"# 当前下载量:" + temSize);
                         oldLoadingSize = current;
 
-
-
-
-
-
-
-
                         double speedTem = (temSize/(1024 * 1.0))/((currentTime-oldTime)/(1000*1.0)) ;
                         log.e(url +"# 当前速度:" + speedTem);
                         speed = String.format("%f",speedTem)+"kb/s";
@@ -260,14 +251,6 @@ public class Loader {
 
                         loadFileRecall("loaderr");
                         nitifyMsg(url.substring(url.lastIndexOf("/")+1),4);
-
-//                        if (msg.equals("maybe the file has downloaded completely")){
-//                            caller.Call(Filepath);
-//                        }
-//                        if (msg.equals("Not Found")){
-//                            loadFileRecall(Filepath);
-//                        }
-
                     }
                 }
         );
@@ -281,7 +264,7 @@ public class Loader {
             notifyThread.schedule(new Action0() {
                 @Override
                 public void call() {
-                    caller.Call("404");
+                    caller.downloadResult("404");
                 }
             });
         }else{
@@ -289,20 +272,10 @@ public class Loader {
             notifyThread.schedule(new Action0() {
                 @Override
                 public void call() {
-                    caller.Call(Filepath);
+                    caller.downloadResult(Filepath);
                 }
             });
         }
-
-
-//        if (new File(Filepath).exists()){//存在  直接回调
-//            log.w("本地存在 文件:"+Filepath);
-//            caller.Call(Filepath);
-//            return;
-//        }
-//        //下载404图片
-//        String nofoundUri = "http://pic.qiantucdn.com/58pic/17/68/32/5578959f3ec76_1024.jpg";
-//        this.LoadingUriResource(nofoundUri,Filepath);
     }
 
 
@@ -335,7 +308,6 @@ public class Loader {
 
                         if (fileName.contains(".apk")){
                          //APK文件
-                        //caller.Call(file.getAbsolutePath());
                         loadFileRecall(file.getAbsolutePath());
                         nitifyMsg(fileName,3);
                         return;
@@ -345,12 +317,7 @@ public class Loader {
                             //MD5文件
                             log.d(TAG,"资源文件 在服务器上 对应md5文件 : "+file.getAbsolutePath());
 
-                            if (ob == null) {
-                                    Log.e(TAG,"资源文件 对比 md5 失败,资源文件未传递");
-                                    loadFileRecall("loaderr");
-                                    nitifyMsg(((File)ob).getName(),4);
-                                    return;
-                            }
+
                                 String source_file = MD5Util.getFileMD5String((File)ob).trim();// 源文件本地生成的md5 code
                                 if (source_file == null){
                                     log.e(TAG,"文件: "+((File)ob).getName()+ "- 资源文件生成 md5 code失败 ");
@@ -368,48 +335,45 @@ public class Loader {
                                 loadFileRecall("loaderr");
                                 nitifyMsg(((File)ob).getName(),4);
                             }
-                        }else{
+                        }
+                        else{
+                            if (file == null) {
+                                Log.e(TAG,"资源文件下载失败");
+                                loadFileRecall("loaderr");
+                                nitifyMsg(fileName,4);
+                                return;
+                            }
+
                             //资源文件
                             log.d(TAG,"资源文件 : "+ file.getAbsolutePath());
+
                             //下载 md5  这个资源文件的 md5文件名, 和 资源文件本身
                             FTPload(host,user,pass,remotePath,fileName+".md5",localPath,file);
                         }
-
-
-
-
-
-
-//                        caller.Call(file.getAbsolutePath());
-                     /*   loadFileRecall(file.getAbsolutePath());
-                        nitifyMsg(fileName,3);*/
                     }
-
+                    //下载中
                     if (currentStep.equals(ActiveFtpUtils.FTP_DOWN_LOADING)){
-                        //下载中
                         notifyProgress(fileName,downProcess+"",speed);
                     }
-
+                    //ftp远程文件不存在
                     if (currentStep.equals(ActiveFtpUtils.FTP_FILE_NOTEXISTS)){
-                        //ftp远程文件不存在
-                        log.e(TAG,"ftp服务器 不存在文件 <<" + fileName+">>");
+                        log.e(TAG,"ftp服务器 不存在文件 - " + fileName);
                         loadFileRecall("loaderr");
                         nitifyMsg(fileName,4);
                     }
+                    //连接失败
                     if(currentStep.equals(ActiveFtpUtils.FTP_CONNECT_FAIL)){
-                        //连接失败
                         log.e(TAG,"ftp 连接失败 ");
                         loadFileRecall("loaderr");
                         nitifyMsg(fileName,4);
                     }
+                    //下载失败
                     if (currentStep.equals(ActiveFtpUtils.FTP_DOWN_FAIL)){
-                        //下载失败
-                        log.e(TAG,"ftp 下载失败 :"+fileName);
+                        log.e(TAG,"ftp 下载失败 : "+fileName);
                         loadFileRecall("loaderr");
                         nitifyMsg(fileName,4);
 
                     }
-
                     if (currentStep.equals(ActiveFtpUtils.FTP_CONNECT_SUCCESSS)){
                         log.d(TAG,"ftp 连接成功 - "+ fileName);
                         nitifyMsg(fileName,1);
@@ -417,7 +381,6 @@ public class Loader {
                     }
                 }
             });
-
         }
 
 
@@ -428,45 +391,32 @@ public class Loader {
      *
      */
     private void nitifyMsg(String filename, int type){
-
-//        String TERMINAL_NO = wosPlayerApp.config.GetStringDefualt("terminalNo","0000");
-
         wosPlayerApp.sendMsgToServer("FTPS:"+terminalNo+";" + filename+ ";"+type);
-
     }
 
     private void notifyProgress(String filename, String process, String speed){
-
-        String command = "PRGS:" +  terminalNo //wosPlayerApp.config.GetStringDefualt("terminalNo", "0000")
+        String command = "PRGS:" +  terminalNo
                 + "," + filename + ","
                 + process + "," + speed;
         wosPlayerApp.sendMsgToServer(command);
     }
-/////////////////////////////////////
-    /**
-     * 数据回调
-      */
-    public interface LoaderCaller{
-        void Call(String filePath);
-    }
 
-////////////////////////////////
     private static int callCount = 0;
     private String muri = null;
     private boolean existRepeatList = false;
 
-    private LoaderCaller caller = new LoaderCaller() {
+    private LoaderCall caller = new LoaderCall() {
         @Override
-        public void Call(String filePath) {
+        public void downloadResult(String filePath) {
 
-            log.i(TAG, "Call: 当前一个回调结果[ "+Loader.this.muri+" ]");
+            log.i(TAG, "downloadResult: 当前一个回调结果[ "+Loader.this.muri+" ]");
 
-            log.d(TAG, "loader Call(): 执行线程"+ Thread.currentThread().getName()+" \n thread size:"+ Thread.getAllStackTraces().size());
+            log.d(TAG, "loader downloadResult(): 执行线程"+ Thread.currentThread().getName()+" \n thread size:"+ Thread.getAllStackTraces().size());
 
             if (other_caller!=null){
                     try {
-                        log.d(TAG,"Call:传递到 子监听回调 , count:"+ callCount++);
-                        other_caller.Call(filePath);
+                        log.d(TAG,"downloadResult:传递到 子监听回调 , count:"+ callCount++);
+                        other_caller.downloadResult(filePath);
 
                     }catch (Exception e){
                         log.e(TAG,"传递子监听回调err:"+e.toString());
@@ -483,8 +433,6 @@ public class Loader {
             notifyWaitList();
         }
     };
-
-
     /**
      * 重复任务队列
      */
@@ -492,7 +440,6 @@ public class Loader {
 
     private void addRepeatTask(Loader l){
         try{
-//            lock_repeat.lock();
             if(repeatTaskList.containsKey(l.muri)){
                 ArrayList<Loader> list = repeatTaskList.get(l.muri);
                 log.e(TAG,"repeat list key:"+l.muri+" value array:"+ list.toString());
@@ -509,8 +456,6 @@ public class Loader {
 
         }catch (Exception e){
             e.printStackTrace();
-        }finally {
-//            lock_repeat.unlock();
         }
     }
 
@@ -537,7 +482,6 @@ public class Loader {
                         }
                     });
                 }
-
             }else{
                 log.i(TAG, uri+ "  不在 重复列表");
             }
@@ -549,7 +493,6 @@ public class Loader {
             lock_repeat.unlock();
         }
     }
-
     /**
      * 接收一个通告广播
      * @param uri
@@ -562,11 +505,9 @@ public class Loader {
         boolean f =  u.equals(t);
         log.w(TAG,  u+ " < - >"+t+"结果:{"+f+"}");
         if(f){
-         caller.Call(filePath);
+         caller.downloadResult(filePath);
         }
     }
-
-
     /**
      * 判断一个文件是不是已经存在
      */
@@ -594,12 +535,10 @@ public class Loader {
             //如果存在 每次只執行 至多 5 個
             if (loadingTaskList.size()==0){
                 if (waitList.size()>0){
-                    //ArrayList<Loader> waitload = new ArrayList<Loader>();
                     Iterator<Loader> itr = waitList.iterator();
                     int i = 0;
                     while(itr.hasNext()){
                         Loader o = itr.next();
-//                    waitload.add(o);
                         o.LoadingUriResource(o.muri,null);
                         itr.remove();
                         i++;
@@ -617,11 +556,7 @@ public class Loader {
         }finally {
             waitlistLock.unlock();
         }
-
-
     }
-
-
 }
 
 

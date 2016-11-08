@@ -139,7 +139,7 @@ public class IinteractionPlayer extends AbsoluteLayout implements IPlayer{
         return mp;
     }
     @Override
-    public void Call(String filePath) {
+    public void downloadResult(String filePath) {
         //null
     }
 

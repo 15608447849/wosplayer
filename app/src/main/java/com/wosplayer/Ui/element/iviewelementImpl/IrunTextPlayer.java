@@ -130,7 +130,7 @@ public class IrunTextPlayer implements IPlayer{
     }
 
     @Override
-    public void Call(String filePath) {
+    public void downloadResult(String filePath) {
         //no
     }
 

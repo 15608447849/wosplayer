@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.wosplayer.app.log;
 import com.wosplayer.loadArea.excuteBolock.Loader;
+import com.wosplayer.loadArea.excuteBolock.LoaderCall;
 
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
@@ -16,7 +17,8 @@ import java.util.concurrent.locks.ReentrantLock;
  *  2.维护一个count , 当count 与 当前所需要下载的任务相同的时候 发送一个 下载完成广播
  *
  */
-public class loaderManager extends IntentService implements Loader.LoaderCaller{
+public class loaderManager extends IntentService implements LoaderCall
+{
 
     public static final String taskKey = "loaderTaskArr";
     private static final String TAG = "_loaderManager";
@@ -67,7 +69,7 @@ public class loaderManager extends IntentService implements Loader.LoaderCaller{
 
     private int SuccessCount = 0;
     @Override
-    public void Call(String filePath) {
+    public void downloadResult(String filePath) {
         log.i(TAG,"current count :["+ SuccessCount++ +"] ,sumCount:["+TaskList.size()+"]");
         if(filePath.equals("404")){
             log.e(TAG,"load faild :["+filePath +"]-\n\r");

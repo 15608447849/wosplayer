@@ -384,14 +384,10 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
 
     }
 
-
-
-
-
-
-
-
-
+    @Override
+    public void downloadResult(String filePath) {
+        //
+    }
 
 
     /**

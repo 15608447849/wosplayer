@@ -18,6 +18,7 @@ import com.wosplayer.app.log;
 import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 import com.wosplayer.loadArea.excuteBolock.Loader;
+import com.wosplayer.loadArea.excuteBolock.LoaderCall;
 import com.wosplayer.service.RestartApplicationBroad;
 
 import org.dom4j.Document;
@@ -122,9 +123,9 @@ public class Command_UPDC implements iCommand {
 
         if (local<remote){
             final Loader loader = new Loader();
-            loader.settingCaller(new Loader.LoaderCaller() {
+            loader.settingCaller(new LoaderCall() {
                 @Override
-                public void Call(String filePath) {
+                public void downloadResult(String filePath) {
                     installApk(filePath);
                 }
             });

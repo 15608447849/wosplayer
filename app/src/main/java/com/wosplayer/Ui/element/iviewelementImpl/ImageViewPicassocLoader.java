@@ -35,9 +35,16 @@ import it.sephiroth.android.library.picasso.Picasso;
  */
  
 public class ImageViewPicassocLoader {
-    public static final int TYPE_IIMAGE = 0001;
-    public static final int TYPE_ACTION_IIMAGE = 0000;
-    public static void loadImage(Context mContext, ImageView imageView,File tagerImageFile ,int [] sizeParam,int type){
+
+    /**
+     * 加载图片
+     * @param mContext 上下文
+     * @param imageView 控件
+     * @param tagerImageFile 目标文件
+     * @param sizeParam 大小数组
+     *
+     */
+    public static void loadImage(Context mContext, ImageView imageView,File tagerImageFile ,int [] sizeParam){
         Log.d("load image",tagerImageFile.getAbsolutePath()+ " \n length:["+( sizeParam==null?"null":sizeParam.length )+"]");
         if (tagerImageFile.exists()){
             Log.d("","文件存在");
@@ -45,8 +52,6 @@ public class ImageViewPicassocLoader {
             Log.e("","文件不存在");
         }
         getBitmap(mContext,tagerImageFile,imageView);
-
-
         }
 /************************************************************************/
 

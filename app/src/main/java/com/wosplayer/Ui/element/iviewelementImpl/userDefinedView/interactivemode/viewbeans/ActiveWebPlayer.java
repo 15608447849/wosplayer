@@ -222,4 +222,8 @@ public class ActiveWebPlayer extends WebView implements IviewPlayer {
         this.loadUrl(uri);
     }
 
+    @Override
+    public void downloadResult(String filePath) {
+
+    }
 }
