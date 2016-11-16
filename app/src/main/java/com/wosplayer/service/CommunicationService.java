@@ -421,7 +421,11 @@ public class CommunicationService extends Service{
      */
     private void unregistSSendBroad() {
         if (broad!=null){
-            getApplicationContext().unregisterReceiver(broad);
+            try {
+                getApplicationContext().unregisterReceiver(broad);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             broad = null;
             log.i("注销 接受本地消息到服务器 ,广播");
         }

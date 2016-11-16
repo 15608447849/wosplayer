@@ -20,6 +20,13 @@ public class StartSelfBroad extends BroadcastReceiver {
         log.e(" installBroad ","["+intent.getAction()+"]");
         if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)){//"android.intent.action.BOOT_COMPLETED";
 
+
+            //如果被停用
+          /*  Settings.Secure.putInt(context.getContentResolver(), Settings.Secure.DEVICE_PROVISIONED, 1);
+            PackageManager pm = context.getPackageManager();
+            ComponentName name = new ComponentName(context, DisplayActivity.class);
+            pm.setComponentEnabledSetting(name, PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED);*/
 //            Toast.makeText(context, "start remote port !!!", Toast.LENGTH_LONG).show();
 //            AdbShellCommd.startRemoteport();
 

@@ -118,9 +118,7 @@ public class ScheduleReader {
     }
 
     private static final java.lang.String TAG = ScheduleReader.class.getName();
-
     private static DateFormat dataFormatUtils = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()); // 格式化 时间 工具
-
     private static Map<String,ArrayList<XmlNodeEntity>> scheduleMap = Collections.synchronizedMap(new HashMap<String, ArrayList<XmlNodeEntity>>());
     static {
         //轮播排期
@@ -134,7 +132,6 @@ public class ScheduleReader {
         //默认
         scheduleMap.put("5",new ArrayList<XmlNodeEntity>());
     }
-
     /**
      * 清理全部排期
      */
@@ -154,7 +151,6 @@ public class ScheduleReader {
         scheduleMap.get(type).remove(schedule);
         log.i(TAG,scheduleMap.toString());
     }
-
     /**
      * 添加排期
      */

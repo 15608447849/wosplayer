@@ -37,7 +37,6 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
     private int w=0;
     private boolean isExistOnLayout = false;//是否已经布局
 
-
     //播放器
     private MyVideoView video = null;
     public IVideoPlayer(Context context,ViewGroup vp) {
@@ -68,7 +67,7 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
         multifileList = Collections.synchronizedList(new ArrayList<String>());
 
          addMultiFileItem(singleFileLocalPath,singleFileUri);
-            //如果是多文件  设置false
+            //如果是多文件 设置false
             video.initVideoView(false);
             //自己完成播放完成监听
             log.d(TAG," MyVideoView : IVideoplayer srtting OnCompletionListener ...");
@@ -148,7 +147,7 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
                 //效验文件
                 for (String item : multifileList){
                     if(!loader.fileIsExist(item)){
-                    //不存在
+                        //不存在
                         String uri = multiFileUriMap.get(item);
                         if (uri!=null && !uri.equals("")){
                             loader.LoadingUriResource(uri,null);

@@ -76,7 +76,9 @@ public class SdCardTools {
     public static  final String Construction_Bank_dir_xmlfile ="/construction_bank/xml/";
     private static String appSourcePath = null;
     public static void setAppSourceDir(String path){
+
         appSourcePath = path;
+        Log.i("","设置app 根目录 - ["+ appSourcePath+"]");
     }
     public static String getAppSourceDir(Context context){
         return appSourcePath==null?getDataDataAppDir(context):appSourcePath;
@@ -138,7 +140,11 @@ public class SdCardTools {
         if (existSDCard()){
             sdDir = Environment.getExternalStorageDirectory();//获取跟目录
         }
-        return sdDir.toString();
+        if (sdDir.exists()){
+            Log.i("",sdDir.toString());
+            return sdDir.toString();
+        }
+        return "mnt/sdcard";
     }
 
     /**
@@ -352,7 +358,7 @@ public class SdCardTools {
      # /mnt/usb_storage
      */
     public static void checkSdCard(Context context) {
-
+        File dir = null;
         String tags = "#file_sdcard";
         if(!SdCardTools.existSDCard()){
             Log.e(tags," sdcard is no exist ! ");
@@ -368,11 +374,26 @@ public class SdCardTools {
                 for (String path : paths){
                     Log.i(tags," # "+ path);
                     if (path.equals("/mnt/external_sd")){
-                        SdCardTools.setAppSourceDir(path);
-                        break;
+                       dir= new File(path);
+                        if (dir.exists()){
+                            if(MkDir(dir.toString()+"/test")){
+                                SdCardTools.setAppSourceDir(path);
+                                break;
+                            }
+                        }
+                    }
+                    if (path.contains("usb")){
+                        dir = new File(path);
+                        if (dir.exists()){
+                            if(MkDir(dir.toString()+"/test")){
+                                SdCardTools.setAppSourceDir(path);
+                                break;
+                            }
+                        }
                     }
                 }
             }
+
         }
 
 
@@ -386,14 +407,18 @@ public class SdCardTools {
      *
      * @param pathdir
      */
-    public static void MkDir(String pathdir) {
+    public static boolean MkDir(String pathdir) {
         try {
             File file = new File(pathdir);
             if (!file.exists()) {
                 file.mkdirs();
             }
+            if (file.exists()){
+                return true;
+            }
         } catch (Exception e) {
             Log.i("MkDir", e.getMessage());
         }
+        return false;
     }
 }

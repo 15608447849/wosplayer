@@ -11,6 +11,7 @@ import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlHelper;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.Xmlparse;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
+import com.wosplayer.loadArea.completeTaskListBroadcast;
 import com.wosplayer.loadArea.loaderManager;
 
 import org.w3c.dom.Element;
@@ -159,7 +160,16 @@ public class ScheduleSaver implements iCommand {
         if (isNextLoad){
             //开启后台下载线程
             log.i(TAG,"当前的任务数:"+rootNode.getFtplist().size()+"\n "+rootNode.getFtplist().toString());
-            sendloadTask();
+            if (rootNode.getFtplist().size()>0){
+                sendloadTask();
+            }else{
+                log.i(TAG,"无任务 发送通知");
+                //发送完成通知
+                Intent intent = new Intent();
+                intent.setAction(completeTaskListBroadcast.action);
+                wosPlayerApp.appContext.sendBroadcast(intent);
+            }
+
         }
     }
 
@@ -580,7 +590,7 @@ public class ScheduleSaver implements iCommand {
      * @param urlString
      * @return the xml data or "" if catch Exception
      */
-    public static String uriTranslationXml(String urlString) {
+    public static String uriTranslationXml(String urlString) { // http:// xxxxx   -> file://xxx
         URL url;
         try {
             url = new URL(urlString);

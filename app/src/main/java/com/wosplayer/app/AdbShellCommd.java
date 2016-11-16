@@ -1,6 +1,9 @@
 package com.wosplayer.app;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.provider.Settings;
 
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -12,6 +15,8 @@ import installUtils.AppToSystem;
  * Created by user on 2016/10/9.
  */
 public class AdbShellCommd extends Thread{
+
+
 
     private static ReentrantLock mLock = new ReentrantLock();
 
