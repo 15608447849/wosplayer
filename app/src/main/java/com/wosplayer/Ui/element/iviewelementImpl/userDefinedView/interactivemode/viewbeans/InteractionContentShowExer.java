@@ -93,6 +93,7 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
                 return;
             }
             addButton(mFontLayout);
+
             playShow();
 
 
@@ -104,6 +105,9 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
 
     //播放
     private void playShow() {
+
+            log.e(TAG," - contentList -> size = "+contentList.size());
+
         contentList.get(currentIndex).addMeToFather(mBackLayout);
         ImageAttabuteAnimation.SttingAnimation(mContext, (View) contentList.get(currentIndex),null);
         int time = contentList.get(currentIndex).getPlayDration(this);
@@ -404,6 +408,9 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
         switch (tag){
             case leftTag:
             log.d("左边 \n <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+                if (contentList.size()==1){
+                    return;
+                }
             contentList.get(currentIndex).removeMeToFather();
                 currentIndex--;
                 if (currentIndex<0){
@@ -415,14 +422,19 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
             break;
             case rightTag:
             log.d("右边\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-
+                if (contentList.size()==1){
+                    return;
+                }
                 contentList.get(currentIndex).removeMeToFather();
                 currentIndex++;
                 if (currentIndex>=contentList.size()){
                     currentIndex=0;
                 }
 
-                playShow();
+                    playShow();
+
+
+
 
             break;
         }

@@ -39,7 +39,8 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
     private boolean isloading = false;//是否正在下载中
     private String uriPath;  //网络 uri 地址
     private String localPath; // 本地文件路径
-    private Context mcontext ;
+    private Context mcontext;
+
     public ActiveImagePlayer(Context context, String uriPath, String localPath) {
         super(context);
         this.mcontext = context;
@@ -82,42 +83,38 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
      */
     private View mFather;
     public boolean isShow = true;
+
     @Override
     public void addMeToFather(View Father) {
         if (this.mFather != null) {
             ((AbsoluteLayout) mFather).removeView(this);
             this.mFather = null;
         }
-        if (Father != null) {
-            this.mFather = Father;
+        if (Father == null) {
+           return;
         }
-
-        if (mFather != null) {
-            if (mFather instanceof AbsoluteLayout) {
-                //容器是个绝对布局的话
-
-                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-                    @Override
-                    public void call() {
+        this.mFather = Father;
+        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+            @Override
+            public void call() {
+                if (mFather != null) {
+                    if (mFather instanceof AbsoluteLayout) {
+                        //容器是个绝对布局的话
                         ((AbsoluteLayout) mFather).removeView(ActiveImagePlayer.this);
                         ((AbsoluteLayout) mFather).addView(ActiveImagePlayer.this);
                     }
-                });
-
-                if (isShow){
-                    //异步加载视图
-                    loadingMyImageView();
                 }
-
-
-
             }
+        });
+        if (isShow) {
+            //异步加载视图
+            loadingMyImageView();
         }
     }
 
     @Override
     public void addMeToFather(View view, boolean f) {
-        isShow=false;
+        isShow = false;
         addMeToFather(view);
     }
 
@@ -140,17 +137,15 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
                         try {
                             ((ViewGroup) mFather).removeView(ActiveImagePlayer.this);
                         } catch (Exception e) {
-                           log.e(TAG," "+mFather +"- "+this+" & "+ e.getMessage());
+                            log.e(TAG, " " + mFather + "- " + this + " & " + e.getMessage());
                         }
                         mFather = null;
-                        log.e(TAG,"移除自己视图成功");
+                        log.e(TAG, "移除自己视图成功");
                         //异步释放视图
                         releaseImageViewResouce();
 
                     }
                 });
-
-
 
 
             }
@@ -161,20 +156,20 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
     public void removeMeToFather(boolean f) {
 
 
-            AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-                @Override
-                public void call() {
-                    //异步释放视图
-                    releaseImageViewResouce();
-                }
-            });
+        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+            @Override
+            public void call() {
+                //异步释放视图
+                releaseImageViewResouce();
+            }
+        });
 
 
     }
 
     @Override
     public int getPlayDration(IviewPlayer iviewPlayer) {
-        return 15*1000;
+        return 15 * 1000;
     }
 
     @Override
@@ -184,6 +179,7 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
 
     private boolean existLoaddingBg = false;
     Bitmap bitmap_Loading = null;
+
     /**
      * 加载视图
      */
@@ -192,16 +188,16 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
         if (mFather == null) {
             return;
         }
-        if (isloading){
+        if (isloading) {
 
             AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                 @Override
                 public void call() {
-                    if(bitmap_Loading==null){
+                    if (bitmap_Loading == null) {
                         try {
                             bitmap_Loading = BitmapFactory.decodeResource(ActiveImagePlayer.this.getResources(), R.drawable.loadding);
                         } catch (Exception e) {
-                           log.e("下载 时 图片 异常:"+e.getMessage());
+                            log.e("下载 时 图片 异常:" + e.getMessage());
 //                            return;
                             bitmap_Loading = BitmapFactory.decodeResource(ActiveImagePlayer.this.getResources(), R.drawable.error);
                         }
@@ -223,7 +219,7 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
         } else {
             //访问网络
             if (!isloading) {
-                load.LoadingUriResource(uriPath,null);
+                load.LoadingUriResource(uriPath, null);
             }
 
         }
@@ -235,18 +231,18 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
      */
     @Override
     public void AotuLoadingResource() {
-        if (fileUtils.checkFileExists(localPath)){
+        if (fileUtils.checkFileExists(localPath)) {
             log.e("互动 image 存在资源");
             if (mFather == null) {
                 return;
             }
             downloadResult(localPath);
-          return;
+            return;
         }
 
         isloading = true; //正在下载中
-        log.i(TAG, ActiveImagePlayer.this.toString()+" 加载资源..."+uriPath );
-        load.LoadingUriResource(uriPath,null);
+        log.i(TAG, ActiveImagePlayer.this.toString() + " 加载资源..." + uriPath);
+        load.LoadingUriResource(uriPath, null);
 
     }
 
@@ -254,9 +250,9 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
      * 资源释放
      */
     private void releaseImageViewResouce() {
-        log.i(TAG, "----------------------互动图片----------------------------------Thread: "+Thread.currentThread().getName() );
+        log.i(TAG, "----------------------互动图片----------------------------------Thread: " + Thread.currentThread().getName());
         IImagePlayer.removeMyImage(this);
-        log.i(TAG, "----------------------互动图片 end----------------------------------Thread: "+Thread.currentThread().getName() );
+        log.i(TAG, "----------------------互动图片 end----------------------------------Thread: " + Thread.currentThread().getName());
 //        Drawable drawable = this.getDrawable();
 //        if (drawable != null && drawable instanceof BitmapDrawable) {
 //            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
@@ -287,15 +283,15 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
         log.i(TAG, "  一个图片 资源 下载结果传递了来了:" + filePath);
 
         isloading = false; //下载完毕
-        if (existLoaddingBg){
+        if (existLoaddingBg) {
             AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                 @Override
                 public void call() {
                     //releaseImageViewResouce();
-                    if (bitmap_Loading!=null){
+                    if (bitmap_Loading != null) {
                         ActiveImagePlayer.this.setImageDrawable(null);
                         bitmap_Loading.recycle();
-                        bitmap_Loading=null;
+                        bitmap_Loading = null;
                     }
                     existLoaddingBg = false;
                 }
@@ -304,13 +300,13 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
         }
 
         if (mFather == null) {
-        return;
+            return;
         }
 
         AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
             @Override
             public void call() {
-               // releaseImageViewResouce();
+                // releaseImageViewResouce();
                 picassoLoaderImager(filePath);
             }
         });
@@ -346,27 +342,28 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
 
     /**
      * Android中有四种，分别是：
-     ALPHA_8：每个像素占用1byte内存
-     ARGB_4444:每个像素占用2byte内存
-     ARGB_8888:每个像素占用4byte内存
-     RGB_565:每个像素占用2byte内存
+     * ALPHA_8：每个像素占用1byte内存
+     * ARGB_4444:每个像素占用2byte内存
+     * ARGB_8888:每个像素占用4byte内存
+     * RGB_565:每个像素占用2byte内存
+     *
      * @param filePath
      */
     private void picassoLoaderImager(String filePath) {
 
 //        ImageAttabuteAnimation.SttingAnimation(mcontext,this,null);
 
-        log.e(TAG,"互动 -------  loadimageing ------- "+ filePath);
-        File file =new File(filePath);
-        if (file.exists()){
+        log.e(TAG, "互动 -------  loadimageing ------- " + filePath);
+        File file = new File(filePath);
+        if (file.exists()) {
             //ImageViewPicassocLoader.loadImage(mcontext,this,new File(filePath),null);
             log.e("exists");
-        }else{
+        } else {
             log.e("no exists");
         }
 
-        ImageViewPicassocLoader.loadImage(mcontext,this,new File(filePath),null);
-        log.e(TAG,"互动 -------  loadimage end -------");
+        ImageViewPicassocLoader.loadImage(mcontext, this, new File(filePath), null);
+        log.e(TAG, "互动 -------  loadimage end -------");
     }
 
     private WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
@@ -379,49 +376,49 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
         try {
             super.onDraw(canvas);
         } catch (Exception e) {
-            log.i(TAG,"试图引用　一个　回收的图片 ["+e.getMessage()+"-"+e.getCause()+"]");
+            log.i(TAG, "试图引用　一个　回收的图片 [" + e.getMessage() + "-" + e.getCause() + "]");
             picassoLoaderImager(localPath);
         }
     }
 
     @Override
-    protected void onDetachedFromWindow(){
+    protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-       // setImageDrawable(null);
+        // setImageDrawable(null);
     }
 
     /**
-     *加载一个  播放按钮
+     * 加载一个  播放按钮
      */
-    private Button playVideoBtn ;
+    private Button playVideoBtn;
     private RelativeLayout relative;
 
-    public Button getPlayVideoBtn (){
-        if (mFather!=null){
-        if(playVideoBtn == null){
+    public Button getPlayVideoBtn() {
+        if (mFather != null) {
+            if (playVideoBtn == null) {
 
-            playVideoBtn = new Button(DisplayActivity.activityContext);
+                playVideoBtn = new Button(DisplayActivity.activityContext);
 
-            Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.play);
-            BitmapDrawable bd = new BitmapDrawable(this.getResources(), bitmap);
-            playVideoBtn.setBackgroundDrawable(bd); //背景图
+                Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.play);
+                BitmapDrawable bd = new BitmapDrawable(this.getResources(), bitmap);
+                playVideoBtn.setBackgroundDrawable(bd); //背景图
 
-            if (relative == null){
-                relative = new RelativeLayout(DisplayActivity.activityContext);
-                relative.setLayoutParams(new AbsoluteLayout.LayoutParams(AbsoluteLayout.LayoutParams.MATCH_PARENT, AbsoluteLayout.LayoutParams.MATCH_PARENT,0,0));
-            }
-            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-            lp.addRule(RelativeLayout.CENTER_IN_PARENT);
-            playVideoBtn.setLayoutParams(lp);
-
-            AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-                @Override
-                public void call() {
-                    relative.addView(playVideoBtn); //添加到相对布局中
-                    ((ViewGroup) ActiveImagePlayer.this.mFather).addView(relative);
+                if (relative == null) {
+                    relative = new RelativeLayout(DisplayActivity.activityContext);
+                    relative.setLayoutParams(new AbsoluteLayout.LayoutParams(AbsoluteLayout.LayoutParams.MATCH_PARENT, AbsoluteLayout.LayoutParams.MATCH_PARENT, 0, 0));
                 }
-            });
-        }
+                RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                lp.addRule(RelativeLayout.CENTER_IN_PARENT);
+                playVideoBtn.setLayoutParams(lp);
+
+                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+                    @Override
+                    public void call() {
+                        relative.addView(playVideoBtn); //添加到相对布局中
+                        ((ViewGroup) ActiveImagePlayer.this.mFather).addView(relative);
+                    }
+                });
+            }
         }
         return playVideoBtn;
     }
@@ -430,15 +427,15 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
     /**
      * 释放 播放 按钮
      */
-    private void releativePlayBtn(final ViewGroup view){
-        if (playVideoBtn == null){
+    private void releativePlayBtn(final ViewGroup view) {
+        if (playVideoBtn == null) {
             return;
         }
 
         //如果返回按钮存在. 移除
 
         Drawable drawable = playVideoBtn.getBackground();
-        if (drawable!=null) {
+        if (drawable != null) {
             BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
             if (bitmapDrawable != null) {
                 if (!bitmapDrawable.getBitmap().isRecycled()) {
@@ -458,7 +455,7 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
         AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
             @Override
             public void call() {
-                if (relative!=null){
+                if (relative != null) {
                     relative.removeView(playVideoBtn);
                     view.removeView(relative);
                     relative = null;

@@ -365,12 +365,11 @@ public class SdCardTools {
             Log.e(tags," application store dir-> "+getAppSourceDir(context));
 //            checkSdCard(context);
         }else{
+            SdCardTools.setAppSourceDir(getSDPath());
             String [] paths = SdCardTools.getVolumePaths(context);
             if (paths!=null && paths.length>0){
                 Log.i(tags,"---------------------------------- sd card path info ------------------------------------");
                 Log.i(tags," 当前 sdcard path:"+ getSDPath());
-
-                SdCardTools.setAppSourceDir(getSDPath());
                 for (String path : paths){
                     Log.i(tags," # "+ path);
                     if (path.equals("/mnt/external_sd")){

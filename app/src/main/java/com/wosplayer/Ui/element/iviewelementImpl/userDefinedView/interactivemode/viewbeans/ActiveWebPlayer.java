@@ -2,10 +2,8 @@ package com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemod
 
 import android.content.Context;
 import android.graphics.Color;
-import android.net.http.SslError;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -16,7 +14,6 @@ import android.widget.ImageButton;
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.IinteractionPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
-import com.wosplayer.app.log;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
@@ -188,7 +185,7 @@ public class ActiveWebPlayer extends WebView implements IviewPlayer {
             return;
         }
 
-        this.setWebViewClient(new WebViewClient(){
+        /*this.setWebViewClient(new WebViewClient(){
             @Override
             public boolean shouldOverrideUrlLoading(android.webkit.WebView view,
                                                     String url) {
@@ -211,14 +208,15 @@ public class ActiveWebPlayer extends WebView implements IviewPlayer {
                     log.e(TAG, "onReceivedSslError1." + e.getMessage());
                 }
             }
-        });
+        });*/
 
         this.getSettings().setJavaScriptEnabled(true);//java
         this.getSettings().setPluginState(WebSettings.PluginState.ON);
-        this.setWebChromeClient(new WebChromeClient());
         this.getSettings().setDefaultTextEncodingName("UTF-8");
         this.getSettings().setLoadWithOverviewMode(true);
-        uri = uri.startsWith("http://")? uri : "http://"+uri;
+        this.setWebChromeClient(new WebChromeClient());
+        this.setWebViewClient(new WebViewClient());
+        uri = uri.startsWith("http")? uri : "http://"+uri;
         this.loadUrl(uri);
     }
 

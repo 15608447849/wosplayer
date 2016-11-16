@@ -1,9 +1,7 @@
 package com.wosplayer.Ui.element.iviewelementImpl;
 
 import android.content.Context;
-import android.net.http.SslError;
 import android.view.ViewGroup;
-import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebViewClient;
@@ -16,37 +14,39 @@ import com.wosplayer.app.log;
  * Created by Administrator on 2016/7/24.
  */
 
-public class IWebPlayer extends android.webkit.WebView  implements IPlayer {
+public class IWebPlayer extends android.webkit.WebView implements IPlayer {
     private static final java.lang.String TAG = IWebPlayer.class.getName();
 
     private Context mCcontext;
     private ViewGroup mfatherView = null;
-    private int x=0;
-    private int y=0;
-    private int h=0;
-    private int w=0;
+    private int x = 0;
+    private int y = 0;
+    private int h = 0;
+    private int w = 0;
     private boolean isExistOnLayout = false;
+
     public IWebPlayer(Context context, ViewGroup mfatherView) {
         super(context);
-        mCcontext =context;
+        mCcontext = context;
         this.mfatherView = mfatherView;
     }
 
     private DataList mp = null;
     private String uri = null;
+
     @Override
     public void loadData(DataList mp, Object ob) {
         try {
-        this.mp = mp;
-        this.x = mp.GetIntDefualt("x", 0);
-        this.y = mp.GetIntDefualt("y", 0);
-        this.w = mp.GetIntDefualt("width", 0);
-        this.h = mp.GetIntDefualt("height", 0);
-        this.uri = mp.GetStringDefualt("getcontents",
-                "http://www.winonetech.com/");
-        if (!this.uri.startsWith("http://")) {
-            this.uri = "http://" + this.uri;
-        }
+            this.mp = mp;
+            this.x = mp.GetIntDefualt("x", 0);
+            this.y = mp.GetIntDefualt("y", 0);
+            this.w = mp.GetIntDefualt("width", 0);
+            this.h = mp.GetIntDefualt("height", 0);
+            this.uri = mp.GetStringDefualt("getcontents",
+                    "http://www.winonetech.com/");
+           this.uri = uri.startsWith("http")?uri:"http://" + this.uri;
+
+
 
             initParam();
         } catch (Exception e) {
@@ -57,31 +57,32 @@ public class IWebPlayer extends android.webkit.WebView  implements IPlayer {
     private void initParam() {
         this.getSettings().setJavaScriptEnabled(true);//js
         this.getSettings().setPluginState(WebSettings.PluginState.ON);//flash 有关系
-        this.setWebChromeClient(new WebChromeClient());
+//      this.setWebChromeClient(new WebChromeClient());
         this.getSettings().setDefaultTextEncodingName("UTF-8");//编码
-        this.setWebChromeClient(new WebChromeClient(){
+        this.setWebChromeClient(new WebChromeClient() {
             @Override
-            public void onProgressChanged(android.webkit.WebView view,
-                                          int newProgress) {
+            public void onProgressChanged(android.webkit.WebView view, int newProgress) {
                 super.onProgressChanged(view, newProgress);
                 if (newProgress == 100) {
                     // 加载完成
-                    log.i(TAG,"页面加载完成");
+                    log.i(TAG, "页面加载完成");
                 } else {
                     // 加载进度
-                    log.i(TAG,"页面加载中..."+newProgress);
+                    log.i(TAG, "页面加载中..." + newProgress);
                 }
             }
         });
-        this.setWebViewClient(new WebViewClient(){
-            @Override
-            public boolean shouldOverrideUrlLoading(android.webkit.WebView view,
-                                                    String url) {
-                log.i(TAG,"url :"+url+"            "+uri);
+        this.setWebViewClient(new WebViewClient());
+       /* this.setWebViewClient(new WebViewClient() {
+                                  @Override
+                                  public boolean shouldOverrideUrlLoading(android.webkit.WebView view,
+                                                                          String url) {
+                                      log.i(TAG, "shouldOverrideUrlLoading() 参数url :" + url + " \n 全局uri -" + uri);
+                                      view.loadUrl(url);
 
-                view.loadUrl(url);// 不开启新的浏器页面
-                return true;
-            }
+                                      return true;
+                                  }
+
                                   @Override
                                   public void onReceivedSslError(android.webkit.WebView view,
                                                                  SslErrorHandler handler, SslError error) {
@@ -93,15 +94,18 @@ public class IWebPlayer extends android.webkit.WebView  implements IPlayer {
                                           log.e(TAG, "onReceived Ssl Error1 :" + e.getMessage());
                                       }
                                   }
-        }
-        );
+                              }
+        );*/
+        this.getSettings().setPluginState(WebSettings.PluginState.ON);
+        this.getSettings().setLoadWithOverviewMode(true);
     }
+
     @Override
-    public void setlayout(){
+    public void setlayout() {
         try {
-            if (!isExistOnLayout){
+            if (!isExistOnLayout) {
                 mfatherView.addView(this);
-                isExistOnLayout= true;
+                isExistOnLayout = true;
             }
 
             LayoutParams lp = (LayoutParams) this
@@ -127,20 +131,21 @@ public class IWebPlayer extends android.webkit.WebView  implements IPlayer {
         try {
             setlayout();
             this.loadUrl(this.uri);
-        }catch (Exception e){
-            log.e(TAG,"web start():"+e.getMessage());
+        } catch (Exception e) {
+            log.e(TAG, "web start():" + e.getMessage());
         }
     }
+
     @Override
     public void stop() {//主线程执行
-     try{
-         mfatherView.removeView(IWebPlayer.this);
-         isExistOnLayout = false;
-     }
-     catch (Exception e){
-         log.e(TAG,"web stop():"+e.getMessage());
-     }
+        try {
+            mfatherView.removeView(IWebPlayer.this);
+            isExistOnLayout = false;
+        } catch (Exception e) {
+            log.e(TAG, "web stop():" + e.getMessage());
+        }
     }
+
     @Override
     public void downloadResult(String filePath) {
         //未使用
