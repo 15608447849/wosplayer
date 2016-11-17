@@ -290,11 +290,9 @@ public class Loader {
      */
     private synchronized void FTPload(final String host, final String user, final String pass, final String remotePath, final String fileName, final String localPath, final Object ob){
         log.i(TAG, "FTP任务["+fileName+"],所在线程:"+ Thread.currentThread().getName());
-
-            final ActiveFtpUtils ftp = new ActiveFtpUtils(host,21,user,pass);
-
-
-            ftp.downloadSingleFile(remotePath + fileName,
+        ActiveFtpUtils
+                .getInstants(host,21,user,pass)
+                .downloadSingleFile(remotePath + fileName,
                     localPath,
                     fileName,
                     3,//重新链接次数
