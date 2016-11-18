@@ -96,7 +96,6 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
                                   }
                               }
         );*/
-        this.getSettings().setPluginState(WebSettings.PluginState.ON);
         this.getSettings().setLoadWithOverviewMode(true);
     }
 
