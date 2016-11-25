@@ -38,8 +38,6 @@ public class IImagePlayer extends ImageView implements IPlayer{
     private int defaultWidth = wm.getDefaultDisplay().getWidth();
     private boolean isExistOnLayout = false;
 
-
-
     public IImagePlayer(Context context, ViewGroup mfatherView) {
         super(context);
         mCcontext =context;
