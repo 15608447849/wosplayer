@@ -3,7 +3,7 @@ package com.wosplayer.cmdBroadcast.Command.OtherCmd;
 import android.util.Log;
 
 import com.wosplayer.app.log;
-import com.wosplayer.app.wosPlayerApp;
+import com.wosplayer.app.WosApplication;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 
 import cn.trinea.android.common.util.ShellUtils;
@@ -22,7 +22,7 @@ public class Command_Reboot_Sys implements iCommand {
         //Command_CAPT.executeLiunx("reboot");//
 //        AppToSystem.execRootCmdSilent("reboot");
 
-        wosPlayerApp.sendMsgToServer("OFLI:" + wosPlayerApp.config.GetStringDefualt("terminalNo","0000"));
+        WosApplication.sendMsgToServer("OFLI:" + WosApplication.config.GetStringDefualt("terminalNo","0000"));
 
         String cmd = "reboot";
         Log.e("#####","\n"+cmd);

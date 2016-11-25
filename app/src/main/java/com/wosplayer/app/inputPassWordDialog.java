@@ -23,7 +23,7 @@ public class inputPassWordDialog {
         final EditText passwordInput = new EditText(m);
         passwordInput.setTransformationMethod(PasswordTransformationMethod.getInstance());
              new AlertDialog.Builder(m)
-                    .setTitle(wosPlayerApp.getLocalIpAddress()+" 输入管理密码将结束应用")
+                    .setTitle(WosApplication.getLocalIpAddress()+" 输入管理密码将结束应用")
                     .setIcon(android.R.drawable.ic_dialog_info)
                     .setView(passwordInput).setPositiveButton("确定", new DialogInterface.OnClickListener() {
                         @Override

@@ -6,7 +6,7 @@ import android.os.Bundle;
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.Ui.uiBroadcast.UibrocdCastReceive;
 import com.wosplayer.app.log;
-import com.wosplayer.app.wosPlayerApp;
+import com.wosplayer.app.WosApplication;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_SYTI;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
 
@@ -436,7 +436,7 @@ public class ScheduleReader {
             Bundle b = new Bundle();
             b.putParcelable(UibrocdCastReceive.key,entity);
             intent.putExtras(b);
-            wosPlayerApp.appContext.sendBroadcast(intent);
+            WosApplication.appContext.sendBroadcast(intent);
         }else{
             log.e(TAG,"播放默认排期");
         }

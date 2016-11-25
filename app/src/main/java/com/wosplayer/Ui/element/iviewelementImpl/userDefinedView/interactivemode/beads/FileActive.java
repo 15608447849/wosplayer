@@ -7,7 +7,7 @@ import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.ActiveWebPlayer;
 import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.log;
-import com.wosplayer.app.wosPlayerApp;
+import com.wosplayer.app.WosApplication;
 
 /**
  * Created by Administrator on 2016/6/28.
@@ -39,32 +39,24 @@ public class FileActive {
      */
     public IviewPlayer TanslateInfoToView() {
 
-        //先判断资源文件 本地是否存在
-        String filename = filepath.substring(filepath.lastIndexOf("/") + 1);
-        String localPath = wosPlayerApp.config.GetStringDefualt("basepath", "") + filename;
+        try {
+            //先判断资源文件 本地是否存在
+            String filename = filepath.substring(filepath.lastIndexOf("/") + 1);
+            String localPath = WosApplication.config.GetStringDefualt("basepath", "") + filename;
 
-        log.i(TAG, "这个类型:" + type + "资源:" + filepath + "本地资源路径:" + localPath);
+            log.i(TAG, "这个类型:" + type + "资源:" + filepath + "本地资源路径:" + localPath);
 
-        if (type == 3) { //网页 //|| filetype == 1006
-            log.i(TAG, Thread.currentThread().getName());
-          return new ActiveWebPlayer(DisplayActivity.activityContext,filepath);
+            if (type == 3) { //网页 //|| filetype == 1006
+                log.i(TAG, Thread.currentThread().getName());
+              return new ActiveWebPlayer(DisplayActivity.activityContext,filepath);
 
-        } else if (filetype == 1007) { //图片
-           return new ActiveImagePlayer(DisplayActivity.activityContext, filepath, localPath);
-        } else if (filetype == 1002) {//video 1002
-
-
-           /*if(video_image_url.equals("") || video_image_url==null || video_image_url.equals("null")){
-                video_image_url = "http://desk.fd.zol-img.com.cn/t_s1920x1080c5/g5/M00/08/04/ChMkJleF7WeIdaxTABNpaaUXOW8AATeTwERcIwAE2mB274.jpg?downfile=146891502194.jpg";
+            } else if (filetype == 1007) { //图片
+               return new ActiveImagePlayer(DisplayActivity.activityContext, filepath, localPath);
+            } else if (filetype == 1002) {//video 1002
+                return new ActiveVideoPlayer(DisplayActivity.activityContext,filepath,localPath);
             }
-
-            String imagefn = video_image_url.substring(video_image_url.lastIndexOf("/") + 1);
-            String imageLocalPath =  wosPlayerApp.config.GetStringDefualt("basepath", "")+imagefn;
-            return  new ActiveVideoPlayerAndImage(DisplayActivity.activityContext,video_image_url,imageLocalPath,filepath,localPath);*/
-
-
-            return new ActiveVideoPlayer(DisplayActivity.activityContext,filepath,localPath);
-
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
 

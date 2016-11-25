@@ -1,4 +1,4 @@
-package com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans;
+package com.wosplayer.Ui.element.iviewelementImpl.notuser;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -384,7 +384,7 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
 
     }
 
-    @Override
+
     public void downloadResult(String filePath) {
         //
     }

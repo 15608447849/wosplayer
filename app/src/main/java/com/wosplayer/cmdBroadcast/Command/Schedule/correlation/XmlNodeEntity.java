@@ -6,7 +6,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.wosplayer.app.log;
-import com.wosplayer.app.wosPlayerApp;
+import com.wosplayer.app.WosApplication;
 
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -299,7 +299,7 @@ public class XmlNodeEntity implements Parcelable {
      * @param value
      */
     public static void writeShareDataSelf(String key, String value) {
-        SharedPreferences preferences = wosPlayerApp.appContext.getSharedPreferences(
+        SharedPreferences preferences = WosApplication.appContext.getSharedPreferences(
                XmlNodeEntity.class.getName(), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(key, value);
@@ -314,7 +314,7 @@ public class XmlNodeEntity implements Parcelable {
     public static String readShareDataSelf(String key) {
         String result = "";
         try {
-            SharedPreferences preferences = wosPlayerApp.appContext
+            SharedPreferences preferences = WosApplication.appContext
                     .getSharedPreferences(XmlNodeEntity.class.getName(),
                             Context.MODE_PRIVATE);
             result = preferences.getString(key, "");

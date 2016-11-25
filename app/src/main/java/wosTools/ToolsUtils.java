@@ -7,9 +7,10 @@ import android.content.pm.PackageManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.wos.SdCardTools;
+import com.wosplayer.app.WosApplication;
 import com.wosplayer.app.appTools;
 import com.wosplayer.app.log;
-import com.wosplayer.app.wosPlayerApp;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -19,6 +20,8 @@ import org.dom4j.io.SAXReader;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
@@ -58,7 +61,7 @@ public class ToolsUtils {
      */
     public static String GetKey(boolean f,String key,String defualtValue)
     {
-        String value= f?readShareData(wosPlayerApp.appContext,key).trim() : appTools.readShareDataTools(wosPlayerApp.appContext,key).trim();;
+        String value= f?readShareData(WosApplication.appContext,key).trim() : appTools.readShareDataTools(WosApplication.appContext,key).trim();;
         return  (value!="")?value:defualtValue;
     }
     /**
@@ -66,20 +69,20 @@ public class ToolsUtils {
      * @return
      */
     public static String GetMac(){
-        return wosPlayerApp.GetMac();
+        return WosApplication.GetMac();
     }
     /**
      * 生成ip
      */
     public static String getLocalIpAddress(){
-        return wosPlayerApp.getLocalIpAddress();
+        return WosApplication.getLocalIpAddress();
     }
 
     public static String getAppVersionName() {
         String versionName = "";
         try {
-            PackageManager pm = wosPlayerApp.appContext.getPackageManager();
-            PackageInfo pi = pm.getPackageInfo(wosPlayerApp.appContext.getPackageName(), 0);
+            PackageManager pm = WosApplication.appContext.getPackageManager();
+            PackageInfo pi = pm.getPackageInfo(WosApplication.appContext.getPackageName(), 0);
             versionName = pi.versionName;
             if (versionName == null || versionName.length() <= 0) {
                 return "";
@@ -190,7 +193,7 @@ public class ToolsUtils {
     }
     public  static void showToast(String msg)
     {
-        Toast toast=Toast.makeText(wosPlayerApp.appContext, msg, Toast.LENGTH_SHORT);
+        Toast toast=Toast.makeText(WosApplication.appContext, msg, Toast.LENGTH_SHORT);
         toast.show();
     }
 
@@ -206,5 +209,64 @@ public class ToolsUtils {
         }
         return result;
     }
+
+
+
+
+
+
+    /**
+     *SDCard/ xxx / xx.txt
+     *
+     * 读取 acesst路径下的文件 -> 保存到sd卡中
+     */
+
+    public static boolean ReadAssectsDataToSdCard(Context c,String dirPath,String fileName) {
+        InputStream inputStream = null;
+        FileOutputStream fileOutputStream = null;
+        try {
+            // 得到资源中的assets数据流
+            inputStream = c.getResources().getAssets().open(fileName);
+            int length = inputStream.available();
+            if (length==0){
+                return false;
+            }
+            if(SdCardTools.MkDir(dirPath)){
+                //目录创建 或者 存在
+                fileOutputStream = new FileOutputStream(dirPath+fileName);
+                byte[] buffer = new byte[1024];
+                length = 0;
+                while((length = inputStream.read(buffer)) > 0){
+                    fileOutputStream.write(buffer, 0 ,length);
+                }
+                fileOutputStream.flush();
+                System.out.println("ReadAssectsDataToSdCard() ----------success--------------");
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            if (inputStream!=null){
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (fileOutputStream!=null){
+                try {
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return false;
+    }
+
+
+
+
+
 
 }

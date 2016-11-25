@@ -1,4 +1,4 @@
-package com.wosplayer.loadArea;
+package com.wosplayer.loadArea.kernal;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

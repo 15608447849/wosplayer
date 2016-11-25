@@ -20,11 +20,11 @@ import android.widget.Toast;
 
 import com.wos.SdCardTools;
 import com.wosplayer.R;
-import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.MyVideoView;
+import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.MyVideoView;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
 import com.wosplayer.app.inputPassWordDialog;
 import com.wosplayer.app.log;
-import com.wosplayer.app.wosPlayerApp;
+import com.wosplayer.app.WosApplication;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleReader;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleSaver;
 import com.wosplayer.service.MonitorService;
@@ -37,7 +37,7 @@ import wosTools.DataListEntiy;
 import wosTools.RequstTerminal;
 import wosTools.ToolsHandler;
 
-import static com.wosplayer.app.wosPlayerApp.config;
+import static com.wosplayer.app.WosApplication.config;
 
 /**
  *  Timer timer = new Timer();
@@ -68,7 +68,7 @@ public class DisplayActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ((wosPlayerApp)getApplication()).startAppInit();
+        ((WosApplication)getApplication()).startAppInit();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//保持屏幕常亮
         setContentView(R.layout.activity_main);//设置布局文件
         baselayout = (AbsoluteLayout) LayoutInflater.from(this).inflate(R.layout.activity_main,null);
@@ -120,7 +120,7 @@ public class DisplayActivity extends Activity {
         super.onStart();
 
         if(isSettingServerInfo()){
-            ((wosPlayerApp)this.getApplication()).init(true);
+            ((WosApplication)this.getApplication()).init(true);
         }
     }
 
@@ -206,7 +206,6 @@ public class DisplayActivity extends Activity {
             }
             //隐藏
             frame.setVisibility(View.GONE);
-
            // openOtherVideo(main);
         }
     }
@@ -292,7 +291,7 @@ public class DisplayActivity extends Activity {
     private void startWork(){
         if (activityContext!=null){
             //开启通讯服务
-            wosPlayerApp.startCommunicationService(this);
+            WosApplication.startCommunicationService(this);
             try {
                 ScheduleSaver.clear();
                 ScheduleReader.clear();
@@ -308,7 +307,7 @@ public class DisplayActivity extends Activity {
     //结束工作
     private void endWork(){
         try {
-            wosPlayerApp.stopCommunicationService(this); //关闭服务
+            WosApplication.stopCommunicationService(this); //关闭服务
 //            ScheduleSaver.clear();
 //            ScheduleReader.clear();
         } catch (Exception e) {
@@ -377,7 +376,7 @@ public class DisplayActivity extends Activity {
     }
 
     private void initTimer() {
-        if (wosPlayerApp.isWosToolsDataTranslation){
+        if (WosApplication.isWosToolsDataTranslation){
             log.e(TAG,"--- initTimer() ---");
             //有数据转移
             new Timer().schedule(
@@ -385,7 +384,7 @@ public class DisplayActivity extends Activity {
                 @Override
                 public void run() {
                 save();
-                wosPlayerApp.isWosToolsDataTranslation =false;
+                WosApplication.isWosToolsDataTranslation =false;
                 DisplayActivity.activityContext.finish();
                 }
             },15*1000);

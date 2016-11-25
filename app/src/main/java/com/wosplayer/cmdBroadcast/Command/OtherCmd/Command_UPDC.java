@@ -15,7 +15,7 @@ import com.lidroid.xutils.http.client.HttpRequest;
 import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.AdbShellCommd;
 import com.wosplayer.app.log;
-import com.wosplayer.app.wosPlayerApp;
+import com.wosplayer.app.WosApplication;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 import com.wosplayer.loadArea.excuteBolock.Loader;
 import com.wosplayer.loadArea.excuteBolock.LoaderCall;
@@ -119,14 +119,17 @@ public class Command_UPDC implements iCommand {
         log.i(TAG,"upload  LocalVersion :"+ local+" remoteVersion:"+remote);
 
 
-        wosPlayerApp.sendMsgToServer("terminalNo:"+wosPlayerApp.config.GetStringDefualt("terminalNo","0000")+",localVersionNumber:"+local+",serverVersionNumber:"+remote);
+        WosApplication.sendMsgToServer("terminalNo:"+ WosApplication.config.GetStringDefualt("terminalNo","0000")+",localVersionNumber:"+local+",serverVersionNumber:"+remote);
 
         if (local<remote){
             final Loader loader = new Loader();
             loader.settingCaller(new LoaderCall() {
                 @Override
-                public void downloadResult(String filePath) {
-                    installApk(filePath);
+                public void downloadResult(String filePath,String state) {
+                    if (!state.equals("loaderr")){
+                        installApk(filePath);
+                    }
+
                 }
             });
 
@@ -143,7 +146,7 @@ public class Command_UPDC implements iCommand {
         int versionCode = 0;
         try {
             // 获取软件版本号
-            versionCode = wosPlayerApp.appContext.getPackageManager().getPackageInfo(wosPlayerApp.appContext.getPackageName(), 0).versionCode;
+            versionCode = WosApplication.appContext.getPackageManager().getPackageInfo(WosApplication.appContext.getPackageName(), 0).versionCode;
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }

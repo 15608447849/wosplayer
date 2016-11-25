@@ -6,7 +6,8 @@ import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
 
 import com.wosplayer.Ui.element.IPlayer;
-import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.mSurfaceview;
+import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.mSurfaceview;
+import com.wosplayer.Ui.performer.TimeCalls;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.log;
 
@@ -129,10 +130,6 @@ public class IrunTextPlayer implements IPlayer{
         return mp;
     }
 
-    @Override
-    public void downloadResult(String filePath) {
-        //no
-    }
 
 
     private Thread textHelper = null;
@@ -165,6 +162,17 @@ public class IrunTextPlayer implements IPlayer{
             log.e(TAG, "stop :"+ e.getMessage());
         }
     }
+    //时间回调
+    private TimeCalls timeCalls = null;
 
+    @Override
+    public void setTimerCall(TimeCalls timer) {
+        timeCalls = timer;
+    }
+
+    @Override
+    public void unTimerCall() {
+        timeCalls = null;
+    }
 
 }

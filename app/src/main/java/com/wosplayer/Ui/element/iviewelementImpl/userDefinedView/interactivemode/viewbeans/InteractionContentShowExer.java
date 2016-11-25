@@ -14,7 +14,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.wosplayer.R;
-import com.wosplayer.Ui.element.iviewelementImpl.ImageAttabuteAnimation;
+import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageAttabuteAnimation;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
 import com.wosplayer.app.log;
 
@@ -42,33 +42,23 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
     private static final String TAG = "_InteractionContentShowExer";
     private static final int leftTag = 0;
     private static final int rightTag = 1;
-
-
-
     private Context mContext = null;
     private List<IviewPlayer> contentList = null;
     private int currentIndex = 0;
     private View mFather = null;
     private AbsoluteLayout mBackLayout = null;
     private AbsoluteLayout mFontLayout = null;
-
     private Button left=null;
     private Button right=null;
     private FrameLayout returnbtn;//返回按钮
-
-
     private Timer timer = null;
     private TimerTask timerTask  = null;
-
-
-
     /**
      * 构造
      * @param context 环境
      */
     public InteractionContentShowExer(Context context,List<IviewPlayer> list) {
         super(context);
-
         this.mContext = context;
         //设置自己的布局
         AbsoluteLayout.LayoutParams lp = new AbsoluteLayout.LayoutParams(ViewPager.LayoutParams.MATCH_PARENT, ViewPager.LayoutParams.MATCH_PARENT,0,0);
@@ -77,14 +67,10 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
         setContentList(list);
         log.d(TAG,"创建完成 -"+this.toString());
     }
-
     @Override
     public void AotuLoadingResource() {
         try {
-
             genereteLayout();//前后图层
-
-
             //首次 显示 第一个控件
             if (contentList==null){
                 log.e(TAG,"无内容集合");
@@ -93,34 +79,24 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
                 return;
             }
             addButton(mFontLayout);
-
             playShow();
-
-
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
     //播放
     private void playShow() {
-
-            log.e(TAG," - contentList -> size = "+contentList.size());
-
+        log.e(TAG," - contentList -> size = "+contentList.size());
         contentList.get(currentIndex).addMeToFather(mBackLayout);
         ImageAttabuteAnimation.SttingAnimation(mContext, (View) contentList.get(currentIndex),null);
         int time = contentList.get(currentIndex).getPlayDration(this);
         startTimer(time);
     }
-
-
     private void cancalTimer() {
         log.d(TAG,"停止定时任务");
         if (timerTask != null){
             timerTask.cancel();
             timerTask=null;
-
         }
         if (timer!=null){
             timer.cancel();
@@ -151,21 +127,17 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
         timer = new Timer();
         timer.schedule(timerTask,times);
     }
-
     //tianjia anniu
     private void addButton(ViewGroup layout) {
         addReturnButton(layout);
         addLeftOrRightButton(layout);
-
     }
-
     private void removeResoure(){
         try {
             cancalTimer();
             if (contentList!=null && contentList.size()>currentIndex){
                 contentList.get(currentIndex).removeMeToFather();
             }
-
             this.removeAllViews();//删除全部的视图
             left = null;
             right = null;
@@ -173,23 +145,6 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
             mFontLayout =null;
             contentList=null;
             mContext = null;
-  /*
-            if (!isRemoveBtn){
-                return;
-            }
-         if (returnbtn!=null){
-               // ((ViewGroup)mFather).removeView(returnbtn);
-                this.removeView(returnbtn);
-                returnbtn=null;
-            }
-            if (left!=null){
-                ((ViewGroup)mFather).removeView(left);
-                left=null;
-            }
-            if (right!=null){
-                ((ViewGroup)mFather).removeView(right);
-                right=null;
-            }*/
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -197,7 +152,6 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
     }
     @Override
     public void addMeToFather(View view) {
-
         try {
             mFather = view;
 //            ((ViewGroup)mFather).removeView(this);
@@ -207,7 +161,6 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
             e.printStackTrace();
         }
     }
-
     @Override
     public void addMeToFather(View view, boolean f) {
 
@@ -233,8 +186,6 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
 
     @Override
@@ -246,11 +197,9 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
     public int getPlayDration(IviewPlayer iviewPlayer) {
         return 0;
     }
-
     //因为获取视频时长,在加载视频之前无法获取,  所以开一个接口 在视频播放完之后可供调用
     @Override
     public void otherMother(Object object) {
-
         try {
             Integer var = (Integer) object;
             log.e(TAG," otherMother() call : "+ var);
@@ -258,23 +207,15 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
-
-
     /*
-
     我的方法
      */
-
     private void genereteLayout(){
-
         if (Thread.currentThread() != Looper.getMainLooper().getThread()){
-            log.e(TAG,"当前线程不在主线程 创建图层");
+            log.e(TAG,"当前线程不在主线程 不能创建图层");
             return;
         }
-
         try {
             //第一层
             if (mBackLayout==null){
@@ -286,8 +227,6 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
                 this.addView(mBackLayout);
                 log.d(TAG,"背景图层 创建完成 "+mBackLayout);
             }
-
-
             //第二层
             if (mFontLayout==null){
                 mFontLayout = new AbsoluteLayout(mContext);
@@ -297,11 +236,9 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
                 this.addView(mFontLayout);
                 log.d(TAG,"前景图层 创建完成 "+ mFontLayout);
             }
-
         } catch (Exception e) {
             log.e(TAG,"genereteLayout() err:"+e.getMessage());
         }
-
     }
 
 
@@ -438,11 +375,5 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
 
             break;
         }
-    }
-
-
-    @Override
-    public void downloadResult(String filePath) {
-
     }
 }

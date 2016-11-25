@@ -8,10 +8,10 @@ import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.MyVideoView;
+import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.MyVideoView;
 import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.log;
-import com.wosplayer.app.wosPlayerApp;
+import com.wosplayer.app.WosApplication;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 
 import org.apache.http.client.HttpClient;
@@ -38,8 +38,8 @@ import rx.functions.Action0;
  * catch screen
  */
 public class Command_CAPT implements iCommand {
-   private static String picpath = wosPlayerApp.config.GetStringDefualt("CAPTIMAGEPATH","");//path
-   private String basepath = wosPlayerApp.config.GetStringDefualt("basepath","")+"screen0.png";;
+   private static String picpath = WosApplication.config.GetStringDefualt("CAPTIMAGEPATH","");//path
+   private String basepath = WosApplication.config.GetStringDefualt("basepath","")+"screen0.png";;
     @Override
     public void Execute(String param) {
 
@@ -132,7 +132,7 @@ public class Command_CAPT implements iCommand {
             // 向服务端上传图片
             String FilePath = picpath;
             final File uploadFile  = new File(FilePath);
-            final String uri = wosPlayerApp.config.GetStringDefualt("CaptureURL", "");
+            final String uri = WosApplication.config.GetStringDefualt("CaptureURL", "");
 
             new Thread(new Runnable() {
                 @Override
@@ -307,7 +307,7 @@ public class Command_CAPT implements iCommand {
             HttpPost httppost = new HttpPost(url);
             MultipartEntity entity = new MultipartEntity();
 
-            String terminalNo = wosPlayerApp.config.GetStringDefualt("terminalNo",
+            String terminalNo = WosApplication.config.GetStringDefualt("terminalNo",
                     "");
 
             entity.addPart(terminalNo, new FileBody(file));

@@ -6,13 +6,13 @@ import android.util.Log;
 
 import com.wos.SdCardTools;
 import com.wosplayer.app.log;
-import com.wosplayer.app.wosPlayerApp;
+import com.wosplayer.app.WosApplication;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlHelper;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.Xmlparse;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
-import com.wosplayer.loadArea.completeTaskListBroadcast;
-import com.wosplayer.loadArea.loaderManager;
+import com.wosplayer.loadArea.kernal.completeTaskListBroadcast;
+import com.wosplayer.loadArea.kernal.loaderManager;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -148,10 +148,10 @@ public class ScheduleSaver implements iCommand {
         startTime = System.currentTimeMillis();
         //判断是否清理数据
 
-        if(SdCardTools.justFileBlockVolume(wosPlayerApp.config.GetStringDefualt("basepath",""),
-                wosPlayerApp.config.GetStringDefualt("storageLimits","50"))){
+        if(SdCardTools.justFileBlockVolume(WosApplication.config.GetStringDefualt("basepath",""),
+                WosApplication.config.GetStringDefualt("storageLimits","50"))){
 
-            SdCardTools.clearTargetDir(wosPlayerApp.config.GetStringDefualt("basepath",""),rootNode.getFtplist());
+            SdCardTools.clearTargetDir(WosApplication.config.GetStringDefualt("basepath",""),rootNode.getFtplist());
         }
         endTime = System.currentTimeMillis();
         log.e(TAG,"清理数据用时 : "+(endTime - startTime)+" 毫秒 \n" +
@@ -167,7 +167,7 @@ public class ScheduleSaver implements iCommand {
                 //发送完成通知
                 Intent intent = new Intent();
                 intent.setAction(completeTaskListBroadcast.action);
-                wosPlayerApp.appContext.sendBroadcast(intent);
+                WosApplication.appContext.sendBroadcast(intent);
             }
 
         }
@@ -181,14 +181,14 @@ public class ScheduleSaver implements iCommand {
         for (int i = 0; i<rootNode.getFtplist().size();i++){
             tasklist.add(rootNode.getFtplist().get(i));
         }
-        Intent intent = new Intent(wosPlayerApp.appContext, loaderManager.class);
+        Intent intent = new Intent(WosApplication.appContext, loaderManager.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         Bundle bundle = new Bundle();
         bundle.putCharSequenceArrayList(loaderManager.taskKey,tasklist);
-        bundle.putString("terminalNo", wosPlayerApp.config.GetStringDefualt("terminalNo","0000"));
-        bundle.putString("savepath", wosPlayerApp.config.GetStringDefualt("basepath", "/sdcard/mnt/playlist"));
+        bundle.putString("terminalNo", WosApplication.config.GetStringDefualt("terminalNo","0000"));
+        bundle.putString("savepath", WosApplication.config.GetStringDefualt("basepath", "/sdcard/mnt/playlist"));
         intent.putExtras(bundle);
-        wosPlayerApp.appContext.startService(intent);
+        WosApplication.appContext.startService(intent);
     }
 
 

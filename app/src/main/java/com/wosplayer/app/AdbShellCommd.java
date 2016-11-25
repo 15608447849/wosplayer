@@ -1,9 +1,6 @@
 package com.wosplayer.app;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.provider.Settings;
 
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -149,7 +146,7 @@ public class AdbShellCommd extends Thread{
 
         String strs = "远程端口开启结果: "+cr.result;
         log.d("Remote",strs);
-        strs = "本地ip: "+ wosPlayerApp.getLocalIpAddress();
+        strs = "本地ip: "+ WosApplication.getLocalIpAddress();
         log.d("Remote",strs);
     }
 

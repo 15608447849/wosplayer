@@ -7,6 +7,7 @@ import android.widget.AbsoluteLayout;
 
 import com.wosplayer.Ui.element.IPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.actioner.ContainerItem.LayoutContainer;
+import com.wosplayer.Ui.performer.TimeCalls;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.log;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
@@ -147,10 +148,15 @@ public class Actioner extends AbsoluteLayout implements IPlayer{
         return null;
     }
 
-
-
     @Override
-    public void downloadResult(String filePath) {
+    public void setTimerCall(TimeCalls timer) {
 
     }
+
+    @Override
+    public void unTimerCall() {
+
+    }
+
+
 }

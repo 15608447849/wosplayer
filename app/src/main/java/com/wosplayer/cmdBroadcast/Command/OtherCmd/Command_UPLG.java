@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.wosplayer.app.log;
-import com.wosplayer.app.wosPlayerApp;
+import com.wosplayer.app.WosApplication;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 import com.wosplayer.service.logUploadService;
 
@@ -27,12 +27,12 @@ public class Command_UPLG implements iCommand {
 
        log.i(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  start log upload server ...");
         //开启 日志上传服务
-        Intent logIntent = new Intent(wosPlayerApp.appContext,logUploadService.class);
+        Intent logIntent = new Intent(WosApplication.appContext,logUploadService.class);
         Bundle b = new Bundle();
         b.putString(logUploadService.uriKey,uri);
-        b.putString("terminalNo", wosPlayerApp.config.GetStringDefualt("terminalNo","0000"));
+        b.putString("terminalNo", WosApplication.config.GetStringDefualt("terminalNo","0000"));
         logIntent.putExtras(b);
-        wosPlayerApp.appContext.startService(logIntent);
+        WosApplication.appContext.startService(logIntent);
 
     }
 }

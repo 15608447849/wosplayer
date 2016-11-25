@@ -19,7 +19,7 @@ import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.IinteractionPlayer;
-import com.wosplayer.Ui.element.iviewelementImpl.ImageViewPicassocLoader;
+import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.iCache.InteractionCache;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.InteractionContentShowExer;
@@ -27,8 +27,7 @@ import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.log;
-import com.wosplayer.app.wosPlayerApp;
-import com.wosplayer.loadArea.excuteBolock.Loader;
+import com.wosplayer.app.WosApplication;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
 
 import java.io.File;
@@ -52,7 +51,6 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
     public String bindid; //绑定id
     public String layoutUri;
     public String folderurl;
-    private Loader loader; //加载资源操作者
     private HttpUtils http = IinteractionPlayer.http;//网络连接使用
     private String myBgUri = null; //我的背景uri
     private Context mcontext;
@@ -78,14 +76,9 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
         this.bindid = bindid;
         this.layoutUri = layoutUri;
         this.folderurl = folderurl;
-        loader = new Loader();
-        loader.settingCaller(this);
         this.setOnClickListener(this);
         this.setEnabled(false);//不可点击
     }
-
-
-
     private IinteractionPlayer CanvasView; //按钮绑定的视图 显示的 容器
     private List<IviewPlayer> myBindFileViews;//绑定的文件视图
     private LayoutActive myBindLayoutView;
@@ -93,8 +86,6 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
     private InteractionContentShowExer mvp = null;
     private Button retenbtn;//返回按钮
     private FrameLayout fLayout;//存放返回按钮
-
-
     /**
      * 设置 我的 画布
      * 如果有人点击我了.
@@ -123,14 +114,11 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
             log.e("清理布局中.....");
             return;
         }
-
         log.i(TAG, "按钮  ,绑定id:"+bindid);//click:[" + this.toString() +"]
-
         if (CanvasView == null) {
             log.e(TAG," 互动模块容器 不存在 ");
             return;
         }
-
         if (retenbtn == null) {
             //添加一个返回按钮　
             retenbtn = new Button(DisplayActivity.activityContext);
@@ -156,7 +144,6 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
             fLayout.addView(retenbtn);
         }
 
-
         // 如果有人点击我了. 1.移除 画布当前视图(不删除视图栈), 我就把我绑定的的视图放上去,
         switch (bindtype) {
             case 0: //排版
@@ -171,50 +158,18 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
 
                 break;
             case 3://网页
-              /*if (myBindFileViews == null || myBindFileViews.size() < 1) {
-                    return;
-                }
-                if (myBindFileViews.size()==1 && myBindFileViews.get(0) instanceof iWebPlayer){
-                    //网页
-                    IviewPlayer iv = myBindFileViews.get(0);
-                    iv.addMeToFather(CanvasView);
-                    CanvasView.setmCurrentView((View) iv);
-                }*/
-
-//                break;
             case 1://文件 (视频, 图片,网站)
-
                 if (myBindFileViews == null || myBindFileViews.size() < 1) {
                     return;
                 }
-
-              /*  if (myBindFileViews.size()==1 && myBindFileViews.get(0) instanceof iWebPlayer){
-                        //网页
-                    IviewPlayer iv = myBindFileViews.get(0);
-                    iv.addMeToFather(CanvasView);
-                    CanvasView.setmCurrentView((View) iv);
-                    return;
-                }*/
-
-
                 if (mvp == null) {
-                    //滑动控件是空的
-/*                    mvp = new ActiveViewPagers(DisplayActivity.activityContext);//第一次创建滑动控件
-                    //加载需要显示的资源
-                        for(IviewPlayer iview:myBindFileViews){
-                            log.i(TAG,"滑动控件 添加: "+iview);
-                            mvp.addMeSubView(iview);
-                        }*/
                     mvp = new InteractionContentShowExer(mcontext,myBindFileViews);
                 }
-
                 mvp.setMyReturnBtn(fLayout);//添加返回键
                 mvp.addMeToFather(CanvasView); //滑动控件　加到画布上
                 CanvasView.setmCurrentView(mvp); //设置当前视图
                 break;
         }
-
-
     }
 
     /**
@@ -227,7 +182,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
         log.i(TAG," 互动执行者 绑定的视图>子项-按钮>加载自己的xml文件");
         //根据类型拼接 URI 0 2排版 1 文件夹 3web
         String srcUri = bindtype == 0 || bindtype == 2 ? layoutUri + bindid : folderurl + bindid;
-        log.i(TAG, "----bindtype--- " + bindtype + "----bindid--" + bindid + "---->" + srcUri);
+        log.i(TAG, "----bindtype--- " + bindtype + "\n----bindid--" + bindid + "\n---->" + srcUri);
         getXmlData(srcUri);
     }
 
@@ -326,7 +281,6 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
     }
 
     private LayoutActive mFather;
-
     /**
      * 自动加载资源
      */
@@ -334,7 +288,6 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
     public void AotuLoadingResource() {
     //null
     }
-
     /**
      * 把自己 加载到我的父控件上面
      */
@@ -347,9 +300,9 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
             AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                 @Override
                 public void call() {
-                    log.i(TAG," 互动执行者 绑定的视图>>子项button>>按钮>>加载自己到布局层");
                     mFather.removeView(ButtonActive.this);
                     mFather.addView(ButtonActive.this);
+                    log.i(TAG," 互动执行者 绑定的视图>>子项button>>按钮>>加载自己到布局层");
                 }
             });
 
@@ -445,9 +398,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
                 @Override
                 public void call() {
                     //进行XML解析
-                    ParseResultXmlGetBgUri(result); //得到 背景图片
-                    //加载 自己 绑定 的视图
-                    loadMeBindView(result); //得到绑定的子视图
+                    parseTanslation(result);
                 }
             });
             return;
@@ -463,11 +414,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
                     public void onSuccess(ResponseInfo<String> responseInfo) {
                         String xml = responseInfo.result;
                         InteractionCache.push(key,xml);//存
-                        //进行XML解析
-                        ParseResultXmlGetBgUri(xml); //得到 背景图片
-                        //加载 自己 绑定 的视图
-                        loadMeBindView(xml); //得到 绑定的子视图
-
+                        parseTanslation(xml);
                     }
                     @Override
                     public void onFailure(HttpException e, String s) {
@@ -477,6 +424,11 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
         );
     }
 
+    private void parseTanslation(String result) {
+        loadMeBindView(result); //得到 绑定的子视图,//加载 自己 绑定 的视图
+        ParseResultXmlGetBgUri(result); //得到 背景图片//进行XML解析
+    }
+
     /**
      * 解析
      *
@@ -484,24 +436,29 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
      * @return
      */
     private void ParseResultXmlGetBgUri(final String xml) {
-        log.i(TAG," 互动执行者 绑定的视图>子项>按钮>>加载自己的背景资源");
+        log.i(TAG," 互动执行者 绑定的视图>子项>按钮>>加载自己的背景资源 \n "+xml);
         try {
         switch (bindtype) {
             case 0: //排版
             case 2:
                 myBgUri = XmlParse.interactionParse_ButtonSrcUri_LayoutType(xml);
-                log.i(TAG, this.bindid + "是布局类型, 获取的xml : " + xml);
+                log.i(TAG, bindid + "是布局类型,  : \n" + myBgUri);
                 break;
             case 1://文件夹
             case 3://网页
                     myBgUri = XmlParse.interactionParse_ButtonSrcUri_FildType(xml);
+                log.i(TAG, bindid + "是文件夹网页类型  : \n" + myBgUri);
                 break;
         }
-            loadMeBackImage(); //自己的背景图
         } catch (Exception e) {
-
             log.e(TAG,""+e.getMessage());
         }
+        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+            @Override
+            public void call() {
+                loadMeBackImage(); //自己的背景图
+            }
+        });
 
     }
 
@@ -509,21 +466,25 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
      * 加载自己的背景图片
      */
     private void loadMeBackImage() {
-        if (myBgUri == null) {
-            log.e(TAG,"背景图片uri不存在");
-            return;
-        }
-            log.i(TAG, "bg image uri " + myBgUri);
-            String filename = myBgUri.substring(myBgUri.lastIndexOf("/") + 1);
-            final String loacPath = wosPlayerApp.config.GetStringDefualt("basepath", "") + filename;
 
-            if (fileUtils.checkFileExists(loacPath)) {
+
+        log.i(TAG, "bg image uri " + myBgUri);
+        if (myBgUri == null) {
+            log.e(TAG,"背景图片uri不存在 ");
+            this.setImageResource(R.drawable.error);
+        }else{
+            String filename = myBgUri.substring(myBgUri.lastIndexOf("/") + 1);
+            filename = WosApplication.config.GetStringDefualt("basepath", "") + filename;
+            log.i(TAG, "bg image local path - " + filename);
+            if (fileUtils.checkFileExists(filename)) {
                 //存在 直接设置
-                downloadResult(loacPath);
+                picassoLoaderImager(filename);
             } else {
-                //下载
-                loader.LoadingUriResource(myBgUri,null);
+                log.e(TAG,"按钮 找不到背景图片 url - "+myBgUri +"本地 路径: "+filename);
+                this.setImageResource(R.drawable.error);
             }
+            log.e(TAG, "----------------------------------------------------bg image success -------------------------------------------------");
+        }
     }
 
     /**
@@ -542,109 +503,53 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
                     @Override
                     public void call() {
                         try {
-                            log.d(TAG,"线程1: " + Thread.currentThread().getName());
                             myBindLayoutView =  XmlParse.interactionParse_one(xml); //1 先解析
-                            log.i(TAG,"获取到一个 绑定布局视图:"+myBindLayoutView);
-                            log.d(TAG,"线程2: " + Thread.currentThread().getName());
                             //在 需要显示的时候 去加载他的 子资源
                             ButtonActive.this.setEnabled(true);
                             log.i(TAG, bindid+"可以点击了");
                         } catch (Exception e) {
-                            log.e(TAG,"loadMeBindView() _ case 2: err: "+ e.getMessage());
                             e.printStackTrace();
                         }
                     }
                 });
-
-
                 break;
 
             case 1://文件夹
             case 3://web
-
                     final List<FileActive> arr = XmlParse.interactionParse_Button_Item_View_FildType(xml);//返回所有的 file
                     if (myBindFileViews == null) {
                         myBindFileViews = Collections.synchronizedList(new ArrayList<IviewPlayer>());
                     } else {
                         myBindFileViews.clear();
                     }
-
                 AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                     @Override
                     public void call() {
-                        ////////////////////////
-                        for (int i = 0; i < arr.size(); i++) {
 
-                            try {
-                                IviewPlayer view = arr.get(i).TanslateInfoToView();//转化视图
+                        IviewPlayer view = null;
+                        for (int i = 0; i < arr.size(); i++) {
+                                view = arr.get(i).TanslateInfoToView();//转化视图 (创建...)
                                 if (view != null) {
                                     myBindFileViews.add(view);//把视图 保存
                                 }
-                                if (i == arr.size() - 1) {//最后一个
-                                    ButtonActive.this.setEnabled(true);
-                                    log.i(TAG, bindid+"可以点击了");
-                                }
-                            }catch (Exception e){
-                                log.e(" "+e.getMessage());
-                                continue;
-                            }
                         }
-
-                        if (bindtype == 1) {//文件类型  图片加视频
-                            try {
-
-                                log.i(TAG,myBindFileViews.size()+" ");
-                                //开启资源下载
-                                for (final IviewPlayer ip:myBindFileViews){
-                                    log.i(TAG,ip.toString());
-                                    log.i(TAG,"准备开启一个下载任务,当前所在线程:" + Thread.currentThread().getName());
-                                    ip.AotuLoadingResource();
-                                }
-                            }catch (Exception e){
-                                log.e(TAG,"捕获一个 Exception... 3  "+ e.getMessage() );
-                            }
-
-                        }
-                        /////////////////////////
+                        ButtonActive.this.setEnabled(true);
+                        log.i(TAG, bindid+"可以点击了");
                     }
                 });
-
-
-
                 break;
         } //switch 结束
         } catch (Exception e) {
-          log.e(TAG,""+e.getMessage());
+         e.printStackTrace();
         }
 
     }
 
-    /**
-     * 回调资源
-     *
-     * @param filePath
-     */
-    @Override
-    public void downloadResult(final String filePath) {
-        log.i(TAG, "Button Active  一个图片 资源 下载结果传递了来了:" + filePath);
 
-        if (mFather == null) {
-            log.e(TAG,"互动模块 button 无父容器");
-            return;
-        }
-        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-            @Override
-            public void call() {
-                picassoLoaderImager(filePath);
-            }
-        });
-    }
 
     private void picassoLoaderImager(String filePath) {
-        log.i(TAG,"button _width:"+w);
-        log.i(TAG,"button _current width :"+nw);
-        log.i(TAG,"button _layoutparam w:"+this.getLayoutParams().width);
-        log.i(TAG,"button _getMeasuredWidth:"+this.getMeasuredWidth());
+        log.i(TAG,"button _width:"+nw);
+        log.i(TAG,"button _height :"+nh);
 
         ImageViewPicassocLoader.loadImage(mcontext,this,new File(filePath),new int[]{nw,nh});
     }

@@ -20,6 +20,7 @@ import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.UUID;
 
+import cn.trinea.android.common.util.FileUtils;
 import wosTools.DataListEntiy;
 import wosTools.ToolsUtils;
 
@@ -27,7 +28,7 @@ import wosTools.ToolsUtils;
  * Created by Administrator on 2016/7/19.
  */
 
-public class wosPlayerApp extends Application {
+public class WosApplication extends Application {
 
 
     public static DataList config = new DataList();
@@ -38,7 +39,7 @@ public class wosPlayerApp extends Application {
         super.onCreate();
         appContext = getApplicationContext();
         log.e("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wosPlayer app start~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        appContext = wosPlayerApp.this.getApplicationContext();
+        appContext = WosApplication.this.getApplicationContext();
         //捕获异常
         CrashHandler.getInstance().init(getApplicationContext());
     }
@@ -47,7 +48,7 @@ public class wosPlayerApp extends Application {
         //数据转移
         translationWosToolsData();
         //放入系统目录
-//         new AdbShellCommd(this.getApplicationContext(),true,true).start();//会开端口,会重启
+        //new AdbShellCommd(this.getApplicationContext(),true,true).start();//会开端口,会重启
         //new AdbShellCommd(this.getApplicationContext(),true,false).start();//开端口,不重启
         //new AdbShellCommd(this.getApplicationContext(),false,true).start();//不开远程端口.会重启
         new AdbShellCommd(this.getApplicationContext(),false,false).start();//不开远程端口,不重启
@@ -96,7 +97,12 @@ public class wosPlayerApp extends Application {
         config.put("basepath", basepath);
         //创建一个目录用于存储资源
         SdCardTools.MkDir(basepath);
+        if(defautSource(basepath,"default.mp4")){
+            config.put("defaultVideo", config.GetStringDefualt("basepath","") + "default.mp4");//默认视频本地位置
+        }
+
         config.put("CAPTIMAGEPATH", config.GetStringDefualt("basepath","") + "screen.png");//截图本地位置
+        //将 默认图片 或者 视频 放入 指定 文件夹下
 
         //建设银行接口资源下载位置
         basepath =  GetKey("bankPathSource", "mnt/sdcard"+SdCardTools.Construction_Bank_dir_source);
@@ -108,6 +114,21 @@ public class wosPlayerApp extends Application {
 
         log.i("--- app config init complete ---" );
         config.printData();
+    }
+
+    public static String getConfigValue(String key){
+        if (config!=null){
+            return config.GetStringDefualt(key,"");
+        }
+        return "";
+    }
+
+    private boolean defautSource(String basepath,String filename) {
+        String path=basepath.endsWith("/")?basepath+filename:basepath+filename;
+        if(!FileUtils.isFileExist(basepath)){
+            return ToolsUtils.ReadAssectsDataToSdCard(getApplicationContext(),basepath,filename);
+        }
+        return true;
     }
 
     public static String GetKey(String key, String defualtValue) {
@@ -257,8 +278,8 @@ public class wosPlayerApp extends Application {
     public static void startCommunicationService(Context mc) {
 
         try {
-            if (mc instanceof wosPlayerApp){
-                ((wosPlayerApp)mc).init(true);
+            if (mc instanceof WosApplication){
+                ((WosApplication)mc).init(true);
             }
 
             Intent intent = new Intent(mc, CommunicationService.class);

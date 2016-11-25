@@ -13,11 +13,10 @@ import android.widget.FrameLayout;
 
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.IinteractionPlayer;
-import com.wosplayer.Ui.element.iviewelementImpl.ImageViewPicassocLoader;
+import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
 import com.wosplayer.app.log;
-import com.wosplayer.app.wosPlayerApp;
-import com.wosplayer.loadArea.excuteBolock.Loader;
+import com.wosplayer.app.WosApplication;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
 
 import java.io.File;
@@ -42,7 +41,6 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
     public int bgType;
     public String bgImagename;
     public List<ButtonActive> myItems;
-    private Loader loader;
     private Context mcontext;
 
     private boolean isLayout = false;
@@ -67,40 +65,29 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
         this.bgType = bgType;
         this.bgImagename = bgImagename;
         this.myItems = myItems;
-
-        loader = new Loader();//资源下载对象
-        loader.settingCaller(this);
     }
 
 
     private IinteractionPlayer mFather;//
-
     public FrameLayout returnBtn;
-
     /**
      * 设置我的宽高属性
      */
     private void setMylayoutParma() {
         log.i(TAG," 互动执行者-> 绑定的视图->设置自己的布局参数");
-
         //获取 与父容器的 宽高比值
-
         log.i(TAG,"1f宽度"+mFather.getWidth()+"--f高度"+ mFather.getHeight());
         log.i(TAG,"2f宽度"+mFather.getMeasuredWidth()+"--f高度"+ mFather.getMeasuredHeight());
         log.i(TAG,"3f宽度"+mFather.getLayoutParams().width+"--f高度"+ mFather.getLayoutParams().height);
-
         wScale = (float)mFather.getLayoutParams().width /(float)this.w ;
         hScale =(float)mFather.getLayoutParams().height/ (float)this.h ;
-
         log.i(TAG,"宽度比例"+wScale+"--高度比例"+ hScale);
         if (wScale == 0.0 || hScale== 0.0){
             log.e(TAG," 比例异常 ");
             return;
         }
-
         scale_w =(int) ((float)this.w * wScale);
         scale_h = (int) ((float)this.h * hScale);
-
         //设置宽高
         this.setLayoutParams(new LayoutParams(
                 scale_w,
@@ -112,25 +99,21 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
     public void addReturnButton(FrameLayout returnbtn){
         this.returnBtn = returnbtn;
     }
-
     /**
      * 把自己添加到父控件
      */
     @Override
     public void addMeToFather(View Father) {
-
         if (Father != null) {
             this.mFather = (IinteractionPlayer) Father;
         }
-
         if (mFather != null) {
             if (mFather instanceof IinteractionPlayer) {
-                setMylayoutParma();
-
                 AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                     @Override
                     public void call() {
                         log.i(TAG," 互动执行者 ->绑定的视图->添加自己到互动执行者");
+                        setMylayoutParma();
                         //容器是个绝对布局的话
                         ((AbsoluteLayout) mFather).removeView(LayoutActive.this);
                         ((AbsoluteLayout) mFather).addView(LayoutActive.this);
@@ -253,12 +236,12 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
 
         } else if (bgType == 2){
             String uriLoad = bgImagelurl + bgImagename; //下载地址
-            String localpath = wosPlayerApp.config.GetStringDefualt("basepath", "/sdcard/") + bgImagename; //本地路径
+            String localpath = WosApplication.config.GetStringDefualt("basepath", "/sdcard/") + bgImagename; //本地路径
 
             if (fileUtils.checkFileExists(localpath)) { //资源是否存在
-              downloadResult(localpath);
+                setBgImagers(localpath);
             } else {
-              loader.LoadingUriResource(uriLoad,null);
+             log.e(TAG,"互动布局 图片资源 不存在 - "+localpath+"\n uri:"+uriLoad);
             }
         }
 
@@ -288,57 +271,24 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
         }
     }
 
-    /**
-     * 资源回调
-     *
-     * @param filePath
-     */
-    @Override
-    public void downloadResult(final String filePath) {
-        log.i(TAG, " 一个布局 资源 下载结果传递了来了:" + filePath + " - "+Thread.currentThread().getName()+"-count:"+Thread.getAllStackTraces().size());
-        if (mFather == null) {
-            log.i(TAG, this.toString()+"_Layout Active 没有父容器:");
-            return;
+
+    public void setBgImagers(String filePath){
+        Bitmap bitmap = null;
+        try {
+            log.d(TAG,"互动 layout . scale after w,h = "+scale_w+","+scale_h);
+            bitmap = ImageViewPicassocLoader.loadImage(mcontext,new File(filePath),new int[]{scale_w,scale_h});
+            if (bitmap==null){
+                throw new NullPointerException("filepath err :"+filePath);
+            }
+        } catch (Exception e) {
+            log.e(TAG,"layout call() err : "+e.getMessage());
+            bitmap = BitmapFactory.decodeResource(mcontext.getResources(), R.drawable.error);
         }
 
-
-        IinteractionPlayer.worker.schedule(new Action0() {
-            @Override
-            public void call() {
-
-        Bitmap bitmap = null;
-//        releasSource();
-                try {
-                    log.d(TAG,"互动 layout . scale after w,h = "+scale_w+","+scale_h);
-                    bitmap = ImageViewPicassocLoader.loadImage(mcontext,new File(filePath),new int[]{scale_w,scale_h});
-                    if (bitmap==null){
-                       throw new NullPointerException("filepath:"+filePath);
-                    }
-                } catch (Exception e) {
-                    log.e(TAG,"layout call() err : "+e.getMessage());
-                    bitmap = BitmapFactory.decodeResource(mcontext.getResources(), R.drawable.no_found);
-                }
-
-                final Drawable dw = new BitmapDrawable(bitmap);
-                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-                    @Override
-                    public void call() {
-                        log.i(TAG, " 互动布局设置背景图片 ");
-                        LayoutActive.this.setBackgroundDrawable(dw);
-                        //addMeSubView();//添加子类视图
-                    }
-                });
-
-            }
-        });
-
-
-
-
-
-
+        final Drawable dw = new BitmapDrawable(bitmap);
+        log.i(TAG, "互动布局设置背景图片");
+        LayoutActive.this.setBackgroundDrawable(dw);
     }
-
 
     /**
      * 添加我的子控件　对象

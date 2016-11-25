@@ -1,4 +1,4 @@
-package com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans;
+package com.wosplayer.Ui.element.iviewelementImpl.notuser;
 
 import android.view.View;
 import android.view.ViewGroup;

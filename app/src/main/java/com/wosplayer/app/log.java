@@ -20,11 +20,11 @@ public class log {
 		Date date = new Date();
 		DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
 		String content = formatter.format(date) + ": \b" + logStr;
-		Intent mintent = new Intent(wosPlayerApp.appContext,serviceLog.class);
+		Intent mintent = new Intent(WosApplication.appContext,serviceLog.class);
 		Bundle b = new Bundle();
 		b.putString(serviceLog.serviceLogKey,logStr);
 		mintent.putExtras(b);
-		wosPlayerApp.appContext.startService(mintent);
+		WosApplication.appContext.startService(mintent);
 		log.d(TAG," - send :"+ logStr);
 	}
 

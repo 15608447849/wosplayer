@@ -1,4 +1,4 @@
-package com.wosplayer.Ui.element.iviewelementImpl;
+package com.wosplayer.Ui.element.iviewelementImpl.uitools;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -47,9 +47,9 @@ public class ImageViewPicassocLoader {
     public static void loadImage(Context mContext, ImageView imageView,File tagerImageFile ,int [] sizeParam){
         Log.d("load image",tagerImageFile.getAbsolutePath()+ " \n length:["+( sizeParam==null?"null":sizeParam.length )+"]");
         if (tagerImageFile.exists()){
-            Log.d("","文件存在");
+            Log.d("","文件存在 - " + tagerImageFile.getAbsolutePath());
         }else{
-            Log.e("","文件不存在");
+            Log.e("","文件不存在 " + tagerImageFile.getAbsolutePath());
         }
         getBitmap(mContext,tagerImageFile,imageView);
         }
@@ -88,8 +88,8 @@ public class ImageViewPicassocLoader {
                bitmap = createImageThumbnail(is);
                iv.setScaleType(ImageView.ScaleType.FIT_XY);
                iv.setImageBitmap(bitmap);
-               bitmap = null;
-               Log.d("","------------ 获取完毕 一个 bitmap _success -----------------");
+
+               Log.d("","------------ 获取完毕 一个 bitmap _success ------------- "+iv+" ---- "+bitmap);
                f = true;
            }
        }catch (Exception e){

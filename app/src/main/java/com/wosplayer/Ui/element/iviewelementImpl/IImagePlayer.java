@@ -10,15 +10,16 @@ import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
 import android.widget.ImageView;
 
+import com.wosplayer.R;
 import com.wosplayer.Ui.element.IPlayer;
+import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageAttabuteAnimation;
+import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageViewPicassocLoader;
+import com.wosplayer.Ui.performer.TimeCalls;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.log;
-import com.wosplayer.loadArea.excuteBolock.Loader;
+import com.wosplayer.loadArea.otherBlock.fileUtils;
 
 import java.io.File;
-
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
 
 /**
  * Created by Administrator on 2016/7/24.
@@ -28,7 +29,6 @@ public class IImagePlayer extends ImageView implements IPlayer{
 
     private WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
     private static final java.lang.String TAG = "_iimagePlayer ";//IImagePlayer.class.getName();
-    private Loader loader;
     private Context mCcontext;
     private ViewGroup mfatherView = null;
     private int x=0;
@@ -41,12 +41,7 @@ public class IImagePlayer extends ImageView implements IPlayer{
     public IImagePlayer(Context context, ViewGroup mfatherView) {
         super(context);
         mCcontext =context;
-        //资源加载者
-        loader = new Loader();
-        loader.settingCaller(this);
         this.mfatherView = mfatherView;
-       //设置 图片显示 方式
-//        this.setScaleType(ImageView.ScaleType.FIT_XY);
     }
 
     private String localpath = null;
@@ -67,22 +62,31 @@ public class IImagePlayer extends ImageView implements IPlayer{
             log.e(TAG, "loaddata() " + e.getMessage());
         }
     }
-
-
-
     @Override
     public DataList getDatalist() {
         return mp;
     }
+
+    //时间回调
+    private TimeCalls timeCalls = null;
+
+    @Override
+    public void setTimerCall(TimeCalls timer) {
+        timeCalls = timer;
+    }
+
+    @Override
+    public void unTimerCall() {
+        timeCalls = null;
+    }
+
     @Override
     public void setlayout() {
-
         try {
             if (!isExistOnLayout){
                 mfatherView.addView(this);
                 isExistOnLayout = true;
             }
-
             AbsoluteLayout.LayoutParams lp = (AbsoluteLayout.LayoutParams) this
                     .getLayoutParams();
             lp.x = x;
@@ -94,8 +98,6 @@ public class IImagePlayer extends ImageView implements IPlayer{
           log.e(TAG,"设置布局:" + e.getMessage());
         }
     }
-
-
     //主线程中执行
     @Override
     public void start() {
@@ -106,19 +108,19 @@ public class IImagePlayer extends ImageView implements IPlayer{
             log.e(TAG,"开始:"+e.getMessage());
         }
     }
-
     //加载图片
     private void loadMyImage() {
         //先判断文件是不是存在
-        if (loader.fileIsExist(localpath)){
+        if (fileUtils.checkFileExists(localpath)){
             picassoLoaderImager(localpath);
-            return;
+        }else{
+            log.e(TAG,"图片 路径 不存在 - "+localpath);
+            this.setImageResource(R.drawable.error);
+            if (timeCalls!=null){
+                timeCalls.playOvers(this);
+            }
         }
-        //通过 资源加载者
-        loader.LoadingUriResource(uri,null);
     }
-
-
     //主线程中执行
     @Override
     public void stop() {
@@ -132,29 +134,23 @@ public class IImagePlayer extends ImageView implements IPlayer{
             log.e(TAG,"停止:"+e.getMessage());
         }
     }
-
     //放入主线程
     public static void removeMyImage(ImageView imageView) {
         log.i(TAG, "----------------------准备 释放资源----------------------------------" );
-
         //资源回调的地方
         Bitmap bitmap = null;
         Drawable drawable = imageView.getDrawable();
-
         if (drawable == null){
             drawable = imageView.getBackground();
             if (drawable == null){
-
                 imageView.setDrawingCacheEnabled(true);
                     bitmap = imageView.getDrawingCache();
                 imageView.setDrawingCacheEnabled(false);
-
                     if (bitmap==null){
                         return;
                     }else{
                         log.i(TAG,"getDrawingCache() :"+bitmap.toString());
                     }
-
             }
         }
         if (drawable != null && drawable instanceof BitmapDrawable) {
@@ -165,12 +161,6 @@ public class IImagePlayer extends ImageView implements IPlayer{
 
         if (bitmap != null && !bitmap.isRecycled()) {
             log.i(TAG,"-- bitmap is exitt --");
-//                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-//                    @Override
-//                    public void call() {
-
-//                    }
-//                });
             if(drawable!=null){
                 drawable.setCallback(null);
             }
@@ -182,22 +172,6 @@ public class IImagePlayer extends ImageView implements IPlayer{
         imageView.setImageDrawable(null);
         log.e(TAG, " 释放资源 failt" );
     }
-
-    @Override
-    public void downloadResult(final String filePath) {
-        log.i(TAG," 图片资源回传:" + filePath +" 当前所在线程:"+Thread.currentThread().getName()+"正在执行的所有线程数:"+ Thread.getAllStackTraces().size());
-            try {
-                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-                    @Override
-                    public void call() {
-                        picassoLoaderImager(filePath);
-                    }
-                });
-            }catch (Exception e){
-                log.e(TAG,""+e.getMessage());
-            }
-    }
-
 
     private void picassoLoaderImager(String filePath) {
         //设置图片切换方式
@@ -211,10 +185,7 @@ public class IImagePlayer extends ImageView implements IPlayer{
         log.i(TAG," ---------------------------------loader image --------------------------------- over");
     }
 
-
-
     //重写系统方法
-
     @Override
     protected void onDraw(Canvas canvas) {
         try {

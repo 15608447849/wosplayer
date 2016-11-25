@@ -68,7 +68,7 @@ public final class contentTanslater {
      * @param list
      * @return
      */
-    public static IPlayer tanslationAndStart(DataList list,Object ob,boolean isStart,ViewGroup vp){
+    public static IPlayer tanslationAndStart(DataList list, Object ob, boolean isStart, ViewGroup vp, TimeCalls timrmanager){
         if (mLruCache==null){
             mLruCache =  new LruCache<String,IPlayer>((int) (Runtime.getRuntime().maxMemory() / 8));//最大内存的1/3
         }
@@ -110,6 +110,7 @@ public final class contentTanslater {
             }
             //执行它
             iplay.loadData(list,ob);
+            iplay.setTimerCall(timrmanager);
             if (isStart){
                 iplay.start();//主线程执行
             }

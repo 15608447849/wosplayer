@@ -3,7 +3,7 @@ package wosTools;
 import android.util.Log;
 
 import com.wosplayer.app.log;
-import com.wosplayer.app.wosPlayerApp;
+import com.wosplayer.app.WosApplication;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -75,7 +75,7 @@ public class DataListEntiy {
             Map.Entry entry = (Map.Entry) iter.next();
             Object key = entry.getKey();
             Object val = entry.getValue();
-            ToolsUtils.writeShareData(wosPlayerApp.appContext,key.toString(), val.toString());
+            ToolsUtils.writeShareData(WosApplication.appContext,key.toString(), val.toString());
         }
         ToolsHandler.NotityActivty(ToolsHandler.usermessage.outtext, "保存成功！");
     }

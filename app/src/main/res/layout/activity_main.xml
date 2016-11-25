@@ -63,7 +63,7 @@
             android:id="@+id/frame_load_wait_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/load_wait"
+            android:src="@drawable/no_found"
             android:layout_centerInParent="true"
             android:visibility="gone"
             />

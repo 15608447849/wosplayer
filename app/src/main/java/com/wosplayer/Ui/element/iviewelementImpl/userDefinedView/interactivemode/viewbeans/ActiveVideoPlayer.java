@@ -1,7 +1,6 @@
 package com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.util.Log;
 import android.view.View;
@@ -9,8 +8,9 @@ import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
 import android.widget.FrameLayout;
 
-import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.MyVideoView;
+import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.MyVideoView;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
+import com.wosplayer.app.WosApplication;
 import com.wosplayer.app.log;
 import com.wosplayer.loadArea.excuteBolock.Loader;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
@@ -38,8 +38,6 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer{
 
     private void mInitStart(String filePath) {
         video.setMyLayout(0,0,LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT);
-
-
         Log.d(TAG,"不循环播放视频");
         video.initVideoView(false);//不循环
         log.d(TAG,"设置准备完成监听事件");
@@ -64,13 +62,9 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer{
 //      video.pause();
         video.stopMyPlayer();
     }
-
     public void mResume(){
         video.start();
     }
-
-
-
     /**
      * ------------------------------------------------我的方法------------------------------------------------------------------------------*
      */
@@ -86,11 +80,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer{
 
         //设置布局 属性　
         this.settingLayout(AbsoluteLayout.LayoutParams.MATCH_PARENT, AbsoluteLayout.LayoutParams.MATCH_PARENT, 0, 0);
-
-        //初始化 资源加载者
-        load = new Loader();
-        load.settingCaller(this);
-        log.e(TAG,"互动 视频 初始化:"+uriPath+"; "+localPath);
+        log.e(TAG,"互动 视频 初始化:"+uriPath+"\n "+localPath);
     }
 
     /**
@@ -110,7 +100,6 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer{
         //设置宽高坐标
         AbsoluteLayout.LayoutParams params = new AbsoluteLayout.LayoutParams(w, h, x, y);
         this.setLayoutParams(params);
-        this.setBackgroundColor(Color.RED);
     }
 
     private String UriPath;
@@ -124,14 +113,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer{
      */
     @Override
     public void AotuLoadingResource() {
-        //本地如果存在 不加载
-        if (load.fileIsExist(videoFileLocalPath)){
-            log.e(TAG,"video 资源 本地存在");
-            return;
-        }
 
-        load.LoadingUriResource(UriPath,null);
-        isloading = true;
     }
     /**
      * 加载视图
@@ -144,26 +126,20 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer{
               //  查看本地
         if (fileUtils.checkFileExists(videoFileLocalPath)) {
             //存在
-            downloadResult(videoFileLocalPath);
+            mInitStart(videoFileLocalPath);
         } else {
-
-            if(isloading){//在下载
-                log.e(TAG,"video 正在下载中");
-                return;
-            }
-            //访问网络
-            if (!isloading) {
-                load.LoadingUriResource(UriPath,null);
-                isloading = true;
+            log.e(TAG,"视频资源不存在 - "+videoFileLocalPath);
+            String del = WosApplication.getConfigValue("defaultVideo");
+            if (!del.equals("")){
+                mInitStart(del);
             }
         }
-
     }
     /**
      * 释放资源
      */
     public void releasedResource() {
-//        mStop();
+        mStop();
     }
     private FrameLayout returnBtn ;
 
@@ -224,14 +200,13 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer{
                 AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                     @Override
                     public void call() {
+                        //释放视图
+                        releasedResource();
                         //容器是个绝对布局的话
                         mFather.removeView(ActiveVideoPlayer.this);
                         mFather = null;
-
                     }
                 });
-                        //异步释放视图
-                        releasedResource();
 
             }
         }
@@ -250,31 +225,9 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer{
 
     @Override
     public void otherMother(Object object) {
-
     }
 
-    /**
-     * 资源回调
-     * @param filePath
-     */
-    @Override
-    public void downloadResult(final String filePath) {
-        log.i(TAG, "videoplayer  一个视频 资源 下载结果传递了来了:" + filePath);
-        isloading = false; //下载完毕
-        if (mFather == null) {
-            log.e(TAG,"video - >vp is null");
-            return;
-        }
 
-            //播放.
-    AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-        @Override
-        public void call() {
-            mInitStart(filePath);
-        }
-    }) ;
-
-    }
 
 
 

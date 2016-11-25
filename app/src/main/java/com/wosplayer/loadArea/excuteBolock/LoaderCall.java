@@ -5,5 +5,5 @@ package com.wosplayer.loadArea.excuteBolock;
  * 下载完成数据回调接口
  */
 public interface LoaderCall {
-    void downloadResult(String filePath);
+    void downloadResult(String filePath,String state);
 }

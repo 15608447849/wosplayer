@@ -4,11 +4,10 @@ import android.util.Log;
 
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.exception.HttpException;
-import com.lidroid.xutils.http.HttpHandler;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
+import com.wosplayer.app.WosApplication;
 import com.wosplayer.app.log;
-import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.loadArea.ftpBlock.ActiveFtpUtils;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
 
@@ -54,10 +53,10 @@ public class Loader {
 
     public Loader(){
         if (savepath==null || savepath.equals("")){
-            savepath = wosPlayerApp.config.GetStringDefualt("basepath", "/sdcard/mnt/playlist/");
+            savepath = WosApplication.config.GetStringDefualt("basepath", "/sdcard/mnt/playlist/");
         }
         if (terminalNo==null ||  terminalNo.equals("")){
-            terminalNo = wosPlayerApp.config.GetStringDefualt("terminalNo","0000");
+            terminalNo = WosApplication.config.GetStringDefualt("terminalNo","0000");
         }
     }
 
@@ -88,7 +87,7 @@ public class Loader {
     /**
      * 删除一个任务
      */
-    private  void complateTask(String Task, final String filepath){
+    private  void complateTask(String Task, final String filepath,final String state){
 //        log.i(TAG,"当前所在线程:"+Thread.currentThread().getName()+";总线程数量:"+Thread.getAllStackTraces().size());
         log.w(TAG,"一個任務完成["+ Task+"] - 準備刪除 ,當前 下載中 任務數量:"+loadingTaskList.size());
         if (loadingTaskList.contains(Task)){
@@ -104,7 +103,7 @@ public class Loader {
             @Override
             public void call() {
                 //异步通知所有人 一个任务完成
-                notifyRepatList(Loader.this.muri,filepath);
+                notifyRepatList(Loader.this.muri,filepath,state);
             }
         });
     }
@@ -144,7 +143,7 @@ public class Loader {
                 ioThread.schedule(new Action0() {
                     @Override
                     public void call() {
-                        caller.downloadResult(finalFps);
+                        caller.downloadResult(finalFps,"");
                         nitifyMsg(uri.substring(uri.lastIndexOf("/") + 1), 1);
                         nitifyMsg(uri.substring(uri.lastIndexOf("/") + 1), 2);
                         nitifyMsg(uri.substring(uri.lastIndexOf("/") + 1), 3);
@@ -159,10 +158,8 @@ public class Loader {
         //判断路径i
         if (uri.startsWith("http://")) {
             HttpLoad(uri, finalFps);
-
         } else if (uri.startsWith("ftp://")) {
             // ftp://ftp:FTPmedia@21.89.68.163/uploads/1466573392435.png
-
             String str = uri.substring(uri.indexOf("//") + 2);
             final String name = str.substring(0, str.indexOf(":"));
             final String password = str.substring(str.indexOf(":") + 1, str.indexOf("@"));
@@ -184,10 +181,10 @@ public class Loader {
             if (jhFile.exists()){
                 Log.e(TAG,"建行资源文件:\n"+jhFile.getAbsolutePath());
                 FileUtils.copyFile(jhFile, new File(fps));
-                loadFileRecall(fps);
+                loadFileRecall(fps,"success");
             }else{
                 Log.e(TAG,"建行资源文件不存在:\n"+uri);
-                loadFileRecall("loaderr");
+                loadFileRecall(uri,"loaderr");
             }
         }
         }catch (Exception e){
@@ -203,7 +200,7 @@ public class Loader {
      */
     private synchronized void HttpLoad(final String url, final String Filepath){
         HttpUtils http = new HttpUtils();
-        HttpHandler handler =http.download(
+        http.download(
                 url,
                 Filepath,
                 false,// 如果目标文件存在，接着未完成的部分继续下载。服务器不支持RANGE时将从新下载。
@@ -242,29 +239,29 @@ public class Loader {
                         log.i(TAG,"http 下载完成:[" + url + "]当前所在线程 : "+Thread.currentThread().getName()+"-Thread count :"+Thread.getAllStackTraces().size());
                         final String path  =responseInfo.result.getPath();
 
-                        loadFileRecall(path);
+                        loadFileRecall(path,"success");
                         nitifyMsg(url.substring(url.lastIndexOf("/")+1),3);
                     }
                     @Override
                     public void onFailure(HttpException error, String msg) {
                         log.e(TAG,"http 下载失败:"+msg +" url:[" + url +"],当前所在线程:"+Thread.currentThread().getName());
 
-                        loadFileRecall("loaderr");
+                        loadFileRecall(url,"loaderr");
                         nitifyMsg(url.substring(url.lastIndexOf("/")+1),4);
                     }
                 }
         );
     }
 
-    private void loadFileRecall(final String Filepath) {
-        log.d(" & loadFileRecall() 接受到一个文件路径: "+ Filepath);
-
-        if (Filepath.equals("loaderr")){
+    private void loadFileRecall(final String Filepath,String state) {
+        log.d(" & loadFileRecall() 接受到一个文件路径: "+ Filepath +"状态 : "+state);
+        log.i(TAG,"---------------------------------------------------- 开始通告------"+Filepath+"-------------------");
+        if (state.equals("loaderr")){
             log.e("文件:"+ Filepath+" - load faild");
             notifyThread.schedule(new Action0() {
                 @Override
                 public void call() {
-                    caller.downloadResult("404");
+                    caller.downloadResult(Filepath,"404");
                 }
             });
         }else{
@@ -272,7 +269,7 @@ public class Loader {
             notifyThread.schedule(new Action0() {
                 @Override
                 public void call() {
-                    caller.downloadResult(Filepath);
+                    caller.downloadResult(Filepath,"");
                 }
             });
         }
@@ -292,7 +289,8 @@ public class Loader {
         log.i(TAG, "FTP任务["+fileName+"],所在线程:"+ Thread.currentThread().getName());
         ActiveFtpUtils
                 .getInstants(host,21,user,pass)
-                .downloadSingleFile(remotePath + fileName,
+                .downloadSingleFile(
+                    remotePath + fileName,
                     localPath,
                     fileName,
                     3,//重新链接次数
@@ -303,49 +301,32 @@ public class Loader {
                     if(currentStep.equals(ActiveFtpUtils.FTP_DOWN_SUCCESS)){
                         //成功
                         log.i(TAG, "ftp下载succsee -"+fileName+" - 线程 - "+ Thread.currentThread().getName());
-
+                        loadFileRecall(file.getAbsolutePath(),"success");
+                        nitifyMsg(fileName,3);
                         if (fileName.contains(".apk")){
                          //APK文件
-                        loadFileRecall(file.getAbsolutePath());
-                        nitifyMsg(fileName,3);
                         return;
                         }
 
                         if (fileName.contains(".md5")){
                             //MD5文件
-                            log.d(TAG,"资源文件 在服务器上 对应md5文件 : "+file.getAbsolutePath());
-
-
-                                String source_file = MD5Util.getFileMD5String((File)ob).trim();// 源文件本地生成的md5 code
-                                if (source_file == null){
+                            log.d(TAG,"资源文件 在服务器上 对应md5文件 : " + file.getAbsolutePath());
+                                String source_file_code = MD5Util.getFileMD5String((File)ob).trim();// 源文件本地生成的md5 code
+                                if (source_file_code == null){
                                     log.e(TAG,"文件: "+((File)ob).getName()+ "- 资源文件生成 md5 code失败 ");
-                                    loadFileRecall("loaderr");
-                                    nitifyMsg(((File)ob).getName(),4);
                                     return;
                                 }
                         //源文件MD5文件(服务器上的)
-                            if (MD5Util.FTPMD5(source_file, file.getAbsolutePath()) ==0 ){
+                            if (MD5Util.FTPMD5(source_file_code, file.getAbsolutePath()) ==0 ){
                                 log.e(TAG,"文件:"+((File)ob).getName()+ " md5 效验成功");
-                                loadFileRecall(((File)ob).getAbsolutePath());
-                                nitifyMsg(((File)ob).getName(),3);
                             }else{
                                 log.e(TAG,"文件:"+((File)ob).getName()+ " md5 效验失败!");
-                                loadFileRecall("loaderr");
-                                nitifyMsg(((File)ob).getName(),4);
                             }
                         }
                         else{
-                            if (file == null) {
-                                Log.e(TAG,"资源文件下载失败");
-                                loadFileRecall("loaderr");
-                                nitifyMsg(fileName,4);
-                                return;
-                            }
-
                             //资源文件
                             log.d(TAG,"资源文件 : "+ file.getAbsolutePath());
-
-                            //下载 md5  这个资源文件的 md5文件名, 和 资源文件本身
+                            //下载 md5  -这个资源文件的 md5文件名, 和 资源文件本身
                             FTPload(host,user,pass,remotePath,fileName+".md5",localPath,file);
                         }
                     }
@@ -356,19 +337,19 @@ public class Loader {
                     //ftp远程文件不存在
                     if (currentStep.equals(ActiveFtpUtils.FTP_FILE_NOTEXISTS)){
                         log.e(TAG,"ftp服务器 不存在文件 - " + fileName);
-                        loadFileRecall("loaderr");
+                        loadFileRecall(remotePath + fileName,"loaderr");
                         nitifyMsg(fileName,4);
                     }
                     //连接失败
                     if(currentStep.equals(ActiveFtpUtils.FTP_CONNECT_FAIL)){
                         log.e(TAG,"ftp 连接失败 ");
-                        loadFileRecall("loaderr");
+                        loadFileRecall(remotePath + fileName,"loaderr");
                         nitifyMsg(fileName,4);
                     }
                     //下载失败
                     if (currentStep.equals(ActiveFtpUtils.FTP_DOWN_FAIL)){
                         log.e(TAG,"ftp 下载失败 : "+fileName);
-                        loadFileRecall("loaderr");
+                        loadFileRecall(remotePath + fileName,"loaderr");
                         nitifyMsg(fileName,4);
 
                     }
@@ -389,14 +370,14 @@ public class Loader {
      *
      */
     private void nitifyMsg(String filename, int type){
-        wosPlayerApp.sendMsgToServer("FTPS:"+terminalNo+";" + filename+ ";"+type);
+        WosApplication.sendMsgToServer("FTPS:"+terminalNo+";" + filename+ ";"+type);
     }
 
     private void notifyProgress(String filename, String process, String speed){
         String command = "PRGS:" +  terminalNo
                 + "," + filename + ","
                 + process + "," + speed;
-        wosPlayerApp.sendMsgToServer(command);
+        WosApplication.sendMsgToServer(command);
     }
 
     private static int callCount = 0;
@@ -405,25 +386,26 @@ public class Loader {
 
     private LoaderCall caller = new LoaderCall() {
         @Override
-        public void downloadResult(String filePath) {
+        public void downloadResult(String filePath,String state) {
 
             log.i(TAG, "downloadResult: 当前一个回调结果[ "+Loader.this.muri+" ]");
-
             log.d(TAG, "loader downloadResult(): 执行线程"+ Thread.currentThread().getName()+" \n thread size:"+ Thread.getAllStackTraces().size());
 
-            if (other_caller!=null){
+            if (!filePath.endsWith(".md5")){
+                if (other_caller!=null){
                     try {
-                        log.d(TAG,"downloadResult:传递到 子监听回调 , count:"+ callCount++);
-                        other_caller.downloadResult(filePath);
-
+                        log.d(TAG,"downloadResult -- 传递到 子监听回调 , count:"+ callCount++);
+                        other_caller.downloadResult(filePath,state);
                     }catch (Exception e){
-                        log.e(TAG,"传递子监听回调err:"+e.toString());
+                        e.printStackTrace();
                     }
+                }
             }
+
                 if (muri!=null){
                     if (!existRepeatList){ // 不存在 重复列表
                         log.d(TAG, "不在重复任务队列");
-                        complateTask(muri,filePath);//完成任务
+                        complateTask(muri,filePath,state);//完成任务
                     }
                     existRepeatList = false;
                 }
@@ -459,8 +441,7 @@ public class Loader {
 
 
     private static ReentrantLock lock_repeat = new ReentrantLock();
-
-    private static void notifyRepatList(final String uri, final String filepath){
+    private static void notifyRepatList(final String uri, final String filepath,final String state){
 
         try{
             lock_repeat.lock();
@@ -476,7 +457,7 @@ public class Loader {
                     Schedulers.newThread().createWorker().schedule(new Action0() {
                             @Override
                             public void call() {
-                            l.receivedNotifi(uri,filepath);
+                            l.receivedNotifi(uri,filepath,state);
                         }
                     });
                 }
@@ -496,14 +477,14 @@ public class Loader {
      * @param uri
      * @param filePath
      */
-    private void receivedNotifi(String uri, String filePath){
+    private void receivedNotifi(String uri, String filePath,String state){
 
         String u = muri.trim();
         String t = uri.trim();
         boolean f =  u.equals(t);
         log.w(TAG,  u+ " < - >"+t+"结果:{"+f+"}");
         if(f){
-         caller.downloadResult(filePath);
+         caller.downloadResult(filePath,state);
         }
     }
     /**

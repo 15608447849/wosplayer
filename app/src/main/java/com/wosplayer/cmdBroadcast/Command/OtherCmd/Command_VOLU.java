@@ -4,7 +4,7 @@ import android.content.Context;
 import android.media.AudioManager;
 
 import com.wosplayer.app.log;
-import com.wosplayer.app.wosPlayerApp;
+import com.wosplayer.app.WosApplication;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 
 /**
@@ -23,7 +23,7 @@ public class Command_VOLU implements iCommand {
     }
     public void SetSystemVolume(int percent)
     {
-        AudioManager audioManager = (AudioManager) wosPlayerApp.appContext.getSystemService(Context.AUDIO_SERVICE);
+        AudioManager audioManager = (AudioManager) WosApplication.appContext.getSystemService(Context.AUDIO_SERVICE);
         int max = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (max*percent)/100, 0);
     }

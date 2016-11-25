@@ -7,6 +7,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebViewClient;
 
 import com.wosplayer.Ui.element.IPlayer;
+import com.wosplayer.Ui.performer.TimeCalls;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.log;
 
@@ -73,29 +74,6 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
             }
         });
         this.setWebViewClient(new WebViewClient());
-       /* this.setWebViewClient(new WebViewClient() {
-                                  @Override
-                                  public boolean shouldOverrideUrlLoading(android.webkit.WebView view,
-                                                                          String url) {
-                                      log.i(TAG, "shouldOverrideUrlLoading() 参数url :" + url + " \n 全局uri -" + uri);
-                                      view.loadUrl(url);
-
-                                      return true;
-                                  }
-
-                                  @Override
-                                  public void onReceivedSslError(android.webkit.WebView view,
-                                                                 SslErrorHandler handler, SslError error) {
-                                      super.onReceivedSslError(view, handler, error);
-                                      try {
-                                          log.e(TAG, "onReceived Ssl Error0 :" + error.toString());
-                                          handler.cancel(); // 默认的处理方式，WebView变成空白页
-                                      } catch (Exception e) {
-                                          log.e(TAG, "onReceived Ssl Error1 :" + e.getMessage());
-                                      }
-                                  }
-                              }
-        );*/
         this.getSettings().setLoadWithOverviewMode(true);
     }
 
@@ -125,6 +103,19 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
         return mp;
     }
 
+    //时间回调
+    private TimeCalls timeCalls = null;
+
+    @Override
+    public void setTimerCall(TimeCalls timer) {
+        timeCalls = timer;
+    }
+
+    @Override
+    public void unTimerCall() {
+        timeCalls = null;
+    }
+
     @Override
     public void start() {//主线程执行
         try {
@@ -143,10 +134,5 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
         } catch (Exception e) {
             log.e(TAG, "web stop():" + e.getMessage());
         }
-    }
-
-    @Override
-    public void downloadResult(String filePath) {
-        //未使用
     }
 }

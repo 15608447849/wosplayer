@@ -4,8 +4,8 @@ import android.graphics.Typeface;
 
 import com.wosplayer.Ui.element.IPlayer;
 import com.wosplayer.app.DataList;
+import com.wosplayer.app.WosApplication;
 import com.wosplayer.app.log;
-import com.wosplayer.app.wosPlayerApp;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import rx.functions.Action0;
  * Created by user on 2016/7/25.
  * 执行布局
  */
-public class layoutExcuter {
+public class layoutExcuter implements TimeCalls{
     private static final java.lang.String TAG = "layout Excuter";
     private XmlNodeEntity layout ;
     private IPlayer currentIplayer=null ;
@@ -43,7 +43,6 @@ public class layoutExcuter {
             startContent(contentArr.get(0));
         }else{
             //设置定时任务
-
             startContentTimer(contentArr);
 
         }
@@ -74,7 +73,7 @@ public class layoutExcuter {
         log.i(TAG,"在"+(second*1000)+"后执行下一个内容");
         startContent(contentArr.get(_index));
         //创建定时器任务
-//创建定时器
+        //创建定时器
         timer = new Timer();
         timerTask = new TimerTask() {
 
@@ -117,7 +116,7 @@ public class layoutExcuter {
         String height = layout.getXmldata().get("height");
         String fileproterty = content.getXmldata().get("fileproterty");//类型
         String getcontents = content.getXmldata().get("getcontents");//uri
-        String localpath = wosPlayerApp.config.GetStringDefualt("basepath","")+content.getXmldata().get("contentsnewname");//本地路径
+        String localpath = WosApplication.config.GetStringDefualt("basepath","")+content.getXmldata().get("contentsnewname");//本地路径
         String timelength = content.getXmldata().get("timelength");
         String UUKS = content.getXmldata().get("uuks");
         String contentsname = content.getXmldata().get("contentsname");
@@ -224,7 +223,7 @@ public class layoutExcuter {
             public void call() {
                 clearContent();
                 //生成iplayer
-                currentIplayer = contentTanslater.tanslationAndStart(datalist,ob,true,null);//创建必须放入主线程执行
+                currentIplayer = contentTanslater.tanslationAndStart(datalist,ob,true,null,layoutExcuter.this);//创建必须放入主线程执行
             }
         });
     }
@@ -241,4 +240,9 @@ public class layoutExcuter {
     }
 
 
+
+    @Override
+    public void playOvers(IPlayer play) {
+        start();
+    }
 }

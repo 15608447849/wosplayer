@@ -1,4 +1,4 @@
-package com.wosplayer.loadArea;
+package com.wosplayer.loadArea.kernal;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -69,7 +69,7 @@ public class loaderManager extends IntentService implements LoaderCall
 
     private int SuccessCount = 0;
     @Override
-    public void downloadResult(String filePath) {
+    public void downloadResult(String filePath,String state) {
         log.i(TAG,"current count :["+ SuccessCount++ +"] ,sumCount:["+TaskList.size()+"]");
         if(filePath.equals("404")){
             log.e(TAG,"load faild :["+filePath +"]-\n\r");

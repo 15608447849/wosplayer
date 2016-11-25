@@ -102,7 +102,7 @@ public class ContentContainer extends Container{
         datalist.put("localpath",filepath);//图片 视频 使用
         datalist.put("getcontents",weburl);//网页使用
         datalist.put("fileproterty",filetype);
-        content = contentTanslater.tanslationAndStart(datalist,null,false, container);
+        content = contentTanslater.tanslationAndStart(datalist,null,false, container,null);
         log.i(TAG," content init over");
     }catch (Exception e){
         log.e(TAG,"content err:"+e.getMessage());

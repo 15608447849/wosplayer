@@ -4,7 +4,7 @@ import android.content.Intent;
 
 import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.log;
-import com.wosplayer.app.wosPlayerApp;
+import com.wosplayer.app.WosApplication;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 import com.wosplayer.service.MonitorService;
 
@@ -25,7 +25,7 @@ public class Command_Close_App implements iCommand {
         DisplayActivity.activityContext.stopService(intent);
         //不發送重啟廣播
         DisplayActivity.isSendRestartBroad = false;
-        wosPlayerApp.stopCommunicationService(DisplayActivity.activityContext); //关闭服务
+        WosApplication.stopCommunicationService(DisplayActivity.activityContext); //关闭服务
      //   DisplayActivity.activityContext.finish();
         System.exit(0);
     }

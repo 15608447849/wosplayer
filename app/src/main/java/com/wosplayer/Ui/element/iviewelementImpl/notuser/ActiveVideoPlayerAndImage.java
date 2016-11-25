@@ -1,4 +1,4 @@
-package com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans;
+package com.wosplayer.Ui.element.iviewelementImpl.notuser;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -10,9 +10,10 @@ import android.widget.FrameLayout;
 
 import com.wosplayer.Ui.element.iviewelementImpl.IinteractionPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
+import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.ActiveImagePlayer;
+import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.ActiveVideoPlayer;
 import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.log;
-import com.wosplayer.loadArea.excuteBolock.Loader;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
 
 import rx.android.schedulers.AndroidSchedulers;
@@ -48,9 +49,6 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
 
         //设置布局 属性　
         settingLayout(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 0, 0);
-        //初始化 资源加载者
-        load = new Loader();
-        load.settingCaller(this);
     }
 
     /**
@@ -84,8 +82,8 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
     private String UriPath;
     private String videoFileLocalPath;//播放的文件路径
     private ViewGroup mFather ; //父容器
-    private Loader load ;//资源下载者
-    private boolean isloading = false;//是否正在下载中
+
+//    private boolean isloading = false;//是否正在下载中
     private boolean isremove = false;//是否移除
 
     /**
@@ -96,13 +94,10 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
     private OnClickListener ImaerClickEvent = new OnClickListener() {
         @Override
         public void onClick(View v) {
-
             log.e("准备播放一个视频,当前资源状态:" + image_Src_isOK);
-
             if (mFather==null){
                 return;
             }
-
 
             int iw = -1;
             int ih = -1;
@@ -122,18 +117,13 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
            AbsoluteLayout.LayoutParams param = new AbsoluteLayout.LayoutParams(iw,ih,ix,iy);
 //           param.gravity = Gravity.CENTER;
 
-           DisplayActivity.activityContext.visibleLayoutDialog(!image_Src_isOK,param); //资源如果没有加载完 显示图层 传递true
-
             if (!image_Src_isOK){ //如果资源没有下载完  不加载视频
-                log.e("资源没有加载完");
+                log.e(TAG,"--- 资源没有加载完 ---");
+                DisplayActivity.activityContext.visibleLayoutDialog(true,param); //资源如果没有加载完 显示图层 传递true
                 return;
             }
-
-
            ViewGroup vp = DisplayActivity.frame_main;
-
             log.e("this Vp:"+mFather.getMeasuredHeight());
-
             if (vplayer == null){
                 vplayer = new ActiveVideoPlayer(DisplayActivity.activityContext,UriPath,videoFileLocalPath);
             }
@@ -146,15 +136,7 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
      */
     @Override
     public void AotuLoadingResource() {
-        log.i(TAG,"视频 资源 加载 : "+UriPath+"\n 本地 : "+videoFileLocalPath);
 
-        if (load.fileIsExist(videoFileLocalPath)){
-            downloadResult(videoFileLocalPath);
-            return;
-        }else{
-            load.LoadingUriResource(UriPath,null);//视频资源
-            isloading = true;
-        }
     }
     private Button playbtn = null;
     /**
@@ -165,7 +147,6 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
             log.e(TAG,"loadingMyVideoView father is null");
             return;
         }
-
         //图片 播放者  出来吧!!!
         if (imager_One == null){
             log.d(TAG,"制作第一帧图片");
@@ -177,24 +158,14 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
             playbtn.setOnClickListener(ImaerClickEvent);//播放事件
         }
 
-
-
-        if(isloading){//如果在下载中 继续下载视频资源
-            log.e(TAG,"正在下载资源中");
-            return;
-        }
         //  查看本地
         if (fileUtils.checkFileExists(videoFileLocalPath)) {
             //存在
-            downloadResult(videoFileLocalPath);//回调 视频资源
+            image_Src_isOK = true;
         } else {
-            //访问网络
-            if (!isloading) {
-                //不在下载中
-                load.LoadingUriResource(UriPath,null);
-            }
+            image_Src_isOK = false;
+            log.e(TAG,"资源不存在");
         }
-
     }
     /**
      * 释放资源
@@ -215,7 +186,6 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
 
     }
     private FrameLayout returnBtn ;
-
     public void setMyreturnBtn(FrameLayout btn){
         returnBtn = btn;
     }
@@ -244,17 +214,9 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
 
                         }
                         isremove = false;
-                    }
-                });
-
-                IinteractionPlayer.worker.schedule(new Action0() {
-                    @Override
-                    public void call() {
-                        //异步加载视图
                         loadingMyVideoView();
                     }
                 });
-
             }
         }
     }
@@ -313,14 +275,5 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
 
     }
 
-    /**
-     * 资源回调
-     * @param filePath
-     */
-    @Override
-    public void downloadResult(final String filePath) {
-        log.i(TAG, "一个视频 资源 下载结果传递了来了:" + filePath);
-        isloading = false; //下载完毕
-        image_Src_isOK = true;
-    }
+
 }

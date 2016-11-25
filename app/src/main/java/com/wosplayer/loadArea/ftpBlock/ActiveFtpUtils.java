@@ -316,6 +316,12 @@ public class ActiveFtpUtils {
                         }
                     }
                 }
+
+                String nNmae = tmp_localPath.substring(0,tmp_localPath.lastIndexOf("."));//正式文件名
+                fileUtils.renamefile(tmp_localPath,nNmae);//转换名字
+                File Nf = new File(nNmae);
+                log.i(TAG,",转换前文件名["+tmp_localPath+"]\n新文件名: "+nNmae);
+                listener.onDownLoadProgress(FTP_DOWN_SUCCESS, 0,null,Nf);
             } catch (IOException e) {
                 e.printStackTrace();
                 listener.onDownLoadProgress(FTP_CONNECT_FAIL, 0,null, null);
@@ -335,11 +341,7 @@ public class ActiveFtpUtils {
             }
 
         }
-        String nNmae = tmp_localPath.substring(0,tmp_localPath.lastIndexOf("."));//正式文件名
-        fileUtils.renamefile(tmp_localPath,nNmae);//转换名字
-        File Nf = new File(nNmae);
-        log.i(TAG,",转换前文件名["+tmp_localPath+"]\n新文件名: "+nNmae);
-        listener.onDownLoadProgress(FTP_DOWN_SUCCESS, 0,null,Nf);
+
     }
 
 
