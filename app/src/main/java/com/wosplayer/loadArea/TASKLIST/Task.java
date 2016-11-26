@@ -33,6 +33,7 @@ public class Task {
     private LoaderCall call;
 
     public Task(String savePath, String terminalNo, String url, LoaderCall call) {
+        state = State.NEW;
         this.savePath = savePath;
         this.terminalNo = terminalNo;
         this.url = url;

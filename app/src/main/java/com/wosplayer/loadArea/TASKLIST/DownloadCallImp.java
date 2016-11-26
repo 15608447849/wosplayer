@@ -38,9 +38,15 @@ public class DownloadCallImp implements LoaderCall{
         if (DownloadState==0){ //成功
             nitifyMsg(task.getFileName(),1);
         }
-        if (DownloadState==1){
+        if (DownloadState==1){//失败
             nitifyMsg(task.getFileName(),4);
         }
+        if ( task.getCall()!=null){
+            task.getCall().downloadResult(null,null);
+        }
+        //删除任务
+        TaskQueue.getInstants().finishTask(task);
+
     }
 
     @Override
