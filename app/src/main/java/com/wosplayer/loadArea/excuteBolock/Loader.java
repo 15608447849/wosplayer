@@ -287,8 +287,7 @@ public class Loader {
      */
     private synchronized void FTPload(String host, String user, String pass, String remotePath, String fileName, String localPath){
         log.i(TAG, "FTP任务["+fileName+"],所在线程:"+ Thread.currentThread().getName());
-        FtpHelper
-                .getInstants(host,21,user,pass)
+        new FtpHelper(host,21,user,pass)
                 .downloadSingleFile(
                     remotePath,
                     localPath,

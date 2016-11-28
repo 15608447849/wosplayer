@@ -49,18 +49,8 @@ public class FtpHelper {
      * FTP重新链接次数
      */
     private int reConnectCount = 0;
-
-
-    private static FtpHelper instents;
-    private FtpHelper() {
-
-    }
-    public static FtpHelper getInstants(String hostName, int serverPort, String userName, String password){
-        if (instents==null){
-            instents = new FtpHelper();
-        }
-        instents.init(hostName,serverPort,userName,password);
-        return instents;
+    public FtpHelper(String hostName, int serverPort, String userName, String password) {
+        init(hostName,serverPort,userName,password);
     }
     private void init(String hostName, int serverPort, String userName, String password){
         this.reConnectCount = 0;

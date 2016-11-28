@@ -3,12 +3,14 @@ package com.wosplayer.Ui.performer;
 import android.graphics.Typeface;
 
 import com.wosplayer.Ui.element.IPlayer;
+import com.wosplayer.Ui.element.iviewelementImpl.IVideoPlayer;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.WosApplication;
 import com.wosplayer.app.log;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -24,13 +26,29 @@ public class layoutExcuter implements TimeCalls{
     private XmlNodeEntity layout ;
     private IPlayer currentIplayer=null ;
     private ArrayList<XmlNodeEntity> contentArr = null;
+    private List<String> videoNameList = null;
     public layoutExcuter(XmlNodeEntity layout) {
         this.layout = layout;
         log.i(TAG,"创建成功");
+        //收集 有效 视频 数量
+        takeVideoVaildCount();
+    }
+    //收集有效 视频 数量
+    private void takeVideoVaildCount() {
+        contentArr = layout.getChildren();
+        for (XmlNodeEntity content : contentArr){
+            if (content.getXmldata().get("fileproterty").equals("video")){
+                if (videoNameList==null){
+                    videoNameList = new ArrayList<>();
+                }
+                videoNameList.add(content.getXmldata().get("getcontents"));
+            }
+        }
+
     }
 
     public void start(){
-        contentArr = layout.getChildren();
+
         if (contentArr==null || contentArr.size()==0){
             log.e(TAG," 布局下 无内容列表" + layout.getChildren());
             return;
@@ -190,9 +208,6 @@ public class layoutExcuter implements TimeCalls{
                 return new Object[]{datalist,ob};
             }
         }
-
-
-
         return  new Object[]{datalist,ob};
     }
 
@@ -230,6 +245,7 @@ public class layoutExcuter implements TimeCalls{
                 clearContent();
                 //生成iplayer
                 currentIplayer = contentTanslater.tanslationAndStart(datalist,ob,true,null,layoutExcuter.this);//创建必须放入主线程执行
+
             }
         });
     }
@@ -245,10 +261,33 @@ public class layoutExcuter implements TimeCalls{
         log.i("清理 布局 下 的 内容");
     }
 
-
-
     @Override
     public void playOvers(IPlayer play) {
+        if (play instanceof IVideoPlayer){
+          if(!checkValidVideo((IVideoPlayer)play)){
+              return;
+          }
+
+        }
         start();
+    }
+
+
+
+    //判断有效视频数量  false 没有有效视频资源  true,存在
+    private boolean checkValidVideo(IVideoPlayer video){
+        if (videoNameList!=null){
+            if(videoNameList.contains(video.singleFileUri)){
+             videoNameList.remove(video.singleFileUri);
+            }
+            log.e(TAG," 有效 视频数:"+videoNameList.size());
+            if (videoNameList.size()==0){
+                //没有一个有效视频 -> 播放默认视频
+                    return false;
+            }
+            return true;
+        }
+
+      return true;
     }
 }

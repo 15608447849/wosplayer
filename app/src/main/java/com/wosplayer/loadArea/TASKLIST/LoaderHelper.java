@@ -29,13 +29,15 @@ public class LoaderHelper implements Observer {//观察者
 
     private static final java.lang.String TAG = "LoaderHelper";
     private DownloadCallImp caller = null;
-    private ExecutorService singleThreadExecutor;
+    //private ExecutorService singleThreadExecutor;
     private HttpUtils http = null;
+    ExecutorService fixedThreadPool;
     public LoaderHelper() {
 
     }
     public void initWord(){
-        singleThreadExecutor = Executors.newSingleThreadExecutor();
+//        singleThreadExecutor = Executors.newSingleThreadExecutor();
+        fixedThreadPool = Executors.newFixedThreadPool(10);
         http = new HttpUtils();
         caller = new DownloadCallImp();
     }
@@ -45,7 +47,7 @@ public class LoaderHelper implements Observer {//观察者
      * 执行下载任务
      */
     private void excuteDownLoad(final Task task) {
-        singleThreadExecutor.execute(new Runnable() {
+        fixedThreadPool.execute(new Runnable() {
             public void run() {
                 try {
                     parseDatas(task);
@@ -110,8 +112,7 @@ public class LoaderHelper implements Observer {//观察者
 
     //Ftp 下载助手
     private void ftpDownloadImp(final Task task, final String user, final String pass, final String host, final String remotePath, final String fileName, final String localPath) {
-        FtpHelper
-                .getInstants(host,21,user,pass)
+        new FtpHelper(host,21,user,pass)
                 .downloadSingleFile(
                         remotePath,
                         localPath,

@@ -55,19 +55,14 @@ public class loaderManager extends IntentService implements LoaderCall
     }
 
     private void testWork() {
+//        final long start = System.currentTimeMillis();
         for (int i = 0;i<TaskList.size();i++){
-            log.i(TAG," 下載 >> index [ "+i+" ] - ["+TaskList.get(i) +"]");
-            TaskQueue.getInstants().addTask(new Task(savepath,terminalNo,(String)TaskList.get(i),i!=TaskList.size()-1?null:new LoaderCall() {
-                @Override
-                public void downloadResult(String filePath, String state) {
-                    //发送完成通知
-                    Intent intent = new Intent();
-                    intent.setAction(completeTaskListBroadcast.action);
-                    getApplicationContext().sendBroadcast(intent);
-                }
-            }));
+//            log.i(TAG," 下載 >> index [ "+i+" ] - ["+TaskList.get(i) +"]");
+            TaskQueue.getInstants().addTask(new Task(savepath,terminalNo,(String)TaskList.get(i),null));
         }
-
+        Intent intent = new Intent();
+        intent.setAction(completeTaskListBroadcast.action);
+        getApplicationContext().sendBroadcast(intent);
     }
 
 

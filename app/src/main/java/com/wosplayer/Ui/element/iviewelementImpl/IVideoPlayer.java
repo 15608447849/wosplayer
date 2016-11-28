@@ -19,7 +19,7 @@ import com.wosplayer.loadArea.otherBlock.fileUtils;
  */
 
 public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
-    private static final java.lang.String TAG = IVideoPlayer.class.getName();
+    private static final java.lang.String TAG = "IVideoPlayer";
     private Context mCcontext;
     private ViewGroup mfatherView = null;
     private int x=0;
@@ -38,7 +38,7 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
     }
 
     private String singleFileLocalPath = null;
-    private String singleFileUri = null;
+    public String singleFileUri = null;
     private DataList mp = null;
     @Override
     public void loadData(DataList mp, Object ob) {
@@ -88,13 +88,13 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
                     if(!fileUtils.checkFileExists(singleFileLocalPath)) {//fileUtils.checkFileExists(filename)
                         //不存在
                         log.e(TAG, "开始 - 视频资源 不存在 - " + singleFileLocalPath);
-                        //播放默认视频
+                        if (timeCalls!=null){
+                            timeCalls.playOvers(this);
+                        }
+//                        //播放默认视频
                         String del = WosApplication.getConfigValue("defaultVideo");
                         if (!del.equals("")){
                             playVideo(del);
-                        }
-                        if (timeCalls!=null){
-                            timeCalls.playOvers(this);
                         }
                     }else{
                         playVideo(singleFileLocalPath);
