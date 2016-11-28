@@ -19,6 +19,7 @@ public class TaskQueue extends Observable { //被观察者
     private List<Task> queue;//队列
     private TaskQueue(){
         queue = new LinkedList<Task>();
+        init(new LoaderHelper());
     }
 
     //获取队列实例
@@ -43,7 +44,7 @@ public class TaskQueue extends Observable { //被观察者
     // 添加一项任务
     public synchronized void addTask(Task task) {
         if (task != null) {
-            log.i(TAG,"addTask()" +task.getUrl());
+//            log.i(TAG,"addTask()" +task.getUrl());
             queue.add(task);
             excute();//通知->观察者
         }
@@ -51,7 +52,7 @@ public class TaskQueue extends Observable { //被观察者
     // 完成任务后将它从任务队列中删除
     public synchronized void finishTask(Task task) {
         if (task != null) {
-            log.i(TAG,"finishTask()"+task.getUrl());
+//            log.i(TAG,"finishTask()"+task.getUrl());
             task.setState(Task.State.FINISHED);
             queue.remove(task);
         }
@@ -67,7 +68,7 @@ public class TaskQueue extends Observable { //被观察者
                     if (Task.State.NEW == task.getState()) {
                         //把任务状态置为运行中
                         task.setState(Task.State.RUNNING);
-                        log.i(TAG,"getTask()"+task.getUrl() +"queue size = "+queue.size());
+//                        log.i(TAG,"getTask()"+task.getUrl() +"queue size = "+queue.size());
                         return task;
                     }
                 }
@@ -76,7 +77,7 @@ public class TaskQueue extends Observable { //被观察者
 
 
     private void excute(){
-        log.i(TAG,"excute()");
+//        log.i(TAG,"excute()");
         setChanged();
         notifyObservers(getTask());  //取出任务
     }

@@ -102,11 +102,17 @@ public class layoutExcuter implements TimeCalls{
             return;
         }
         Object[] dataArr = ReorganizationData(content);
-        createContent((DataList) dataArr[0],dataArr[1]);//自动执行
+        if (dataArr!=null){
+            createContent((DataList) dataArr[0],dataArr[1]);//自动执行
+        }
+
     }
 
     //组装数据
     private Object[] ReorganizationData(XmlNodeEntity content) {
+        if (layout==null || content ==null ) {
+            return null;
+        }
         DataList datalist =new DataList();
         Object ob = null;
         //1 x,y,w,h  2.本地文件路径,<contentsnewname><![CDATA[1469177181932.mp4]]></contentsnewname> 3.<fileproterty>video</fileproterty>类型 4.资源uri    <getcontents><![CDATA[ftp://ftp:FTPmedia@172.16.0.19/uploads/1469177181932.mp4]]></getcontents>

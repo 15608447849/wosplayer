@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.wosplayer.app.log;
-import com.wosplayer.loadArea.TASKLIST.LoaderHelper;
 import com.wosplayer.loadArea.TASKLIST.Task;
 import com.wosplayer.loadArea.TASKLIST.TaskQueue;
 import com.wosplayer.loadArea.excuteBolock.Loader;
@@ -50,14 +49,12 @@ public class loaderManager extends IntentService implements LoaderCall
         savepath = intent.getExtras().getString("savepath","0000");
         Log.i(TAG,"收到一个 下载队列, 队列大小:"+TaskList.size()+"\n terminalNo="+terminalNo+"\nsavepath="+savepath);
 
-//        testWork();
+        testWork();
 
-        WorkEvent();
+//        WorkEvent();
     }
 
     private void testWork() {
-        TaskQueue.getInstants().init(new LoaderHelper());
-
         for (int i = 0;i<TaskList.size();i++){
             log.i(TAG," 下載 >> index [ "+i+" ] - ["+TaskList.get(i) +"]");
             TaskQueue.getInstants().addTask(new Task(savepath,terminalNo,(String)TaskList.get(i),i!=TaskList.size()-1?null:new LoaderCall() {

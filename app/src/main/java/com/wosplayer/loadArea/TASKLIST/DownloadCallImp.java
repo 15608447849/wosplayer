@@ -3,8 +3,6 @@ package com.wosplayer.loadArea.TASKLIST;
 import com.wosplayer.app.WosApplication;
 import com.wosplayer.loadArea.excuteBolock.LoaderCall;
 
-import static com.wosplayer.R.id.terminalNo;
-
 /**
  * Created by user on 2016/11/25.
  */
@@ -18,17 +16,25 @@ public class DownloadCallImp implements LoaderCall{
      * 2 3 4
      *
      */
-    public void nitifyMsg(String filename, int type){
+    public void nitifyMsg(String terminalNo,String filename, int type){
         WosApplication.sendMsgToServer("FTPS:"+terminalNo+";" + filename+ ";"+type);
     }
 
-    public void notifyProgress(String filename, String process, String speed){
+    public void notifyProgress(String terminalNo,String filename, String process, String speed){
         String command = "PRGS:" +  terminalNo
                 + "," + filename + ","
                 + process + "," + speed;
         WosApplication.sendMsgToServer(command);
     }
 
+    // 指定类型 不匹配
+    public boolean downloadResult(Task task,int DownloadState,String fileName,String filterType){
+        if (fileName.endsWith(filterType)){
+            return true;
+        }
+        downloadResult(task,DownloadState);
+        return false;
+    }
     /**
      *
      * @param task
@@ -36,10 +42,10 @@ public class DownloadCallImp implements LoaderCall{
      */
     public void downloadResult(Task task,int DownloadState){
         if (DownloadState==0){ //成功
-            nitifyMsg(task.getFileName(),1);
+            nitifyMsg(task.getTerminalNo(),task.getFileName(),1);
         }
         if (DownloadState==1){//失败
-            nitifyMsg(task.getFileName(),4);
+            nitifyMsg(task.getTerminalNo(),task.getFileName(),4);
         }
         if ( task.getCall()!=null){
             task.getCall().downloadResult(null,null);
