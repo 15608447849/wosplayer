@@ -2,8 +2,8 @@ package com.wosplayer.cmdBroadcast.Command.OtherCmd;
 
 import android.text.format.Time;
 
-import com.wosplayer.app.log;
 import com.wosplayer.app.WosApplication;
+import com.wosplayer.app.log;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleReader;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 
@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,17 +34,29 @@ public class Command_SYTI implements iCommand {
 	}
 
 	private String getSystemTime(){
+		log.i(TAG,"当前时区 - "+ TimeZone.getDefault().getDisplayName());
 		long time= System.currentTimeMillis();
 		final Calendar mCalendar= Calendar.getInstance();
 		mCalendar.setTimeInMillis(time);
-		int mHour=mCalendar.get(Calendar.HOUR);//取得小时：
+		int mYear = mCalendar.get(Calendar.YEAR);//年
+		int mMonth = mCalendar.get(Calendar.MONTH);//月
+		int mDate = mCalendar.get(Calendar.DATE);//日
+		log.i(TAG,"mCalendar >>> "+mYear+"-"+mMonth+"-"+mDate);
+		int mHour=mCalendar.get(Calendar.HOUR_OF_DAY);//取得小时：
 		int mMinuts=mCalendar.get(Calendar.MINUTE);//取得分钟：
+		int mSecond=mCalendar.get(Calendar.SECOND);//取得秒
+		log.i(TAG,"mCalendar >>> "+mHour+":"+mMinuts+":"+mSecond);
+
 		Time t=new Time(); // or Time t=new Time("GMT+8"); 加上Time Zone资料
 		t.setToNow(); // 取得系统时间。
 		int year = t.year;
 		int month = t.month;
 		int date = t.monthDay;
+		log.i(TAG,"Time() >>> \n"+year+"-"+month+"-"+date);
 		int hour = t.hour;    // 0-23
+		int minuts = t.minute;
+		int seconds = t.second;
+		log.i(TAG,"Time() >>> \n"+hour+":"+minuts+":"+seconds);
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String times = df.format(new Date());
 		return times;
@@ -57,62 +70,37 @@ public class Command_SYTI implements iCommand {
 			return;
 		}
 
-		if(justTime(param,null,true)){
-			log.i(TAG,"不需要时间同步");
+		if(justTime(getSystemTime(),param)){
 			return;
 		}
-
-
-
-
-		disableSystemSyncTime();
 		String settingTime = param.replaceAll("-", "").replace(":","").replaceAll(" ", ".");
-		log.i(TAG,settingTime);
-		String newTime = null;
+		log.i(TAG,"准备设置时间参数 >date>> "+settingTime);
+		liunx_SU_syncTimeCmd(settingTime,"Asia/Shanghai");
+		log.i(TAG,"当前设置时区 Asia/Shanghai >>> 时间 - "+getSystemTime());
 
-
-		log.e(TAG,"srtting zone GMT+08:00 ");
-		newTime = liunx_SU_syncTimeCmd(settingTime,"GMT+08:00");
-
-		if(!justTime(param,newTime,false)){
-			log.e(TAG,"srtting zone GMT-08:00 ");
-			liunx_SU_syncTimeCmd(settingTime,"GMT-08:00");
-		}
 		//再次执行排期读取
 		ScheduleReader.clear();
 		ScheduleReader.Start(false);
 
 	}
 
-	private boolean justTime(String param,String nt,boolean flag) {
-		DateFormat dataFormatUtils = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()); // 格式化 时间 工具
+	private boolean justTime(String androidTime,String serviceTime) {
+
 		try {
-			long systemTime = dataFormatUtils.parse(param).getTime();
+			DateFormat dataFormatUtils = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()); // 格式化 时间 工具
+			long systemTime = dataFormatUtils.parse(serviceTime).getTime();    //服务器传来的时间
+			long currentTime = dataFormatUtils.parse(androidTime).getTime();    //当前时间
 
-			long currentTime = 0;
-			if (flag){
-				//当前时间
-				currentTime = new Date().getTime();
-				if (Math.abs(currentTime-systemTime) < (10 * 1000)){
-					log.e(TAG, "不需要 同步时间");
-					return true;
-				}
-
+			if (Math.abs(currentTime-systemTime) < (5 * 1000)){
+				log.i(TAG, "时间正确 - android"+currentTime +"   server - "+systemTime);
+				return true;
 			}else{
-				currentTime = dataFormatUtils.parse(nt).getTime();
-
-				if (Math.abs(currentTime-systemTime) < (30 * 1000)){
-					log.e(TAG, "同步时间 正确");
-					return true;
-				}
-
+				log.i(TAG, "时间错误 android  "+currentTime +"   server - "+systemTime);
 			}
-
 
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-
 		return false;
 	}
 
