@@ -40,11 +40,12 @@ import rx.functions.Action0;
 public class InteractionContentShowExer extends FrameLayout implements IviewPlayer {
 
     private static final String TAG = "_InteractionContentShowExer";
-    private static final int leftTag = 0;
-    private static final int rightTag = 1;
+    private static final int leftTag = 0;//向左
+    private static final int rightTag = 1; //向右
     private Context mContext = null;
     private List<IviewPlayer> contentList = null;
-    private int currentIndex = 0;
+    private int currentIndex = -100;
+    private IviewPlayer currentIview = null;
     private View mFather = null;
     private AbsoluteLayout mBackLayout = null;
     private AbsoluteLayout mFontLayout = null;
@@ -70,28 +71,47 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
     @Override
     public void AotuLoadingResource() {
         try {
-            genereteLayout();//前后图层
+            log.i(TAG," --- 初始化 --- ");
+            currentIndex = 0;
             //首次 显示 第一个控件
             if (contentList==null){
-                log.e(TAG,"无内容集合");
-                //设置一张默认图片 显示2秒 退出
+                log.e(TAG,"互动无内容列表 - contentList - "+contentList);
+                //设置一张默认图片 显示2秒 退出 (没有做)
                 removeMeToFather();
-                return;
+            }else{
+                genereteLayout();//前后图层
+                addButton(mFontLayout);//添加按钮
+                playShow();//开始显示//第一次开始显示
             }
-            addButton(mFontLayout);
-            playShow();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
     //播放
     private void playShow() {
-        log.e(TAG," - contentList -> size = "+contentList.size());
-        contentList.get(currentIndex).addMeToFather(mBackLayout);
-        ImageAttabuteAnimation.SttingAnimation(mContext, (View) contentList.get(currentIndex),null);
-        int time = contentList.get(currentIndex).getPlayDration(this);
+        if (mBackLayout==null){
+            log.e(TAG,"背景图层不存在 "+mBackLayout);
+            return;
+        }
+
+        if (currentIview!=null){
+            log.i(TAG,"清理子视图 - "+currentIview);
+            currentIview.removeMeToFather();
+            currentIview=null;
+        }
+        currentIview = contentList.get(currentIndex);
+        log.i(TAG,"playShow() 获取一个显示 视图 - currentIview"+currentIview);
+        if (currentIview==null){
+            return;
+        }
+        currentIview.addMeToFather(mBackLayout);//添加到 后景
+        ImageAttabuteAnimation.SttingAnimation(mContext, (View) currentIview,null);//设置入场动画
+        int time = currentIview.getPlayDration(this);//获取播放时长
+        log.i(TAG,"playShow 获取播放时长 : "+time);
         startTimer(time);
     }
+    //取消定时器
     private void cancalTimer() {
         log.d(TAG,"停止定时任务");
         if (timerTask != null){
@@ -103,23 +123,21 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
             timer=null;
         }
     }
-    //開始
+    //開始定时器
     private void startTimer(int times){
+        log.i(TAG,"startTimer() 播放时间: "+ times);
         if (times<=0){
             log.e(TAG,"永久播放");
             return;
         }
-        log.d(TAG,"播放时间: "+ times);
-
         cancalTimer();
         timerTask = new TimerTask() {
             @Override
             public void run() {
-                log.e(TAG,"Thread name:"+Thread.currentThread().getName());
                 AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                     @Override
                     public void call() {
-                        ScollTo(rightTag);
+                        ScollTo(rightTag);  //在指定时长之后 会滑动到下一个
                     }
                 });
             }
@@ -127,18 +145,20 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
         timer = new Timer();
         timer.schedule(timerTask,times);
     }
-    //tianjia anniu
+    //添加 按钮
     private void addButton(ViewGroup layout) {
-        addReturnButton(layout);
-        addLeftOrRightButton(layout);
+        addReturnButton(layout);//添加返回按钮
+        addLeftOrRightButton(layout); //添加左 右 键.
     }
+
+    //删除资源
     private void removeResoure(){
         try {
-            cancalTimer();
-            if (contentList!=null && contentList.size()>currentIndex){
+            cancalTimer();//停止计时器
+            if (contentList!=null && contentList.size()>currentIndex){ //如果内容列表大小 > 当前下标
                 contentList.get(currentIndex).removeMeToFather();
             }
-            this.removeAllViews();//删除全部的视图
+            unGenereteLayout();
             left = null;
             right = null;
             mBackLayout =null;
@@ -150,6 +170,7 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
             e.printStackTrace();
         }
     }
+    //入口
     @Override
     public void addMeToFather(View view) {
         try {
@@ -172,13 +193,11 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
             AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                 @Override
                 public void call() {
-                    log.d(TAG,"准备清理中...");
+                    log.i(TAG,"清理中......");
                     //清空内容
                     removeResoure();
-                   log.d(TAG,"清理资源完毕");
                     //移除自己
                     ((ViewGroup)mFather).removeView(InteractionContentShowExer.this);
-                    log.d(TAG,"移除自己成功");
                     mFather=null;
                 }
             });
@@ -197,12 +216,13 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
     public int getPlayDration(IviewPlayer iviewPlayer) {
         return 0;
     }
+
     //因为获取视频时长,在加载视频之前无法获取,  所以开一个接口 在视频播放完之后可供调用
     @Override
     public void otherMother(Object object) {
         try {
             Integer var = (Integer) object;
-            log.e(TAG," otherMother() call : "+ var);
+            log.i(TAG," otherMother() call  视频时长 -: "+ var);
             startTimer(var);
         } catch (Exception e) {
             e.printStackTrace();
@@ -211,7 +231,7 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
     /*
     我的方法
      */
-    private void genereteLayout(){
+    private void genereteLayout(){ //生成视图层
         if (Thread.currentThread() != Looper.getMainLooper().getThread()){
             log.e(TAG,"当前线程不在主线程 不能创建图层");
             return;
@@ -223,7 +243,6 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
                 mBackLayout = new AbsoluteLayout(mContext);
                 LayoutParams lp = new LayoutParams(ViewPager.LayoutParams.MATCH_PARENT, ViewPager.LayoutParams.MATCH_PARENT);
                 mBackLayout.setLayoutParams(lp);
-                mBackLayout.setBackgroundColor(Color.RED);
                 this.addView(mBackLayout);
                 log.d(TAG,"背景图层 创建完成 "+mBackLayout);
             }
@@ -241,6 +260,23 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
         }
     }
 
+    //取消视图层
+    private void unGenereteLayout(){
+        try {
+            //第一层
+            if (mBackLayout!=null){
+                this.removeView(mBackLayout);
+                mBackLayout = null;
+            }
+            //第二层
+            if (mFontLayout!=null){
+                this.removeView(mFontLayout);
+                mFontLayout = null;
+            }
+        } catch (Exception e) {
+            log.e(TAG,"unGenereteLayout() err:"+e.getMessage());
+        }
+    }
 
 
 
@@ -259,31 +295,28 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
     public void setMyReturnBtn(FrameLayout buttonLayout){
         returnbtn = buttonLayout;
     }
-    private void addReturnButton(ViewGroup v){
 
+    private void addReturnButton(ViewGroup v){
         try {
             if (Thread.currentThread() != Looper.getMainLooper().getThread()){
                 log.e(TAG,"当前线程不在主线程 不能添加按钮");
                 return;
             }
-            if (returnbtn==null){
-                log.e(TAG,"返回按钮不存在");
-                return;
+            if (returnbtn!=null){
+                v.removeView(returnbtn);
+                v.addView(returnbtn);
+                log.d(TAG,"添加返回按钮成功");
             }
-            v.removeView(returnbtn);
-            v.addView(returnbtn);
-            log.e(TAG,"已经添加返回按钮");
+
         } catch (Exception e) {
            log.e(TAG,"addReturnButton() err:"+e.getMessage());
         }
-
     }
 
     //添加左右按钮
     private void addLeftOrRightButton(ViewGroup v){
 
       try{
-
           if (Thread.currentThread() != Looper.getMainLooper().getThread()){
               log.e(TAG,"当前线程不在主线程 不能添加按钮");
               return;
@@ -307,7 +340,6 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
                 }
             });
         }
-
           if(right==null) {
               right = new Button(mContext);
               right.setTag(rightTag);
@@ -338,42 +370,44 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
 
     //按钮滑动事件
     private void ScollTo(int tag) {
+        log.i(TAG,"playShow() 内容列表 - contentList -> size = "+contentList.size());
         if (contentList==null){
             log.e(TAG,"   contentList is null - ");
+            this.removeMeToFather();
             return;
         }
+        if (contentList.size()==1){
+            log.i(TAG,"   contentList 只有一个内容 - "+ contentList.size());
+            currentIndex = 0;
+        }else{
+            justIndex(tag);
+        }
+
+        log.i(TAG,"计算之后的下标 : "+currentIndex);
+        if (currentIndex>=contentList.size() || currentIndex<0){
+            currentIndex = 0;
+        }
+
+        playShow();
+    }
+    //计算下标
+    private void justIndex(int tag) {
         switch (tag){
-            case leftTag:
-            log.d("左边 \n <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-                if (contentList.size()==1){
-                    return;
-                }
-            contentList.get(currentIndex).removeMeToFather();
+            case leftTag://左
+                log.i(TAG,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<左边 - 当前下标  "+currentIndex);
                 currentIndex--;
                 if (currentIndex<0){
                     currentIndex=contentList.size()-1;
                 }
-                playShow();
+                break;
 
-
-            break;
-            case rightTag:
-            log.d("右边\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-                if (contentList.size()==1){
-                    return;
-                }
-                contentList.get(currentIndex).removeMeToFather();
+            case rightTag://右
+                log.i(TAG,">>>>>>>>>>>>>>>>>>>>>>>>>>>>右边  - 当前下标  "+currentIndex);
                 currentIndex++;
                 if (currentIndex>=contentList.size()){
                     currentIndex=0;
                 }
-
-                    playShow();
-
-
-
-
-            break;
+                break;
         }
     }
 }

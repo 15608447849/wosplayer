@@ -88,9 +88,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
         super(context);
         mContext = context;
         this.layout = layout;
-
         layout.addView(this); //把自己 添加到 父视图 还没有布局
-
         log.d(TAG," my videoview create");
     }
 
@@ -225,7 +223,6 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
         if (mMediaPlayer == null){
             return;
         }
-
         if (!isDestroy){
             log.i(TAG,filename+"视频停止播放");
             isDestroy = true;
@@ -233,7 +230,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
             mMediaPlayer.release();
             mMediaPlayer = null;
         }
-        layout.removeView(this);//父布局移除视图
+
     }
     /**
      * 初始化

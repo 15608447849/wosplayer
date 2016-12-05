@@ -10,7 +10,6 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.backjar.Bak;
 import com.wosplayer.app.log;
 import com.wosplayer.cmdBroadcast.CmdPostTaskCenter;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_UPDC;
@@ -34,7 +33,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class CommunicationService extends Service{
 
-    private static final java.lang.String TAG = CommunicationService.class.getName();
+    private static final java.lang.String TAG = "CommunicationService";
     private DataOutputStream dataOutputStream;
     private DataInputStream dataInputStream;
     private Socket socket;
@@ -283,12 +282,6 @@ public class CommunicationService extends Service{
      */
     private void startCommunication(){
         log.i(TAG,"startCommunication() >>>\n当前所在线程:"+Thread.currentThread().getName()+"\n当前线程数量:"+Thread.getAllStackTraces().size());
-        try {
-            new Bak().start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
 
         //创建接受消息线程,发送消息线程
         startReceiveThreadAndSendThread();
