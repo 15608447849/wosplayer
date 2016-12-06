@@ -41,7 +41,7 @@ public class WosApplication extends Application {
         log.e("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wosPlayer app start~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         appContext = WosApplication.this.getApplicationContext();
         //捕获异常
-        CrashHandler.getInstance().init(getApplicationContext());
+        //CrashHandler.getInstance().init(getApplicationContext());
     }
 
     public void startAppInit(){

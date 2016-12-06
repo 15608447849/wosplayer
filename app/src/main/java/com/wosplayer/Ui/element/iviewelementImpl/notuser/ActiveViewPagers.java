@@ -197,6 +197,8 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
         });
     }
 
+
+
     private void ScollToRight() {
         log.e(TAG,"ScollToRight");
         int index = ++mCurrentPos;
@@ -276,7 +278,6 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
      * 设置Viewpage 的 大小
      * 把自己 添加到 父布局上
      */
-    @Override
     public void addMeToFather(View f){
 
         if(f!=null){
@@ -311,7 +312,6 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
         }
     }
 
-    @Override
     public void addMeToFather(View view, boolean f) {
         //null
         addMeToFather(view);
@@ -342,7 +342,6 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
         }
     }
 
-    @Override
     public void removeMeToFather(boolean f) {
         removeMeToFather();
     }
@@ -372,16 +371,11 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
                             0,
                             0));
             loadLayout.setBackgroundColor(Color.TRANSPARENT);//透明
-
-            iview.addMeToFather(loadLayout,false);
-
-
+//            iview.addMeToFather(loadLayout,false);
         if(!myViewList.contains(loadLayout)){ //不存在
             myViewList.add(loadLayout);
         }
-
         this.pa.notifyDataSetChanged();
-
     }
 
 

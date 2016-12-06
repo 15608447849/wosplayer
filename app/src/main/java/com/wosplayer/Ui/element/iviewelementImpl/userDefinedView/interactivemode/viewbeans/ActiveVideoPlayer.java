@@ -18,7 +18,7 @@ import com.wosplayer.loadArea.otherBlock.fileUtils;
  * Created by user on 2016/7/4.
  */
 public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer {
-    private static final java.lang.String TAG = "_VIDEOPLAYER";//ActiveVideoPlayer.class.getName();
+    private static final java.lang.String TAG = "ActiveVideoPlayer";//ActiveVideoPlayer.class.getName();
     private MyVideoView video;
     private long mCurrentSeek;
 
@@ -169,10 +169,6 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer {
         }
     }
 
-    @Override
-    public void addMeToFather(View view, boolean f) {
-        //NULL
-    }
 
     /**
      * 从父容器中移除
@@ -181,9 +177,6 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer {
     public void removeMeToFather() {
         if (mFather != null) {
             if (mFather instanceof AbsoluteLayout) {
-//                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-//                    @Override
-//                    public void call() {
                         if (isremove) {
                             log.e(TAG, "已經被移除");
                             return;
@@ -194,17 +187,10 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer {
                         mFather.removeView(ActiveVideoPlayer.this);
                         mFather = null;
                         isremove = true;
-//                    }
-//                });
-
             }
         }
     }
 
-    @Override
-    public void removeMeToFather(boolean f) {
-
-    }
 
     //获取 时长
     @Override

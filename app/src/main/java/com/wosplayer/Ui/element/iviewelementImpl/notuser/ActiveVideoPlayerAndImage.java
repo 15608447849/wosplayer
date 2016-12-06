@@ -119,7 +119,7 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
 
             if (!image_Src_isOK){ //如果资源没有下载完  不加载视频
                 log.e(TAG,"--- 资源没有加载完 ---");
-                DisplayActivity.activityContext.visibleLayoutDialog(true,param); //资源如果没有加载完 显示图层 传递true
+                //DisplayActivity.activityContext.visibleLayoutDialog(true,param); //资源如果没有加载完 显示图层 传递true
                 return;
             }
            ViewGroup vp = DisplayActivity.frame_main;
@@ -221,11 +221,7 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
         }
     }
 
-    @Override
-    public void addMeToFather(View view, boolean f) {
-        //null
-        addMeToFather(view);
-    }
+
 
     /**
      * 从父容器中移除
@@ -260,10 +256,7 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
         }
     }
 
-    @Override
-    public void removeMeToFather(boolean f) {
 
-    }
 
     @Override
     public int getPlayDration(IviewPlayer iviewPlayer) {

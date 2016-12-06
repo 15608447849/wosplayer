@@ -131,10 +131,7 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
         }
     }
 
-    @Override
-    public void addMeToFather(View view, boolean f) {
-        addMeToFather(view);
-    }
+
 
 
     /**
@@ -157,29 +154,23 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
      * 把自己 从父控件移除
      */
     public void removeMeToFather() {
-        if (mFather != null) {
-            if (mFather instanceof IinteractionPlayer) {
-                if (returnBtn!=null){
-                    returnBtn = null;
-                }
                 AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                     @Override
                     public void call() {
+                        if (mFather != null) {
+                        if (returnBtn!=null){
+                            returnBtn = null;
+                        }
                         //容器是个绝对布局的话
                         mFather.removeView(LayoutActive.this);
                         mFather = null;
+                        }
+                        releasedResource();
                     }
                 });
-                releasedResource();
-            }
-        }
-
     }
 
-    @Override
-    public void removeMeToFather(boolean f) {
 
-    }
 
     @Override
     public int getPlayDration(IviewPlayer iviewPlayer) {

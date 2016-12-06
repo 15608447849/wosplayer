@@ -105,11 +105,7 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
         }
     }
 
-    @Override
-    public void addMeToFather(View view, boolean f) {
-        isShow = false;
-        addMeToFather(view);
-    }
+
 
 
     /**
@@ -145,20 +141,7 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
         }
     }
 
-    @Override
-    public void removeMeToFather(boolean f) {
 
-
-        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-            @Override
-            public void call() {
-                //异步释放视图
-                releaseImageViewResouce();
-            }
-        });
-
-
-    }
 
     @Override
     public int getPlayDration(IviewPlayer iviewPlayer) {

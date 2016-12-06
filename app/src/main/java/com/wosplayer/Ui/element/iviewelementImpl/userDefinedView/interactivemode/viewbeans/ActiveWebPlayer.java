@@ -125,11 +125,6 @@ public class ActiveWebPlayer extends WebView implements IviewPlayer {
         }
     }
 
-    @Override
-    public void addMeToFather(View view, boolean f) {
-        //NULL
-        addMeToFather(view);
-    }
 
     boolean isRemove = false;
     /**
@@ -160,10 +155,7 @@ public class ActiveWebPlayer extends WebView implements IviewPlayer {
         }
     }
 
-    @Override
-    public void removeMeToFather(boolean f) {
 
-    }
 
     @Override
     public int getPlayDration(IviewPlayer iviewPlayer) {

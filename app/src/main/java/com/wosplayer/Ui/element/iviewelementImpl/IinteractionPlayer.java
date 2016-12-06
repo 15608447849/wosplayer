@@ -305,7 +305,7 @@ private void releasedResource() {
         //判断 如果 是个 层布局 看看是不是带按钮 带按钮就添加按钮
         if(view instanceof LayoutActive){
             if (((LayoutActive)view).returnBtn !=null){
-                this.removeView(((LayoutActive)view).returnBtn );
+                this.removeView(((LayoutActive)view).returnBtn);
                 this.addView(((LayoutActive)view).returnBtn );
             }
         }
