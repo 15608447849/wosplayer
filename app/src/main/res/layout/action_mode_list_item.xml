@@ -9,7 +9,7 @@
         android:layout_width="75dp"
         android:layout_height="75dp"
         android:layout_centerHorizontal="true"
-        android:src="@drawable/error"
+
         />
     <TextView
         android:layout_below="@id/list_item_iv"

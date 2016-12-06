@@ -1,6 +1,7 @@
 package com.wosplayer.Ui.element.iviewelementImpl;
 
 import android.content.Context;
+import android.media.MediaPlayer;
 import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
 
@@ -51,10 +52,23 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
         this.singleFileLocalPath = mp.GetStringDefualt("localpath", "");
         this.singleFileUri = mp.GetStringDefualt("getcontents", "");
         video.initVideoView(true);//false 不循环
+            video.setOnCompletionListener_(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                  callTo();
+                }
+            });
         }catch (Exception e){
             log.e(TAG, "loaddata() " + e.getMessage());
         }
     }
+
+    private void callTo() {
+        if (timeCalls!=null){
+            timeCalls.playOvers(this);
+        }
+    }
+
     @Override
     public void setlayout() {
         try {
@@ -77,10 +91,6 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
         }
     }
 
-    /**
-     * 当前下标
-     */
-    private int currentIndex = -1;
     @Override
     public void start() {
         try{
@@ -88,9 +98,7 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
                     if(!fileUtils.checkFileExists(singleFileLocalPath)) {//fileUtils.checkFileExists(filename)
                         //不存在
                         log.e(TAG, "开始 - 视频资源 不存在 - " + singleFileLocalPath);
-                        if (timeCalls!=null){
-                            timeCalls.playOvers(this);
-                        }
+                        callTo();
 //                        //播放默认视频
                         String del = WosApplication.getConfigValue("defaultVideo");
                         if (!del.equals("")){

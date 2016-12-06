@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import cn.trinea.android.common.util.FileUtils;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 
@@ -62,10 +63,7 @@ public class layoutExcuter implements TimeCalls{
         }else{
             //设置定时任务
             startContentTimer(contentArr);
-
         }
-
-
     }
 
     private int _index = 0;//当前下标的选中内容
@@ -265,20 +263,23 @@ public class layoutExcuter implements TimeCalls{
     public void playOvers(IPlayer play) {
         if (play instanceof IVideoPlayer){
           if(!checkValidVideo((IVideoPlayer)play)){
+              log.e(TAG,"无有效视频 播放默认视频资源");
               return;
           }
-
         }
         start();
     }
 
 
 
-    //判断有效视频数量  false 没有有效视频资源  true,存在
+    //判断有效视频数量
     private boolean checkValidVideo(IVideoPlayer video){
         if (videoNameList!=null){
             if(videoNameList.contains(video.singleFileUri)){
              videoNameList.remove(video.singleFileUri);
+            }
+            if (FileUtils.isFileExist(video.singleFileUri) && !videoNameList.contains(video.singleFileUri)){
+                videoNameList.add(video.singleFileUri);
             }
             log.e(TAG," 有效 视频数:"+videoNameList.size());
             if (videoNameList.size()==0){

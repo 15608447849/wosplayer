@@ -135,15 +135,14 @@ public class WosApplication extends Application {
                     ||!FileUtils.isFileExist("/mnt/sdcard/wosplayer/default/default_prog.xml")
                     ){
                     //一个 - 不存在 - 删除目录
-                org.apache.commons.io.FileUtils.deleteDirectory(new File("/mnt/sdcard/wosplayer"));
+                org.apache.commons.io.FileUtils.deleteDirectory(new File("/mnt/sdcard/wosplayer/default/"));
                 //放入zip包
                if(ToolsUtils.ReadAssectsDataToSdCard(getApplicationContext(),"/mnt/sdcard/wosplayer/","defprog.zip")){
                     //解压缩
                    Log.i("unzip","路径- ->>>>>"+"/mnt/sdcard/wosplayer/defprog.zip");
                    ToolsUtils.UnZip("/mnt/sdcard/wosplayer/defprog.zip","/mnt/sdcard/wosplayer");
-                   FileUtils.deleteFile("/mnt/sdcard/wosplayer/default/defprog.zip");
+                   FileUtils.deleteFile("/mnt/sdcard/wosplayer/defprog.zip");
                }
-
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -521,7 +521,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
 
     private void picassoLoaderImager(String filePath) {
         log.i(TAG, "button _width:" + nw);
-        log.i(TAG, "button _height :" + nh);
+        log.i(TAG, "button _height:" + nh);
 
 //        ImageViewPicassocLoader.loadImage(mcontext, this, new File(filePath), new int[]{nw, nh});
         ImageViewPicassocLoader.getBitmap(mcontext,filePath,this);

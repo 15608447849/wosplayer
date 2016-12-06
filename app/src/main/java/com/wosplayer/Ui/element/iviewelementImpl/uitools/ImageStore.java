@@ -1,6 +1,7 @@
 package com.wosplayer.Ui.element.iviewelementImpl.uitools;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.util.LruCache;
 
 /**
@@ -10,6 +11,7 @@ import android.util.LruCache;
 public class ImageStore {
     private static final String TAG = "image_cache";
     private static ImageStore instant;
+    private boolean isInit = false;
     private ImageStore(){
         init();
     }
@@ -24,6 +26,9 @@ public class ImageStore {
     private int mCacheSize = 0;
     //初始化
     private void init() {
+        if (isInit){
+            return;
+        }
         maxMemory = (int) Runtime.getRuntime().maxMemory();
         mCacheSize = maxMemory / 4;
         if(CacheMap == null){
@@ -42,6 +47,7 @@ public class ImageStore {
                 }
             };
         }
+        isInit = true;
     }
 
     //获取 一个 缓存 view
@@ -60,7 +66,7 @@ public class ImageStore {
                 return;
             }
             if (CacheMap.get(tag) == null || CacheMap.get(tag).isRecycled()) {
-//                Logs.i(TAG,"添加 bitmap - key - "+tag +"\n bitmap - "+bitmap);
+                Log.i(TAG,"添加 bitmap - key - "+tag +"\n bitmap - "+bitmap);
                 CacheMap.put(tag,bitmap);
             }
 
@@ -77,7 +83,6 @@ public class ImageStore {
                 CacheMap.evictAll();
 //                Log.d("CacheUtils", "mMemoryCache.size()" + mMemoryCache.size());
             }
-            CacheMap = null;
         }
     }
 
