@@ -12,6 +12,8 @@ import com.wos.SdCardTools;
 import com.wosplayer.service.CommunicationService;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -41,17 +43,17 @@ public class WosApplication extends Application {
         log.e("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wosPlayer app start~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         appContext = WosApplication.this.getApplicationContext();
         //捕获异常
-        //CrashHandler.getInstance().init(getApplicationContext());
+        CrashHandler.getInstance().init(getApplicationContext());
     }
 
     public void startAppInit(){
         //数据转移
         translationWosToolsData();
         //放入系统目录
-        //new AdbShellCommd(this.getApplicationContext(),true,true).start();//会开端口,会重启
+        new AdbShellCommd(this.getApplicationContext(),true,true).start();//会开端口,会重启
         //new AdbShellCommd(this.getApplicationContext(),true,false).start();//开端口,不重启
         //new AdbShellCommd(this.getApplicationContext(),false,true).start();//不开远程端口.会重启
-       new AdbShellCommd(this.getApplicationContext(),false,false).start();//不开远程端口,不重启
+//       new AdbShellCommd(this.getApplicationContext(),false,false).start();//不开远程端口,不重启
         //初始化 配置信息
         //init(false);
     }
@@ -97,13 +99,11 @@ public class WosApplication extends Application {
         config.put("basepath", basepath);
         //创建一个目录用于存储资源
         SdCardTools.MkDir(basepath);
+        //将 默认图片 或者 视频 放入 指定 文件夹下
         if(defautSource(basepath,"default.mp4")){
             config.put("defaultVideo", config.GetStringDefualt("basepath","") + "default.mp4");//默认视频本地位置
         }
-
         config.put("CAPTIMAGEPATH", config.GetStringDefualt("basepath","") + "screen.png");//截图本地位置
-        //将 默认图片 或者 视频 放入 指定 文件夹下
-
         //建设银行接口资源下载位置
         basepath =  GetKey("bankPathSource", "mnt/sdcard"+SdCardTools.Construction_Bank_dir_source);
         config.put("bankPathSource",basepath);
@@ -114,6 +114,40 @@ public class WosApplication extends Application {
 
         log.i("--- app config init complete ---" );
         config.printData();
+        saveDefProg();
+    }
+
+    private void saveDefProg() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //将默认排期 放入 指定文件夹下
+                defaultProgram();
+            }
+        }).start();
+    }
+
+    //默认排期
+    private void defaultProgram() {
+        try {
+            if (!FileUtils.isFileExist("/mnt/sdcard/wosplayer/default/def.mp4")
+                    ||!FileUtils.isFileExist("/mnt/sdcard/wosplayer/default/default_sche.xml")
+                    ||!FileUtils.isFileExist("/mnt/sdcard/wosplayer/default/default_prog.xml")
+                    ){
+                    //一个 - 不存在 - 删除目录
+                org.apache.commons.io.FileUtils.deleteDirectory(new File("/mnt/sdcard/wosplayer"));
+                //放入zip包
+               if(ToolsUtils.ReadAssectsDataToSdCard(getApplicationContext(),"/mnt/sdcard/wosplayer/","defprog.zip")){
+                    //解压缩
+                   Log.i("unzip","路径- ->>>>>"+"/mnt/sdcard/wosplayer/defprog.zip");
+                   ToolsUtils.UnZip("/mnt/sdcard/wosplayer/defprog.zip","/mnt/sdcard/wosplayer");
+                   FileUtils.deleteFile("/mnt/sdcard/wosplayer/default/defprog.zip");
+               }
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static String getConfigValue(String key){
@@ -123,9 +157,9 @@ public class WosApplication extends Application {
         return "";
     }
 
+    //默认资源
     private boolean defautSource(String basepath,String filename) {
-        String path=basepath.endsWith("/")?basepath+filename:basepath+filename;
-        if(!FileUtils.isFileExist(basepath)){
+        if(!FileUtils.isFileExist(basepath+filename)){
             return ToolsUtils.ReadAssectsDataToSdCard(getApplicationContext(),basepath,filename);
         }
         return true;

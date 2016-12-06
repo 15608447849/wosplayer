@@ -15,11 +15,10 @@ import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.IinteractionPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
-import com.wosplayer.app.log;
 import com.wosplayer.app.WosApplication;
+import com.wosplayer.app.log;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
 
-import java.io.File;
 import java.util.List;
 
 import rx.android.schedulers.AndroidSchedulers;
@@ -227,7 +226,7 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
 
         } else if (bgType == 2){
             String uriLoad = bgImagelurl + bgImagename; //下载地址
-            String localpath = WosApplication.config.GetStringDefualt("basepath", "/sdcard/") + bgImagename; //本地路径
+            String localpath = WosApplication.config.GetStringDefualt("basepath", "") + bgImagename; //本地路径
 
             if (fileUtils.checkFileExists(localpath)) { //资源是否存在
                 setBgImagers(localpath);
@@ -267,7 +266,7 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
         Bitmap bitmap = null;
         try {
             log.d(TAG,"互动 layout . scale after w,h = "+scale_w+","+scale_h);
-            bitmap = ImageViewPicassocLoader.loadImage(mcontext,new File(filePath),new int[]{scale_w,scale_h});
+            bitmap = ImageViewPicassocLoader.getBitmap(mcontext,filePath,null);
             if (bitmap==null){
                 throw new NullPointerException("filepath err :"+filePath);
             }

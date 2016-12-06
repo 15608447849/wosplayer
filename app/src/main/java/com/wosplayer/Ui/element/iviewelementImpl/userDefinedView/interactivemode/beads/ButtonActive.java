@@ -26,15 +26,14 @@ import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.xml.XmlParse;
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.activity.DisplayActivity;
-import com.wosplayer.app.log;
 import com.wosplayer.app.WosApplication;
-import com.wosplayer.loadArea.otherBlock.fileUtils;
+import com.wosplayer.app.log;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import cn.trinea.android.common.util.FileUtils;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 
@@ -450,7 +449,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
             String filename = myBgUri.substring(myBgUri.lastIndexOf("/") + 1);
             filename = WosApplication.config.GetStringDefualt("basepath", "") + filename;
             log.i(TAG, "bg image local path - " + filename);
-            if (fileUtils.checkFileExists(filename)) {
+            if (FileUtils.isFileExist(filename)) {
                 //存在 直接设置
                 picassoLoaderImager(filename);
             } else {
@@ -524,7 +523,8 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
         log.i(TAG, "button _width:" + nw);
         log.i(TAG, "button _height :" + nh);
 
-        ImageViewPicassocLoader.loadImage(mcontext, this, new File(filePath), new int[]{nw, nh});
+//        ImageViewPicassocLoader.loadImage(mcontext, this, new File(filePath), new int[]{nw, nh});
+        ImageViewPicassocLoader.getBitmap(mcontext,filePath,this);
     }
 
     @Override

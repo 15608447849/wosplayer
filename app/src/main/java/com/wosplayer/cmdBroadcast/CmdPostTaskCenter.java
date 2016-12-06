@@ -79,7 +79,7 @@ public class CmdPostTaskCenter extends BroadcastReceiver {
         //设置密码
         commandList.put(CMD_INFO.PASD,new Command_PASD());
         //建行对接接口
-        commandList.put(CMD_INFO.TSLT,new Command_TSLT());
+        commandList.put(CMD_INFO.TSLT,new Command_TSLT(commandList.get(CMD_INFO.UPSC)));
     }
 
     private void postCmd(final String cmd, final String param){

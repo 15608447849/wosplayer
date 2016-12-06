@@ -5,8 +5,9 @@ import android.os.Bundle;
 
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.Ui.uiBroadcast.UibrocdCastReceive;
-import com.wosplayer.app.log;
 import com.wosplayer.app.WosApplication;
+import com.wosplayer.app.log;
+import com.wosplayer.cmdBroadcast.CmdPostTaskCenter;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_SYTI;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
 
@@ -215,6 +216,7 @@ public class ScheduleReader {
             //判断当前uuks 是否和上一个相同
             if(list==null || list.size()==0){
                 log.e(TAG,"-- 无排期列表 --");
+                sendTSLT();
                 return;
             }else{
                 if (currentEntity!=null){
@@ -223,6 +225,8 @@ public class ScheduleReader {
                 currentEntity =  list.get(0);
                 if (currentEntity==null){
                     log.e(TAG,"排期读取错误- 获取不到当前排期 ");
+                    //执行  本地默认排期
+                    sendTSLT();
                     return;
                 }
 
@@ -257,6 +261,7 @@ public class ScheduleReader {
                 log.e(TAG," 空排期 ");
                 clear();
                 UiExcuter.getInstancs().StopExcuter();
+                sendTSLT();
                 return;
             }
 
@@ -309,6 +314,18 @@ public class ScheduleReader {
             lock.unlock();
         }
     }
+
+    //发送广播 - > 到指令
+    private static void sendTSLT(){
+        Intent intent = new Intent();
+        intent.setAction(CmdPostTaskCenter.action);
+        Bundle b = new Bundle();
+        b.putString(CmdPostTaskCenter.cmd,"TSLT:");
+        b.putString(CmdPostTaskCenter.param,"default_");
+        intent.putExtras(b);
+        WosApplication.appContext.sendBroadcast(intent);
+    }
+
 
     /**
      * 制作定时器

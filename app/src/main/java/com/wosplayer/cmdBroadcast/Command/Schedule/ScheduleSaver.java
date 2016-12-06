@@ -5,8 +5,8 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.wos.SdCardTools;
-import com.wosplayer.app.log;
 import com.wosplayer.app.WosApplication;
+import com.wosplayer.app.log;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlHelper;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.Xmlparse;
@@ -464,8 +464,8 @@ public class ScheduleSaver implements iCommand {
                     String bg = XmlHelper.getFirstChildNodeValue(layout_ItemsElement, "bg");
                     if (bg == null || bg.equals("")) {
                         log.e(TAG,"一个布局背景解析错误:背景图片名不存在") ;
-                        String layoutBgerr = "http://cdn.duitang.com/uploads/item/201205/07/20120507220903_VR22y.thumb.600_0.jpeg";
-                        rootNode.addUriTast(layoutBgerr); //创建一个ftp任务
+//                        String layoutBgerr = "http://cdn.duitang.com/uploads/item/201205/07/20120507220903_VR22y.thumb.600_0.jpeg";
+//                        rootNode.addUriTast(layoutBgerr); //创建一个ftp任务
                     }else{
                         String bgmode_uri = thumbnailurl + bg;
                         //创建ftp
