@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Canvas;
 import android.util.Log;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.wos.SdCardTools;
@@ -214,7 +216,18 @@ public class ToolsUtils {
     }
 
 
-
+    public static ImageButton mImageButton(Context context){
+        return new ImageButton(context){
+            @Override
+            protected void onDraw(Canvas canvas) {
+                try {
+                    super.onDraw(canvas);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+    }
 
 
 

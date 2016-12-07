@@ -1,7 +1,6 @@
 package com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.iCache;
 
 
-import com.wosplayer.app.log;
 import com.wosplayer.app.WosApplication;
 
 /**
@@ -16,16 +15,16 @@ public class InteractionCache {
         String k = key +"#"+uid+"#";
         XmlSharedSave.SaveXmlData(WosApplication.appContext,k,value);
         XMLCache.GetOb().saveCache(k,value);
-        log.i(TAG,"本地存入:["+k+"],value:["+value+"]");
+//        log.i(TAG,"本地存入:["+k+"],value:["+value+"]");
     }
 
     //取
     public static String pull(String key){
         String k = key +"#"+uid+"#";
-        log.i(TAG,"->  key:["+k+"]");
+//        log.i(TAG,"->  key:["+k+"]");
         String v = "";
        v = XMLCache.GetOb().getCache(k) ==null ? XmlSharedSave.readXmlData(WosApplication.appContext,k) : XMLCache.GetOb().getCache(k) ;
-        log.i(TAG,"本地:["+v+"]");
+//        log.i(TAG,"本地:["+v+"]");
         return v.equals("")? null:v;
     }
 

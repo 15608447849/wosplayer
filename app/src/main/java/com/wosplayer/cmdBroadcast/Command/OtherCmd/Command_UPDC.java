@@ -209,9 +209,7 @@ private void installApk(String apkLocalPath) {
 
         //String commands = "adb shell am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n com.wosplayer/com.wosplayer.activity.DisplayActivity";
         ShellUtils.CommandResult cr = ShellUtils.execCommand(AdbShellCommd.commands_startApp,false,true);
-
         Log.e(TAG,cr.result+"");
-
 
 //        //打开apk
 //			String param =

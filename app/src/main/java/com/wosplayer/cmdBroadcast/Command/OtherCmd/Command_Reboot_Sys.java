@@ -14,19 +14,23 @@ import cn.trinea.android.common.util.ShellUtils;
 public class Command_Reboot_Sys implements iCommand {
     @Override
     public void Execute(String param) {
-        log.e("-----------------------------------重启终端-----------------------------------------");
+        try {
+            log.e("-----------------------------------重启终端-----------------------------------------");
 
 //        Intent intent = new Intent(DisplayActivity.activityContext, MonitorService.class);
 //        DisplayActivity.activityContext.stopService(intent);
 
-        //Command_CAPT.executeLiunx("reboot");//
+            //Command_CAPT.executeLiunx("reboot");//
 //        AppToSystem.execRootCmdSilent("reboot");
 
-        WosApplication.sendMsgToServer("OFLI:" + WosApplication.config.GetStringDefualt("terminalNo","0000"));
+            WosApplication.sendMsgToServer("OFLI:" + WosApplication.config.GetStringDefualt("terminalNo","0000"));
 
-        String cmd = "reboot";
-        Log.e("#####","\n"+cmd);
-        ShellUtils.CommandResult cr = ShellUtils.execCommand(cmd,true,true);
-        log.e(" reboot result:"+cr.result);
+            String cmd = "reboot";
+            Log.e("#####","\n"+cmd);
+            ShellUtils.CommandResult cr = ShellUtils.execCommand(cmd,true,true);
+            log.e(" reboot result:"+cr.result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

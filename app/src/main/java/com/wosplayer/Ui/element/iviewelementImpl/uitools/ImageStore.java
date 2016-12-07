@@ -1,8 +1,12 @@
 package com.wosplayer.Ui.element.iviewelementImpl.uitools;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.util.LruCache;
+
+import com.wosplayer.R;
 
 /**
  * Created by user on 2016/12/2.
@@ -43,7 +47,10 @@ public class ImageStore {
                 @Override
                 protected void entryRemoved(boolean evicted, String key,
                                             Bitmap oldValue, Bitmap newValue) {
-                    removeImageCache(key);
+                    if (evicted){
+                        removeImageCache(key);
+                    }
+
                 }
             };
         }
@@ -56,7 +63,12 @@ public class ImageStore {
             return null;
         }
 //        Logs.i(TAG,"获取 bitmap - key - "+tag);
-        return CacheMap.get(tag);
+        Bitmap bitmap = CacheMap.get(tag);
+
+        if (bitmap==null || bitmap.isRecycled()){
+            return null;
+        }
+        return bitmap;
     }
 
     //添加 一个 缓存 view
@@ -100,5 +112,55 @@ public class ImageStore {
             }
         }
     }
+
+
+    /**
+     * 获取 返回按钮
+     */
+    public Bitmap getButton_back(Context context){
+        Bitmap bitmap = ImageStore.getInstants().getBitmapCache("returnBtn");
+        if (bitmap==null || bitmap.isRecycled()){
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.back);
+            ImageStore.getInstants().addBitmapCache("returnBtn",bitmap);
+        }
+        return bitmap;
+    }
+
+    /**
+     * 获取错误图片
+     */
+    public Bitmap getButton_err(Context context){
+        Bitmap bitmap = ImageStore.getInstants().getBitmapCache("errors");
+        if (bitmap==null || bitmap.isRecycled()){
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.error);
+            ImageStore.getInstants().addBitmapCache("errors",bitmap);
+        }
+        return bitmap;
+    }
+
+    /**
+     * 获取左键
+     */
+    public Bitmap getButton_left(Context context){
+        Bitmap bitmap = ImageStore.getInstants().getBitmapCache("btn_left");
+        if (bitmap==null || bitmap.isRecycled()){
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.left);
+            ImageStore.getInstants().addBitmapCache("btn_left",bitmap);
+        }
+        return bitmap;
+    }
+
+    /**
+     * 获取右键
+     */
+    public Bitmap getButton_right(Context context){
+        Bitmap bitmap = ImageStore.getInstants().getBitmapCache("btn_rigth");
+        if (bitmap==null || bitmap.isRecycled()){
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.right);
+            ImageStore.getInstants().addBitmapCache("btn_rigth",bitmap);
+        }
+        return bitmap;
+    }
+
 
 }

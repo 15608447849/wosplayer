@@ -35,23 +35,7 @@ import rx.functions.Action0;
 
 public class ImageViewPicassocLoader {
 
-    /**
-     * 加载图片
-     *
-     * @param mContext       上下文
-     * @param imageView      控件
-     * @param tagerImageFile 目标文件
-     * @param sizeParam      大小数组
-     */
-    public static void loadImage(Context mContext, ImageView imageView, File tagerImageFile, int[] sizeParam) {
-        Log.d("load image", tagerImageFile.getAbsolutePath() + " \n length:[" + (sizeParam == null ? "null" : sizeParam.length) + "]");
-        if (tagerImageFile.exists()) {
-            Log.d("", "文件存在 - " + tagerImageFile.getAbsolutePath());
-        } else {
-            Log.e("", "文件不存在 " + tagerImageFile.getAbsolutePath());
-        }
-        getBitmap(mContext, tagerImageFile.getAbsolutePath(), imageView);
-    }
+
 
     /************************************************************************/
 
@@ -93,6 +77,9 @@ public class ImageViewPicassocLoader {
             });
         }
         return bitmap;
+    }
+    public static Bitmap getBitmap(String filePath, final ImageView iv) {
+        return getBitmap(null,filePath,iv);
     }
 
     /**

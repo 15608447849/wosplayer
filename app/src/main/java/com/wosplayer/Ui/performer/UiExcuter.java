@@ -1,6 +1,5 @@
 package com.wosplayer.Ui.performer;
 
-import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageStore;
 import com.wosplayer.app.log;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
 
@@ -70,7 +69,6 @@ public class UiExcuter {
                 _index = 0;
                 contentTanslater.clearCache();
                 clearProgramExcuter();
-                ImageStore.getInstants().clearCache();
 //                if (DisplayActivity.activityContext != null) {
 //                    //隐藏层布局
 //                    DisplayActivity.activityContext.goneLayoutdialog();

@@ -1,10 +1,7 @@
 package com.wosplayer.Ui.element.iviewelementImpl;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
@@ -18,8 +15,6 @@ import com.wosplayer.Ui.performer.TimeCalls;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.log;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
-
-import java.io.File;
 
 /**
  * Created by Administrator on 2016/7/24.
@@ -129,49 +124,49 @@ public class IImagePlayer extends ImageView implements IPlayer{
             mfatherView.removeView(this);
             isExistOnLayout = false;
             //移除存在的图片资源
-            removeMyImage(this);
+//            removeMyImage(this);
         }catch (Exception e){
             log.e(TAG,"停止:"+e.getMessage());
         }
     }
-    //放入主线程
-    public static void removeMyImage(ImageView imageView) {
-        log.i(TAG, "----------------------准备 释放资源----------------------------------" );
-        //资源回调的地方
-        Bitmap bitmap = null;
-        Drawable drawable = imageView.getDrawable();
-        if (drawable == null){
-            drawable = imageView.getBackground();
-            if (drawable == null){
-                imageView.setDrawingCacheEnabled(true);
-                    bitmap = imageView.getDrawingCache();
-                imageView.setDrawingCacheEnabled(false);
-                    if (bitmap==null){
-                        return;
-                    }else{
-                        log.i(TAG,"getDrawingCache() :"+bitmap.toString());
-                    }
-            }
-        }
-        if (drawable != null && drawable instanceof BitmapDrawable) {
-            log.e(TAG,"释放资源:" + drawable.toString());
-            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            bitmap = bitmapDrawable.getBitmap();
-        }
-
-        if (bitmap != null && !bitmap.isRecycled()) {
-            log.i(TAG,"-- bitmap is exitt --");
-            if(drawable!=null){
-                drawable.setCallback(null);
-            }
-            bitmap.recycle();
-            log.i(TAG, " 释放资源 success" );
-            return;
-        }
-        imageView.setBackgroundResource(0);
-        imageView.setImageDrawable(null);
-        log.e(TAG, " 释放资源 failt" );
-    }
+//    //放入主线程
+//    public static void removeMyImage(ImageView imageView) {
+//        log.i(TAG, "----------------------准备 释放资源----------------------------------" );
+//        //资源回调的地方
+//        Bitmap bitmap = null;
+//        Drawable drawable = imageView.getDrawable();
+//        if (drawable == null){
+//            drawable = imageView.getBackground();
+//            if (drawable == null){
+//                imageView.setDrawingCacheEnabled(true);
+//                    bitmap = imageView.getDrawingCache();
+//                imageView.setDrawingCacheEnabled(false);
+//                    if (bitmap==null){
+//                        return;
+//                    }else{
+//                        log.i(TAG,"getDrawingCache() :"+bitmap.toString());
+//                    }
+//            }
+//        }
+//        if (drawable != null && drawable instanceof BitmapDrawable) {
+//            log.e(TAG,"释放资源:" + drawable.toString());
+//            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+//            bitmap = bitmapDrawable.getBitmap();
+//        }
+//
+//        if (bitmap != null && !bitmap.isRecycled()) {
+//            log.i(TAG,"-- bitmap is exitt --");
+//            if(drawable!=null){
+//                drawable.setCallback(null);
+//            }
+//            bitmap.recycle();
+//            log.i(TAG, " 释放资源 success" );
+//            return;
+//        }
+//        imageView.setBackgroundResource(0);
+//        imageView.setImageDrawable(null);
+//        log.e(TAG, " 释放资源 failt" );
+//    }
 
     private void picassoLoaderImager(String filePath) {
         //设置图片切换方式
@@ -181,8 +176,8 @@ public class IImagePlayer extends ImageView implements IPlayer{
          * 他们的值是相等的，只有当view超出屏幕后，才能看出他们的区别。
          * 当超出屏幕后，getMeasuredHeight()等于getHeight()加上屏幕之外没有显示的高度。
          */
-        ImageViewPicassocLoader.loadImage(mCcontext,this,new File(filePath),new int[]{this.getWidth(),this.getHeight()});
-        log.i(TAG," ---------------------------------loader image --------------------------------- over");
+        ImageViewPicassocLoader.getBitmap(filePath,this);
+//        log.i(TAG," ---------------------------------loader image --------------------------------- over");
     }
 
     //重写系统方法

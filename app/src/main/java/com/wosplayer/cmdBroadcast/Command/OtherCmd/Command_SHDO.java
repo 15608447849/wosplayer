@@ -13,20 +13,24 @@ public class Command_SHDO implements iCommand {
     @Override
     public void Execute(String param) {
 
-        log.e("SHDO:" + param);
+        try {
+            log.e("SHDO:" + param);
 
-        if (param.equals("false")){
-            return;
+            if (param.equals("false")){
+                return;
+            }
+
+            //关机
+            String [] commands = {
+                    "adb shell\n",
+                    "sleep 10 && reboot -p\n"
+            };
+            ShellUtils.CommandResult cr = ShellUtils.execCommand(commands,true,true);
+
+            String strs = "即将关机: "+cr.result;
+            log.e(strs);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        //关机
-        String [] commands = {
-                "adb shell\n",
-                "sleep 10 && reboot -p\n"
-        };
-        ShellUtils.CommandResult cr = ShellUtils.execCommand(commands,true,true);
-
-        String strs = "即将关机: "+cr.result;
-        log.e(strs);
-     }
+    }
 }

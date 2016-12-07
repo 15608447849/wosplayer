@@ -10,7 +10,8 @@ import com.wosplayer.cmdBroadcast.Command.iCommand;
 public class Command_Reboot_App implements iCommand {
     @Override
     public void Execute(String param) {
-        log.e("重启 application");
+        try {
+            log.e("重启 application");
 
        /* Intent intent1 = new Intent();
         intent1.setClass(DisplayActivity.activityContext, DisplayActivity.class);
@@ -18,6 +19,11 @@ public class Command_Reboot_App implements iCommand {
         DisplayActivity.activityContext.startActivity(intent1);
 
         System.exit(0);*/
-        DisplayActivity.activityContext.finish();
+            if ( DisplayActivity.activityContext!=null){
+                DisplayActivity.activityContext.finish();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

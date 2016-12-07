@@ -14,13 +14,10 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.wosplayer.R;
-import com.wosplayer.Ui.element.iviewelementImpl.IImagePlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
 import com.wosplayer.app.log;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
-
-import java.io.File;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
@@ -210,9 +207,7 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
      * 资源释放
      */
     private void releaseImageViewResouce() {
-        log.i(TAG, "----------------------互动图片-------------清理资源---------------------Thread: " + Thread.currentThread().getName());
-        IImagePlayer.removeMyImage(this);
-        log.i(TAG, "----------------------互动图片 end-------------清理资源---------------------Thread: " + Thread.currentThread().getName());
+
     }
 
 
@@ -229,11 +224,11 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
     private void picassoLoaderImager(String filePath) {
 
 //        ImageAttabuteAnimation.SttingAnimation(mcontext,this,null);
-
-        log.e(TAG, "互动 -------  loadimageing ------- " + filePath);
-
-        ImageViewPicassocLoader.loadImage(mcontext, this, new File(filePath), null);
-        log.e(TAG, "互动 -------  loadimage end -------");
+        if (cn.trinea.android.common.util.FileUtils.isFileExist(filePath)){
+            ImageViewPicassocLoader.getBitmap(filePath, this);
+        }else{
+            this.setImageResource(R.drawable.error);
+        }
     }
 
 
@@ -245,16 +240,11 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
         try {
             super.onDraw(canvas);
         } catch (Exception e) {
-            log.i(TAG, "试图引用　一个　回收的图片 [" + e.getMessage() + "-" + e.getCause() + "]");
-           picassoLoaderImager(localPath);
+            log.e(TAG, "试图引用　一个　回收的图片 [" + e.getMessage() + "-" + e.getCause() + "]");
+            picassoLoaderImager(localPath);
         }
     }
 
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        // setImageDrawable(null);
-    }
 
     /**
      * 加载一个  播放按钮

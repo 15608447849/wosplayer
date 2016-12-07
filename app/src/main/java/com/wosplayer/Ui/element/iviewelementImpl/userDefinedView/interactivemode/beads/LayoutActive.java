@@ -2,17 +2,15 @@ package com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemod
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.AbsoluteLayout;
 import android.widget.FrameLayout;
 
-import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.IinteractionPlayer;
+import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageStore;
 import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
 import com.wosplayer.app.WosApplication;
@@ -36,7 +34,7 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
     public String id;
     public int w, h;
     private float wScale, hScale;
-    private int scale_w,scale_h;
+    private int scale_w, scale_h;
     public int bgType;
     public String bgImagename;
     public List<ButtonActive> myItems;
@@ -69,24 +67,25 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
 
     private IinteractionPlayer mFather;//
     public FrameLayout returnBtn;
+
     /**
      * 设置我的宽高属性
      */
     private void setMylayoutParma() {
-        log.i(TAG," 互动执行者-> 绑定的视图->设置自己的布局参数");
+        log.i(TAG, " 互动执行者-> 绑定的视图->设置自己的布局参数");
         //获取 与父容器的 宽高比值
-        log.i(TAG,"1f宽度"+mFather.getWidth()+"--f高度"+ mFather.getHeight());
-        log.i(TAG,"2f宽度"+mFather.getMeasuredWidth()+"--f高度"+ mFather.getMeasuredHeight());
-        log.i(TAG,"3f宽度"+mFather.getLayoutParams().width+"--f高度"+ mFather.getLayoutParams().height);
-        wScale = (float)mFather.getLayoutParams().width /(float)this.w ;
-        hScale =(float)mFather.getLayoutParams().height/ (float)this.h ;
-        log.i(TAG,"宽度比例"+wScale+"--高度比例"+ hScale);
-        if (wScale == 0.0 || hScale== 0.0){
-            log.e(TAG," 比例异常 ");
+        log.i(TAG, "1f宽度" + mFather.getWidth() + "--f高度" + mFather.getHeight());
+        log.i(TAG, "2f宽度" + mFather.getMeasuredWidth() + "--f高度" + mFather.getMeasuredHeight());
+        log.i(TAG, "3f宽度" + mFather.getLayoutParams().width + "--f高度" + mFather.getLayoutParams().height);
+        wScale = (float) mFather.getLayoutParams().width / (float) this.w;
+        hScale = (float) mFather.getLayoutParams().height / (float) this.h;
+        log.i(TAG, "宽度比例" + wScale + "--高度比例" + hScale);
+        if (wScale == 0.0 || hScale == 0.0) {
+            log.e(TAG, " 比例异常 ");
             return;
         }
-        scale_w =(int) ((float)this.w * wScale);
-        scale_h = (int) ((float)this.h * hScale);
+        scale_w = (int) ((float) this.w * wScale);
+        scale_h = (int) ((float) this.h * hScale);
         //设置宽高
         this.setLayoutParams(new LayoutParams(
                 scale_w,
@@ -94,10 +93,12 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
                 0,
                 0));
     }
+
     //添加返回按钮
-    public void addReturnButton(FrameLayout returnbtn){
+    public void addReturnButton(FrameLayout returnbtn) {
         this.returnBtn = returnbtn;
     }
+
     /**
      * 把自己添加到父控件
      */
@@ -111,12 +112,12 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
                 AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                     @Override
                     public void call() {
-                        log.i(TAG," 互动执行者 ->绑定的视图->添加自己到互动执行者");
+                        log.i(TAG, " 互动执行者 ->绑定的视图->添加自己到互动执行者");
                         setMylayoutParma();
                         //容器是个绝对布局的话
                         ((AbsoluteLayout) mFather).removeView(LayoutActive.this);
                         ((AbsoluteLayout) mFather).addView(LayoutActive.this);
-                        if (returnBtn!=null){
+                        if (returnBtn != null) {
                             ((AbsoluteLayout) mFather).removeView(returnBtn);
                             ((AbsoluteLayout) mFather).addView(returnBtn);
                         }
@@ -131,21 +132,19 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
     }
 
 
-
-
     /**
      * 加载资源
      */
     @Override
     public void AotuLoadingResource() {
-        log.i(TAG," 互动执行者-> 绑定的视图->加载自己的资源");
+        log.i(TAG, " 互动执行者-> 绑定的视图 ->加载自己的资源");
         //加载视图
         LoaderSource();
         addMeSubView(); //加载我的子控件
     }
+
     //释放资源
-    private void releasedResource(){
-        releasSource(); //在释放背景资源
+    private void releasedResource() {
         removeMeSubView();//先移除我的子控件
     }
 
@@ -153,22 +152,22 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
      * 把自己 从父控件移除
      */
     public void removeMeToFather() {
-                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-                    @Override
-                    public void call() {
-                        if (mFather != null) {
-                        if (returnBtn!=null){
-                            returnBtn = null;
-                        }
-                        //容器是个绝对布局的话
-                        mFather.removeView(LayoutActive.this);
-                        mFather = null;
-                        }
-                        releasedResource();
+        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
+            @Override
+            public void call() {
+                if (mFather != null) {
+                    if (returnBtn != null) {
+                        returnBtn = null;
                     }
-                });
-    }
+                    //容器是个绝对布局的话
+                    mFather.removeView(LayoutActive.this);
+                    mFather = null;
+                    releasedResource();
+                }
 
+            }
+        });
+    }
 
 
     @Override
@@ -182,14 +181,14 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
     }
 
 
-
     /**
      * 转换背景颜色代码
+     *
      * @param colorValue
      * @return
      */
-    public static String TanslateColor(String colorValue){
-        String color = null ;
+    public static String TanslateColor(String colorValue) {
+        String color = null;
         try {
             String tem = Integer.toHexString(Integer.parseInt(colorValue));
             if (tem.length() == 6) {
@@ -202,99 +201,76 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
                 color = addZeor + tem;
             }
             return "#" + color;
-            }catch (Exception e){
-                return null;
-            }
+        } catch (Exception e) {
+            return null;
+        }
     }
+
     /**
-     *  加载背景图片资源资源
-     *  在添加到父组件中被调用
+     * 加载背景图片资源资源
+     * 在添加到父组件中被调用
      */
-    public void  LoaderSource() {
+    public void LoaderSource() {
         if (bgType == 1) { //纯色
             final String colorValue = TanslateColor(bgImagename);
             AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                 @Override
                 public void call() {
-                    if (colorValue!=null){
+                    if (colorValue != null) {
                         LayoutActive.this.setBackgroundColor(Color.parseColor(colorValue));
-                    }else{
+                    } else {
                         LayoutActive.this.setBackgroundColor(Color.WHITE);
                     }
                 }
             });
 
-        } else if (bgType == 2){
+        } else if (bgType == 2) {
             String uriLoad = bgImagelurl + bgImagename; //下载地址
             String localpath = WosApplication.config.GetStringDefualt("basepath", "") + bgImagename; //本地路径
 
             if (fileUtils.checkFileExists(localpath)) { //资源是否存在
                 setBgImagers(localpath);
             } else {
-             log.e(TAG,"互动布局 图片资源 不存在 - "+localpath+"\n uri:"+uriLoad);
+                log.e(TAG, "互动布局 图片资源 不存在 - " + localpath + "\n uri:" + uriLoad);
             }
         }
 
     }
 
-    /**
-     *     释放资源
-     * //被移除时调用
-     */
-    private void releasSource() {
-        Drawable drawable = this.getBackground();
-        if (drawable != null && drawable instanceof BitmapDrawable) {
-            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            Bitmap bitmap = bitmapDrawable.getBitmap();
-            if (bitmap != null && !bitmap.isRecycled()) {
-
-                AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-                                                                           @Override
-                                                                           public void call() {
-                                                                               LayoutActive.this.setBackgroundResource(0);
-                                                                           }
-                                                                       });
-                drawable.setCallback(null);
-                bitmap.recycle();
-                log.i(TAG, "layout 释放资源...");
-            }
-        }
-    }
 
 
-    public void setBgImagers(String filePath){
+
+    public void setBgImagers(String filePath) {
         Bitmap bitmap = null;
         try {
-            log.d(TAG,"互动 layout . scale after w,h = "+scale_w+","+scale_h);
-            bitmap = ImageViewPicassocLoader.getBitmap(mcontext,filePath,null);
-            if (bitmap==null){
-                throw new NullPointerException("filepath err :"+filePath);
+//            log.d(TAG, "互动 layout . scale after w,h = " + scale_w + "," + scale_h);
+            bitmap = ImageViewPicassocLoader.getBitmap(filePath, null);
+            if (bitmap == null) {
+                throw new NullPointerException("filepath err :" + filePath);
             }
         } catch (Exception e) {
-            log.e(TAG,"layout call() err : "+e.getMessage());
-            bitmap = BitmapFactory.decodeResource(mcontext.getResources(), R.drawable.error);
+            log.e(TAG, "layout call() err : " + e.getMessage());
+            bitmap = ImageStore.getInstants().getButton_err(mcontext);
         }
-
-        final Drawable dw = new BitmapDrawable(bitmap);
         log.i(TAG, "互动布局设置背景图片");
-        LayoutActive.this.setBackgroundDrawable(dw);
+        LayoutActive.this.setBackgroundDrawable(new BitmapDrawable(bitmap));
     }
 
     /**
      * 添加我的子控件　对象
      */
-    private  void addMeSubView() {
+    private void addMeSubView() {
         try {
-            for (ButtonActive button: myItems){
-                button.setMyLayoutparam(wScale,hScale);//设置按钮大小位置
+            for (ButtonActive button : myItems) {
+                button.setMyLayoutparam(wScale, hScale);//设置按钮大小位置
                 button.addMeToFather(LayoutActive.this); //把自己添加到父控件
                 //设置它的画布　　
                 button.setMeCanvasView(LayoutActive.this.mFather);
             }
-            log.i(TAG," 互动执行者 -> 绑定的视图->加载自己的子项 success");
+            log.i(TAG, " 互动执行者 -> 绑定的视图->加载自己的子项 success");
 
-        }catch (Exception e){
-            log.e(TAG,"捕获一个 Exception...   "+ e.getMessage() );
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }
@@ -304,13 +280,13 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
      */
     private void removeMeSubView() {
         try {
-            for (ButtonActive button:myItems){
+            for (ButtonActive button : myItems) {
                 button.removeMeCanvasView();//移除 自己的画板 视图
                 button.removeMeToFather(); // 从 父控件中 移除 自己
             }
-          }catch (Exception e){
-            log.e(TAG,"捕获一个 Exception...  "+ e.getMessage() );
-    }
+        } catch (Exception e) {
+            log.e(TAG, "捕获一个 Exception...  " + e.getMessage());
+        }
 
     }
 
@@ -319,7 +295,7 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
         try {
             super.onDraw(canvas);
         } catch (Exception e) {
-            log.e(TAG,"试图引用　一个　回收的图片 ["+e.getMessage()+"-----"+e.getCause()+"]");
+            log.e(TAG, "试图引用　一个　回收的图片 [" + e.getMessage() + "-----" + e.getCause() + "]");
         }
     }
- }
+}

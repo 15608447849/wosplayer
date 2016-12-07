@@ -15,18 +15,22 @@ public class Command_Close_App implements iCommand {
     @Override
     public void Execute(String param) {
 
-        if (param.equals("false")){
-            return;
-        }
-        log.i("stop runing app...");
+        try {
+            if (param.equals("false")){
+                return;
+            }
+            log.i("stop runing app...");
 
-        // 停止監聽服務
-        Intent intent = new Intent(DisplayActivity.activityContext, MonitorService.class);
-        DisplayActivity.activityContext.stopService(intent);
-        //不發送重啟廣播
-        DisplayActivity.isSendRestartBroad = false;
-        WosApplication.stopCommunicationService(DisplayActivity.activityContext); //关闭服务
-     //   DisplayActivity.activityContext.finish();
-        System.exit(0);
+            // 停止監聽服務
+            Intent intent = new Intent(DisplayActivity.activityContext, MonitorService.class);
+            DisplayActivity.activityContext.stopService(intent);
+            //不發送重啟廣播
+            DisplayActivity.isSendRestartBroad = false;
+            WosApplication.stopCommunicationService(DisplayActivity.activityContext); //关闭服务
+            //   DisplayActivity.activityContext.finish();
+            System.exit(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

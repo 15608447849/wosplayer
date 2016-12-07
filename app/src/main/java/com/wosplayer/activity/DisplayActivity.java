@@ -21,10 +21,11 @@ import android.widget.Toast;
 import com.wos.SdCardTools;
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.MyVideoView;
+import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageStore;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
+import com.wosplayer.app.WosApplication;
 import com.wosplayer.app.inputPassWordDialog;
 import com.wosplayer.app.log;
-import com.wosplayer.app.WosApplication;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleReader;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleSaver;
 import com.wosplayer.service.MonitorService;
@@ -146,6 +147,7 @@ public class DisplayActivity extends Activity {
         if (isSettingServerInfo()){
             endWork();
         }
+        ImageStore.getInstants().clearCache();
     }
 
     @Override

@@ -1,9 +1,6 @@
 package com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Looper;
 import android.support.v4.view.ViewPager;
@@ -14,8 +11,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
-import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageAttabuteAnimation;
+import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageStore;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
 import com.wosplayer.app.log;
 
@@ -25,6 +22,7 @@ import java.util.TimerTask;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
+import wosTools.ToolsUtils;
 
 /**
  * Created by user on 2016/10/10.
@@ -153,25 +151,17 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
             if (left!=null && mFontLayout!=null){
                 mFontLayout.removeView(left);
                 left = null;
-                if (leftBitmap!=null){
-                    leftBitmap.recycle();
-                    leftBitmap=null;
-                }
             }
             if (right!=null && mFontLayout!=null){
                 mFontLayout.removeView(right);
                 right = null;
-                if (right!=null){
-                    rightBitmap.recycle();
-                    rightBitmap=null;
-                }
+
             }
             if (returnbtn!=null && mFontLayout!=null){
                 mFontLayout.removeView(returnbtn);
                 returnbtn = null;
             }
             unGenereteLayout();
-
             if (mFather!=null){
                 //移除自己
                 mFather.removeView(InteractionContentShowExer.this);
@@ -319,8 +309,7 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
         }
     }
 
-    private Bitmap leftBitmap;
-    private Bitmap rightBitmap;
+
     //添加左右按钮
     private void addLeftOrRightButton(ViewGroup v) {
 
@@ -334,23 +323,23 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
             };
 
             if (left == null) {
-                left = mImageButton(mContext);
+                left =ToolsUtils.mImageButton(mContext);
                 left.setTag(leftTag);
                 left.setScaleType(ImageView.ScaleType.FIT_XY);
-                leftBitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.left);
+              //  leftBitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.left);
 //                BitmapDrawable bd = new BitmapDrawable(this.getResources(), bitmap);
-                left.setImageBitmap(leftBitmap);
+                left.setImageBitmap(ImageStore.getInstants().getButton_left(mContext));
                 left.setLayoutParams(new AbsoluteLayout.LayoutParams(60, 60, 0, (mFather.getLayoutParams().height / 2) - 60));
                 left.setOnClickListener(clickEvent);
                 v.addView(left);
             }
             if (right == null) {
-                right = mImageButton(mContext);
+                right = ToolsUtils.mImageButton(mContext);
                 right.setTag(rightTag);
                 right.setScaleType(ImageView.ScaleType.FIT_XY);
-                rightBitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.right);
+               // rightBitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.right);
                 //BitmapDrawable bd2 = new BitmapDrawable(this.getResources(), bitmap2);
-                right.setImageBitmap(rightBitmap);
+                right.setImageBitmap(ImageStore.getInstants().getButton_right(mContext));
                 right.setLayoutParams(new AbsoluteLayout.LayoutParams(60, 60, mFather.getLayoutParams().width - 60, (mFather.getLayoutParams().height / 2) - 60));
                 right.setOnClickListener(clickEvent);
                 v.addView(right);
@@ -360,18 +349,7 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
         }
     }
 
-    private ImageButton mImageButton(Context context){
-        return new ImageButton(mContext){
-            @Override
-            protected void onDraw(Canvas canvas) {
-                try {
-                    super.onDraw(canvas);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-    }
+
 
 
     //按钮滑动事件
