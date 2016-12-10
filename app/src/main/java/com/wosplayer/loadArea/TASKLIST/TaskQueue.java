@@ -57,7 +57,7 @@ public class TaskQueue extends Observable { //被观察者
             try {
                 if (task.getCall()!=null){
                     log.e(TAG,"队列 - - - - 回调- >"+task.getSavePath()+task.getFileName());
-                 //   task.getCall().downloadResult(task.getSavePath()+task.getFileName(),"");
+                    task.getCall().downloadResult(task.getSavePath()+task.getFileName(),"");
                 }
             } catch (Exception e) {
                 e.printStackTrace();

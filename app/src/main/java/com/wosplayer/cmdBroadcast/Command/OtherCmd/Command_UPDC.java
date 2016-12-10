@@ -20,7 +20,6 @@ import com.wosplayer.app.WosApplication;
 import com.wosplayer.app.log;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 import com.wosplayer.loadArea.kernal.loaderManager;
-import com.wosplayer.service.CommunicationService;
 import com.wosplayer.service.RestartApplicationBroad;
 
 import org.dom4j.Document;
@@ -125,6 +124,7 @@ public class Command_UPDC implements iCommand {
 
         if (local<remote){
 
+            isUploading =false;
             if (broad!=null){
                 try {
                     WosApplication.appContext.unregisterReceiver(broad);
@@ -135,7 +135,7 @@ public class Command_UPDC implements iCommand {
             }
             broad = new UPDCbroad(this);
             IntentFilter filter=new IntentFilter();
-            filter.addAction(CommunicationService.CommunicationServiceReceiveNotification.action);
+            filter.addAction(UPDCbroad.ACTION);
             WosApplication.appContext.registerReceiver(broad, filter); //只需要注册一次
 
             //发送 远程升级
@@ -166,7 +166,7 @@ public class Command_UPDC implements iCommand {
         return versionCode;
     }
 
-
+private boolean isUploading = false;
 /**
  * 安装APK文件
  */
@@ -176,62 +176,36 @@ public void installApk(String apkLocalPath) {
         log.e(TAG,"install apk is not exists >>> "+apkLocalPath +" <<<");
         return;
     }
-    // 通过Intent安装APK文件
-	/*	Intent i = new Intent(Intent.ACTION_VIEW);
-		i.setDataAndType(Uri.parse("file://" + apkfile.toString()), "application/vnd.android.package-archive");
-		config.activity.startActivity(i);*/
-
-//		System.exit(0);
-
-   //Intent intent = new Intent(DisplayActivity.activityContext,  DisplayActivity.class);
-    // 创建PendingIntent对象
-  /*  final PendingIntent pi = PendingIntent.getActivity(DisplayActivity.activityContext, 0, intent, 0);
-
-    Calendar calendar = Calendar.getInstance();
-    calendar.setTimeInMillis(System.currentTimeMillis());
-    calendar.add(Calendar.SECOND, 20);
-    ((AlarmManager) DisplayActivity.activityContext.getSystemService(Context.ALARM_SERVICE))
-            .set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
-    /*Intent intent = new Intent(DisplayActivity.activityContext,  MonitorService.class);*/
-    // 创建PendingIntent对象
-   /* final PendingIntent pi = PendingIntent.getService(DisplayActivity.activityContext, 0, intent, 0);
-    Calendar calendar = Calendar.getInstance();
-    calendar.setTimeInMillis(System.currentTimeMillis());
-    calendar.add(Calendar.SECOND, 10);
-    ((AlarmManager) DisplayActivity.activityContext.getSystemService(Context.ALARM_SERVICE)).set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);*/
-
+    if (isUploading){
+        return;
+    }
+    isUploading = true;
 
     Intent intent = new Intent();
     intent.setAction(RestartApplicationBroad.action);
-//    intent.putExtra(RestartApplicationBroad.IS_START,false);
     Calendar calendar = Calendar.getInstance();
     calendar.setTimeInMillis(System.currentTimeMillis());
     calendar.add(Calendar.SECOND, 10);
-
     PendingIntent pi = PendingIntent.getBroadcast(DisplayActivity.activityContext,0,intent,0);
     ((AlarmManager) DisplayActivity.activityContext.getSystemService(Context.ALARM_SERVICE))
             .set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
 
-    log.e(TAG," execute install APK.. end progress");
+    log.e(TAG," 执行 install APK.. 并且结束程序 ,\n apk path :"+apkLocalPath);
 
     int code =  PackageUtils.install(DisplayActivity.activityContext,apkLocalPath);
 
-    log.e(TAG," - - install requst code :"+code);
+    log.e(TAG," 安装结果 返回值 : "+code);
 
     if (code == PackageUtils.INSTALL_SUCCEEDED){
 
         //String commands = "adb shell am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n com.wosplayer/com.wosplayer.activity.DisplayActivity";
-        ShellUtils.CommandResult cr = ShellUtils.execCommand(AdbShellCommd.commands_startApp,false,true);
-        Log.e(TAG,cr.result+"");
-
+        ShellUtils.execCommand(AdbShellCommd.commands_startApp,false,true);
 //        //打开apk
 //			String param =
 //			"adb shell am start -n com.wosplayer/com.wosplayer.activity.DisplayActivity";
 //			AppToSystem.execRootCmdSilent(param);
-//
 //        PackageUtils.startInstalledAppDetails(DisplayActivity.activityContext,packagename);
     }else{
-        Log.e(TAG,apkLocalPath);
 
         String filane = apkLocalPath.substring(apkLocalPath.lastIndexOf("/")+1);
 //        String [] param = {
@@ -243,19 +217,11 @@ public void installApk(String apkLocalPath) {
 //               // "rm /data/local/tmp.apk\n"
 //        };
         String param[] = AdbShellCommd.getInstallAdb(apkLocalPath,filane);
-        try{
-            Log.e(TAG,"\n"+param[0]+param[1]+param[2]+param[3]+param[4]);
-        }catch (Exception e){
-            log.e(e.getMessage());
-        }
 
-        ShellUtils.CommandResult cr = ShellUtils.execCommand(param,true,true);
-        Log.e(TAG,"result -------------------  "+  cr.result+"  --------------------------------------------------");
-        if (cr.result == 0){
-            //String p = "adb shell am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n com.wosplayer/com.wosplayer.activity.DisplayActivity\n";
-            ShellUtils.CommandResult cr1 = ShellUtils.execCommand(AdbShellCommd.commands_startApp,false,true);
-            Log.e(TAG," run result  "+  cr.result+" ^#");
-        }
+        Log.e(TAG,"shell 命令安装 >>> \n"+param[0]+param[1]+param[2]+param[3]+param[4]);
+        ShellUtils.execCommand(param,true,true);
+        ShellUtils.execCommand(AdbShellCommd.commands_startApp,false,true);
+        //String p = "adb shell am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n com.wosplayer/com.wosplayer.activity.DisplayActivity\n";
     }
 
 }

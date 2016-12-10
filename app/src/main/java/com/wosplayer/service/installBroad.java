@@ -8,9 +8,12 @@ import android.content.Intent;
 import android.widget.Toast;
 
 import com.wosplayer.activity.DisplayActivity;
+import com.wosplayer.app.AdbShellCommd;
 import com.wosplayer.app.log;
 
 import java.util.Calendar;
+
+import cn.trinea.android.common.util.ShellUtils;
 
 /**
  * Created by user on 2016/8/2.
@@ -44,6 +47,13 @@ public class installBroad extends BroadcastReceiver {
 
             String packageName = intent.getDataString().substring(8);
             System.out.println("---------------" + packageName);
+            //启动
+            ShellUtils.execCommand(AdbShellCommd.commands_startApp,false,true);
+            if(context!=null){
+                Intent mintent = new Intent(context,DisplayActivity.class);
+                mintent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(mintent);
+            }
 
            /* PackageManager pageManage = context.getPackageManager();
             Intent intent1 = pageManage.getLaunchIntentForPackage(packageName);
@@ -53,6 +63,13 @@ public class installBroad extends BroadcastReceiver {
         if (intent.getAction().equals("android.intent.action.PACKAGE_REMOVED")) {
             String packageName = intent.getData().getSchemeSpecificPart();
             System.out.println("---------------删除了..."+packageName);
+            //启动
+            ShellUtils.execCommand(AdbShellCommd.commands_startApp,false,true);
+            if(context!=null){
+                Intent mintent = new Intent(context,DisplayActivity.class);
+                mintent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(mintent);
+            }
         }
 
 
@@ -62,17 +79,38 @@ public class installBroad extends BroadcastReceiver {
         if (intent.getAction().equals("android.intent.action.PACKAGE_REPLACED")) {
             String packageName = intent.getData().getSchemeSpecificPart();
             System.out.println("---------------替换了..."+packageName);
+            //启动
+            ShellUtils.execCommand(AdbShellCommd.commands_startApp,false,true);
+           if(context!=null){
+               Intent mintent = new Intent(context,DisplayActivity.class);
+               mintent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+               context.startActivity(mintent);
+           }
         }
 
 
         if (intent.getAction().equals("android.intent.action.PACKAGE_RESTARTED")) {
             System.out.println("---------------清除应用数据...PACKAGE_RESTARTED");
+            //启动
+            ShellUtils.execCommand(AdbShellCommd.commands_startApp,false,true);
+            if(context!=null){
+                Intent mintent = new Intent(context,DisplayActivity.class);
+                mintent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(mintent);
+            }
         }
 
 
 
         if (intent.getAction().equals("android.intent.action.PACKAGE_DATA_CLEARED")) {
             System.out.println("---------------清除应用数据...PACKAGE_DATA_CLEARED");
+            //启动
+            ShellUtils.execCommand(AdbShellCommd.commands_startApp,false,true);
+            if(context!=null){
+                Intent mintent = new Intent(context,DisplayActivity.class);
+                mintent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(mintent);
+            }
         }
 
 

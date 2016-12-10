@@ -9,7 +9,6 @@ import com.wosplayer.app.log;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.UPDCbroad;
 import com.wosplayer.loadArea.TASKLIST.Task;
 import com.wosplayer.loadArea.TASKLIST.TaskQueue;
-import com.wosplayer.loadArea.excuteBolock.Loader;
 import com.wosplayer.loadArea.excuteBolock.LoaderCall;
 
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ import java.util.concurrent.locks.ReentrantLock;
  *  2.维护一个count , 当count 与 当前所需要下载的任务相同的时候 发送一个 下载完成广播
  *
  */
-public class loaderManager extends IntentService implements LoaderCall
+public class loaderManager extends IntentService
 {
 
     public static final String taskKey = "loaderTaskArr";
@@ -47,20 +46,20 @@ public class loaderManager extends IntentService implements LoaderCall
     @Override
     protected void onHandleIntent(final Intent intent) {
         TaskList =   intent.getExtras().getCharSequenceArrayList(taskKey);
-        updcUrl = intent.getExtras().getString("UPDC","");
-        terminalNo = intent.getExtras().getString("terminalNo","0000");
-        savepath = intent.getExtras().getString("savepath","0000");
+        terminalNo = intent.getExtras().getString("terminalNo","");
+        savepath = intent.getExtras().getString("savepath","");
 
         if (TaskList == null || TaskList.size() == 0){
+            updcUrl = intent.getExtras().getString("UPDC","");
             if (updcUrl==null || "".equals(updcUrl)){
                 return;
             }else{
-                Log.i(TAG,"下载升级apk - >>>"+updcUrl);
+                Log.i(TAG,"下载升级apk - >>>"+updcUrl+"\nsavepath - "+savepath+"\nterminalNo - "+terminalNo);
                 TaskQueue.getInstants().addTask(new Task(savepath, terminalNo, updcUrl, new LoaderCall() {
                     @Override
                     public void downloadResult(String filePath, String state) {
                         try {
-                            log.i(TAG,"下载成功 升级apk - 路径- "+filePath);
+                            log.i(TAG,"下载成功 升级apk - 路径- "+filePath );
                             sendUPDCBroad(filePath);
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -68,30 +67,21 @@ public class loaderManager extends IntentService implements LoaderCall
                     }
                 }));
             }
+        }else{
+            Log.i(TAG,"收到一个 下载队列, 队列大小:"+TaskList.size()+"\n terminalNo="+terminalNo+"\nsavepath="+savepath);
+            testWork();
         }
-
-        Log.i(TAG,"收到一个 下载队列, 队列大小:"+TaskList.size()+"\n terminalNo="+terminalNo+"\nsavepath="+savepath);
-        testWork();
-//      WorkEvent();
 
     }
 
     private void testWork() {
-//        final long start = System.currentTimeMillis();
         for (int i = 0;i<TaskList.size();i++){
-//            log.i(TAG," 下載 >> index [ "+i+" ] - ["+TaskList.get(i) +"]");
             TaskQueue.getInstants().addTask(new Task(savepath,terminalNo,(String)TaskList.get(i),null));
         }
         Intent intent = new Intent();
         intent.setAction(completeTaskListBroadcast.action);
         getApplicationContext().sendBroadcast(intent);
     }
-
-
-
-
-
-
 
     public void sendUPDCBroad(String filepath){
         Intent intent = new Intent();
@@ -100,44 +90,5 @@ public class loaderManager extends IntentService implements LoaderCall
         bundle.putString("updc",filepath);
         intent.putExtras(bundle);
         getApplicationContext().sendBroadcast(intent);
-    }
-
-
-
-
-
-    private void WorkEvent() {
-        try {
-            lock.lock();
-
-            Loader loader = null;
-            for (int i = 0;i<TaskList.size();i++){
-                log.d(TAG,"--- 下載任务名["+TaskList.get(i) +"]  - index [ "+i+" ] ---");
-                loader = new Loader(savepath,terminalNo);
-                loader.settingCaller(this);//设置回调
-                loader.LoadingUriResource((String) TaskList.get(i),null);// 开始任务
-            }
-
-        }catch (Exception e){
-            e.printStackTrace();
-        }finally {
-            lock.unlock();
-        }
-    }
-
-    private int SuccessCount = 0;
-    @Override
-    public void downloadResult(String filePath,String state) {
-        log.i(TAG,"current count :["+ ++SuccessCount +"] ,sumCount:["+TaskList.size()+"]");
-        if(filePath.equals("404")){
-            log.e(TAG,"load faild :["+filePath +"]-\n\r");
-        }
-            if (SuccessCount == TaskList.size()){
-            log.i(TAG,"任务完成 发送通知");
-            //发送完成通知
-            Intent intent = new Intent();
-            intent.setAction(completeTaskListBroadcast.action);
-            getApplicationContext().sendBroadcast(intent);
-        }
     }
 }
