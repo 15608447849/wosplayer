@@ -177,8 +177,8 @@ public class DisplayActivity extends Activity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK ) {
-                        log.e(TAG,"click back key");
-                      DisplayActivity.this.finish();
+//                        log.e(TAG,"click back key");
+//                      DisplayActivity.this.finish();
                         return true;
                     }
         return super.onKeyDown(keyCode, event);

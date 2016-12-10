@@ -66,10 +66,10 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
                 super.onProgressChanged(view, newProgress);
                 if (newProgress == 100) {
                     // 加载完成
-                    log.i(TAG, "页面加载完成");
+//                    log.i(TAG, "页面加载完成");
                 } else {
                     // 加载进度
-                    log.i(TAG, "页面加载中..." + newProgress);
+//                    log.i(TAG, "页面加载中..." + newProgress);
                 }
             }
         });

@@ -202,7 +202,7 @@ public class CommunicationService extends Service{
                     if (msg != null){
                         dataOutputStream.writeUTF(msg);
                         dataOutputStream.flush();
-                        log.w(TAG," 发送一条信息到服务器 :" + msg);
+//                        log.w(TAG," 发送一条信息到服务器 :" + msg);
 //                        Thread.sleep(10);
                     }
                 }catch (Exception e){

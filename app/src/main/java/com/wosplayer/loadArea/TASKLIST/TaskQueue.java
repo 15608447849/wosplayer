@@ -54,6 +54,14 @@ public class TaskQueue extends Observable { //被观察者
         if (task != null) {
 //            log.i(TAG,"finishTask()"+task.getUrl());
             task.setState(Task.State.FINISHED);
+            try {
+                if (task.getCall()!=null){
+                    log.e(TAG,"队列 - - - - 回调- >"+task.getSavePath()+task.getFileName());
+                 //   task.getCall().downloadResult(task.getSavePath()+task.getFileName(),"");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             queue.remove(task);
         }
     }

@@ -2,9 +2,11 @@ package com.wosplayer.loadArea.kernal;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.wosplayer.app.log;
+import com.wosplayer.cmdBroadcast.Command.OtherCmd.UPDCbroad;
 import com.wosplayer.loadArea.TASKLIST.Task;
 import com.wosplayer.loadArea.TASKLIST.TaskQueue;
 import com.wosplayer.loadArea.excuteBolock.Loader;
@@ -41,17 +43,37 @@ public class loaderManager extends IntentService implements LoaderCall
     private String terminalNo ;
     private String savepath ;
     private ArrayList<CharSequence> TaskList = null;
+    private String updcUrl;
     @Override
-    protected void onHandleIntent(Intent intent) {
+    protected void onHandleIntent(final Intent intent) {
         TaskList =   intent.getExtras().getCharSequenceArrayList(taskKey);
-        if (TaskList == null || TaskList.size() == 0) return;
+        updcUrl = intent.getExtras().getString("UPDC","");
         terminalNo = intent.getExtras().getString("terminalNo","0000");
         savepath = intent.getExtras().getString("savepath","0000");
+
+        if (TaskList == null || TaskList.size() == 0){
+            if (updcUrl==null || "".equals(updcUrl)){
+                return;
+            }else{
+                Log.i(TAG,"下载升级apk - >>>"+updcUrl);
+                TaskQueue.getInstants().addTask(new Task(savepath, terminalNo, updcUrl, new LoaderCall() {
+                    @Override
+                    public void downloadResult(String filePath, String state) {
+                        try {
+                            log.i(TAG,"下载成功 升级apk - 路径- "+filePath);
+                            sendUPDCBroad(filePath);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }));
+            }
+        }
+
         Log.i(TAG,"收到一个 下载队列, 队列大小:"+TaskList.size()+"\n terminalNo="+terminalNo+"\nsavepath="+savepath);
-
         testWork();
+//      WorkEvent();
 
-//        WorkEvent();
     }
 
     private void testWork() {
@@ -71,7 +93,14 @@ public class loaderManager extends IntentService implements LoaderCall
 
 
 
-
+    public void sendUPDCBroad(String filepath){
+        Intent intent = new Intent();
+        intent.setAction(UPDCbroad.ACTION);
+        Bundle bundle = new Bundle();
+        bundle.putString("updc",filepath);
+        intent.putExtras(bundle);
+        getApplicationContext().sendBroadcast(intent);
+    }
 
 
 

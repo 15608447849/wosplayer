@@ -23,8 +23,6 @@ public class RestartApplicationBroad extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, final Intent intent) {
 
-
-
         boolean flag = intent.getBooleanExtra(IS_START,true);
         log.d("重启广播 flag - "+flag);
         if (flag){

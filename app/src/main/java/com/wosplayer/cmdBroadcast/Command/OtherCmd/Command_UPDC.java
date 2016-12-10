@@ -4,7 +4,9 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.lidroid.xutils.HttpUtils;
@@ -14,11 +16,11 @@ import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
 import com.wosplayer.activity.DisplayActivity;
 import com.wosplayer.app.AdbShellCommd;
-import com.wosplayer.app.log;
 import com.wosplayer.app.WosApplication;
+import com.wosplayer.app.log;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
-import com.wosplayer.loadArea.excuteBolock.Loader;
-import com.wosplayer.loadArea.excuteBolock.LoaderCall;
+import com.wosplayer.loadArea.kernal.loaderManager;
+import com.wosplayer.service.CommunicationService;
 import com.wosplayer.service.RestartApplicationBroad;
 
 import org.dom4j.Document;
@@ -108,7 +110,7 @@ public class Command_UPDC implements iCommand {
         }
         compareVersion(Integer.parseInt(code),path);//比较版本
     }
-
+    private UPDCbroad broad;
     /**
      * 比较版本号
      */
@@ -122,18 +124,29 @@ public class Command_UPDC implements iCommand {
         WosApplication.sendMsgToServer("terminalNo:"+ WosApplication.config.GetStringDefualt("terminalNo","0000")+",localVersionNumber:"+local+",serverVersionNumber:"+remote);
 
         if (local<remote){
-            final Loader loader = new Loader();
-            loader.settingCaller(new LoaderCall() {
-                @Override
-                public void downloadResult(String filePath,String state) {
-                    if (!state.equals("loaderr")){
-                        installApk(filePath);
-                    }
 
+            if (broad!=null){
+                try {
+                    WosApplication.appContext.unregisterReceiver(broad);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            });
+                broad=null;
+            }
+            broad = new UPDCbroad(this);
+            IntentFilter filter=new IntentFilter();
+            filter.addAction(CommunicationService.CommunicationServiceReceiveNotification.action);
+            WosApplication.appContext.registerReceiver(broad, filter); //只需要注册一次
 
-        loader.LoadingUriResource(uri,null);
+            //发送 远程升级
+            Intent intent = new Intent(WosApplication.appContext, loaderManager.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            Bundle bundle = new Bundle();
+            bundle.putString("terminalNo", WosApplication.config.GetStringDefualt("terminalNo","0000"));
+            bundle.putString("savepath", WosApplication.config.GetStringDefualt("basepath", "/sdcard/mnt/playlist"));
+            bundle.putString("UPDC",uri);
+            intent.putExtras(bundle);
+            WosApplication.appContext.startService(intent);
         }
     }
 
@@ -157,10 +170,10 @@ public class Command_UPDC implements iCommand {
 /**
  * 安装APK文件
  */
-private void installApk(String apkLocalPath) {
+public void installApk(String apkLocalPath) {
     File apkfile = new File(apkLocalPath);
     if (!apkfile.exists()) {
-        log.e(TAG,"install apk is not exists...");
+        log.e(TAG,"install apk is not exists >>> "+apkLocalPath +" <<<");
         return;
     }
     // 通过Intent安装APK文件
@@ -246,5 +259,27 @@ private void installApk(String apkLocalPath) {
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
