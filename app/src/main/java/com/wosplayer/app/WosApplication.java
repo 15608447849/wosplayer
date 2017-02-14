@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -46,16 +47,19 @@ public class WosApplication extends Application {
         CrashHandler.getInstance().init(getApplicationContext());
     }
 
-    public void startAppInit(){
+    public void startAppInit(Handler handler){
+
         //数据转移
         translationWosToolsData();
+
         //放入系统目录
-        new AdbShellCommd(this.getApplicationContext(),true,true).start();//会开端口,会重启
+        new AdbShellCommd(this.getApplicationContext(),handler,true,true).start();//会开端口,会重启
         //new AdbShellCommd(this.getApplicationContext(),true,false).start();//开端口,不重启
         //new AdbShellCommd(this.getApplicationContext(),false,true).start();//不开远程端口.会重启
 //       new AdbShellCommd(this.getApplicationContext(),false,false).start();//不开远程端口,不重启
         //初始化 配置信息
         //init(false);
+
     }
     /**
      *   false 读取 com.wos.tools 下面的信息

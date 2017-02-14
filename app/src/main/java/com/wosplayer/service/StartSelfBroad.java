@@ -22,7 +22,7 @@ public class StartSelfBroad extends BroadcastReceiver {
 
 
             //如果被停用
-          /*  Settings.Secure.putInt(context.getContentResolver(), Settings.Secure.DEVICE_PROVISIONED, 1);
+           /*Settings.Secure.putInt(context.getContentResolver(), Settings.Secure.DEVICE_PROVISIONED, 1);
             PackageManager pm = context.getPackageManager();
             ComponentName name = new ComponentName(context, DisplayActivity.class);
             pm.setComponentEnabledSetting(name, PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
@@ -37,9 +37,11 @@ public class StartSelfBroad extends BroadcastReceiver {
             context.startActivity(ootStartIntent);
 
 
-
-
-            log.e("-----------------------------开机启动任务完成--------------------------------");
+            try {
+                Toast.makeText(context,"开机启动任务完成",Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
         }
     }

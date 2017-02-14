@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -54,6 +56,19 @@ wosPlayerApp.sendMsgToServer(msg);
 
 public class DisplayActivity extends Activity {
 
+
+    private Handler iniHander = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+           if (msg.arg1 == 0x11){
+               Toast.makeText(DisplayActivity.this,msg.obj.toString(),Toast.LENGTH_LONG).show();
+           }
+        }
+    };
+
+
+
+
     private static final java.lang.String TAG = "_DisplayerActivity";
     public static boolean isSendRestartBroad = true;
     public static AbsoluteLayout baselayout = null;
@@ -69,7 +84,7 @@ public class DisplayActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ((WosApplication)getApplication()).startAppInit();
+        ((WosApplication)getApplication()).startAppInit(iniHander);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//保持屏幕常亮
         setContentView(R.layout.activity_main);//设置布局文件
         baselayout = (AbsoluteLayout) LayoutInflater.from(this).inflate(R.layout.activity_main,null);
