@@ -1,8 +1,10 @@
 package com.wosplayer.cmdBroadcast.Command.Schedule.correlation;
 
+import org.apache.http.impl.cookie.IgnoreSpec;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -137,4 +139,8 @@ public class XmlHelper {
             }
         }
     }
+
+
+
+
 }

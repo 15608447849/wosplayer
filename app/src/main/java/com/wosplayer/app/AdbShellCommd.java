@@ -7,6 +7,7 @@ import android.os.Message;
 
 import java.util.concurrent.locks.ReentrantLock;
 
+import cn.trinea.android.common.util.FileUtils;
 import cn.trinea.android.common.util.ShellUtils;
 import installUtils.ApkController;
 import installUtils.AppToSystem;
@@ -122,6 +123,8 @@ public class AdbShellCommd extends Thread {
                     }else{
                         log.e(packagepath + " 已经存在");
                     }*/
+
+
                     excuteAppMoveSystem(context);
                 }
 
@@ -180,6 +183,11 @@ public class AdbShellCommd extends Thread {
 //                String alias = packagepath.substring(packagepath.lastIndexOf("/") + 1);
 
                 String alias = "WosOldTerminal.apk";
+                if (FileUtils.isFileExist("/system/app/"+alias)){
+                    handlerSendMsg("系统应用,请勿尝试卸载.");
+                    return;
+                }
+
                 System.out.println("源apk路径:" + packagepath + " - 移动路径 :/sysytem/app/" + alias);
                 handlerSendMsg("源apk路径:" + packagepath + " - 移动路径 :/sysytem/app/" + alias);
                 String cmd = genereteCommand(packagepath, alias);

@@ -4,6 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -24,6 +28,7 @@ import com.wos.SdCardTools;
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.MyVideoView;
 import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageStore;
+import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
 import com.wosplayer.app.WosApplication;
 import com.wosplayer.app.inputPassWordDialog;
@@ -335,12 +340,66 @@ public class DisplayActivity extends Activity {
 
     }
 
+    //设置 main 视图 背景
+    public void setMainBg(final String var){
+        if (var==null || var.equals("null")){
+            iniHander.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        main.setBackgroundDrawable(null);
+                        main.setBackgroundColor(Color.WHITE);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }else
+        if (var.startsWith("#")){
+            //颜色
+            iniHander.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        main.setBackgroundColor(Color.parseColor(var));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }else{
+            //图片
+
+            Bitmap bitmap = ImageViewPicassocLoader.getBitmap(var,null);
+            if (bitmap==null){
+                //获取错误图片bitmap
+                final String errorTag = "errorimage";
+                bitmap = ImageStore.getInstants().getBitmapCache(errorTag);
+                if (bitmap==null || bitmap.isRecycled()){
+                    bitmap = BitmapFactory.decodeResource(this.getResources(),R.drawable.error);
+                    ImageStore.getInstants().addBitmapCache(errorTag,bitmap);
+                }
+
+            }
+            final BitmapDrawable drawable = new BitmapDrawable(bitmap);
+
+            iniHander.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        main.setBackgroundDrawable(drawable);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+    }
 
 
 
 
-
-    //--------------------------------------
+    //------------------------------------
 
     /**
      * 设置服务器信息成功 true

@@ -1,5 +1,7 @@
 package com.wosplayer.Ui.performer;
 
+import com.wosplayer.activity.DisplayActivity;
+import com.wosplayer.app.WosApplication;
 import com.wosplayer.app.log;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
 
@@ -14,13 +16,35 @@ public class programExcuter {
     private static final java.lang.String TAG = "program Excuter";
     private XmlNodeEntity program = null;
     private ArrayList<layoutExcuter> layoutList = null;
+    private String bgInfo;
     public programExcuter(XmlNodeEntity program) {
         this.program = program;
         layoutList = new ArrayList<layoutExcuter>();
         log.i(TAG,"节目:"+program.getXmldata().get("title")+"创建了");
+        //获取背景信息
+        getBgInfos();
+    }
+    public void getBgInfos() {
+        if (program==null || "".equals(program)){
+            return;
+        }
+        //查看背景是图片还是颜色
+        bgInfo = program.getXmldata().get("bgimage");
+        //如果是图片
+        if (bgInfo==null || bgInfo.equals("")){
+            //如果是颜色
+            bgInfo = program.getXmldata().get("bgcolor");
+        }else{
+            bgInfo = WosApplication.config.GetStringDefualt("basepath","")+bgInfo;
+        }
+        log.e(TAG,"节目背景 - "+bgInfo);
     }
 
     public void start(){
+
+        //设置背景给 main acticvity
+        DisplayActivity.activityContext.setMainBg(bgInfo);
+
         //获取 布局信息 ,创建布局 执行所有的节目
         ArrayList<XmlNodeEntity> layoutArr = program.getChildren();
         if ( layoutArr==null || layoutArr.size()==0){
@@ -58,4 +82,6 @@ public class programExcuter {
 
         program = null;
     }
+
+
 }

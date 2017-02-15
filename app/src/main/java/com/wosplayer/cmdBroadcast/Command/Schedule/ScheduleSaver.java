@@ -292,6 +292,12 @@ public class ScheduleSaver implements iCommand {
                 if (program_root == null) return;
                 Element programElement = (Element) program_root.getElementsByTagName("programmes").item(0);
                 if (programElement == null) return;
+                try {
+                    String progBgImageUrl = programElement.getElementsByTagName("bgimage").item(0).getAttributes().getNamedItem("src").getNodeValue();
+                    log.i(TAG,"存在背景图片 - url : "+ progBgImageUrl);
+                    rootNode.addUriTast(progBgImageUrl);
+                } catch (Exception e) {
+                }
                 String program_XmlData = XmlHelper.getNodeToString(program_root);
                 HashMap<String, String> program_xmldataMap = Xmlparse.ParseXml("/root/programmes", program_XmlData, Xmlparse.parseType.OnlyLeaf).get(0);
                 XmlNodeEntity program_node = (XmlNodeEntity) obj;
