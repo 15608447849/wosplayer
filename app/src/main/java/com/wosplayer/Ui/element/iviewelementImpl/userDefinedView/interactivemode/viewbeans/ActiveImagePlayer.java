@@ -16,7 +16,7 @@ import android.widget.RelativeLayout;
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
 
 import rx.android.schedulers.AndroidSchedulers;
@@ -123,10 +123,10 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
                             releativePlayBtn();//释放 播放 按钮
                             ((ViewGroup) mFather).removeView(ActiveImagePlayer.this);
                         } catch (Exception e) {
-                            log.e(TAG, " " + mFather + "- " + this + " & " + e.getMessage());
+                            Logs.e(TAG, " " + mFather + "- " + this + " & " + e.getMessage());
                         }
                         mFather = null;
-                        log.e(TAG, "视图移除自己成功");
+                        Logs.e(TAG, "视图移除自己成功");
                         //异步释放视图
                         releaseImageViewResouce();
 
@@ -170,7 +170,7 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
                         try {
                             bitmap_Loading = BitmapFactory.decodeResource(ActiveImagePlayer.this.getResources(), R.drawable.loadding);
                         } catch (Exception e) {
-                            log.e("下载 时 图片 异常:" + e.getMessage());
+                            Logs.e("下载 时 图片 异常:" + e.getMessage());
 //                            return;
                             bitmap_Loading = BitmapFactory.decodeResource(ActiveImagePlayer.this.getResources(), R.drawable.error);
                         }
@@ -190,7 +190,7 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
             //存在
             picassoLoaderImager(localPath);
         } else {
-            log.e(TAG,"互动 图片 资源 不存在 - "+localPath +" \nurl "+uriPath );
+            Logs.e(TAG,"互动 图片 资源 不存在 - "+localPath +" \nurl "+uriPath );
             setImageResource(R.drawable.error);
         }
     }
@@ -240,7 +240,7 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
         try {
             super.onDraw(canvas);
         } catch (Exception e) {
-            log.e(TAG, "试图引用　一个　回收的图片 [" + e.getMessage() + "-" + e.getCause() + "]");
+            Logs.e(TAG, "试图引用　一个　回收的图片 [" + e.getMessage() + "-" + e.getCause() + "]");
             picassoLoaderImager(localPath);
         }
     }

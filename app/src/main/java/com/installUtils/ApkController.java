@@ -1,4 +1,4 @@
-package installUtils;
+package com.installUtils;
 
 import android.content.Context;
 import android.content.Intent;

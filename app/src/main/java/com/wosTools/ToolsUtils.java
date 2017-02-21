@@ -1,4 +1,4 @@
-package wosTools;
+package com.wosTools;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -9,10 +9,10 @@ import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.wos.SdCardTools;
+import com.wosplayer.tool.SdCardTools;
 import com.wosplayer.app.WosApplication;
-import com.wosplayer.app.appTools;
-import com.wosplayer.app.log;
+import com.wosplayer.app.AppTools;
+import com.wosplayer.app.Logs;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -59,14 +59,13 @@ public class ToolsUtils {
 
     /**
      * 获取key，没有获取就使用默认的
-     * @param f true本地 false -> com.wos.tools
      * @param key
      * @param defualtValue
      * @return
      */
-    public static String GetKey(boolean f,String key,String defualtValue)
+    public static String GetKey(String key,String defualtValue)
     {
-        String value= f?readShareData(WosApplication.appContext,key).trim() : appTools.readShareDataTools(WosApplication.appContext,key).trim();;
+        String value= readShareData(WosApplication.appContext,key).trim();
         return  (value!="")?value:defualtValue;
     }
     /**
@@ -74,13 +73,13 @@ public class ToolsUtils {
      * @return
      */
     public static String GetMac(){
-        return WosApplication.GetMac();
+        return AppTools.GetMac(WosApplication.appContext);
     }
     /**
      * 生成ip
      */
     public static String getLocalIpAddress(){
-        return WosApplication.getLocalIpAddress();
+        return AppTools.getLocalIpAddress();
     }
 
     public static String getAppVersionName() {
@@ -142,7 +141,7 @@ public class ToolsUtils {
             xml = inputStream2String(is);
         } catch (Exception e)
         {
-            log.e("tools_utils err: http请求失败 -\n "+e.getMessage());
+            Logs.e("tools_utils err: http请求失败 -\n "+e.getMessage());
         }
         try {
             if(is != null)
@@ -152,7 +151,7 @@ public class ToolsUtils {
             Log.e("CloseInputStream", e.getMessage());
         }
 
-        log.i("ToolsUtils httpGetString() : -\n " + xml);
+        Logs.i("ToolsUtils httpGetString() : -\n " + xml);
         return xml;
     }
 

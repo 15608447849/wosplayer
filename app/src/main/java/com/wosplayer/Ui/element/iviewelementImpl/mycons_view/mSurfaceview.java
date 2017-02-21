@@ -11,7 +11,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 /**
  * Created by Administrator on 2016/7/26.
@@ -85,14 +85,14 @@ public class mSurfaceview extends SurfaceView implements SurfaceHolder.Callback,
                 try {
                     draw();
                 } catch (Exception e) {
-                    log.e(TAG,""+e.getMessage());
+                    Logs.e(TAG,""+e.getMessage());
                 }
 
             }
             try {
                 Thread.sleep(speed);
             } catch (InterruptedException ex) {
-                log.e(TAG,"TextSurfaceView"+ ex.getMessage() + "\n" + ex);
+                Logs.e(TAG,"TextSurfaceView"+ ex.getMessage() + "\n" + ex);
             }
         }
         content = null;
@@ -298,7 +298,7 @@ public class mSurfaceview extends SurfaceView implements SurfaceHolder.Callback,
             fontType = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + FONTTYPE);//Typeface.MONOSPACE;
             fontType = Typeface.create(fontType, fontStyle);
         } catch (Exception e) {
-            log.e(TAG,"type face err, setting defult typeface");
+            Logs.e(TAG,"type face err, setting defult typeface");
             fontType = Typeface.SERIF;
         }
     }

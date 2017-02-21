@@ -9,7 +9,7 @@ import com.wosplayer.Ui.element.IPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.mSurfaceview;
 import com.wosplayer.Ui.performer.TimeCalls;
 import com.wosplayer.app.DataList;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 /**
  * Created by user on 2016/7/27.
@@ -99,7 +99,7 @@ public class IrunTextPlayer implements IPlayer{
 
 
         }catch (Exception e){
-            log.e(TAG, "loadData :"+ e.getMessage());
+            Logs.e(TAG, "loadData :"+ e.getMessage());
         }
     }
 
@@ -120,7 +120,7 @@ public class IrunTextPlayer implements IPlayer{
             text.setLayoutParams(lp);
 
         }catch (Exception e){
-            log.e(TAG, "setlayout :"+ e.getMessage());
+            Logs.e(TAG, "setlayout :"+ e.getMessage());
         }
     }
 
@@ -145,7 +145,7 @@ public class IrunTextPlayer implements IPlayer{
             textHelper.start();
 
         }catch (Exception e){
-            log.e(TAG, "start :"+ e.getMessage());
+            Logs.e(TAG, "start :"+ e.getMessage());
         }
     }
 
@@ -159,7 +159,7 @@ public class IrunTextPlayer implements IPlayer{
             mfatherView.removeView(text);
             isExistOnLayout=false;
         }catch (Exception e){
-            log.e(TAG, "stop :"+ e.getMessage());
+            Logs.e(TAG, "stop :"+ e.getMessage());
         }
     }
     //时间回调

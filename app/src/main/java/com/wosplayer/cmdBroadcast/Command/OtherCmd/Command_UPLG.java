@@ -3,7 +3,7 @@ package com.wosplayer.cmdBroadcast.Command.OtherCmd;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.app.WosApplication;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 import com.wosplayer.service.logUploadService;
@@ -18,14 +18,14 @@ public class Command_UPLG implements iCommand {
 
         //获取 uri
         String uri = param;
-        log.i("Command_UPLG_开启 日志上传 服务 "+ uri);
+        Logs.i("Command_UPLG_开启 日志上传 服务 "+ uri);
         if (uri==null || uri.equals("")) return;
         if (!uri.contains("http://")){
-            log.e("upload log err :  uri is error ("+ uri +")");
+            Logs.e("upload log err :  uri is error ("+ uri +")");
             return;
         }
 
-       log.i(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  start log upload server ...");
+       Logs.i(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  start log upload server ...");
         //开启 日志上传服务
         Intent logIntent = new Intent(WosApplication.appContext,logUploadService.class);
         Bundle b = new Bundle();

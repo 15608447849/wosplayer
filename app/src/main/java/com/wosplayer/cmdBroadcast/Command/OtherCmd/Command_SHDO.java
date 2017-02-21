@@ -1,6 +1,6 @@
 package com.wosplayer.cmdBroadcast.Command.OtherCmd;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 
 import cn.trinea.android.common.util.ShellUtils;
@@ -14,7 +14,7 @@ public class Command_SHDO implements iCommand {
     public void Execute(String param) {
 
         try {
-            log.e("SHDO:" + param);
+            Logs.e("SHDO:" + param);
 
             if (param.equals("false")){
                 return;
@@ -28,7 +28,7 @@ public class Command_SHDO implements iCommand {
             ShellUtils.CommandResult cr = ShellUtils.execCommand(commands,true,true);
 
             String strs = "即将关机: "+cr.result;
-            log.e(strs);
+            Logs.e(strs);
         } catch (Exception e) {
             e.printStackTrace();
         }

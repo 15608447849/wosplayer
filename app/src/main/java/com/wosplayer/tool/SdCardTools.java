@@ -1,4 +1,4 @@
-package com.wos;
+package com.wosplayer.tool;
 
 import android.app.Activity;
 import android.content.Context;

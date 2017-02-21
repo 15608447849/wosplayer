@@ -12,8 +12,8 @@ import com.wosplayer.Ui.element.iviewelementImpl.IinteractionPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.ActiveImagePlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.ActiveVideoPlayer;
-import com.wosplayer.activity.DisplayActivity;
-import com.wosplayer.app.log;
+import com.wosplayer.app.DisplayActivity;
+import com.wosplayer.app.Logs;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
 
 import rx.android.schedulers.AndroidSchedulers;
@@ -94,7 +94,7 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
     private OnClickListener ImaerClickEvent = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            log.e("准备播放一个视频,当前资源状态:" + image_Src_isOK);
+            Logs.e("准备播放一个视频,当前资源状态:" + image_Src_isOK);
             if (mFather==null){
                 return;
             }
@@ -118,12 +118,12 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
 //           param.gravity = Gravity.CENTER;
 
             if (!image_Src_isOK){ //如果资源没有下载完  不加载视频
-                log.e(TAG,"--- 资源没有加载完 ---");
+                Logs.e(TAG,"--- 资源没有加载完 ---");
                 //DisplayActivity.activityContext.visibleLayoutDialog(true,param); //资源如果没有加载完 显示图层 传递true
                 return;
             }
            ViewGroup vp = DisplayActivity.frame_main;
-            log.e("this Vp:"+mFather.getMeasuredHeight());
+            Logs.e("this Vp:"+mFather.getMeasuredHeight());
             if (vplayer == null){
                 vplayer = new ActiveVideoPlayer(DisplayActivity.activityContext,UriPath,videoFileLocalPath);
             }
@@ -144,12 +144,12 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
      */
     private void loadingMyVideoView() {
         if (mFather == null) {
-            log.e(TAG,"loadingMyVideoView father is null");
+            Logs.e(TAG,"loadingMyVideoView father is null");
             return;
         }
         //图片 播放者  出来吧!!!
         if (imager_One == null){
-            log.d(TAG,"制作第一帧图片");
+            Logs.d(TAG,"制作第一帧图片");
             imager_One = new ActiveImagePlayer(mcontext,imageUriPath,imageLoalPath);//加载图片
             imager_One.addMeToFather(ActiveVideoPlayerAndImage.this);//添加到绝对布局
         }
@@ -164,14 +164,14 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
             image_Src_isOK = true;
         } else {
             image_Src_isOK = false;
-            log.e(TAG,"资源不存在");
+            Logs.e(TAG,"资源不存在");
         }
     }
     /**
      * 释放资源
      */
     public void releasedResource() {
-        log.e(TAG,"释放资源中... ");
+        Logs.e(TAG,"释放资源中... ");
         if (imager_One != null){
             imager_One.removeMeToFather();
             imager_One = null;

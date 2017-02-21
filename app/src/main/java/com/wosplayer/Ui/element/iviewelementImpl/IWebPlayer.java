@@ -9,7 +9,7 @@ import android.webkit.WebViewClient;
 import com.wosplayer.Ui.element.IPlayer;
 import com.wosplayer.Ui.performer.TimeCalls;
 import com.wosplayer.app.DataList;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 /**
  * Created by Administrator on 2016/7/24.
@@ -51,7 +51,7 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
 
             initParam();
         } catch (Exception e) {
-            log.e(TAG, "loaddata() " + e.getMessage());
+            Logs.e(TAG, "loaddata() " + e.getMessage());
         }
     }
 
@@ -94,7 +94,7 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
             this.setLayoutParams(lp);
 
         } catch (Exception e) {
-            log.e(TAG, "setlayout() " + e.getMessage());
+            Logs.e(TAG, "setlayout() " + e.getMessage());
         }
     }
 
@@ -122,7 +122,7 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
             setlayout();
             this.loadUrl(this.uri);
         } catch (Exception e) {
-            log.e(TAG, "web start():" + e.getMessage());
+            Logs.e(TAG, "web start():" + e.getMessage());
         }
     }
 
@@ -132,7 +132,7 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
             mfatherView.removeView(IWebPlayer.this);
             isExistOnLayout = false;
         } catch (Exception e) {
-            log.e(TAG, "web stop():" + e.getMessage());
+            Logs.e(TAG, "web stop():" + e.getMessage());
         }
     }
 }

@@ -4,7 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.os.Environment;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -76,7 +76,7 @@ public class serviceLog extends IntentService {
                 String createDateInfo = getFileNameWithoutExtension(fileName);//过来后缀得到一个文件名
                 if (canDeleteSDLog(createDateInfo)) { //判断 是不是可以删除了
                     logFile.delete();
-                    log.e(TAG, "delete expired log success,the log path is:"
+                    Logs.e(TAG, "delete expired log success,the log path is:"
                             + logFile.getAbsolutePath());
 
                 }
@@ -107,7 +107,7 @@ public class serviceLog extends IntentService {
             java.util.Date createDate = sdf.parse(createDateStr);
             canDel = createDate.before(expiredDate);
         } catch (ParseException e) {
-            log.e(TAG, e.getMessage(), e);
+            Logs.e(TAG, e.getMessage(), e);
             canDel = false;
         }
         return canDel;
@@ -161,7 +161,7 @@ public class serviceLog extends IntentService {
     protected void onHandleIntent(Intent intent) {
         String saveLogMsg = intent.getExtras().getString(serviceLogKey);
         if (saveLogMsg.equals("")){
-            log.e(TAG," log msg is null ,unwrite to file");
+            Logs.e(TAG," log msg is null ,unwrite to file");
             return;
         }
         writeLog(saveLogMsg);

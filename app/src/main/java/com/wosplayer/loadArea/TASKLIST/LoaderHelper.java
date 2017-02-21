@@ -6,7 +6,7 @@ import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.loadArea.ftpBlock.FtpHelper;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
 
@@ -19,7 +19,7 @@ import java.util.Observer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import installUtils.MD5Util;
+import com.installUtils.MD5Util;
 
 /**
  * Created by user on 2016/11/25.
@@ -122,14 +122,14 @@ public class LoaderHelper implements Observer {//观察者
 
                             @Override
                             public void ftpConnectState(int stateCode, String ftpHost, int port, String userName, String ftpPassword, String fileName) {
-                                log.i(TAG,"连接服务器 : ip:"+ ftpHost+" port:"+port  +"\nuser:"+userName+" password:"+ftpPassword);
+                                Logs.i(TAG,"连接服务器 : ip:"+ ftpHost+" port:"+port  +"\nuser:"+userName+" password:"+ftpPassword);
                                 if (stateCode==FtpHelper.FTP_CONNECT_SUCCESSS){
-                                    log.i(TAG,"ftp 连接成功");
+                                    Logs.i(TAG,"ftp 连接成功");
                                     caller.nitifyMsg(task.getTerminalNo(),fileName,1);
                                     caller.nitifyMsg(task.getTerminalNo(),fileName,2);
                                 }
                                 if (stateCode==FtpHelper.FTP_CONNECT_FAIL){
-                                    log.e(TAG,"ftp 连接失败");
+                                    Logs.e(TAG,"ftp 连接失败");
                                     caller.nitifyMsg(task.getTerminalNo(),fileName,4);
                                     caller.downloadResult(task,1,fileName,".md5");
                                 }
@@ -137,14 +137,14 @@ public class LoaderHelper implements Observer {//观察者
 
                             @Override
                             public void ftpNotFountFile(String remoteFileName, String fileName) {
-                                log.e(TAG,"ftp 服务器未发现文件 : "+remoteFileName+fileName);
+                                Logs.e(TAG,"ftp 服务器未发现文件 : "+remoteFileName+fileName);
                                 caller.downloadResult(task,1);
                                 caller.nitifyMsg(task.getTerminalNo(),fileName,4);
                             }
 
                             @Override
                             public void localNotFountFile(String localFilePath, String fileName) {
-                                log.e(TAG,"本地文件不存在或无法创建 : "+localFilePath);
+                                Logs.e(TAG,"本地文件不存在或无法创建 : "+localFilePath);
                                 caller.nitifyMsg(task.getTerminalNo(),fileName,4);
                                 caller.downloadResult(task,1,fileName,".md5");
 
@@ -159,7 +159,7 @@ public class LoaderHelper implements Observer {//观察者
 
                             @Override
                             public void downLoadFailt(String remotePath, String fileName) {
-                                log.e(TAG,"ftp 下载失败 : "+fileName);
+                                Logs.e(TAG,"ftp 下载失败 : "+fileName);
                                 caller.nitifyMsg(task.getTerminalNo(),fileName,4);
                                 caller.downloadResult(task,1,fileName,".md5");
                             }
@@ -170,19 +170,19 @@ public class LoaderHelper implements Observer {//观察者
                             }
                             @Override
                             public void downLoadSuccess(File localFile, String remotePath, String localPath, String fileName, String ftpHost, int port, String userName, String ftpPassword) {
-                                log.i(TAG, "ftp下载succsee -"+ localFile.getAbsolutePath() +" - 线程 - "+ Thread.currentThread().getName());
+                                Logs.i(TAG, "ftp下载succsee -"+ localFile.getAbsolutePath() +" - 线程 - "+ Thread.currentThread().getName());
                                 if (caller.downloadResult(task,0,fileName,".md5")){
 
                                         //获取源文件 code
                                         String sPath = localPath+fileName.substring(0,fileName.lastIndexOf("."));
-                                        log.e(TAG,"文件 - "+sPath +" 比较 MD5值");
+                                        Logs.e(TAG,"文件 - "+sPath +" 比较 MD5值");
                                         String sCode = MD5Util.getFileMD5String(new File(sPath));
                                         if (sCode!=null){
                                             //比较md5
                                             if(MD5Util.FTPMD5(sCode, localFile.getAbsolutePath()) == 1){
                                                 //md5 效验失败 删除文件
                                                 cn.trinea.android.common.util.FileUtils.deleteFile(sPath);
-                                                log.e(TAG,"文件 - "+sPath +" 比较 MD5值 失败 已删除");
+                                                Logs.e(TAG,"文件 - "+sPath +" 比较 MD5值 失败 已删除");
                                             }
                                         }
                                 }else{
@@ -209,7 +209,7 @@ public class LoaderHelper implements Observer {//观察者
                   String speed =null;
                   @Override
                   public void onStart() {
-                      log.i(TAG,"启动http下载:"+ url+" on Thread : "+Thread.currentThread().getName());
+                      Logs.i(TAG,"启动http下载:"+ url+" on Thread : "+Thread.currentThread().getName());
                       caller.nitifyMsg(task.getTerminalNo(),url.substring(url.lastIndexOf("/")+1),1);
                       caller.nitifyMsg(task.getTerminalNo(),url.substring(url.lastIndexOf("/")+1),2);
                       currentTime = System.currentTimeMillis();

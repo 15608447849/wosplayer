@@ -1,6 +1,6 @@
-package installUtils;
+package com.installUtils;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -35,7 +35,7 @@ public class MD5Util {
         String md5Code = null;
         try{
             if (!file.exists()){
-                log.e("生成MD5 的 资源文件不存在 :" + file.toString());
+                Logs.e("生成MD5 的 资源文件不存在 :" + file.toString());
                 return null;
             }
 
@@ -50,14 +50,14 @@ public class MD5Util {
             in.close();
             md5Code = toHexString(messagedigest.digest());
             } catch (Exception e){
-            log.e(e.getMessage());
+            Logs.e(e.getMessage());
         }finally{
         	try {
                 if (bw != null){
                     bw.close();
                 }
 			} catch (IOException e) {
-				log.e(e.getMessage());
+				Logs.e(e.getMessage());
 			}
         }
         return md5Code;
@@ -89,7 +89,7 @@ public class MD5Util {
 
         } catch (IOException e) {
 //            e.printStackTrace();
-            log.e("MD5 - " + e.getMessage());
+            Logs.e("MD5 - " + e.getMessage());
         } finally {
             if (reader != null) {
                 try {
@@ -121,14 +121,14 @@ public class MD5Util {
      */
     public static void deleteFile(String fileName) {
         try {
-            log.e("MD5"," 删除文件 - "+fileName);
+            Logs.e("MD5"," 删除文件 - "+fileName);
             File file = new File(fileName);
             if (file.exists()) {
-                log.e("MD5"," 删除文件 - "+fileName +" * success");
+                Logs.e("MD5"," 删除文件 - "+fileName +" * success");
                 file.delete();
             }
         } catch (Exception e) {
-            log.e("util", "delete file error with exception" + e.toString()
+            Logs.e("util", "delete file error with exception" + e.toString()
                     + "on file:" + fileName);
         }
     }

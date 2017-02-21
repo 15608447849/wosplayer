@@ -1,7 +1,7 @@
 package com.wosplayer.Ui.element.iviewelementImpl.actioner;
 
 import com.wosplayer.app.DataList;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.app.WosApplication;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
 
@@ -33,7 +33,7 @@ public class DataSeparator {
 
     public void Split(XmlNodeEntity entity,DataStore ds){
 
-        log.e(" ",entity.Level+" ------start--------- ");
+        Logs.e(" ",entity.Level+" ------start--------- ");
 
         if (ds==null){
             //第一次
@@ -43,29 +43,29 @@ public class DataSeparator {
 
         //判断
         if (entity.Level.equals(layoutLevel)){
-            log.e(" "," ----布局-----");
+            Logs.e(" "," ----布局-----");
             layoutDataParse(entity,ds);
         }
         if (entity.Level.equals(layoutItemLevel)){
-            log.e(" "," ----布局-----按钮");
+            Logs.e(" "," ----布局-----按钮");
             buttonDataParse(entity,ds);
         }
         if (entity.Level.equals(folderLevel)){
-            log.e(" "," ----布局-----按钮 ---- 文件夹");
+            Logs.e(" "," ----布局-----按钮 ---- 文件夹");
             folderDataParse(entity,ds);
         }
         if (entity.Level.equals(folderItemLevel)){
-            log.e(" "," ----布局-----按钮 ---- 文件夹 ---内容");
+            Logs.e(" "," ----布局-----按钮 ---- 文件夹 ---内容");
             contentDataParse(entity,ds);
         }
         //循环
         ArrayList<XmlNodeEntity> child = entity.getChildren();
         if (child!=null && child.size()>0){
-            log.e(" "," 子对象数量:"+child.size());
+            Logs.e(" "," 子对象数量:"+child.size());
             for (XmlNodeEntity e : child){
                 Split(e,ds.NewSettingNodeEntity());
             }
-            log.e(" "," -----over ------" );
+            Logs.e(" "," -----over ------" );
         }
     }
 
@@ -76,7 +76,7 @@ public class DataSeparator {
     private void contentDataParse(XmlNodeEntity entity,DataStore ds) {
         try{
             if (ds==null){
-                log.e("ds is null");
+                Logs.e("ds is null");
             }
         //网页 视屏 图片
         DataList data = ds.getData();
@@ -85,13 +85,13 @@ public class DataSeparator {
 
         String web_url = entity.getXmldata().get("web_url");
             if (web_url==null){
-                log.e("","web_url is null");
+                Logs.e("","web_url is null");
                 web_url = "";
             }
 
         String filename = entity.getXmldata().get("filename");//"filename" -> "zhoudongyiu.web"
             if (filename==null){
-                log.e(" ","filename is null");
+                Logs.e(" ","filename is null");
                 filename = "";
             }
 
@@ -125,10 +125,10 @@ public class DataSeparator {
         data.put("filepath",filepath);
 
         }catch (Exception e){
-            log.e("contentDataParse()",e.getMessage());
+            Logs.e("contentDataParse()",e.getMessage());
         }
 
-        log.e(" "," -- -- 布局 按钮 文件夹 内容 解析完毕----");
+        Logs.e(" "," -- -- 布局 按钮 文件夹 内容 解析完毕----");
     }
 
     /**
@@ -169,7 +169,7 @@ public class DataSeparator {
         String bgimage = null;
         XmlNodeEntity xnd =  entity.getChildren().get(0);
         if (xnd==null){
-            log.e("互动按钮 背景图片名 错误");
+            Logs.e("互动按钮 背景图片名 错误");
             bgimage = buttonBgerr;
         }else{
             if (bindtype.equals("0")){

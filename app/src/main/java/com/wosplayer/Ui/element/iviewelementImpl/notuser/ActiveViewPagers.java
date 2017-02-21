@@ -19,8 +19,8 @@ import android.widget.FrameLayout;
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.IinteractionPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
-import com.wosplayer.activity.DisplayActivity;
-import com.wosplayer.app.log;
+import com.wosplayer.app.DisplayActivity;
+import com.wosplayer.app.Logs;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -200,7 +200,7 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
 
 
     private void ScollToRight() {
-        log.e(TAG,"ScollToRight");
+        Logs.e(TAG,"ScollToRight");
         int index = ++mCurrentPos;
         if ( index<= ActiveViewPagers.this.myViewList.size() - 1) {
             //现在的下标如果小于最后一个 向右边滑动
@@ -210,7 +210,7 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
             mCurrentPos = 0;
             ActiveViewPagers.this.setCurrentItem(mCurrentPos);
         }
-        log.e(TAG,"ScollToRight over");
+        Logs.e(TAG,"ScollToRight over");
     }
 
     private void ScollToLeft() {
@@ -256,7 +256,7 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
         try {
             super.onDraw(canvas);
         }catch (Exception e){
-            log.e(TAG,"" + e.getMessage());
+            Logs.e(TAG,"" + e.getMessage());
         }
     }
 
@@ -482,7 +482,7 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
         timerTask = new TimerTask() {
             @Override
             public void run() {
-                log.e(TAG,"Thread name:"+Thread.currentThread().getName());
+                Logs.e(TAG,"Thread name:"+Thread.currentThread().getName());
                 AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                     @Override
                     public void call() {

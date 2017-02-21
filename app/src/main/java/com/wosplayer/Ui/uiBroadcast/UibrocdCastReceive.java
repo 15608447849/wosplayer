@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.wosplayer.Ui.performer.UiExcuter;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
 
 import rx.Scheduler;
@@ -25,7 +25,7 @@ public class UibrocdCastReceive extends BroadcastReceiver{
     public void onReceive(Context context, Intent intent) {
 
         if (intent == null){
-            log.e(TAG," intent is null");
+            Logs.e(TAG," intent is null");
             return;
         }
 
@@ -33,15 +33,15 @@ public class UibrocdCastReceive extends BroadcastReceiver{
         final XmlNodeEntity entity = intent.getExtras().getParcelable(key);
 
         if (entity==null){
-            log.e(TAG,"无排期");
+            Logs.e(TAG,"无排期");
             return;
 
         }else {
-            log.i(TAG, "onReceive: "+entity.getXmldata().get("type")+","+entity.getXmldata().get("id"));
+            Logs.i(TAG, "onReceive: "+entity.getXmldata().get("type")+","+entity.getXmldata().get("id"));
             helper.schedule(new Action0() {
                 @Override
                 public void call() {
-                    log.e(TAG,"当前线程:"+Thread.currentThread().getName()+";线程数:"+Thread.getAllStackTraces().size());
+                    Logs.e(TAG,"当前线程:"+Thread.currentThread().getName()+";线程数:"+Thread.getAllStackTraces().size());
                     UiExcuter.getInstancs().StartExcuter(entity);
                 }
             });

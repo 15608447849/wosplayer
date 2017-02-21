@@ -10,7 +10,7 @@ import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.MyVideoView;
 import com.wosplayer.Ui.performer.TimeCalls;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.WosApplication;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
 
 /**
@@ -49,8 +49,11 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
         this.y = mp.GetIntDefualt("y", 0);
         this.w = mp.GetIntDefualt("width", 0);
         this.h = mp.GetIntDefualt("height", 0);
+
+
         this.singleFileLocalPath = mp.GetStringDefualt("localpath", "");
         this.singleFileUri = mp.GetStringDefualt("getcontents", "");
+        Logs.d(TAG,"获取到一个视频 - "+x+y+"-"+w+","+h+"  - "+singleFileLocalPath);
         video.initVideoView(true);//false 不循环
             video.setOnCompletionListener_(new MediaPlayer.OnCompletionListener() {
                 @Override
@@ -59,7 +62,7 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
                 }
             });
         }catch (Exception e){
-            log.e(TAG, "loaddata() " + e.getMessage());
+            Logs.e(TAG, "loaddata() " + e.getMessage());
         }
     }
 
@@ -87,7 +90,7 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
             //设置播放器
             video.setMyLayout(x,y,w,h);
         } catch (Exception e) {
-            log.e(TAG,"设置布局:" + e.getMessage());
+            Logs.e(TAG,"设置布局:" + e.getMessage());
         }
     }
 
@@ -97,7 +100,7 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
             setlayout();//设置布局
                     if(!fileUtils.checkFileExists(singleFileLocalPath)) {//fileUtils.checkFileExists(filename)
                         //不存在
-                        log.e(TAG, "开始 - 视频资源 不存在 - " + singleFileLocalPath);
+                        Logs.e(TAG, "开始 - 视频资源 不存在 - " + singleFileLocalPath);
                         callTo();
 //                        //播放默认视频
                         String del = WosApplication.getConfigValue("defaultVideo");
@@ -108,7 +111,7 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
                         playVideo(singleFileLocalPath);
                     }
         }catch (Exception e){
-            log.e(TAG,"开始:"+e.getMessage());
+            Logs.e(TAG,"开始:"+e.getMessage());
         }
     }
 
@@ -119,7 +122,7 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
             mfatherView.removeView(this);
             isExistOnLayout = false;
         }catch (Exception e){
-            log.e(TAG,"停止:"+e.getMessage());
+            Logs.e(TAG,"停止:"+e.getMessage());
         }
     }
 

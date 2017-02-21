@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 
-import com.wosplayer.activity.DisplayActivity;
-import com.wosplayer.app.log;
+import com.wosplayer.app.DisplayActivity;
+import com.wosplayer.app.Logs;
 
 /**
  * Created by user on 2016/8/1.
@@ -16,8 +16,8 @@ public class StartSelfBroad extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        log.e("-----------------------开机 -----------------------   自启动---------------------------------------");
-        log.e(" installBroad ","["+intent.getAction()+"]");
+        Logs.e("-----------------------开机 -----------------------   自启动---------------------------------------");
+        Logs.e(" installBroad ","["+intent.getAction()+"]");
         if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)){//"android.intent.action.BOOT_COMPLETED";
 
 

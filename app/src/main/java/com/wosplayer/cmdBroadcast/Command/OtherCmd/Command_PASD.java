@@ -2,7 +2,7 @@ package com.wosplayer.cmdBroadcast.Command.OtherCmd;
 
 import android.content.SharedPreferences;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.app.WosApplication;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 
@@ -24,7 +24,7 @@ public class Command_PASD implements iCommand {
 
             return;
         }
-        log.v(TAG,"param: " + param);
+        Logs.v(TAG,"param: " + param);
 
         boolean glag = savaUnlockPassword(param);
 

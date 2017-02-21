@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.app.WosApplication;
 
 import java.security.MessageDigest;
@@ -60,11 +60,11 @@ public class XmlNodeEntity implements Parcelable {
 
 
     public void addUriTast(String uri){
-        log.i(TAG,"准备添加一个uri :"+uri);
+        Logs.i(TAG,"准备添加一个uri :"+uri);
         if (uri.equals("") || uri.equals("null") || uri==null) return;
 
         if (ftplist.contains(uri)){
-            log.i(TAG,"准备添加一个uri"+uri+"---- 已存在");
+            Logs.i(TAG,"准备添加一个uri"+uri+"---- 已存在");
             return;
         }
         ftplist.add(uri);
@@ -89,7 +89,7 @@ public class XmlNodeEntity implements Parcelable {
         catch (Exception e)
         {
 
-            log.e(TAG, "AddProperty() :"+e.getMessage());
+            Logs.e(TAG, "AddProperty() :"+e.getMessage());
         }
     }
 
@@ -128,11 +128,11 @@ public class XmlNodeEntity implements Parcelable {
 
             this.AddProperty("md5", md5);
             String savedata = binder.toJson(this);
-            log.i(TAG,"序列化数据:"+savedata);
+            Logs.i(TAG,"序列化数据:"+savedata);
             writeShareDataSelf("settingNodeEntity", savedata);
         }catch(Exception e)
         {
-            log.e(TAG ,e.getMessage());
+            Logs.e(TAG ,e.getMessage());
         }finally {
             this.lock.unlock();
         }
@@ -152,7 +152,7 @@ public class XmlNodeEntity implements Parcelable {
             result= readShareDataSelf("settingNodeEntity") ;
         }catch(Exception e)
         {
-            log.e(TAG ,e.getMessage());
+            Logs.e(TAG ,e.getMessage());
         }finally {
             lock.unlock();
         }
@@ -177,7 +177,7 @@ public class XmlNodeEntity implements Parcelable {
 
         }catch(Exception e)
         {
-            log.e(TAG, e.getMessage());
+            Logs.e(TAG, e.getMessage());
         }
 
     }
@@ -213,7 +213,7 @@ public class XmlNodeEntity implements Parcelable {
             settingnodeentity=binder.fromJson(SettingNodeEntityText, XmlNodeEntity.class);
         }catch(Exception e)
         {
-            log.e(TAG ,"e.getMessage()");
+            Logs.e(TAG ,"e.getMessage()");
 
         }
         return settingnodeentity;
@@ -232,7 +232,7 @@ public class XmlNodeEntity implements Parcelable {
             if(SettingNodeEntityText!="")
             {
                 settingnodeentity=binder.fromJson(SettingNodeEntityText, XmlNodeEntity.class);
-                log.i(TAG,"本地保存-全部的排期信息: \n 节点等级: "+ settingnodeentity.Level+"-> childs size:"+settingnodeentity.getChildren().size());
+                Logs.i(TAG,"本地保存-全部的排期信息: \n 节点等级: "+ settingnodeentity.Level+"-> childs size:"+settingnodeentity.getChildren().size());
 
                 if(settingnodeentity.xmldata!=null&&settingnodeentity.xmldata.containsKey("md5")){
                     Current_Read_md5=settingnodeentity.xmldata.get("md5");
@@ -243,7 +243,7 @@ public class XmlNodeEntity implements Parcelable {
             }
         }catch(Exception e)
         {
-            log.e(TAG,"获取 本地排期xml数据失败: " + e.getMessage());
+            Logs.e(TAG,"获取 本地排期xml数据失败: " + e.getMessage());
         }
         return settingnodeentity==null?null:settingnodeentity.children;
     }
@@ -285,7 +285,7 @@ public class XmlNodeEntity implements Parcelable {
             }
             return sb.toString();
         } catch (Exception e) {
-            log.e("md5 加密失败:"+e.getMessage());
+            Logs.e("md5 加密失败:"+e.getMessage());
             return null;
         }
     }
@@ -319,7 +319,7 @@ public class XmlNodeEntity implements Parcelable {
                             Context.MODE_PRIVATE);
             result = preferences.getString(key, "");
         } catch (Exception e) {
-            log.e(TAG,e.getMessage());
+            Logs.e(TAG,e.getMessage());
         }
         return result;
     }

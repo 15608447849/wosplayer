@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 import static android.content.ContentValues.TAG;
 
@@ -27,7 +27,7 @@ public class UPDCbroad extends BroadcastReceiver {
 
     @Override
         public void onReceive(Context context, Intent intent) {
-            log.e(TAG," 升级广播 收到  ");
+            Logs.e(TAG," 升级广播 收到  ");
             updcer.installApk(intent.getExtras().getString("updc","null file"));
         }
     }

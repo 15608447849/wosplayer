@@ -14,7 +14,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 /**
  * Created by user on 2016/9/27.
@@ -219,13 +219,13 @@ public class ImageAttabuteAnimation {
         }else{
             selectNunber = (int)(Math.random()*ImageAttabuteAnimation.ANIM_SNUB) + 1;
         }
-        log.d("属性动画 selectNunber : "+selectNunber );
+        Logs.d("属性动画 selectNunber : "+selectNunber );
         AnimatorSet amt = ImageAttabuteAnimation.getOneAnimation(selectNunber,view,point);
         if(amt!=null){
 
             if(point!=null){
                 selectNunber = (int)(Math.random()*ImageAttabuteAnimation.INTER_SNUB) + 1;
-                log.d("属性动画 运动轨迹 selectNunber : "+selectNunber );
+                Logs.d("属性动画 运动轨迹 selectNunber : "+selectNunber );
                 amt.setInterpolator(ImageAttabuteAnimation.getOneTimeInterpolator(selectNunber));
             }
 

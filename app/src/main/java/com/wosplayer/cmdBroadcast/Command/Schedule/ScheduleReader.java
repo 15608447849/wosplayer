@@ -2,11 +2,12 @@ package com.wosplayer.cmdBroadcast.Command.Schedule;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.Ui.uiBroadcast.UibrocdCastReceive;
 import com.wosplayer.app.WosApplication;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.cmdBroadcast.CmdPostTaskCenter;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_SYTI;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
@@ -46,23 +47,23 @@ public class ScheduleReader {
 
 
     public static void clear(){
-        log.i(TAG," 当前存储的uuks == "+PreUUKS);
+        Logs.i(TAG," 当前存储的uuks == "+PreUUKS);
         PreUUKS = null;
         currentEntity = null;
-        log.e(TAG,"--------------------------------------清理 排期读取--------------------------------------------");
+        Logs.e(TAG,"--------------------------------------清理 排期读取--------------------------------------------");
     }
 
 
     private static void startTimer(long millisecond,boolean isNotTimer){
-        log.i(TAG," 定时器时间:"+millisecond+" , 是否延时任务:"+ isNotTimer);
+        Logs.i(TAG," 定时器时间:"+millisecond+" , 是否延时任务:"+ isNotTimer);
 
         try {
             stopTimer(isNotTimer);//停止所有定时任务
         } catch (Exception e) {
-            log.e(TAG,"停止 定时器 err:"+ e.getCause()+";"+e.getMessage());
+            Logs.e(TAG,"停止 定时器 err:"+ e.getCause()+";"+e.getMessage());
             return;
         }
-        log.i(TAG,"清空定时器 gogogo");
+        Logs.i(TAG,"清空定时器 gogogo");
         if (isNotTimer){
             //未到时间的任务
             notToTimeTask = new TimerTask() {
@@ -76,21 +77,21 @@ public class ScheduleReader {
             //未到时间的定时任务
             notToTimer = new Timer();
             notToTimer.schedule(notToTimeTask,millisecond);
-            log.i(TAG,"开始 未到时间 的 定时任务 ,延时毫秒数:" +millisecond);
+            Logs.i(TAG,"开始 未到时间 的 定时任务 ,延时毫秒数:" +millisecond);
         }else{
             //在当前时间段的任务
             timerTask = new TimerTask() {
                 @Override
                 public void run() {
                     //重新读取排期
-                    log.e(TAG,"一个定时任务到时间了,开始执行");
+                    Logs.e(TAG,"一个定时任务到时间了,开始执行");
                     PreUUKS = null;
                     Start(false);
                 }
             };
             timer = new Timer();
             timer.schedule(timerTask,millisecond);
-            log.i(TAG,"开始已经在当前段时间 的 定时任务 ,延时毫秒数:" +millisecond);
+            Logs.i(TAG,"开始已经在当前段时间 的 定时任务 ,延时毫秒数:" +millisecond);
         }
 
     }
@@ -105,7 +106,7 @@ public class ScheduleReader {
                 notToTimer.cancel();
                 notToTimer = null;
             }
-            log.i(TAG,"停止 延时 任务");
+            Logs.i(TAG,"停止 延时 任务");
         }
 
         if (timerTask!=null){
@@ -139,7 +140,7 @@ public class ScheduleReader {
     private static void  clearScheduleMap (){
         //循环
         for (Map.Entry<String, ArrayList<XmlNodeEntity>> entry : scheduleMap.entrySet()) {
-            log.i(TAG,"清理:" + entry.getKey()+ ">" + entry.getValue().size());
+            Logs.i(TAG,"清理:" + entry.getKey()+ ">" + entry.getValue().size());
             entry.getValue().clear();
         }
     }
@@ -148,9 +149,9 @@ public class ScheduleReader {
      */
     private static void deleteOnlySchedule(XmlNodeEntity schedule){
         String type = schedule.getXmldata().get("type");
-        log.e(TAG,"删除 \n id =="+schedule.getXmldata().get("id")+"\n排期summary == "+schedule.getXmldata().get("summary")+" \n 类型:"+type);
+        Logs.e(TAG,"删除 \n id =="+schedule.getXmldata().get("id")+"\n排期summary == "+schedule.getXmldata().get("summary")+" \n 类型:"+type);
         scheduleMap.get(type).remove(schedule);
-        log.i(TAG,scheduleMap.toString());
+        Logs.i(TAG,scheduleMap.toString());
     }
     /**
      * 添加排期
@@ -171,11 +172,11 @@ public class ScheduleReader {
         ArrayList<XmlNodeEntity> allScheduleList = XmlNodeEntity.GetAllNodeInfo();
 
         if (allScheduleList==null){
-            log.e(TAG," not fount schedule.");
+            Logs.e(TAG," not fount schedule.");
             return null;
         }
 
-        log.i(TAG,"all schedule_list size:" + allScheduleList.size());
+        Logs.i(TAG,"all schedule_list size:" + allScheduleList.size());
 
         return allScheduleList;
     }
@@ -193,9 +194,9 @@ public class ScheduleReader {
             String summary = entity.getXmldata().get("summary");
             boolean flag = addScheduleToMap(type,entity);
            if(flag){
-               log.i(TAG,"summary:"+summary+",type" +"=="+type+"[1=轮播,2=点播,3=重复,4=插播,5=默认],添加success");
+               Logs.i(TAG,"summary:"+summary+",type" +"=="+type+"[1=轮播,2=点播,3=重复,4=插播,5=默认],添加success");
            }else{
-               log.e(TAG,"summary:"+summary+",type" +"=="+type+"[1=轮播,2=点播,3=重复,4=插播,5=默认],添加failure");
+               Logs.e(TAG,"summary:"+summary+",type" +"=="+type+"[1=轮播,2=点播,3=重复,4=插播,5=默认],添加failure");
            }
         }
     }
@@ -215,7 +216,7 @@ public class ScheduleReader {
             ArrayList<XmlNodeEntity> list =  getAllSchedule();
             //判断当前uuks 是否和上一个相同
             if(list==null || list.size()==0){
-                log.e(TAG,"-- 无排期列表 --");
+                Logs.e(TAG,"-- 无排期列表 --");
                 sendTSLT();
                 return;
             }else{
@@ -224,7 +225,7 @@ public class ScheduleReader {
                 }
                 currentEntity =  list.get(0);
                 if (currentEntity==null){
-                    log.e(TAG,"排期读取错误- 获取不到当前排期 ");
+                    Logs.e(TAG,"排期读取错误- 获取不到当前排期 ");
                     //执行  本地默认排期
                     sendTSLT();
                     return;
@@ -232,33 +233,33 @@ public class ScheduleReader {
 
                 String uuks = currentEntity.getXmldata().get("uuks");
                 if (uuks==null || uuks.equals("") || uuks.length()==0){
-                    log.e(TAG,"最新xml 读取排期时 获取uuks 失败 \n reader ,uuks is null :"+uuks);
+                    Logs.e(TAG,"最新xml 读取排期时 获取uuks 失败 \n reader ,uuks is null :"+uuks);
                     return;
                 }
                 if (PreUUKS!=null){
                     if (PreUUKS.equals(uuks)){
-                        log.e(TAG," ------------读取排期 uuks is same -----------------------\n ;新排期:"+ uuks+"\n 本地保存的UUKS:"+ PreUUKS);
+                        Logs.e(TAG," ------------读取排期 uuks is same -----------------------\n ;新排期:"+ uuks+"\n 本地保存的UUKS:"+ PreUUKS);
                         return;
                     }
                 }
                 //执行到这里 代表 上一个uuks 不存在或者 上一个uuks 和当前uuks 不相同
                 PreUUKS = uuks;
             }
-            log.i(TAG," UUKS IS NOT SAME, start reader exe_ing");
+            Logs.i(TAG," UUKS IS NOT SAME, start reader exe_ing");
                 //
             Stop();
 
-            log.i(TAG,"全部排期数量:"+list.size());
+            Logs.i(TAG,"全部排期数量:"+list.size());
 
             filterScheduleList(list);
-            log.i(TAG,"过滤 分组 全部排期完成 : \n"+scheduleMap.toString());
+            Logs.i(TAG,"过滤 分组 全部排期完成 : \n"+scheduleMap.toString());
             }
 
 
             //XmlNodeEntity entity = querySchedule();
             currentEntity = querySchedule();
             if (currentEntity==null){
-                log.e(TAG," 空排期 ");
+                Logs.e(TAG," 空排期 ");
                 clear();
                 UiExcuter.getInstancs().StopExcuter();
                 sendTSLT();
@@ -269,8 +270,8 @@ public class ScheduleReader {
            /* clearScheduleMap();
             log.i(TAG,"清理完全部排期");*/
 
-            log.i(TAG,"今天要播放的排期 type:"+currentEntity.getXmldata().get("type")+"name:"+currentEntity.getXmldata().get("summary"));
-            log.i(TAG,"当前排期最后修改时间:"+currentEntity.getXmldata().get("modifydt"));
+            Logs.i(TAG,"今天要播放的排期 type:"+currentEntity.getXmldata().get("type")+"name:"+currentEntity.getXmldata().get("summary"));
+            Logs.i(TAG,"当前排期最后修改时间:"+currentEntity.getXmldata().get("modifydt"));
 
 
             boolean isExistes = false;//是否存在排期
@@ -289,7 +290,7 @@ public class ScheduleReader {
             //发送广播 通知视图更新
             notificationUIexcuter(isExistes,currentEntity);
         }else{
-            log.e(TAG,"不更新ui 获取低优先级的任务");
+            Logs.e(TAG,"不更新ui 获取低优先级的任务");
             deleteOnlySchedule(currentEntity);
             Start(true);
         }
@@ -297,18 +298,18 @@ public class ScheduleReader {
         }
         catch (Exception e)
         {
-            log.e(TAG," 执行读取排期错误:"+e.getMessage());
+            Logs.e(TAG," 执行读取排期错误:"+e.getMessage());
 
             //如果错误是dalay is err ,删除这个排期,重新来过
             if (e.getMessage().equals("dalay is err")){
                 if (currentEntity==null){
-                    log.e(TAG,"当前无排期");
+                    Logs.e(TAG,"当前无排期");
                     return;
                 }
                 deleteOnlySchedule(currentEntity);
                 Start(true);
             }
-            log.e(TAG,"执行读取排期 异常 :"+ e.getCause());
+            Logs.e(TAG,"执行读取排期 异常 :"+ e.getCause());
         }
         finally {
             lock.unlock();
@@ -317,6 +318,7 @@ public class ScheduleReader {
 
     //发送广播 - > 到指令
     private static void sendTSLT(){
+        Logs.d(TAG,"执行本地默认排期，发送本地指令TSLT");
         Intent intent = new Intent();
         intent.setAction(CmdPostTaskCenter.action);
         Bundle b = new Bundle();
@@ -344,7 +346,7 @@ public class ScheduleReader {
                dalay = Integer.parseInt(timelength);
                dalay = dalay * 1000;
            }catch (Exception e){
-               log.e(TAG,"插播解析播放时长异常:"+timelength);
+               Logs.e(TAG,"插播解析播放时长异常:"+timelength);
                return false;
            }
        }
@@ -353,7 +355,7 @@ public class ScheduleReader {
         //如果是重复
             String start = entity.getXmldata().get("start");
             String end = entity.getXmldata().get("end");
-            log.i(TAG," 重复 . 开始时间:"+start+"- 结束时间:"+end);
+            Logs.i(TAG," 重复 . 开始时间:"+start+"- 结束时间:"+end);
 
             String current = dataFormatUtils.format(new Date());//当前时间
             Date startTime = null;
@@ -365,7 +367,7 @@ public class ScheduleReader {
                 currentData = dataFormatUtils.parse(current);
                 endTime = dataFormatUtils.parse(end);
             } catch (ParseException e) {
-                log.e(TAG,"读取排期失败"+e.getMessage());
+                Logs.e(TAG,"读取排期失败"+e.getMessage());
                 return false;
             }
             //开始时间 > 现在的时间 ?
@@ -384,7 +386,7 @@ public class ScheduleReader {
                     dalay =  getTimeMillsecondes(end) - getTimeMillsecondes(current);
                 }
                 if (endTime.before(currentData)){
-                    log.e(TAG,"排期 结束时间 在 当前时间 之前");
+                    Logs.e(TAG,"排期 结束时间 在 当前时间 之前");
                 }
 
             }
@@ -404,7 +406,7 @@ public class ScheduleReader {
                 startTime = dataFormatUtils.parse(startcron);
                 currentData = dataFormatUtils.parse(current);
             } catch (ParseException e) {
-              log.e(TAG,"读取排期失败"+e.getMessage());
+              Logs.e(TAG,"读取排期失败"+e.getMessage());
                 return false;
             }
 
@@ -427,15 +429,15 @@ public class ScheduleReader {
         }
 
         if (dalay<0){
-            log.e(TAG," 定时任务 执行时间 错误:"+dalay);
+            Logs.e(TAG," 定时任务 执行时间 错误:"+dalay);
             throw new Exception("dalay is err");
         }
 
-        log.i(TAG,"延时秒数:"+dalay/1000);
+        Logs.i(TAG,"延时秒数:"+dalay/1000);
         try {
             startTimer(dalay,isNotTo);
         } catch (Exception e) {
-           log.e(TAG,"开始定时器 err:"+ e.getMessage()+" cause:"+e.getCause());
+           Logs.e(TAG,"开始定时器 err:"+ e.getMessage()+" cause:"+e.getCause());
             throw new Exception("start timer is err");
         }
         return flag;
@@ -455,7 +457,7 @@ public class ScheduleReader {
             intent.putExtras(b);
             WosApplication.appContext.sendBroadcast(intent);
         }else{
-            log.e(TAG,"播放默认排期");
+            Logs.e(TAG,"播放默认排期");
         }
     }
 
@@ -470,14 +472,14 @@ public class ScheduleReader {
         ArrayList<XmlNodeEntity> currentArr = DetermineScheduling();
 
         if (currentArr==null){
-            log.e(TAG,"当前无排期信息"+ currentArr);
+            Logs.e(TAG,"当前无排期信息"+ currentArr);
             return e;
         }
 
         //根据最后修改时间得到唯一一个排期
         XmlNodeEntity entity = determineModificationDate(currentArr);
         if (entity==null){
-            log.e(TAG,"根据最后修改时间 未获取到 任何排期");
+            Logs.e(TAG,"根据最后修改时间 未获取到 任何排期");
             return e;
         }
 
@@ -507,25 +509,25 @@ public class ScheduleReader {
 
         String executeExpression = entity.getXmldata().get("executeexpression");
         if (executeExpression ==null || executeExpression.length()==0){
-            log.e(TAG," 重复类型判断: executeExpression ->" + executeExpression);
+            Logs.e(TAG," 重复类型判断: executeExpression ->" + executeExpression);
             return false;
         }
         String []executeExpressionArray = executeExpression.split("\\s"); //空格分割
 
         if (executeExpressionArray.length == 0 ){
-            log.e(TAG," 重复类型判断: executeExpressionArray 大小->" + executeExpressionArray.length);
+            Logs.e(TAG," 重复类型判断: executeExpressionArray 大小->" + executeExpressionArray.length);
             return false;
         }
 
 
-                log.i(TAG,"判断 重复类型 每天?");
+                Logs.i(TAG,"判断 重复类型 每天?");
 //                //如果是每天 true  "executeexpression" -> "0 0 0 * * ? 2016-2099" 每天  //第四个是* 第6个是?
                 if (executeExpressionArray[3].equals("*") && executeExpressionArray[5].equals("?")){
-                    log.i(TAG,"重复类型 每天播放");
+                    Logs.i(TAG,"重复类型 每天播放");
                     return true;
                 }
 
-                log.i(TAG,"判断 重复类型 每月的第几天?");
+                Logs.i(TAG,"判断 重复类型 每月的第几天?");
 // 如果是每个月 判断是哪一天 再判断是不是今天 || 每月 在第 28天  "executeexpression" -> "0 0 0 28 * ? 2016-2099"
                 if (!executeExpressionArray[3].equals("*")  && executeExpressionArray[4].equals("*") && executeExpressionArray[5].equals("?")){
 
@@ -535,20 +537,20 @@ public class ScheduleReader {
                     try{
                         schedule_dayNum = Integer.parseInt(executeExpressionArray[3]);
                     }catch (Exception e){
-                        log.e(TAG,"重复类型排期 每月的某天播放 解析天数参数 异常:"+executeExpressionArray[3]);
+                        Logs.e(TAG,"重复类型排期 每月的某天播放 解析天数参数 异常:"+executeExpressionArray[3]);
                         return false;
                     }
 
                     if (day_of_month == schedule_dayNum){
-                        log.i(TAG,"重复类型 每月的某天播放");
+                        Logs.i(TAG,"重复类型 每月的某天播放");
                         return true;
                     }else{
-                        log.e(TAG,"^^^^^err^^^^");
+                        Logs.e(TAG,"^^^^^err^^^^");
                       //  return false;
                     }
                 }
 
-                log.i(TAG,"判断 重复类型 每年?");
+                Logs.i(TAG,"判断 重复类型 每年?");
                 //如果是每个年  "cronexpression" -> "* * * 19 9 ? 2016-2017"
                 if (!executeExpressionArray[3].equals("*")  && !executeExpressionArray[4].equals("*") && executeExpressionArray[5].equals("?")){
 
@@ -563,19 +565,19 @@ public class ScheduleReader {
                         schedule_month = Integer.parseInt(executeExpressionArray[4]) ;
                         schedule_dayNum = Integer.parseInt(executeExpressionArray[3]);
                     }catch (Exception e){
-                        log.e(TAG,"重复类型排期 每年某月某天播放 解析天数参数 异常:"+executeExpressionArray[3]+"-"+executeExpressionArray[4]);
+                        Logs.e(TAG,"重复类型排期 每年某月某天播放 解析天数参数 异常:"+executeExpressionArray[3]+"-"+executeExpressionArray[4]);
                         return false;
                     }
                     if (month == schedule_month && day_of_month==schedule_dayNum){
-                        log.i(TAG,"重复类型 每年播放");
+                        Logs.i(TAG,"重复类型 每年播放");
                         return true;
                     }else{
-                        log.e("^^^^^err^^^^");
+                        Logs.e("^^^^^err^^^^");
                        // return false;
                     }
                 }
 
-            log.i(TAG,"判断 重复类型 每月的第几星期的星期几?");
+            Logs.i(TAG,"判断 重复类型 每月的第几星期的星期几?");
 //          //如果是每个月的 的某个星期 判断 >是不是这个星期 >再判断是不是今天|  每月 在第 4周 周三 "executeexpression" -> "0 0 0 ? * 4#4 2016-2099" //4#4 星期几#这个月的第几个星期
 
             if (executeExpressionArray[3].equals("?") &&  executeExpressionArray[5].contains("#")){
@@ -586,19 +588,19 @@ public class ScheduleReader {
                     week = todayCalendar.get(Calendar.WEEK_OF_MONTH);
                     day_of_week = todayCalendar.get(Calendar.DAY_OF_WEEK);
                 } catch (Exception e) {
-                    log.e(TAG," "+e.getMessage());
+                    Logs.e(TAG," "+e.getMessage());
                   return false;
                 }
                 //获取排期规定的 第几个星期星期几
                 String text = executeExpressionArray[5];
-                log.e("executeExpressionArray[5] :"+executeExpressionArray[5]);
+                Logs.e("executeExpressionArray[5] :"+executeExpressionArray[5]);
                 if (text==null || text.equals("") || text.length()==0){
-                    log.e(TAG," 重复类型判断星期几 text:"+text);
+                    Logs.e(TAG," 重复类型判断星期几 text:"+text);
                     return false;
                 }
                 String []textArr = text.split("#");
                 if (textArr.length == 0){
-                    log.e(TAG," 解析星期数异常 :"+ executeExpressionArray[5]);
+                    Logs.e(TAG," 解析星期数异常 :"+ executeExpressionArray[5]);
                     return false;
                 }
 
@@ -608,30 +610,30 @@ public class ScheduleReader {
                     schedule_week = Integer.parseInt(textArr[1]);
                     schedule_week_day = Integer.parseInt(textArr[0]);
                 }catch (Exception e){
-                    log.e(TAG,"重复类型排期 每个月的第几个星期的星期几 解析天数参数 异常:"+textArr[0]+"-"+textArr[1]);
+                    Logs.e(TAG,"重复类型排期 每个月的第几个星期的星期几 解析天数参数 异常:"+textArr[0]+"-"+textArr[1]);
                     return false;
                 }
 
-                log.i(TAG," schedule_week:"+schedule_week+";schedule_week_day:"+schedule_week_day);
-                log.i(TAG," week:"+week+";day_of_week:"+day_of_week);
+                Logs.i(TAG," schedule_week:"+schedule_week+";schedule_week_day:"+schedule_week_day);
+                Logs.i(TAG," week:"+week+";day_of_week:"+day_of_week);
 
                 if (week==schedule_week && day_of_week==schedule_week_day){
-                    log.i(TAG,"重复类型 每个星期播放");
+                    Logs.i(TAG,"重复类型 每个星期播放");
                     return true;
                 }else{
-                    log.e("^^^err^^^^^^");
+                    Logs.e("^^^err^^^^^^");
                     //return false;
                 }
             }
 
-        log.i(TAG,"判断 重复类型 每个星期的星期几?");
+        Logs.i(TAG,"判断 重复类型 每个星期的星期几?");
         if (executeExpressionArray[3].equals("?") &&  !executeExpressionArray[5].contains("#")){
 
             int day_of_week = todayCalendar.get(Calendar.DAY_OF_WEEK);//获取当前是星期几
             String text = executeExpressionArray[5];
-            log.e("executeExpressionArray[5] :"+executeExpressionArray[5]);
+            Logs.e("executeExpressionArray[5] :"+executeExpressionArray[5]);
             if (text==null && text.length()==0){
-                log.e(TAG," 重复类型 每星期的星期几 text:"+text);
+                Logs.e(TAG," 重复类型 每星期的星期几 text:"+text);
                 return false;
             }
 
@@ -639,21 +641,21 @@ public class ScheduleReader {
             try{
                 schedule_week_day = Integer.parseInt(text);
             }catch (Exception e){
-                log.e(TAG,""+e.getMessage());
+                Logs.e(TAG,""+e.getMessage());
                 return false;
             }
 
-            log.i(TAG,"schedule_week_day:"+schedule_week_day);
+            Logs.i(TAG,"schedule_week_day:"+schedule_week_day);
             if (day_of_week==schedule_week_day){
-                log.i(TAG,"重复类型 每个星期播放");
+                Logs.i(TAG,"重复类型 每个星期播放");
                 return true;
             }else{
-                log.e("^^^^^err^^^^");
+                Logs.e("^^^^^err^^^^");
                 //return false;
             }
         }
 
-        log.i(TAG,"重复类型解析完毕");
+        Logs.i(TAG,"重复类型解析完毕");
         return false;
     }
 
@@ -663,15 +665,15 @@ public class ScheduleReader {
      */
     private static long getTimeMillsecondes(String time)
     {
-        log.i(TAG,"准备转换时间:"+time);
+        Logs.i(TAG,"准备转换时间:"+time);
        if(! Command_SYTI.RegexMatches(time)){
-           log.e(TAG,"不正确的时间参数:"+time);
+           Logs.e(TAG,"不正确的时间参数:"+time);
            return 0;
        };
         DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
         DateTime dateTime  = fmt.parseDateTime(time);
         long millseconds = dateTime.getMillis();
-        log.i(TAG, "转换时间成功: "+ millseconds);
+        Logs.i(TAG, "转换时间成功: "+ millseconds);
         return millseconds;
     }
 
@@ -692,12 +694,12 @@ public class ScheduleReader {
             }
         });
 
-        log.i(TAG,"-----------------------start-------------------------------");
+        Logs.i(TAG,"-----------------------start-------------------------------");
         for (int i = 0;i<current.size();i++){
-            log.i(TAG,"name: {"+current.get(i).getXmldata().get("summary")+"}最后修改时间:["+current.get(i).getXmldata().get("modifydt")+"]");
+            Logs.i(TAG,"name: {"+current.get(i).getXmldata().get("summary")+"}最后修改时间:["+current.get(i).getXmldata().get("modifydt")+"]");
         }
 
-        log.i(TAG,"-----------------------end-------------------------------");
+        Logs.i(TAG,"-----------------------end-------------------------------");
         entity = current.get(0);
         return entity;
     }
@@ -722,23 +724,23 @@ public class ScheduleReader {
     private static ArrayList<XmlNodeEntity> DetermineScheduling() {
         //优先级 : 插播 4> 重复 3> 点播 2> 轮播 1> 默认5
         if (scheduleMap.get("4").size()>0){
-            log.i(TAG,"返回全部的 插播 排期");
+            Logs.i(TAG,"返回全部的 插播 排期");
             return scheduleMap.get("4");
         }
         if(scheduleMap.get("3").size()>0){
-            log.i(TAG,"返回全部的 重复 排期");
+            Logs.i(TAG,"返回全部的 重复 排期");
             return scheduleMap.get("3");
         }
         if (scheduleMap.get("2").size()>0){
-            log.i(TAG,"返回全部的 点播 排期");
+            Logs.i(TAG,"返回全部的 点播 排期");
             return scheduleMap.get("2");
         }
         if(scheduleMap.get("1").size()>0){
-            log.i(TAG,"返回全部的 轮播 排期");
+            Logs.i(TAG,"返回全部的 轮播 排期");
             return scheduleMap.get("1");
         }
         if(scheduleMap.get("5").size()>0){
-            log.i(TAG,"返回全部的 插默 排期");
+            Logs.i(TAG,"返回全部的 插默 排期");
             return scheduleMap.get("5");
         }
         return null;
@@ -756,7 +758,7 @@ public class ScheduleReader {
         //如果是默认排期 直接返回
         String type = current.getXmldata().get("type");
         if (type.equals("5")){
-            log.i(TAG,"默认排期");
+            Logs.i(TAG,"默认排期");
             return true;
         }
 
@@ -766,7 +768,7 @@ public class ScheduleReader {
 
 
         if ( !Command_SYTI.RegexMatches(schedule_startTimeText) ||  !Command_SYTI.RegexMatches(schedule_endTimeText)){
-           log.e(TAG,"排期开始时间 或者 结束时间 错误");
+           Logs.e(TAG,"排期开始时间 或者 结束时间 错误");
             return false;
         }
 
@@ -779,14 +781,14 @@ public class ScheduleReader {
         String currentTimeText =  dataFormatUtils.format(new Date());
         Date currentData = dataFormatUtils.parse(currentTimeText);
 
-        log.i(TAG,"1 --- >当前时间:"+currentTimeText+";排期 开始:"+schedule_startTimeText+"---结束:"+schedule_endTimeText);
+        Logs.i(TAG,"1 --- >当前时间:"+currentTimeText+";排期 开始:"+schedule_startTimeText+"---结束:"+schedule_endTimeText);
 
 
         String start = current.getXmldata().get("start");
         String end = current.getXmldata().get("end");
-        log.i(TAG,"2---> 当前时间:"+currentTimeText+";排期 开始:"+start+"---结束:"+end);
+        Logs.i(TAG,"2---> 当前时间:"+currentTimeText+";排期 开始:"+start+"---结束:"+end);
         if (type.equals("3")){
-            log.i(TAG,"--重复类型--");
+            Logs.i(TAG,"--重复类型--");
 
             //换成 日历类型
             Date mstart = dataFormatUtils.parse(start);
@@ -794,7 +796,7 @@ public class ScheduleReader {
 
             // 如果结束时间 < 当前时间  false
             if (mend.before(currentData)){
-                log.e(TAG," 重复类型 结束时间 小于 当前时间 ");
+                Logs.e(TAG," 重复类型 结束时间 小于 当前时间 ");
                 return false;
             }
             //判断开始时间 > 当前时间 ?
@@ -811,18 +813,18 @@ public class ScheduleReader {
         // 判断 当前的时间 是不是 符合: 在开始 - 结束 的范围内 ,如果是点播类型 2 ,判断 他的开始时间 是不是在当前时间之后,是的话,也返回true
         if (type.equals("2")){
             boolean f = startTime.after(currentData);
-            log.e(TAG,"点播 开始时间 > 当前时间 ? ->"+ f);
+            Logs.e(TAG,"点播 开始时间 > 当前时间 ? ->"+ f);
             if (f){
                 return true;
             }else{
-                log.e(TAG,"...");
+                Logs.e(TAG,"...");
 
             }
         }
-        log.i(TAG," - 确定时间 - determineTime() start ");
+        Logs.i(TAG," - 确定时间 - determineTime() start ");
 
         if ( currentData.getTime()-startTime.getTime()==0 || currentData.after(startTime) && currentData.before(endTime)){
-            log.i(TAG,"在当前时间存在有效排期 √\n" +
+            Logs.i(TAG,"在当前时间存在有效排期 √\n" +
                     "id == " + current.getXmldata().get("id") + "\n"+
                     "type == "+ current.getXmldata().get("type") +"\n"+
                     "termtype == "+ current.getXmldata().get("termtype") +"\n"+
@@ -830,7 +832,7 @@ public class ScheduleReader {
             return true;
         }
 
-        log.i(TAG," - 确定时间 - determineTime() end");
+        Logs.i(TAG," - 确定时间 - determineTime() end");
         return false;
     }
 

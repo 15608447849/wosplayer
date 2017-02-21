@@ -1,7 +1,7 @@
 package com.wosplayer.loadArea.ftpBlock;
 
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
 
 import org.apache.commons.net.ftp.FTPClient;
@@ -65,7 +65,7 @@ public class FtpHelper {
      * @throws IOException
      */
     public void openConnect() throws IOException {
-        log.i(TAG,"连接ftp...");
+        Logs.i(TAG,"连接ftp...");
         if (ftpClient==null){
             ftpClient = new FTPClient();
         }
@@ -120,7 +120,7 @@ public class FtpHelper {
         } finally {
             try {
                 if (ftpClient != null) {
-                    log.i(TAG,"关闭ftp连接");
+                    Logs.i(TAG,"关闭ftp连接");
                     ftpClient.disconnect();
                     ftpClient=null;
                 }
@@ -343,7 +343,7 @@ public class FtpHelper {
                 e.printStackTrace();
                 listener.ftpConnectState(FTP_CONNECT_FAIL,hostName,serverPort,userName,password,fileName);
             }
-            log.e(TAG,"重新连接FTP...\n当前第"+reConnectCount+"次尝试.\n服务器ip:"+this.hostName+"端口:"+this.serverPort+"用户名:"+this.userName+"密码:"+this.password);
+            Logs.e(TAG,"重新连接FTP...\n当前第"+reConnectCount+"次尝试.\n服务器ip:"+this.hostName+"端口:"+this.serverPort+"用户名:"+this.userName+"密码:"+this.password);
             downloadSingleFile(serverPath,localPath,fileName,reconnectCount,listener);
         }else{
             listener.ftpConnectState(FTP_CONNECT_FAIL,hostName,serverPort,userName,password,fileName);

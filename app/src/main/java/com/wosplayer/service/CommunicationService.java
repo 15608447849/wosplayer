@@ -10,7 +10,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.cmdBroadcast.CmdPostTaskCenter;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_UPDC;
 
@@ -98,7 +98,7 @@ public class CommunicationService extends Service{
     @Override
     public void onCreate() {
         super.onCreate();
-        log.i("----------------------onCreate---------------------开启通讯服务-------------------------------------------------------------------------");
+        Logs.i("----------------------onCreate---------------------开启通讯服务-------------------------------------------------------------------------");
 
     }
     /**
@@ -112,15 +112,15 @@ public class CommunicationService extends Service{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null){
-            log.e(TAG,"連接服務 未傳遞 intent,启动失败");
+            Logs.e(TAG,"連接服務 未傳遞 intent,启动失败");
         }else{
             ip =  intent.getExtras().getString("ip");
             port = intent.getExtras().getInt("port");
             terminalNo = intent.getExtras().getString("terminalNo");
             HeartBeatTime = intent.getExtras().getLong("HeartBeatTime") * 1000;
-            log.i(TAG,"ip: "+ip+"\n端口: "+port+"\n终端号: "+terminalNo+"\n心跳时间 :"+ HeartBeatTime);
+            Logs.i(TAG,"ip: "+ip+"\n端口: "+port+"\n终端号: "+terminalNo+"\n心跳时间 :"+ HeartBeatTime);
             if (ip==null || terminalNo==null){
-                log.e(TAG,"連接服務  intent 參數不正確");
+                Logs.e(TAG,"連接服務  intent 參數不正確");
             }else{
                openConnServerThread();
             }
@@ -134,7 +134,7 @@ public class CommunicationService extends Service{
     @Override
     public void onDestroy() {
         super.onDestroy();
-        log.e("--------------------------------------------------------------通讯服务 停止-------------------------------------------------------------------------");
+        Logs.e("--------------------------------------------------------------通讯服务 停止-------------------------------------------------------------------------");
         stopCommunication();
     }
 /////////////////////////////////////////////////////////////////////////////////////
@@ -164,13 +164,13 @@ public class CommunicationService extends Service{
                 try {
                     if (dataInputStream.available() > 0) {
                         msg = dataInputStream.readUTF();
-                        log.i(" 收到 服务器 参数: " + msg);
+                        Logs.i(" 收到 服务器 参数: " + msg);
                        cmd = msg.substring(0, 5);
                         param = msg.substring(5);
                         postTask(cmd,param);
                     }
                 }catch (Exception e){
-                    log.e("接受服务端消息 错误 :"+ e.getMessage());
+                    Logs.e("接受服务端消息 错误 :"+ e.getMessage());
                     reConnection();
                 }
             }
@@ -206,7 +206,7 @@ public class CommunicationService extends Service{
 //                        Thread.sleep(10);
                     }
                 }catch (Exception e){
-                    log.e(TAG,"发送消息到服务器 错误 :\n"+ e.getMessage());//尝试重新链接
+                    Logs.e(TAG,"发送消息到服务器 错误 :\n"+ e.getMessage());//尝试重新链接
                     e.printStackTrace();
                     //重连接
                     reConnection();
@@ -236,12 +236,12 @@ public class CommunicationService extends Service{
         if (receiveMsg != null){
             receiveMsg.stopMe();
             receiveMsg = null;
-            log.i("断开 接受消息 线程");
+            Logs.i("断开 接受消息 线程");
         }
         if (sendmsgThread!=null){
             sendmsgThread.stopMe();
             sendmsgThread = null;
-            log.i("断开 发送消息 线程");
+            Logs.i("断开 发送消息 线程");
         }
     }
 /////////////////////////////////////////////////////////////////////////////////////
@@ -255,7 +255,7 @@ public class CommunicationService extends Service{
      */
     private void postTask(String cmd, String param) {
         b.clear();
-        log.i("命令:"+cmd+" 参数"+param);
+        Logs.i("命令:"+cmd+" 参数"+param);
         i.setAction(CmdPostTaskCenter.action);
         b.putString(CmdPostTaskCenter.cmd,cmd);
         b.putString(CmdPostTaskCenter.param,param);
@@ -267,12 +267,12 @@ public class CommunicationService extends Service{
      * 创建连接
      */
     private boolean createConnect(){
-        log.i(TAG,"创建连接中...createConnect()");
+        Logs.i(TAG,"创建连接中...createConnect()");
         //连接
         createrSocketConnect();
         if (!isConnected){ //如果没连接上
             //尝试重新链接
-            log.i(TAG,"创建连接失败,稍后在尝试");
+            Logs.i(TAG,"创建连接失败,稍后在尝试");
             return false;
         }
         return true;
@@ -281,7 +281,7 @@ public class CommunicationService extends Service{
      * 开始通讯
      */
     private void startCommunication(){
-        log.i(TAG,"startCommunication() >>>\n当前所在线程:"+Thread.currentThread().getName()+"\n当前线程数量:"+Thread.getAllStackTraces().size());
+        Logs.i(TAG,"startCommunication() >>>\n当前所在线程:"+Thread.currentThread().getName()+"\n当前线程数量:"+Thread.getAllStackTraces().size());
 
         //创建接受消息线程,发送消息线程
         startReceiveThreadAndSendThread();
@@ -312,7 +312,7 @@ public class CommunicationService extends Service{
         stopReceiveThreadAndSendThread();
         //结束链接
         desConnection();
-        log.i(TAG,"---结束通讯---");
+        Logs.i(TAG,"---结束通讯---");
     }
     /////////////////////////////////////////////////////////////////////////////////////
     //创建链接
@@ -323,15 +323,15 @@ public class CommunicationService extends Service{
         }
         try {
             if (socket==null){
-                log.i(TAG,"尝试创建socket 连接...");
+                Logs.i(TAG,"尝试创建socket 连接...");
                 socket = new Socket(ip , port);
                 dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
                 dataInputStream    = new DataInputStream(socket.getInputStream());
                 isConnected=true;
-                log.i("Communication connectToServer success : \n" +ip+":"+port);
+                Logs.i("Communication connectToServer success : \n" +ip+":"+port);
             }
         } catch (IOException e) {
-            log.e(" socket connection err: "+ e.getMessage());
+            Logs.e(" socket connection err: "+ e.getMessage());
             e.printStackTrace();
             isConnected=false;//完成连接
         }
@@ -340,11 +340,11 @@ public class CommunicationService extends Service{
     //尝试重新链接
     private void reConnection() {
         if (isReconne){
-            log.i("正在尝试连接,不要重复尝试...");
+            Logs.i("正在尝试连接,不要重复尝试...");
             return;
         }
         isReconne = true;
-        log.i("尝试重新链接中...");
+        Logs.i("尝试重新链接中...");
         send_offline = false;//不发送下线通知
         stopCommunication();
         openConnServerThread();
@@ -354,13 +354,13 @@ public class CommunicationService extends Service{
      *断开链接
      */
     private void desConnection(){
-        log.i(TAG,"断开连接中....");
+        Logs.i(TAG,"断开连接中....");
         if (socket != null) {
             try {
                 socket.close();
                 socket=null;
             } catch (Exception e) {
-                log.e("Communication disconnect error : " + e.getMessage());
+                Logs.e("Communication disconnect error : " + e.getMessage());
             }
         }
         if (dataOutputStream != null) {
@@ -368,7 +368,7 @@ public class CommunicationService extends Service{
                 dataOutputStream.close();
                 dataOutputStream=null;
             } catch (Exception e) {
-                log.e("Communication disconnect error : " + e.getMessage());
+                Logs.e("Communication disconnect error : " + e.getMessage());
             }
         }
         if (dataInputStream != null) {
@@ -376,7 +376,7 @@ public class CommunicationService extends Service{
                 dataInputStream.close();
                 dataInputStream=null;
             } catch (IOException e) {
-                log.e("Communication disconnect error : " + e.getMessage());
+                Logs.e("Communication disconnect error : " + e.getMessage());
             }
         }
         isConnected = false;//不在连接中
@@ -415,7 +415,7 @@ public class CommunicationService extends Service{
         IntentFilter filter=new IntentFilter();
         filter.addAction(CommunicationServiceReceiveNotification.action);
         getApplicationContext().registerReceiver(broad, filter); //只需要注册一次
-        log.i("已注册 接受本地 到服务器 ,广播");
+        Logs.i("已注册 接受本地 到服务器 ,广播");
     }
     /**
      * 注销广播
@@ -428,7 +428,7 @@ public class CommunicationService extends Service{
                 e.printStackTrace();
             }
             broad = null;
-            log.i("注销 接受本地消息到服务器 ,广播");
+            Logs.i("注销 接受本地消息到服务器 ,广播");
         }
     }
     /////////////////////////////////////////////////////////////////////////////////////
@@ -487,7 +487,7 @@ public class CommunicationService extends Service{
                     //打开通讯
                     startCommunication();
                     stopMe();
-                    log.i(TAG,"ConnectServerThread 完成任务");
+                    Logs.i(TAG,"ConnectServerThread 完成任务");
                 }else{
                     //创建链接
                     isCreateConne = createConnect();

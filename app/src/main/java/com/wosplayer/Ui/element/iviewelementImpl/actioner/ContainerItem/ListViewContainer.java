@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.actioner.Container;
 import com.wosplayer.app.DataList;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +37,7 @@ public class ListViewContainer extends Container{
         this.context = context;
         view = LayoutInflater.from(context).inflate(R.layout.action_mode_listlayout,null);
         if (view == null){
-            log.e(TAG," list create view is null");
+            Logs.e(TAG," list create view is null");
             return;
         }
 
@@ -89,7 +89,7 @@ public class ListViewContainer extends Container{
             view.setLayoutParams(lp);
 
         }catch (Exception e){
-            log.e(TAG,"onLayout() err:" + e.getMessage());
+            Logs.e(TAG,"onLayout() err:" + e.getMessage());
         }
     }
 
@@ -102,14 +102,14 @@ public class ListViewContainer extends Container{
                 this.vp = null;
             }
         }catch (Exception e){
-            log.e(TAG,"onUnlayout() err:" + e.getMessage());
+            Logs.e(TAG,"onUnlayout() err:" + e.getMessage());
         }
     }
 
     @Override
     public void onBind(ViewGroup vp) {
         if (vp==null){
-            log.e(TAG,"list onbind , vp is null");
+            Logs.e(TAG,"list onbind , vp is null");
             return;
         }
 
@@ -117,7 +117,7 @@ public class ListViewContainer extends Container{
             // 1. 设置 view 宽高属性 添加到外层容器上
             onLayout(vp);
         }catch (Exception e){
-            log.e(TAG,"onBind() err:" + e.getMessage());
+            Logs.e(TAG,"onBind() err:" + e.getMessage());
         }
 
     }
@@ -128,7 +128,7 @@ public class ListViewContainer extends Container{
             // 1. 删除视图
             onUnlayout();
         }catch (Exception e){
-            log.e(TAG,"onUnbind() err:" + e.getMessage());
+            Logs.e(TAG,"onUnbind() err:" + e.getMessage());
         }
     }
 
@@ -168,17 +168,17 @@ public class ListViewContainer extends Container{
             childs = new ArrayList<Container>();
         }
         if (childs.contains(child)){
-            log.e(TAG,"list add child is faild");
+            Logs.e(TAG,"list add child is faild");
         }else{
             childs.add(child);
-            log.i(TAG,"list add child is success");
+            Logs.i(TAG,"list add child is success");
         }
     }
 
     public void SetttingAdapter(){
 
         if (childs==null){
-            log.e(TAG,"list childs is null");
+            Logs.e(TAG,"list childs is null");
             return;
         }
         List<ContentContainer> list = new ArrayList<ContentContainer>();

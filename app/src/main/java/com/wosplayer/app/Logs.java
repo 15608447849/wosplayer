@@ -9,7 +9,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class log {
+public class Logs {
 	public static boolean isDebug = true;
 	public static final String TAG = "_WosPlayer log:";
 
@@ -25,7 +25,7 @@ public class log {
 		b.putString(serviceLog.serviceLogKey,logStr);
 		mintent.putExtras(b);
 		WosApplication.appContext.startService(mintent);
-		log.d(TAG," - send :"+ logStr);
+		Logs.d(TAG," - send :"+ logStr);
 	}
 
 

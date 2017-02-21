@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.cmdBroadcast.Command.CMD_INFO;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_CAPT;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Close_App;
@@ -46,7 +46,7 @@ public class CmdPostTaskCenter extends BroadcastReceiver {
 
         if (msgCmd==null) return;
 
-        log.i("收到一个命令 => "+msgCmd+ " 参数:"+ msgParam);
+        Logs.i("收到一个命令 => "+msgCmd+ " 参数:"+ msgParam);
 
         postCmd(msgCmd,msgParam);
     }
@@ -85,7 +85,7 @@ public class CmdPostTaskCenter extends BroadcastReceiver {
     private void postCmd(final String cmd, final String param){
 
         if (commandList.containsKey(cmd)) {
-            log.i("准备 执行指令:"+cmd +" 所在线程:"+Thread.currentThread().getName()+"- 当前线程数:"+Thread.getAllStackTraces().size());
+            Logs.i("准备 执行指令:"+cmd +" 所在线程:"+Thread.currentThread().getName()+"- 当前线程数:"+Thread.getAllStackTraces().size());
             if (cmd.equals(CMD_INFO.REBO) || cmd.equals(CMD_INFO.UIRE) || cmd.equals(CMD_INFO.UPDC)
                     || cmd.equals(CMD_INFO.SHDO) || cmd.equals(CMD_INFO.SHDP) || cmd.equals(CMD_INFO.UPLG)
                     || cmd.equals(CMD_INFO.SCRN) || cmd.equals(CMD_INFO.CAPT) || cmd.equals(CMD_INFO.TSLT)

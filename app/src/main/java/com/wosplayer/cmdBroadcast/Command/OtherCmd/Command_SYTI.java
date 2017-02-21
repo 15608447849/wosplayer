@@ -3,7 +3,7 @@ package com.wosplayer.cmdBroadcast.Command.OtherCmd;
 import android.text.format.Time;
 
 import com.wosplayer.app.WosApplication;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleReader;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 
@@ -34,39 +34,39 @@ public class Command_SYTI implements iCommand {
 	}
 
 	private String getSystemTime(){
-		log.i(TAG,"当前时区 - "+ TimeZone.getDefault().getDisplayName());
+		Logs.i(TAG,"当前时区 - "+ TimeZone.getDefault().getDisplayName());
 		long time= System.currentTimeMillis();
 		final Calendar mCalendar= Calendar.getInstance();
 		mCalendar.setTimeInMillis(time);
 		int mYear = mCalendar.get(Calendar.YEAR);//年
 		int mMonth = mCalendar.get(Calendar.MONTH);//月
 		int mDate = mCalendar.get(Calendar.DATE);//日
-		log.i(TAG,"mCalendar >>> "+mYear+"-"+mMonth+"-"+mDate);
+		Logs.i(TAG,"mCalendar >>> "+mYear+"-"+mMonth+"-"+mDate);
 		int mHour=mCalendar.get(Calendar.HOUR_OF_DAY);//取得小时：
 		int mMinuts=mCalendar.get(Calendar.MINUTE);//取得分钟：
 		int mSecond=mCalendar.get(Calendar.SECOND);//取得秒
-		log.i(TAG,"mCalendar >>> "+mHour+":"+mMinuts+":"+mSecond);
+		Logs.i(TAG,"mCalendar >>> "+mHour+":"+mMinuts+":"+mSecond);
 
 		Time t=new Time(); // or Time t=new Time("GMT+8"); 加上Time Zone资料
 		t.setToNow(); // 取得系统时间。
 		int year = t.year;
 		int month = t.month;
 		int date = t.monthDay;
-		log.i(TAG,"Time() >>> \n"+year+"-"+month+"-"+date);
+		Logs.i(TAG,"Time() >>> \n"+year+"-"+month+"-"+date);
 		int hour = t.hour;    // 0-23
 		int minuts = t.minute;
 		int seconds = t.second;
-		log.i(TAG,"Time() >>> \n"+hour+":"+minuts+":"+seconds);
+		Logs.i(TAG,"Time() >>> \n"+hour+":"+minuts+":"+seconds);
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String times = df.format(new Date());
 		return times;
 	}
 	@Override
 	public void Execute(String param) {
-		log.i(TAG,"终端时间同步 parama:"+param +";当前线程:"+Thread.currentThread().getName());
+		Logs.i(TAG,"终端时间同步 parama:"+param +";当前线程:"+Thread.currentThread().getName());
 
 		if (!RegexMatches(param)){
-			log.e(TAG,"Sync server time err-> param not atches" + param);
+			Logs.e(TAG,"Sync server time err-> param not atches" + param);
 			return;
 		}
 
@@ -74,9 +74,9 @@ public class Command_SYTI implements iCommand {
 			return;
 		}
 		String settingTime = param.replaceAll("-", "").replace(":","").replaceAll(" ", ".");
-		log.i(TAG,"准备设置时间参数 >date>> "+settingTime);
+		Logs.i(TAG,"准备设置时间参数 >date>> "+settingTime);
 		liunx_SU_syncTimeCmd(settingTime,"Asia/Shanghai");
-		log.i(TAG,"当前设置时区 Asia/Shanghai >>> 时间 - "+getSystemTime());
+		Logs.i(TAG,"当前设置时区 Asia/Shanghai >>> 时间 - "+getSystemTime());
 
 		//再次执行排期读取
 		ScheduleReader.clear();
@@ -92,10 +92,10 @@ public class Command_SYTI implements iCommand {
 			long currentTime = dataFormatUtils.parse(androidTime).getTime();    //当前时间
 
 			if (Math.abs(currentTime-systemTime) < (5 * 1000)){
-				log.i(TAG, "时间正确 - android"+currentTime +"   server - "+systemTime);
+				Logs.i(TAG, "时间正确 - android"+currentTime +"   server - "+systemTime);
 				return true;
 			}else{
-				log.i(TAG, "时间错误 android  "+currentTime +"   server - "+systemTime);
+				Logs.i(TAG, "时间错误 android  "+currentTime +"   server - "+systemTime);
 			}
 
 		} catch (ParseException e) {
@@ -106,7 +106,7 @@ public class Command_SYTI implements iCommand {
 
 
 	private String  liunx_SU_syncTimeCmd(String param,String timeZone){
-				log.i(TAG,"yyyyMMdd.HHmmss ==>"+param);
+				Logs.i(TAG,"yyyyMMdd.HHmmss ==>"+param);
 				Process process = null;
 				DataOutputStream os = null;
 				try {
@@ -119,13 +119,13 @@ public class Command_SYTI implements iCommand {
 					os.writeBytes("exit\n");
 					os.flush();
 					process.waitFor();
-					log.i(TAG,"时间同步成功:"+getSystemTime());
+					Logs.i(TAG,"时间同步成功:"+getSystemTime());
 
 					return getSystemTime();
 
 
 				}catch (Exception e) {
-					log.e(TAG,"time sync \"su\" cmd err");
+					Logs.e(TAG,"time sync \"su\" cmd err");
 					return "";
 				}finally {
 					try {

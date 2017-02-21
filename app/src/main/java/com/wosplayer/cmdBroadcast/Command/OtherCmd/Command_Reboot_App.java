@@ -1,7 +1,7 @@
 package com.wosplayer.cmdBroadcast.Command.OtherCmd;
 
-import com.wosplayer.activity.DisplayActivity;
-import com.wosplayer.app.log;
+import com.wosplayer.app.DisplayActivity;
+import com.wosplayer.app.Logs;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 
 /**
@@ -11,7 +11,7 @@ public class Command_Reboot_App implements iCommand {
     @Override
     public void Execute(String param) {
         try {
-            log.e("重启 application");
+            Logs.e("重启 application");
 
        /* Intent intent1 = new Intent();
         intent1.setClass(DisplayActivity.activityContext, DisplayActivity.class);

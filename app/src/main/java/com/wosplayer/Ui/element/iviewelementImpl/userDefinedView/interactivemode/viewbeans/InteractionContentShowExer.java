@@ -14,7 +14,7 @@ import android.widget.ImageView;
 import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageAttabuteAnimation;
 import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageStore;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 import java.util.List;
 import java.util.Timer;
@@ -22,7 +22,7 @@ import java.util.TimerTask;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
-import wosTools.ToolsUtils;
+import com.wosTools.ToolsUtils;
 
 /**
  * Created by user on 2016/10/10.
@@ -65,7 +65,7 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
         this.setLayoutParams(lp);
         this.setBackgroundColor(Color.TRANSPARENT);
         setContentList(list);
-        log.d(TAG, "创建完成 -" + this.toString());
+        Logs.d(TAG, "创建完成 -" + this.toString());
     }
 
     @Override
@@ -81,30 +81,30 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
     //播放
     private void playShow() {
         if (mBackLayout == null) {
-            log.e(TAG, "背景图层不存在 " + mBackLayout);
+            Logs.e(TAG, "背景图层不存在 " + mBackLayout);
             return;
         }
 
         if (currentIview != null) {
-            log.i(TAG, "清理子视图 - " + currentIview);
+            Logs.i(TAG, "清理子视图 - " + currentIview);
             currentIview.removeMeToFather();
             currentIview = null;
         }
         currentIview = contentList.get(currentIndex);
-        log.i(TAG, "playShow() 获取一个显示 视图 - currentIview" + currentIview);
+        Logs.i(TAG, "playShow() 获取一个显示 视图 - currentIview" + currentIview);
         if (currentIview == null) {
             return;
         }
         currentIview.addMeToFather(mBackLayout);//添加到 后景
         ImageAttabuteAnimation.SttingAnimation(mContext, (View) currentIview, null);//设置入场动画
         int time = currentIview.getPlayDration(this);//获取播放时长
-        log.i(TAG, "playShow 获取播放时长 : " + time);
+        Logs.i(TAG, "playShow 获取播放时长 : " + time);
         startTimer(time);
     }
 
     //取消定时器
     private void cancalTimer() {
-        log.d(TAG, "停止定时任务");
+        Logs.d(TAG, "停止定时任务");
         if (timerTask != null) {
             timerTask.cancel();
             timerTask = null;
@@ -117,9 +117,9 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
 
     //開始定时器
     private void startTimer(int times) {
-        log.i(TAG, "startTimer() 播放时间: " + times);
+        Logs.i(TAG, "startTimer() 播放时间: " + times);
         if (times <= 0) {
-            log.e(TAG, "永久播放");
+            Logs.e(TAG, "永久播放");
             return;
         }
         cancalTimer();
@@ -187,14 +187,14 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
 
     public void addMeToFather(View view,FrameLayout buttonLayout){
         if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
-            log.e(TAG, "当前线程不在主线程");
+            Logs.e(TAG, "当前线程不在主线程");
             return;
         }
-        log.i(TAG, " --- 初始化 --- ");
+        Logs.i(TAG, " --- 初始化 --- ");
         currentIndex = 0;
         //首次 显示 第一个控件
         if (contentList == null) {
-            log.e(TAG, "互动无内容列表 - contentList");
+            Logs.e(TAG, "互动无内容列表 - contentList");
             //设置一张默认图片 显示2秒 退出 (没有做)
             return;
         }
@@ -215,7 +215,7 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
             AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                 @Override
                 public void call() {
-                    log.i(TAG, "清理中......");
+                    Logs.i(TAG, "清理中......");
                     //清空内容
                     removeResoure();
                 }
@@ -231,7 +231,7 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
     public void otherMother(Object object) {
         try {
             Integer var = (Integer) object;
-            log.i(TAG, " otherMother() call  视频时长 -: " + var);
+            Logs.i(TAG, " otherMother() call  视频时长 -: " + var);
             startTimer(var);
         } catch (Exception e) {
             e.printStackTrace();
@@ -243,7 +243,7 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
      */
     private void genereteLayout() { //生成视图层
         if (Thread.currentThread() != Looper.getMainLooper().getThread()) {
-            log.e(TAG, "当前线程不在主线程 不能创建图层");
+            Logs.e(TAG, "当前线程不在主线程 不能创建图层");
             return;
         }
         try {
@@ -254,7 +254,7 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
                 LayoutParams lp = new LayoutParams(ViewPager.LayoutParams.MATCH_PARENT, ViewPager.LayoutParams.MATCH_PARENT);
                 mBackLayout.setLayoutParams(lp);
                 this.addView(mBackLayout);
-                log.d(TAG, "背景图层 创建完成 " + mBackLayout);
+                Logs.d(TAG, "背景图层 创建完成 " + mBackLayout);
             }
             //第二层
             if (mFontLayout == null) {
@@ -263,10 +263,10 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
                 mFontLayout.setLayoutParams(lp);
                 mFontLayout.setBackgroundColor(Color.TRANSPARENT);
                 this.addView(mFontLayout);
-                log.d(TAG, "前景图层 创建完成 " + mFontLayout);
+                Logs.d(TAG, "前景图层 创建完成 " + mFontLayout);
             }
         } catch (Exception e) {
-            log.e(TAG, "genereteLayout() err:" + e.getMessage());
+            Logs.e(TAG, "genereteLayout() err:" + e.getMessage());
         }
     }
 
@@ -284,7 +284,7 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
                 mFontLayout = null;
             }
         } catch (Exception e) {
-            log.e(TAG, "unGenereteLayout() err:" + e.getMessage());
+            Logs.e(TAG, "unGenereteLayout() err:" + e.getMessage());
         }
     }
 
@@ -294,7 +294,7 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
         try {
             contentList = list;
         } catch (Exception e) {
-            log.e(TAG, "setContentList() err:" + e.getMessage());
+            Logs.e(TAG, "setContentList() err:" + e.getMessage());
         }
     }
 
@@ -303,9 +303,9 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
     private void addReturnButton(ViewGroup v) {
         try {
             v.addView(returnbtn);
-            log.d(TAG, "添加返回按钮成功");
+            Logs.d(TAG, "添加返回按钮成功");
         } catch (Exception e) {
-            log.e(TAG, "addReturnButton() err:" + e.getMessage());
+            Logs.e(TAG, "addReturnButton() err:" + e.getMessage());
         }
     }
 
@@ -345,7 +345,7 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
                 v.addView(right);
             }
         } catch (Exception e) {
-            log.e(TAG, "addLeftOrRightButton() err:" + e.getMessage());
+            Logs.e(TAG, "addLeftOrRightButton() err:" + e.getMessage());
         }
     }
 
@@ -354,20 +354,20 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
 
     //按钮滑动事件
     private void ScollTo(int tag) {
-        log.i(TAG, "playShow() 内容列表 - contentList -> size = " + contentList.size());
+        Logs.i(TAG, "playShow() 内容列表 - contentList -> size = " + contentList.size());
         if (contentList == null) {
-            log.e(TAG, "   contentList is null - ");
+            Logs.e(TAG, "   contentList is null - ");
             this.removeMeToFather();
             return;
         }
         if (contentList.size() == 1) {
-            log.i(TAG, "   contentList 只有一个内容 - " + contentList.size());
+            Logs.i(TAG, "   contentList 只有一个内容 - " + contentList.size());
             currentIndex = 0;
         } else {
             justIndex(tag);
         }
 
-        log.i(TAG, "计算之后的下标 : " + currentIndex);
+        Logs.i(TAG, "计算之后的下标 : " + currentIndex);
         if (currentIndex >= contentList.size() || currentIndex < 0) {
             currentIndex = 0;
         }
@@ -379,7 +379,7 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
     private void justIndex(int tag) {
         switch (tag) {
             case leftTag://左
-                log.i(TAG, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<左边 - 当前下标  " + currentIndex);
+                Logs.i(TAG, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<左边 - 当前下标  " + currentIndex);
                 currentIndex--;
                 if (currentIndex < 0) {
                     currentIndex = contentList.size() - 1;
@@ -387,7 +387,7 @@ public class InteractionContentShowExer extends FrameLayout implements IviewPlay
                 break;
 
             case rightTag://右
-                log.i(TAG, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>右边  - 当前下标  " + currentIndex);
+                Logs.i(TAG, ">>>>>>>>>>>>>>>>>>>>>>>>>>>>右边  - 当前下标  " + currentIndex);
                 currentIndex++;
                 if (currentIndex >= contentList.size()) {
                     currentIndex = 0;

@@ -3,7 +3,7 @@ package com.wosplayer.cmdBroadcast.Command.OtherCmd;
 import android.content.Context;
 import android.media.AudioManager;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.app.WosApplication;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 
@@ -17,7 +17,7 @@ public class Command_VOLU implements iCommand {
 
     @Override
     public void Execute(String param) {
-        log.i(TAG,"音量设置 param :"+ param +"ThreadName:"+Thread.currentThread().getName()+" ");
+        Logs.i(TAG,"音量设置 param :"+ param +"ThreadName:"+Thread.currentThread().getName()+" ");
         int percent = Integer.valueOf(param);
         SetSystemVolume(percent);
     }

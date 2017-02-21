@@ -6,9 +6,9 @@ import android.util.LruCache;
 import android.view.ViewGroup;
 
 import com.wosplayer.Ui.element.IPlayer;
-import com.wosplayer.activity.DisplayActivity;
+import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.DataList;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -49,7 +49,7 @@ public final class contentTanslater {
             mLruCache =  new LruCache<String,IPlayer>((int) (Runtime.getRuntime().maxMemory() / 8));//最大内存的1/3
         }
         if (key ==null || value ==null){
-            log.e(TAG,"-------------tanslate key or value is null" );
+            Logs.e(TAG,"-------------tanslate key or value is null" );
             return;
         }
         mLruCache.put(key,value);
@@ -60,7 +60,7 @@ public final class contentTanslater {
 
     public static void clearCache(){
         mLruCache = null;
-        log.i(TAG,"清理缓存");
+        Logs.i(TAG,"清理缓存");
     }
 
     /**
@@ -72,19 +72,19 @@ public final class contentTanslater {
         if (mLruCache==null){
             mLruCache =  new LruCache<String,IPlayer>((int) (Runtime.getRuntime().maxMemory() / 8));//最大内存的1/3
         }
-        log.i(TAG,"准备转换视图控件,所在线程:"+Thread.currentThread().getName());
+        Logs.i(TAG,"准备转换视图控件,所在线程:"+Thread.currentThread().getName());
         IPlayer iplay = null;
 
         try {
             //查看缓存是否存在
             String key = list.getKey();
-            log.i(TAG,"iplayer key:"+key);
+            Logs.i(TAG,"iplayer key:"+key);
             iplay = getIplayerToCache(key);
-            log.i(TAG,"视图 缓存 队列 是否存在 :"+iplay);
+            Logs.i(TAG,"视图 缓存 队列 是否存在 :"+iplay);
             if (iplay == null) {
                 //先获取 type
                 String fileproterty = list.GetStringDefualt("fileproterty","");
-                log.i(TAG,"类型 :"+fileproterty);
+                Logs.i(TAG,"类型 :"+fileproterty);
                 if (!referenceViewMap.containsKey(fileproterty)){
                     Log.e(TAG,"无法执行的类型" + fileproterty);
                     return iplay;
@@ -97,7 +97,7 @@ public final class contentTanslater {
                 Constructor constructor = cls.getConstructor(Context.class, //得到构造
                         ViewGroup.class);
                 if (DisplayActivity.activityContext == null || DisplayActivity.main ==null){
-                    log.e(TAG,"无法创建 iplayer ,环境不正确,请初始化 Activity");
+                    Logs.e(TAG,"无法创建 iplayer ,环境不正确,请初始化 Activity");
                     return iplay;
                 }
                 if (vp==null){
@@ -116,16 +116,16 @@ public final class contentTanslater {
             }
 
         } catch (ClassNotFoundException e) {
-            log.e(TAG,"无法找到这个类");
+            Logs.e(TAG,"无法找到这个类");
         }catch(NoSuchMethodException e){
-            log.e(TAG,"不匹配类构造 ");
+            Logs.e(TAG,"不匹配类构造 ");
         }
         catch (InstantiationException e) {
-           log.e(TAG," err:" + e.getMessage());
+           Logs.e(TAG," err:" + e.getMessage());
         } catch (IllegalAccessException e) {
-            log.e(TAG," err:" + e.getMessage());
+            Logs.e(TAG," err:" + e.getMessage());
         } catch (InvocationTargetException e) {
-            log.e(TAG," err:" + e.getMessage());
+            Logs.e(TAG," err:" + e.getMessage());
         }
         return iplay;
     }

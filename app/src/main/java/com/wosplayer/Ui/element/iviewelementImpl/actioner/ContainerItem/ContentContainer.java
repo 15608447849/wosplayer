@@ -12,7 +12,7 @@ import com.wosplayer.Ui.element.IPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.actioner.Container;
 import com.wosplayer.Ui.performer.contentTanslater;
 import com.wosplayer.app.DataList;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 /**
  * Created by user on 2016/8/10.
@@ -103,9 +103,9 @@ public class ContentContainer extends Container{
         datalist.put("getcontents",weburl);//网页使用
         datalist.put("fileproterty",filetype);
         content = contentTanslater.tanslationAndStart(datalist,null,false, container,null);
-        log.i(TAG," content init over");
+        Logs.i(TAG," content init over");
     }catch (Exception e){
-        log.e(TAG,"content err:"+e.getMessage());
+        Logs.e(TAG,"content err:"+e.getMessage());
     }
 
     }
@@ -151,7 +151,7 @@ public class ContentContainer extends Container{
             lp.height = AbsoluteLayout.LayoutParams.MATCH_PARENT;
             view.setLayoutParams(lp);
         }catch (Exception e){
-            log.e(TAG,"onLayout() err:" + e.getMessage());
+            Logs.e(TAG,"onLayout() err:" + e.getMessage());
         }
     }
 
@@ -164,7 +164,7 @@ public class ContentContainer extends Container{
                 this.vp = null;
             }
         }catch (Exception e){
-            log.e(TAG,"onUnlayout() err:" + e.getMessage());
+            Logs.e(TAG,"onUnlayout() err:" + e.getMessage());
         }
     }
 
@@ -178,7 +178,7 @@ public class ContentContainer extends Container{
                 content.start();
             }
         }catch (Exception e){
-            log.e(TAG,"onBind() err:" + e.getMessage());
+            Logs.e(TAG,"onBind() err:" + e.getMessage());
         }
     }
 
@@ -191,7 +191,7 @@ public class ContentContainer extends Container{
                 content.stop();
             }
         }catch (Exception e){
-            log.e(TAG,"onUnbind() err:" + e.getMessage());
+            Logs.e(TAG,"onUnbind() err:" + e.getMessage());
         }
     }
 
@@ -205,7 +205,7 @@ public class ContentContainer extends Container{
         v.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               log.e(TAG,"list layout return button clicking");
+               Logs.e(TAG,"list layout return button clicking");
 
                     //前一项 显示
                     if (previous!=null){

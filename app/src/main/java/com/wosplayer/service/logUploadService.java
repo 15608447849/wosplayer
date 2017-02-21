@@ -10,7 +10,7 @@ import com.lidroid.xutils.http.RequestParams;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 import java.io.File;
 
@@ -34,7 +34,7 @@ public class logUploadService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
 
-        log.i(TAG,"------------------------------------------------------------onHandleIntent()日志文件开始上传服务准备----------------------------------------------------------------------------------");
+        Logs.i(TAG,"------------------------------------------------------------onHandleIntent()日志文件开始上传服务准备----------------------------------------------------------------------------------");
 
         //获取uri
         uri = intent.getExtras().getString(uriKey);
@@ -62,7 +62,7 @@ public class logUploadService extends IntentService {
      * 获取 所有日志文件
      */
     private  File[]  getLogFileList(){
-        log.v(TAG,"日志文件 本地路径 : " + serviceLog.LOG_PATH_SDCARD_DIR);
+        Logs.v(TAG,"日志文件 本地路径 : " + serviceLog.LOG_PATH_SDCARD_DIR);
         File file = new File(serviceLog.LOG_PATH_SDCARD_DIR);
         if (file.isDirectory()) {
            return file.listFiles();
@@ -86,24 +86,24 @@ public class logUploadService extends IntentService {
                 new RequestCallBack<String>() {
                     @Override
                     public void onStart() {
-                        log.i("开始上传 : "+filePath);
+                        Logs.i("开始上传 : "+filePath);
                     }
                     @Override
                     public void onLoading(long total, long current, boolean isUploading) {
                         if (isUploading) {
-                         log.i(TAG,"日志文件:"+filePath+"\n     上传进度"+current + "/" + total);
+                         Logs.i(TAG,"日志文件:"+filePath+"\n     上传进度"+current + "/" + total);
                         } else {
-                          log.i(TAG,"日志文件:"+filePath+"- isUploading="+isUploading);
+                          Logs.i(TAG,"日志文件:"+filePath+"- isUploading="+isUploading);
                         }
                     }
                     @Override
                     public void onSuccess(ResponseInfo<String> responseInfo) {
-                        log.i(TAG,"日志文件: "+filePath+"\n上传成功:"+ responseInfo.result);
+                        Logs.i(TAG,"日志文件: "+filePath+"\n上传成功:"+ responseInfo.result);
                         service.resultCount(filePath);
                     }
                     @Override
                     public void onFailure(HttpException error, String msg) {
-                        log.e(TAG,"日志文件:"+filePath+"\n上传失败:("+ error.getExceptionCode() + "-" + msg+")");
+                        Logs.e(TAG,"日志文件:"+filePath+"\n上传失败:("+ error.getExceptionCode() + "-" + msg+")");
                     }
                 });
     }
@@ -113,11 +113,11 @@ public class logUploadService extends IntentService {
      * @param filepath
      */
     private void resultCount(String filepath) {
-        log.i(TAG,"删除日志文件:"+filepath);
+        Logs.i(TAG,"删除日志文件:"+filepath);
         if(new File(filepath).delete()){
-            log.i(" success ");
+            Logs.i(" success ");
         }else{
-            log.i(" failt ");
+            Logs.i(" failt ");
         }
     }
 }

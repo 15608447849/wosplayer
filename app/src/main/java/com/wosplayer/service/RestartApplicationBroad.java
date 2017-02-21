@@ -6,8 +6,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.wosplayer.activity.DisplayActivity;
-import com.wosplayer.app.log;
+import com.wosplayer.app.DisplayActivity;
+import com.wosplayer.app.Logs;
 
 import java.util.Calendar;
 
@@ -24,7 +24,7 @@ public class RestartApplicationBroad extends BroadcastReceiver {
     public void onReceive(final Context context, final Intent intent) {
 
         boolean flag = intent.getBooleanExtra(IS_START,true);
-        log.d("重启广播 flag - "+flag);
+        Logs.d("重启广播 flag - "+flag);
         if (flag){
             Intent mintent = new Intent(context,DisplayActivity.class);
             mintent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -35,11 +35,11 @@ public class RestartApplicationBroad extends BroadcastReceiver {
             try{
                 delay =  Long.parseLong(var) ;//* 1000;
             }catch(Exception e){
-                log.e("","" + e.getMessage());
+                Logs.e("","" + e.getMessage());
                 delay = 0 ;
             }
 
-            log.e("收到 重启app 广播,执行时间: "+var+" 秒");
+            Logs.e("收到 重启app 广播,执行时间: "+var+" 秒");
 
             Intent intenta = new Intent();
             intenta.putExtra(RestartApplicationBroad.IS_START,true);

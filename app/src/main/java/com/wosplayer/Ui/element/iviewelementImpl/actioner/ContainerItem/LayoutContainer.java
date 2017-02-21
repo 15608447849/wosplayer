@@ -16,7 +16,7 @@ import android.widget.ImageButton;
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.actioner.Container;
 import com.wosplayer.app.DataList;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
 
 import java.util.ArrayList;
@@ -65,12 +65,12 @@ public class LayoutContainer extends Container{
     public void addReturnButton(boolean isAddReturnButton){
 
         if (isAddReturnButton){
-            log.e(TAG,"-----");
+            Logs.e(TAG,"-----");
            FrameLayout f = (FrameLayout) view.findViewById(R.id.layot_frame);
            f.setVisibility(View.VISIBLE);
            ImageButton back = (ImageButton) view.findViewById(R.id.layout_back_back);
            onBack(back);
-           log.e(TAG,"layout add back is success");
+           Logs.e(TAG,"layout add back is success");
         }
 
     }
@@ -81,9 +81,9 @@ public class LayoutContainer extends Container{
     public float[] onSettingScale(int fwidth,int fheight){
       float wScale = (float)fwidth/(float)width ;
       float hScale =(float)fheight/ (float)height ;
-      log.i(TAG,"宽度比例-"+wScale+",高度比例-"+ hScale);
+      Logs.i(TAG,"宽度比例-"+wScale+",高度比例-"+ hScale);
         if (wScale == 0.0 || hScale== 0.0){
-          log.e(TAG,"scale is err");
+          Logs.e(TAG,"scale is err");
             return new float[]{1.0f,1.0f};
         }
 
@@ -116,14 +116,14 @@ public class LayoutContainer extends Container{
                 if (fileUtils.checkFileExists(bgName)) { //资源是否存在
                    loadBg();
                 } else {
-                    log.e(TAG," 互动背景 资源不存在 ");
+                    Logs.e(TAG," 互动背景 资源不存在 ");
                 }
             }else{
-                log.e(TAG,"bg model is err : bgmodel=" + bgmode);
+                Logs.e(TAG,"bg model is err : bgmodel=" + bgmode);
             }
 
         }catch (Exception e){
-                log.e(TAG,"布局容器:"+e.getMessage());
+                Logs.e(TAG,"布局容器:"+e.getMessage());
         }
     }
 
@@ -141,7 +141,7 @@ public class LayoutContainer extends Container{
                             .config(Bitmap.Config.RGB_565)
                             .get();
                 } catch (Exception e) {
-                    log.e(TAG," call(): "+e.getMessage());
+                    Logs.e(TAG," call(): "+e.getMessage());
                     bitmap = BitmapFactory.decodeResource(view.getResources(), R.drawable.no_found);
                 }
 
@@ -149,7 +149,7 @@ public class LayoutContainer extends Container{
                 AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                     @Override
                     public void call() {
-                        log.i(TAG, " 互动布局设置背景图片");
+                        Logs.i(TAG, " 互动布局设置背景图片");
                         absulute.setBackgroundDrawable(dw);
                     }
                 });
@@ -178,7 +178,7 @@ public class LayoutContainer extends Container{
             lp.height = height;
             view.setLayoutParams(lp);
         }catch (Exception e){
-            log.e(TAG,"onLayout() err:" + e.getMessage());
+            Logs.e(TAG,"onLayout() err:" + e.getMessage());
         }
     }
 
@@ -191,7 +191,7 @@ public class LayoutContainer extends Container{
                 this.vp = null;
             }
         }catch (Exception e){
-            log.e(TAG,"onUnlayout() err:" + e.getMessage());
+            Logs.e(TAG,"onUnlayout() err:" + e.getMessage());
         }
     }
 
@@ -206,7 +206,7 @@ public class LayoutContainer extends Container{
             onBg(null);
             // 2. 设置 子项 ，调用子项 bind 方法
             if (childs!=null && childs.size()>0){
-                log.i(TAG," 布局子类:"+ childs.size());
+                Logs.i(TAG," 布局子类:"+ childs.size());
                 for (Container button:childs){
                     if (button instanceof ButtonContainer){
                         ((ButtonContainer)button).onBind((ViewGroup) absulute);
@@ -214,7 +214,7 @@ public class LayoutContainer extends Container{
                 }
             }
         }catch (Exception e){
-            log.e(TAG,"onBind() err:" + e.getMessage());
+            Logs.e(TAG,"onBind() err:" + e.getMessage());
         }
     }
 
@@ -234,7 +234,7 @@ public class LayoutContainer extends Container{
                 }
             }
         }catch (Exception e){
-            log.e(TAG,"onUnbind() err:" + e.getMessage());
+            Logs.e(TAG,"onUnbind() err:" + e.getMessage());
         }
 
     }
@@ -249,7 +249,7 @@ public class LayoutContainer extends Container{
             v.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    log.e(TAG,"- 布局 返回 按钮 - ");
+                    Logs.e(TAG,"- 布局 返回 按钮 - ");
                     if (previous!=null && previous instanceof LayoutContainer){
                         //调用上一个视图的 bind
                         ((LayoutContainer)previous).onBind(vp);
@@ -266,10 +266,10 @@ public class LayoutContainer extends Container{
             childs = new ArrayList<Container>();
         }
         if (childs.contains(child)){
-            log.e(TAG,"布局容器 添加 子视图 失败， 已存在");
+            Logs.e(TAG,"布局容器 添加 子视图 失败， 已存在");
         }else{
             childs.add(child);
-            log.i(TAG,"布局容器 添加 子视图 success");
+            Logs.i(TAG,"布局容器 添加 子视图 success");
         }
     }
 

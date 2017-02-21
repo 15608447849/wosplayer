@@ -2,7 +2,7 @@ package com.wosplayer.cmdBroadcast.Command.OtherCmd;
 
 import android.util.Log;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.app.WosApplication;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 
@@ -15,7 +15,7 @@ public class Command_Reboot_Sys implements iCommand {
     @Override
     public void Execute(String param) {
         try {
-            log.e("-----------------------------------重启终端-----------------------------------------");
+            Logs.e("-----------------------------------重启终端-----------------------------------------");
 
 //        Intent intent = new Intent(DisplayActivity.activityContext, MonitorService.class);
 //        DisplayActivity.activityContext.stopService(intent);
@@ -28,7 +28,7 @@ public class Command_Reboot_Sys implements iCommand {
             String cmd = "reboot";
             Log.e("#####","\n"+cmd);
             ShellUtils.CommandResult cr = ShellUtils.execCommand(cmd,true,true);
-            log.e(" reboot result:"+cr.result);
+            Logs.e(" reboot result:"+cr.result);
         } catch (Exception e) {
             e.printStackTrace();
         }

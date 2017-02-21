@@ -1,8 +1,13 @@
-package wosTools;
+package com.wosTools;
 
+import android.os.Handler;
+import android.os.Message;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.AppTools;
+import com.wosplayer.app.DisplayActivity;
+import com.wosplayer.app.Logs;
 
 import org.dom4j.Element;
 
@@ -16,13 +21,25 @@ public class RequstTerminal extends Thread{
 
     public static RequstTerminal requstterminal = null;
 
+    private static DataListEntiy dataList;
+    private DisplayMetrics m_dm;
+    /**
+     * 初始化的时候，就会生成url
+     * 数据
+     * 窗口尺寸
+     */
+    public RequstTerminal(DataListEntiy dataList, DisplayMetrics m_dm) {
+        this.dataList = dataList;
+        this.m_dm = m_dm;
+        this.url = getTerminalIdUrl();
+    }
+
     /**
      * 开启请求
      */
     public static void BeginRequst(DataListEntiy dataList, DisplayMetrics m_dm) {
         synchronized (Lock) {
-            // requstterminal开启的时候，
-            log.i("-------------------------------------------------------申请终端中-------------------------------------------------------");
+            Logs.i("-------------------------------------------------------申请终端中-------------------------------------------------------");
             requstterminal = new RequstTerminal(dataList,m_dm);
             requstterminal.start();
         }
@@ -35,6 +52,7 @@ public class RequstTerminal extends Thread{
             if (requstterminal != null) {
                 requstterminal.isrunning = false;
                 requstterminal.interrupt();
+                requstterminal = null;
             } else {
             }
         }
@@ -59,39 +77,22 @@ public class RequstTerminal extends Thread{
                 dataList.GetStringDefualt("tip", "127.0.0.1"));
         url = url.replace("{w}", Integer.toString(m_dm.widthPixels));
         url = url.replace("{h}", Integer.toString(m_dm.heightPixels));
-        log.i("获取终端 url :\n "+url);
+        Logs.i("获取终端 url :\n "+url);
         return url;
-    }
-
-    private static DataListEntiy dataList;
-    private DisplayMetrics m_dm;
-    /**
-     * 初始化的时候，就会生成url
-     */
-    public RequstTerminal(DataListEntiy dataList, DisplayMetrics m_dm) {
-        this.dataList = dataList;
-        this.m_dm = m_dm;
-        this.url = getTerminalIdUrl();
-    }
-
-    public static boolean ifRequstTerminal() {
-        String terminalNo = dataList.GetStringDefualt("terminalNo",
-                "0000");
-        return (terminalNo.equals("0000"));
     }
 
 
     public void run() {
         super.run();
         // 设置线程名字
-        this.setName("Terminal_DownloadThread");
+        this.setName("RequstTerminal");
         // 发送消息个handler
-        ToolsHandler.NotityActivty(ToolsHandler.usermessage.outtext, "开始申请终端ID");
-        while (isrunning) {
+        NotityActivty(DisplayActivity.HandleEvent.outtext.ordinal(), "开始申请终端ID");
+        if (isrunning) {
             try {
                 // 网络请求获取数据
                 String xml = ToolsUtils.httpGetString(url);
-                log.i("服务器返回信息:\n"+xml);
+                Logs.i("服务器返回信息:\n"+xml);
                 // 解析获取的xml数据
                 Element root = ToolsUtils.GetXmlRoot(xml);
                 String terminalNo = root.elementText("terminalNo");
@@ -108,8 +109,7 @@ public class RequstTerminal extends Thread{
                     dataList.put("connectionType", connectionType);
                     // config.dataList.put("companyid",keyText);
                     // 携带后台组识别码发送消息
-                    ToolsHandler.NotityActivty(ToolsHandler.usermessage.sucess,
-                            terminalNo);
+                    NotityActivty(DisplayActivity.HandleEvent.success.ordinal(),terminalNo);
                     synchronized (Lock) {
                         requstterminal = null;
                     }
@@ -118,19 +118,33 @@ public class RequstTerminal extends Thread{
                     sleep(1000 * 6);
                 }
             } catch (Exception e) {
-                log.e("","RequstTreminal () err: "+e.getMessage());
+                Logs.e("","RequstTreminal () err: "+e.getMessage());
+                NotityActivty(DisplayActivity.HandleEvent.outtext.ordinal(), "申请终端ID失败");
             }
         }
-        ToolsHandler
-                .NotityActivty(ToolsHandler.usermessage.outtext, "申请终端ID,失败.重试.......");
+
     }
 
 
 
+    private  static Handler woshandler=null;
+
+    public static void setHandler(Handler handler){
+        RequstTerminal.woshandler = handler;
+    }
 
 
-
-
-
+    /**
+     * 收到一个消息 > 传递给毁掉接口的方法
+     * @param what
+     * @param Msg
+     */
+    public  static  void NotityActivty(int what, String Msg)
+    {
+            if(woshandler!=null)
+            {
+                AppTools.NotifyHandle(woshandler,what,Msg);
+            }
+    }
 
 }

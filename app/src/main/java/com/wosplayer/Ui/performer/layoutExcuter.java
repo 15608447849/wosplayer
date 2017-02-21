@@ -6,7 +6,7 @@ import com.wosplayer.Ui.element.IPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.IVideoPlayer;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.WosApplication;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
 
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class layoutExcuter implements TimeCalls{
     private List<String> videoNameList = null;
     public layoutExcuter(XmlNodeEntity layout) {
         this.layout = layout;
-        log.i(TAG,"创建成功");
+        Logs.i(TAG,"创建成功");
         //收集 有效 视频 数量
         takeVideoVaildCount();
     }
@@ -51,7 +51,7 @@ public class layoutExcuter implements TimeCalls{
     public void start(){
 
         if (contentArr==null || contentArr.size()==0){
-            log.e(TAG," 布局下 无内容列表" + layout.getChildren());
+            Logs.e(TAG," 布局下 无内容列表" + layout.getChildren());
             return;
         }
 
@@ -85,8 +85,8 @@ public class layoutExcuter implements TimeCalls{
 
         //获取内容播放时长
         long second = Long.parseLong(contentArr.get(_index).getXmldata().get("timelength"));
-        log.i(TAG,"执行具体内容的播放: ["+contentArr.get(_index).getXmldata().get("contentsnewname") + "]当前时间毫秒数:"+System.currentTimeMillis());
-        log.i(TAG,"在"+(second*1000)+"后执行下一个内容");
+        Logs.i(TAG,"执行具体内容的播放: ["+contentArr.get(_index).getXmldata().get("contentsnewname") + "]当前时间毫秒数:"+System.currentTimeMillis());
+        Logs.i(TAG,"在"+(second*1000)+"后执行下一个内容");
         startContent(contentArr.get(_index));
         //创建定时器任务
         //创建定时器
@@ -114,7 +114,7 @@ public class layoutExcuter implements TimeCalls{
     private void startContent(XmlNodeEntity content) {
         //重新组合数据 -> 生成 datalist
         if(content==null){
-            log.e(TAG,"布局 开始 生成 内容 err："+content);
+            Logs.e(TAG,"布局 开始 生成 内容 err："+content);
             return;
         }
         Object[] dataArr = ReorganizationData(content);
@@ -162,10 +162,10 @@ public class layoutExcuter implements TimeCalls{
             ArrayList<XmlNodeEntity> contentArr = content.getChildren();
                 if (contentArr.size()==0 || contentArr==null){
 
-                    log.e(TAG,"一个文本类型的内容 不存在"+ contentArr);
+                    Logs.e(TAG,"一个文本类型的内容 不存在"+ contentArr);
                     return new Object[]{datalist,ob};
                 }
-            log.i("");
+            Logs.i("");
 
             XmlNodeEntity textcontent = contentArr.get(0);
 
@@ -196,13 +196,13 @@ public class layoutExcuter implements TimeCalls{
         if (fileproterty.equals("interactive")){
             ArrayList<XmlNodeEntity> activeArr = content.getChildren();
             if (activeArr==null || activeArr.size()==0){
-                log.e(TAG,"互动模块 无布局");
+                Logs.e(TAG,"互动模块 无布局");
                 return new Object[]{datalist,ob};
             }
             if (activeArr.size() == 1){
                 ob = activeArr.get(0);
             }else{
-                log.e(TAG,"互动模块 存在多个 布局 无法解析 ...");
+                Logs.e(TAG,"互动模块 存在多个 布局 无法解析 ...");
                 return new Object[]{datalist,ob};
             }
         }
@@ -218,7 +218,7 @@ public class layoutExcuter implements TimeCalls{
         //停止定时器
         clearTimer();
         //清除数据
-        log.i(TAG,"----"+layout.getChildren());
+        Logs.i(TAG,"----"+layout.getChildren());
         layout = null;
         contentArr=null;
         //清理 内容 放在 主线程
@@ -228,7 +228,7 @@ public class layoutExcuter implements TimeCalls{
            clearContent();
             }
         });
-        log.i(TAG,"布局 停止了 "+this.toString());
+        Logs.i(TAG,"布局 停止了 "+this.toString());
     }
 
     /**
@@ -256,14 +256,14 @@ public class layoutExcuter implements TimeCalls{
             currentIplayer.stop();
             currentIplayer = null;
         }
-        log.i("清理 布局 下 的 内容");
+        Logs.i("清理 布局 下 的 内容");
     }
 
     @Override
     public void playOvers(IPlayer play) {
         if (play instanceof IVideoPlayer){
           if(!checkValidVideo((IVideoPlayer)play)){
-              log.e(TAG,"无有效视频 播放默认视频资源");
+              Logs.e(TAG,"无有效视频 播放默认视频资源");
               return;
           }
         }
@@ -281,7 +281,7 @@ public class layoutExcuter implements TimeCalls{
             if (FileUtils.isFileExist(video.singleFileUri) && !videoNameList.contains(video.singleFileUri)){
                 videoNameList.add(video.singleFileUri);
             }
-            log.e(TAG," 有效 视频数:"+videoNameList.size());
+            Logs.e(TAG," 有效 视频数:"+videoNameList.size());
             if (videoNameList.size()==0){
                 //没有一个有效视频 -> 播放默认视频
                     return false;

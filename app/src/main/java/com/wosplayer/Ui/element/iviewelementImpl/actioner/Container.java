@@ -7,7 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 import java.util.List;
 
@@ -61,11 +61,11 @@ public abstract  class Container {
                     drawable.setCallback(null);
                     bitmap.recycle();
                     view.setBackgroundResource(0);
-                    log.i(TAG, "释放背景资源 over");
+                    Logs.i(TAG, "释放背景资源 over");
                 }
             }
         }catch (Exception e){
-            log.e(TAG,e.getMessage());
+            Logs.e(TAG,e.getMessage());
         }
     }
 

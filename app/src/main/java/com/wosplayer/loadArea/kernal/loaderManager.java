@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.UPDCbroad;
 import com.wosplayer.loadArea.TASKLIST.Task;
 import com.wosplayer.loadArea.TASKLIST.TaskQueue;
@@ -32,12 +32,12 @@ public class loaderManager extends IntentService
     @Override
     public void onCreate() {
         super.onCreate();
-        log.i("--------------------------------------------loaderManager create--------------------------------------------------------");
+        Logs.i("--------------------------------------------loaderManager create--------------------------------------------------------");
     }
     @Override
     public void onDestroy() {
         super.onDestroy();
-        log.i("-------------------------------------------loaderManager destroy----------------------------------------------------------");
+        Logs.i("-------------------------------------------loaderManager destroy----------------------------------------------------------");
     }
     private String terminalNo ;
     private String savepath ;
@@ -59,7 +59,7 @@ public class loaderManager extends IntentService
                     @Override
                     public void downloadResult(String filePath, String state) {
                         try {
-                            log.i(TAG,"下载成功 升级apk - 路径- "+filePath );
+                            Logs.i(TAG,"下载成功 升级apk - 路径- "+filePath );
                             sendUPDCBroad(filePath);
                         } catch (Exception e) {
                             e.printStackTrace();

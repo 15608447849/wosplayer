@@ -2,8 +2,8 @@ package com.wosplayer.cmdBroadcast.Command.OtherCmd;
 
 import android.content.Intent;
 
-import com.wosplayer.activity.DisplayActivity;
-import com.wosplayer.app.log;
+import com.wosplayer.app.DisplayActivity;
+import com.wosplayer.app.Logs;
 import com.wosplayer.app.WosApplication;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 import com.wosplayer.service.MonitorService;
@@ -19,7 +19,7 @@ public class Command_Close_App implements iCommand {
             if (param.equals("false")){
                 return;
             }
-            log.i("stop runing app...");
+            Logs.i("stop runing app...");
 
             // 停止監聽服務
             Intent intent = new Intent(DisplayActivity.activityContext, MonitorService.class);

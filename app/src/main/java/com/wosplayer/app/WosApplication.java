@@ -2,30 +2,14 @@ package com.wosplayer.app;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.telephony.TelephonyManager;
-import android.util.Log;
 
-import com.wos.SdCardTools;
+import com.wosplayer.tool.SdCardTools;
 import com.wosplayer.service.CommunicationService;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
-import java.util.UUID;
-
-import cn.trinea.android.common.util.FileUtils;
-import wosTools.DataListEntiy;
-import wosTools.ToolsUtils;
+import com.wosTools.ToolsUtils;
 
 /**
  * Created by Administrator on 2016/7/19.
@@ -36,24 +20,18 @@ public class WosApplication extends Application {
 
     public static DataList config = new DataList();
     public static Context appContext ;
-    public static boolean isReadMeInfo = true;
     @Override
     public void onCreate() {
         super.onCreate();
-        appContext = getApplicationContext();
-        log.e("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wosPlayer app start~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        Logs.e("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~wosPlayer app start~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         appContext = WosApplication.this.getApplicationContext();
         //捕获异常
         CrashHandler.getInstance().init(getApplicationContext());
     }
 
     public void startAppInit(Handler handler){
-
-        //数据转移
-        translationWosToolsData();
-
         //放入系统目录
-        //new AdbShellCommd(this.getApplicationContext(),handler,true,true).start();//会开端口,会重启
+        new AdbShellCommd(this.getApplicationContext(),handler,true,true).start();//会开端口,会重启
         //new AdbShellCommd(this.getApplicationContext(),true,false).start();//开端口,不重启
         //new AdbShellCommd(this.getApplicationContext(),false,true).start();//不开远程端口.会重启
 //       new AdbShellCommd(this.getApplicationContext(),false,false).start();//不开远程端口,不重启
@@ -65,8 +43,8 @@ public class WosApplication extends Application {
      *   false 读取 com.wos.tools 下面的信息
      *   true 读取自己app下面的初始化信息
      */
-    public void init(boolean flag) {
-        isReadMeInfo = flag;
+    public void initConfig() {
+
         //终端id
         config.put("terminalNo", GetKey("terminalNo", ""));
         //通信模式
@@ -86,9 +64,9 @@ public class WosApplication extends Application {
         //sdcard 清理阔值
         config.put("storageLimits",GetKey("storageLimits","50"));
         //机器码
-        config.put("mac", GetMac());
+        config.put("mac",AppTools.GetMac(appContext));
         //本地ip
-        String LocalIpAddress = getLocalIpAddress();
+        String LocalIpAddress = AppTools.getLocalIpAddress();
         config.put("tip", (LocalIpAddress == "") ? "127.0.0.1"
                 : LocalIpAddress);
 
@@ -104,7 +82,7 @@ public class WosApplication extends Application {
         //创建一个目录用于存储资源
         SdCardTools.MkDir(basepath);
         //将 默认图片 或者 视频 放入 指定 文件夹下
-        if(defautSource(basepath,"default.mp4")){
+        if(AppTools.defautSource(appContext,basepath,"default.mp4")){
             config.put("defaultVideo", config.GetStringDefualt("basepath","") + "default.mp4");//默认视频本地位置
         }
         config.put("CAPTIMAGEPATH", config.GetStringDefualt("basepath","") + "screen.png");//截图本地位置
@@ -116,43 +94,22 @@ public class WosApplication extends Application {
         config.put("bankPathXml",basepath);
         SdCardTools.MkDir(basepath);
 
-        log.i("--- app config init complete ---" );
-        config.printData();
-        saveDefProg();
-    }
+        Logs.i("--- app config init complete ---" );
+//        config.printData();
 
-    private void saveDefProg() {
+    }
+    //后台保存默认节目
+    public void initDefaultSource() {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 //将默认排期 放入 指定文件夹下
-                defaultProgram();
+                AppTools.defaultProgram(appContext);
             }
         }).start();
     }
 
-    //默认排期
-    private void defaultProgram() {
-        try {
-            if (!FileUtils.isFileExist("/mnt/sdcard/wosplayer/default/def.mp4")
-                    ||!FileUtils.isFileExist("/mnt/sdcard/wosplayer/default/default_sche.xml")
-                    ||!FileUtils.isFileExist("/mnt/sdcard/wosplayer/default/default_prog.xml")
-                    ){
-                    //一个 - 不存在 - 删除目录
-                org.apache.commons.io.FileUtils.deleteDirectory(new File("/mnt/sdcard/wosplayer/default/"));
-                //放入zip包
-               if(ToolsUtils.ReadAssectsDataToSdCard(getApplicationContext(),"/mnt/sdcard/wosplayer/","defprog.zip")){
-                    //解压缩
-                   Log.i("unzip","路径- ->>>>>"+"/mnt/sdcard/wosplayer/defprog.zip");
-                   ToolsUtils.UnZip("/mnt/sdcard/wosplayer/defprog.zip","/mnt/sdcard/wosplayer");
-                   FileUtils.deleteFile("/mnt/sdcard/wosplayer/defprog.zip");
-               }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
+    //获取配置信息值
     public static String getConfigValue(String key){
         if (config!=null){
             return config.GetStringDefualt(key,"");
@@ -160,165 +117,22 @@ public class WosApplication extends Application {
         return "";
     }
 
-    //默认资源
-    private boolean defautSource(String basepath,String filename) {
-        if(!FileUtils.isFileExist(basepath+filename)){
-            return ToolsUtils.ReadAssectsDataToSdCard(getApplicationContext(),basepath,filename);
-        }
-        return true;
-    }
 
+    //获取配置信息共享xml文件值，带默认值
     public static String GetKey(String key, String defualtValue) {
-        String value = isReadMeInfo? ToolsUtils.readShareData(appContext,key):appTools.readShareDataTools(appContext,key).trim();
+        String value = ToolsUtils.readShareData(appContext,key);
         return (value != "") ? value : defualtValue;
     }
 
     /**
-     * 是否存在初始数据转移
-     */
-    public static boolean isWosToolsDataTranslation = false;
-    /**
-     * 数据 转移
-     */
-    public void translationWosToolsData(){
-        try{
-            Context wosToolsContext = appContext.createPackageContext("com.wos.tools", Context.CONTEXT_IGNORE_SECURITY);
-            if (wosToolsContext!=null){
-                log.d("#  WosTools Context 存在");
-                //转移数据
-                DataListEntiy toolsdataList = new DataListEntiy();
-                toolsdataList.ReadShareData(false);
-                toolsdataList.SaveShareData();
-                isWosToolsDataTranslation = true;
-            }else{
-                log.d("#  WosTools Context 不存在");
-            }
-        }catch (Exception e){
-            log.e("启动 转移数据 异常 : " + e.getMessage());
-        }
-    }
-
-    /**
-     * get mac
-     */
-    public static String getLocalMacAddressFromBusybox(){
-        String result = "";
-        String Mac = "";
-        result = callCmd("busybox ifconfig","HWaddr");
-
-        //如果返回的result == null，则说明网络不可取
-        if(result==null){
-            return "网络出错，请检查网络";
-        }
-
-        //对该行数据进行解析
-        //例如：eth0      Link encap:Ethernet  HWaddr 00:16:E8:3E:DF:67
-        if(result.length()>0 && result.contains("HWaddr")==true){
-            Mac = result.substring(result.indexOf("HWaddr")+6, result.length()-1);
-            Log.i("test","Mac:"+Mac+" Mac.length: "+Mac.length());
-
-             if(Mac.length()>1){
-                 Mac = Mac.replaceAll(" ", "");
-                 result = "";
-                 String[] tmp = Mac.split(":");
-                 for(int i = 0;i<tmp.length;++i){
-                     result +=tmp[i]+"-";
-                 }
-             }
-            result = Mac;
-            Log.i("test",result+" result.length: "+result.length());
-        }
-        return result;
-    }
-
-    private static String callCmd(String cmd,String filter) {
-        String result = "";
-        String line = "";
-        try {
-            Process proc = Runtime.getRuntime().exec(cmd);
-            InputStreamReader is = new InputStreamReader(proc.getInputStream());
-            BufferedReader br = new BufferedReader(is);
-
-            //执行命令cmd，只取结果中含有filter的这一行
-            while ((line = br.readLine ()) != null && line.contains(filter)== false) {
-                //result += line;
-                Log.i("test","line: "+line);
-            }
-
-            result = line;
-            Log.i("test","result: "+result);
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    /**
-     * 生成机器码
-     *
-     * @return
-     */
-    public static String GetMac() {
-        final TelephonyManager tm = (TelephonyManager) ((ContextWrapper) appContext)
-                .getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
-        final String tmDevice, tmSerial, tmPhone, androidId;
-        tmDevice = "" + tm.getDeviceId();
-        tmSerial = "" + tm.getSimSerialNumber();
-        androidId = ""
-                + android.provider.Settings.Secure.getString(
-                appContext.getContentResolver(),
-                android.provider.Settings.Secure.ANDROID_ID);
-        UUID deviceUuid = new UUID(androidId.hashCode(),
-                ((long) tmDevice.hashCode() << 32) | tmSerial.hashCode());
-        String uniqueId = deviceUuid.toString();
-
-        log.e("机器码 唯一识别码:"+uniqueId);
-        uniqueId = getLocalMacAddressFromBusybox();
-        log.e("物理地址:"+uniqueId);
-        return uniqueId;
-    }
-
-    /**
-     * ip
-     * @return
-     */
-    public static String getLocalIpAddress() {
-        try {
-            for (Enumeration<NetworkInterface> en = NetworkInterface
-                    .getNetworkInterfaces(); en.hasMoreElements();) {
-                NetworkInterface intf = en.nextElement();
-                for (Enumeration<InetAddress> enumIpAddr = intf
-                        .getInetAddresses(); enumIpAddr.hasMoreElements();) {
-                    InetAddress inetAddress = enumIpAddr.nextElement();
-                    if (!inetAddress.isLoopbackAddress()
-                            && (inetAddress instanceof Inet4Address)) {
-                        log.i("getLocalIpAddress() _ local IP : "+ inetAddress.getHostAddress().toString());
-                        return inetAddress.getHostAddress().toString();
-                    }
-                }
-            }
-        } catch (SocketException ex) {
-			log.e("","WifiPreference IpAddress :"+ex.toString());
-        }
-        return "";
-    }
-
-
-    /**
-     *   ip =  intent.getExtras().getString("ip");
+     * 开启通讯服务
+     *ip =  intent.getExtras().getString("ip");
      port = intent.getExtras().getInt("port");
      terminalNo = intent.getExtras().getString("terminalNo");
      HeartBeatTime = intent.getExtras().getLong("HeartBeatTime");
      */
-
     public static void startCommunicationService(Context mc) {
-
         try {
-            if (mc instanceof WosApplication){
-                ((WosApplication)mc).init(true);
-            }
-
             Intent intent = new Intent(mc, CommunicationService.class);
             //传递参数
             Bundle b = new Bundle();
@@ -327,40 +141,32 @@ public class WosApplication extends Application {
             b.putString("terminalNo",config.GetStringDefualt("terminalNo","127.0.0.1"));
             b.putLong("HeartBeatTime",(config.GetIntDefualt("HeartBeatInterval",10)));
             intent.putExtras(b);
-            log.i("wosPlayerApp: 尝试开启通讯服务...");
+            Logs.i("wosPlayerApp: 尝试开启通讯服务...");
             mc.startService(intent);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
     /**
-     * 停止服务
+     * 停止通讯服务
      */
     public static void stopCommunicationService(Context mc){
-
         try {
             Intent server = new Intent(mc, CommunicationService.class);
             mc.stopService(server);
         } catch (Exception e) {
-            log.e("停止通讯服务Err:" +e.getMessage());
+            Logs.e("停止通讯服务Err:" +e.getMessage());
         }
     }
-
-
+    //发送消息到通讯服务
     public static void sendMsgToServer(String msg){
         if (msg=="") return;
-
         //发送一个广播
         Intent intent = new Intent();
         intent.setAction(CommunicationService.CommunicationServiceReceiveNotification.action);
         intent.putExtra(CommunicationService.CommunicationServiceReceiveNotification.key,msg);
         appContext.sendBroadcast(intent);
-//        log.i("发送出去一个广播");
-
     }
-
-
 }
 
 

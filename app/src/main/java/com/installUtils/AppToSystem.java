@@ -1,6 +1,6 @@
-package installUtils;
+package com.installUtils;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -26,7 +26,7 @@ public class AppToSystem {
     public static int execRootCmdSilent(String paramString) {
 
         try {
-            log.e("execRootCmdSilent() start");
+            Logs.e("execRootCmdSilent() start");
             Process localProcess = Runtime.getRuntime().exec("su");
              Object localObject = localProcess.getOutputStream();
             DataOutputStream localDataOutputStream = new DataOutputStream((OutputStream) localObject);
@@ -38,7 +38,7 @@ public class AppToSystem {
             localDataOutputStream.flush();
             localProcess.waitFor();
             int result = localProcess.exitValue();
-            log.e("execRootCmdSilent() : "+ result);
+            Logs.e("execRootCmdSilent() : "+ result);
             return (Integer) result;
             } catch (Exception localException){
             localException.printStackTrace();

@@ -1,8 +1,8 @@
-package wosTools;
+package com.wosTools;
 
 import android.util.Log;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.app.WosApplication;
 
 import java.util.HashMap;
@@ -77,7 +77,7 @@ public class DataListEntiy {
             Object val = entry.getValue();
             ToolsUtils.writeShareData(WosApplication.appContext,key.toString(), val.toString());
         }
-        ToolsHandler.NotityActivty(ToolsHandler.usermessage.outtext, "保存成功！");
+
     }
 
 
@@ -85,29 +85,27 @@ public class DataListEntiy {
     /**
      * 读取封装配置文档
      * true 本地
-     * false -> com.wos.tools
      */
-    public void ReadShareData(boolean isMeInfo)
+    public void ReadShareData()
     {
-
-        map.put("connectionType",ToolsUtils.GetKey(isMeInfo,"connectionType", "socket"));
+        map.put("connectionType",ToolsUtils.GetKey("connectionType", "socket"));
         //ui配置项
-        map.put("terminalNo",ToolsUtils.GetKey(isMeInfo,"terminalNo", ""));
-        map.put("serverip",  ToolsUtils.GetKey(isMeInfo,"serverip", "127.0.0.1"));
-        map.put("serverport",  ToolsUtils.GetKey(isMeInfo,"serverport", "8000"));
-        map.put("companyid",  ToolsUtils.GetKey(isMeInfo,"companyid", "999"));
-        map.put("HeartBeatInterval",  ToolsUtils.GetKey(isMeInfo,"HeartBeatInterval", "30"));
-        map.put("basepath",  ToolsUtils.GetKey(isMeInfo,"basepath", "/playlist"));
+        map.put("terminalNo",ToolsUtils.GetKey("terminalNo", ""));
+        map.put("serverip",  ToolsUtils.GetKey("serverip", "127.0.0.1"));
+        map.put("serverport",  ToolsUtils.GetKey("serverport", "8000"));
+        map.put("companyid",  ToolsUtils.GetKey("companyid", "999"));
+        map.put("HeartBeatInterval",  ToolsUtils.GetKey("HeartBeatInterval", "30"));
+        map.put("basepath",  ToolsUtils.GetKey("basepath", "/playlist"));
 
-        map.put("RestartBeatInterval",ToolsUtils.GetKey(isMeInfo,"RestartBeatInterval", "30"));
-        map.put("storageLimits",ToolsUtils.GetKey(isMeInfo,"storageLimits","50"));//sdka 容量达到多少时 会清理资源
+        map.put("RestartBeatInterval",ToolsUtils.GetKey("RestartBeatInterval", "30"));
+        map.put("storageLimits",ToolsUtils.GetKey("storageLimits","50"));//sdka 容量达到多少时 会清理资源
         //获取本地ip
         String LocalIpAddress=ToolsUtils.getLocalIpAddress();
         map.put("tip",  (LocalIpAddress=="")?"127.0.0.1":LocalIpAddress);
         //mac
         map.put("mac",  ToolsUtils.GetMac());
 
-        log.i("DataListEntiy_ReadShareData() ", "--------------------------------------------------读取配置信息------------------------------- \n 成功");
+        Logs.i("DataListEntiy_ReadShareData() ", "--------------------------------------------------读取配置信息------------------------------- \n 成功");
     }
 
 

@@ -14,10 +14,10 @@ import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
-import com.wosplayer.activity.DisplayActivity;
+import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.AdbShellCommd;
 import com.wosplayer.app.WosApplication;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
 import com.wosplayer.loadArea.kernal.loaderManager;
 import com.wosplayer.service.RestartApplicationBroad;
@@ -45,7 +45,7 @@ public class Command_UPDC implements iCommand {
     private String packagename = "com.wosplayer";
     @Override
     public void Execute(String param) {
-        log.i(TAG,"更新app,远程版本号:"+param);
+        Logs.i(TAG,"更新app,远程版本号:"+param);
         getRemoteVersionCode(param);
     }
 
@@ -65,7 +65,7 @@ public class Command_UPDC implements iCommand {
 
                     @Override
                     public void onSuccess(ResponseInfo<String> responseInfo) {
-                        log.i(TAG,"upload version info:"+responseInfo.result);
+                        Logs.i(TAG,"upload version info:"+responseInfo.result);
                         parseRemoteInfo(responseInfo.result);
                     }
 
@@ -75,7 +75,7 @@ public class Command_UPDC implements iCommand {
 
                     @Override
                     public void onFailure(HttpException error, String msg) {
-                        log.i(TAG,"upload version info:"+msg);
+                        Logs.i(TAG,"upload version info:"+msg);
                     }
                 });
     }
@@ -117,7 +117,7 @@ public class Command_UPDC implements iCommand {
         int local = getLocalVersionCode();
         int remote = remoteVersion;
 
-        log.i(TAG,"upload  LocalVersion :"+ local+" remoteVersion:"+remote);
+        Logs.i(TAG,"upload  LocalVersion :"+ local+" remoteVersion:"+remote);
 
 
         WosApplication.sendMsgToServer("terminalNo:"+ WosApplication.config.GetStringDefualt("terminalNo","0000")+",localVersionNumber:"+local+",serverVersionNumber:"+remote);
@@ -173,7 +173,7 @@ private boolean isUploading = false;
 public void installApk(String apkLocalPath) {
     File apkfile = new File(apkLocalPath);
     if (!apkfile.exists()) {
-        log.e(TAG,"install apk is not exists >>> "+apkLocalPath +" <<<");
+        Logs.e(TAG,"install apk is not exists >>> "+apkLocalPath +" <<<");
         return;
     }
     if (isUploading){
@@ -190,11 +190,11 @@ public void installApk(String apkLocalPath) {
     ((AlarmManager) DisplayActivity.activityContext.getSystemService(Context.ALARM_SERVICE))
             .set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
 
-    log.e(TAG," 执行 install APK.. 并且结束程序 ,\n apk path :"+apkLocalPath);
+    Logs.e(TAG," 执行 install APK.. 并且结束程序 ,\n apk path :"+apkLocalPath);
 
     int code =  PackageUtils.install(DisplayActivity.activityContext,apkLocalPath);
 
-    log.e(TAG," 安装结果 返回值 : "+code);
+    Logs.e(TAG," 安装结果 返回值 : "+code);
 
     if (code == PackageUtils.INSTALL_SUCCEEDED){
 

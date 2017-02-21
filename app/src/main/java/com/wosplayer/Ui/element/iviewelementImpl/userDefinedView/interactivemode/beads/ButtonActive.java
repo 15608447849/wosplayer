@@ -22,7 +22,7 @@ import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.xml.XmlParse;
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.app.WosApplication;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +31,7 @@ import java.util.List;
 import cn.trinea.android.common.util.FileUtils;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
-import wosTools.ToolsUtils;
+import com.wosTools.ToolsUtils;
 
 /**
  * Created by Administrator on 2016/6/28.
@@ -109,12 +109,12 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
     @Override
     public void onClick(View v) {
         if (UiExcuter.isStoping) {
-            log.e("清理布局中.....");
+            Logs.e("清理布局中.....");
             return;
         }
-        log.i(TAG, "按钮  ,绑定id:" + bindid);//click:[" + this.toString() +"]
+        Logs.i(TAG, "按钮  ,绑定id:" + bindid);//click:[" + this.toString() +"]
         if (CanvasView == null) {
-            log.e(TAG, " 互动模块容器 不存在 ");
+            Logs.e(TAG, " 互动模块容器 不存在 ");
             return;
         }
         if(fLayout==null){
@@ -134,7 +134,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
                 @Override
                 public void onClick(View v) {
                     try {
-                        log.e(" ---------------------- 点击了 返回按钮 -------------------------");
+                        Logs.e(" ---------------------- 点击了 返回按钮 -------------------------");
                         //删除自己的存在
                         CanvasView.removeView(fLayout);
                         //返回上一个视图
@@ -147,13 +147,13 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
             });
             fLayout.addView(retenbtn);
         }
-        log.i(TAG, "按钮  ,绑定id:" + bindid +" - 返回按钮 ok - bindtype -" +bindtype);
+        Logs.i(TAG, "按钮  ,绑定id:" + bindid +" - 返回按钮 ok - bindtype -" +bindtype);
         // 如果有人点击我了. 1.移除 画布当前视图(不删除视图栈), 我就把我绑定的的视图放上去,
         switch (bindtype) {
             case 0: //排版
             case 2:
                 if (myBindLayoutView == null) {
-                    log.e(TAG, "当前按钮 所 绑定的 下一级 布局层 不存在");
+                    Logs.e(TAG, "当前按钮 所 绑定的 下一级 布局层 不存在");
                     return;
                 }
                 myBindLayoutView.addReturnButton(fLayout);
@@ -182,7 +182,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
      * 请放入 新线程中
      */
     private void LoadingSrc() {
-        log.i(TAG, " 互动执行者 绑定的视图>子项-按钮>加载自己的xml文件");
+        Logs.i(TAG, " 互动执行者 绑定的视图>子项-按钮>加载自己的xml文件");
         //根据类型拼接 URI 0 2排版 1 文件夹 3web
         String srcUri = bindtype == 0 || bindtype == 2 ? layoutUri + bindid : folderurl + bindid;
 //        log.i(TAG, "----bindtype--- " + bindtype + "\n----bindid--" + bindid + "\n---->" + srcUri);
@@ -258,7 +258,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
                 public void call() {
                     mFather.removeView(ButtonActive.this);
                     mFather.addView(ButtonActive.this);
-                    log.i(TAG, " 互动执行者 绑定的视图>>子项button>>按钮>>加载自己到布局层");
+                    Logs.i(TAG, " 互动执行者 绑定的视图>>子项button>>按钮>>加载自己到布局层");
                 }
             });
             //加载资源
@@ -358,7 +358,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
 
                     @Override
                     public void onFailure(HttpException e, String s) {
-                        log.e(TAG, s);
+                        Logs.e(TAG, s);
                     }
                 }
         );
@@ -382,16 +382,16 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
                 case 0: //排版
                 case 2:
                     myBgUri = XmlParse.interactionParse_ButtonSrcUri_LayoutType(xml);
-                    log.i(TAG, bindid + "是布局类型,  : \n" + myBgUri);
+                    Logs.i(TAG, bindid + "是布局类型,  : \n" + myBgUri);
                     break;
                 case 1://文件夹
                 case 3://网页
                     myBgUri = XmlParse.interactionParse_ButtonSrcUri_FildType(xml);
-                    log.i(TAG, bindid + "是文件夹网页类型  : \n" + myBgUri);
+                    Logs.i(TAG, bindid + "是文件夹网页类型  : \n" + myBgUri);
                     break;
             }
         } catch (Exception e) {
-            log.e(TAG, "" + e.getMessage());
+            Logs.e(TAG, "" + e.getMessage());
         }
         AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
             @Override
@@ -407,16 +407,16 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
      */
     private void loadMeBackImage() {
 
-        log.i(TAG, "互动 - 按钮 -背景图片 bg image uri " + myBgUri);
+        Logs.i(TAG, "互动 - 按钮 -背景图片 bg image uri " + myBgUri);
         if (myBgUri != null) {
             String filename = myBgUri.substring(myBgUri.lastIndexOf("/") + 1);
             filename = WosApplication.config.GetStringDefualt("basepath", "") + filename;
-            log.i(TAG, "bg image local path - " + filename);
+            Logs.i(TAG, "bg image local path - " + filename);
             if (FileUtils.isFileExist(filename)) {
                 //存在直接设置
                 picassoLoaderImager(filename);
             } else {
-                log.e(TAG, "按钮 找不到背景图片 url - " + myBgUri + "本地 路径: " + filename);
+                Logs.e(TAG, "按钮 找不到背景图片 url - " + myBgUri + "本地 路径: " + filename);
             }
 
         }
@@ -427,7 +427,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
      * 请放入其他线程
      */
     private void loadMeBindView(final String xml) {
-        log.i(TAG, " 互动执行者 绑定的视图...的子项...按钮..加载自己的子项");
+        Logs.i(TAG, " 互动执行者 绑定的视图...的子项...按钮..加载自己的子项");
         //解析 得到 子视图信息
         try {
             switch (bindtype) {
@@ -440,7 +440,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
                                 myBindLayoutView = XmlParse.interactionParse_one(xml); //1 先解析
                                 //在 需要显示的时候 去加载他的 子资源
                                 ButtonActive.this.setEnabled(true);
-                                log.i(TAG, bindid + "可以点击了");
+                                Logs.i(TAG, bindid + "可以点击了");
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -468,7 +468,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
                                 }
                             }
                             ButtonActive.this.setEnabled(true);
-                            log.i(TAG, bindid + "可以点击了");
+                            Logs.i(TAG, bindid + "可以点击了");
                         }
                     });
                     break;
@@ -491,7 +491,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
         try {
             super.onDraw(canvas);
         } catch (Exception e) {
-            log.e(TAG, "试图引用　一个　回收的图片 [" + e.getMessage() + "-----" + e.getCause() + "]");
+            Logs.e(TAG, "试图引用　一个　回收的图片 [" + e.getMessage() + "-----" + e.getCause() + "]");
         }
     }
 
@@ -501,7 +501,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
             super.onDetachedFromWindow();
             // setImageDrawable(null);
         } catch (Exception e) {
-            log.e(TAG, "onDetachedFromWindow:" + e.getMessage());
+            Logs.e(TAG, "onDetachedFromWindow:" + e.getMessage());
         }
     }
 }

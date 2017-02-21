@@ -10,7 +10,7 @@ import android.widget.AbsoluteLayout;
 import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.MyVideoView;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
 import com.wosplayer.app.WosApplication;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.loadArea.excuteBolock.Loader;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
 
@@ -25,7 +25,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer {
     //构造
     public ActiveVideoPlayer(Context context, String uri, String localpath) {
         super(context);
-        log.e(TAG, "互动 视频播放者 创建");
+        Logs.e(TAG, "互动 视频播放者 创建");
         InitSettting(uri, localpath);
         video = new MyVideoView(context, this);
 }
@@ -71,7 +71,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer {
 
         //设置布局 属性　
         this.settingLayout(AbsoluteLayout.LayoutParams.MATCH_PARENT, AbsoluteLayout.LayoutParams.MATCH_PARENT, 0, 0);
-        log.e(TAG, "互动 视频 初始化:" + uriPath + "\n " + localPath);
+        Logs.e(TAG, "互动 视频 初始化:" + uriPath + "\n " + localPath);
     }
 
     /**
@@ -113,7 +113,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer {
      */
     private void loadingMyVideoView() {
         if (mFather == null) {
-            log.e(TAG, "video viewGroup is null");
+            Logs.e(TAG, "video viewGroup is null");
             return;
         }
         //  查看本地
@@ -121,7 +121,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer {
             //存在
             mInitStart(videoFileLocalPath);
         } else {
-            log.e(TAG, "视频资源不存在 - " + videoFileLocalPath);
+            Logs.e(TAG, "视频资源不存在 - " + videoFileLocalPath);
             String del = WosApplication.getConfigValue("defaultVideo");
             if (!del.equals("")) {
                 mInitStart(del);
@@ -160,7 +160,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer {
                         ActiveVideoPlayer.this.setBackgroundColor(Color.RED);
                         mFather.addView(ActiveVideoPlayer.this);
                         isremove = false;
-                        log.e(TAG, "互动 video player 添加到 视图 ,video 还没有添加");
+                        Logs.e(TAG, "互动 video player 添加到 视图 ,video 还没有添加");
                         //加载视图
                         loadingMyVideoView();
 //                    }
@@ -178,7 +178,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer {
         if (mFather != null) {
             if (mFather instanceof AbsoluteLayout) {
                         if (isremove) {
-                            log.e(TAG, "已經被移除");
+                            Logs.e(TAG, "已經被移除");
                             return;
                         }
                         //释放视图

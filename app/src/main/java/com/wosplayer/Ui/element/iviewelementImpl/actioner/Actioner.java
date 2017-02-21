@@ -9,7 +9,7 @@ import com.wosplayer.Ui.element.IPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.actioner.ContainerItem.LayoutContainer;
 import com.wosplayer.Ui.performer.TimeCalls;
 import com.wosplayer.app.DataList;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
 
 /**
@@ -58,26 +58,26 @@ public class Actioner extends AbsoluteLayout implements IPlayer{
             dst.Split((XmlNodeEntity) ob,null);
 
             if (dst==null){
-                log.e(TAG,"互动模块 数据 分离错误 DataSeparator is null");
+                Logs.e(TAG,"互动模块 数据 分离错误 DataSeparator is null");
                 return;
             }
             stores = dst.getDataStore();
 
             if (stores == null){
-                log.e(TAG,"互动模块 数据 分离错误 stores is null");
+                Logs.e(TAG,"互动模块 数据 分离错误 stores is null");
                 return;
             }
             //转换 数据变成视图 创建 所有子容器
             ContainerFactory.SettingParam(mp);
            container = ContainerFactory.TanslateDataToContainer(stores,null);
             if (container==null){
-                log.e(TAG," 互动模块 容器 获取错误,container="+container);
+                Logs.e(TAG," 互动模块 容器 获取错误,container="+container);
             }
-            log.i(TAG," 互动模块 初始化 完成");
+            Logs.i(TAG," 互动模块 初始化 完成");
 
 
         }catch (Exception e){
-            log.e(TAG, "loaddata() " + e.getMessage());
+            Logs.e(TAG, "loaddata() " + e.getMessage());
         }
     }
 
@@ -87,7 +87,7 @@ public class Actioner extends AbsoluteLayout implements IPlayer{
             setlayout();//设置布局
             loadContainer();
         }catch (Exception e){
-            log.e(TAG,"开始:"+e.getMessage());
+            Logs.e(TAG,"开始:"+e.getMessage());
         }
     }
 
@@ -101,7 +101,7 @@ public class Actioner extends AbsoluteLayout implements IPlayer{
             isExistOnLayout = false;
             removeContainer();
         }catch (Exception e){
-            log.e(TAG,"停止:"+e.getMessage());
+            Logs.e(TAG,"停止:"+e.getMessage());
         }
     }
     //加载容器
@@ -139,7 +139,7 @@ public class Actioner extends AbsoluteLayout implements IPlayer{
             this.setLayoutParams(lp);
 
         } catch (Exception e) {
-            log.e(TAG,"设置布局:" + e.getMessage());
+            Logs.e(TAG,"设置布局:" + e.getMessage());
         }
     }
 

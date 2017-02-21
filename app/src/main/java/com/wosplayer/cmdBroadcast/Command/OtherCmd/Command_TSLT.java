@@ -1,5 +1,6 @@
 package com.wosplayer.cmdBroadcast.Command.OtherCmd;
 
+import com.wosplayer.app.Logs;
 import com.wosplayer.app.WosApplication;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleSaver;
 import com.wosplayer.cmdBroadcast.Command.iCommand;
@@ -21,7 +22,7 @@ import com.wosplayer.cmdBroadcast.Command.iCommand;
  * 某个图片的Uri：content://media/external/images/media/4
  */
 public class Command_TSLT implements iCommand {
-    private static final String TAG = "_建行数据对接测试";
+    private static final String TAG = "_TSLT";
     ScheduleSaver saver = null;
 
     public Command_TSLT(iCommand saver) {
@@ -66,16 +67,19 @@ public class Command_TSLT implements iCommand {
         return null;
     }
 
-
+    //本地默认排期
     public void getDefaultProg() {
         try {
             if (cn.trinea.android.common.util.FileUtils.isFileExist("/mnt/sdcard/wosplayer/default/default_sche.xml")) { //文件存在
                 String str = "file:///mnt/sdcard/wosplayer/default/default_sche.xml";
                 //发送广播 -> 排期
-                if (saver != null) {
+                if (saver == null) {
+                    saver = new ScheduleSaver();
+                }
                     ScheduleSaver.clear();
                     saver.Execute(str);
-                }
+            }else{
+                Logs.d(TAG,"没有找到默认排期 - /mnt/sdcard/wosplayer/default/default_sche.xml");
             }
         } catch (Exception e) {
             e.printStackTrace();

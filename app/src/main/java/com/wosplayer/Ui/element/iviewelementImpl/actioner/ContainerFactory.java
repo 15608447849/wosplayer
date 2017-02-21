@@ -4,9 +4,9 @@ import com.wosplayer.Ui.element.iviewelementImpl.actioner.ContainerItem.ButtonCo
 import com.wosplayer.Ui.element.iviewelementImpl.actioner.ContainerItem.ContentContainer;
 import com.wosplayer.Ui.element.iviewelementImpl.actioner.ContainerItem.LayoutContainer;
 import com.wosplayer.Ui.element.iviewelementImpl.actioner.ContainerItem.ListViewContainer;
-import com.wosplayer.activity.DisplayActivity;
+import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.DataList;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 import java.util.ArrayList;
 
@@ -48,19 +48,19 @@ public class ContainerFactory {
                     for (int i = 0 ;i<arr.size();i++){
                         Container buttonContainer = TanslateDataToContainer(arr.get(i),prev);
                         if (buttonContainer==null){
-                            log.e(TAG," button container is null");
+                            Logs.e(TAG," button container is null");
                             continue;
                         }
                         prev.addChilds(buttonContainer);//布局 添加 button 到 childs
                     }
                 }
-                log.e(TAG,"---- 容器 创建 完成 ----");
+                Logs.e(TAG,"---- 容器 创建 完成 ----");
             }else{
 
                 String level = dl.GetStringDefualt("level","");
                 Container current = null;
                 if (level.equals("")){
-                    log.e(TAG," level is null ");
+                    Logs.e(TAG," level is null ");
                     return current;
                 }
 
@@ -72,7 +72,7 @@ public class ContainerFactory {
                         //设置按钮的下一个视图
                         ArrayList<DataStore> arr = ds.getStores();
                         if (arr!=null && arr.size()==1){
-                            log.i(TAG,"按钮 next exist");
+                            Logs.i(TAG,"按钮 next exist");
                             Container layout = TanslateDataToContainer(arr.get(0),prev);
                             if (layout!=null){
                                 current.next = layout;//按钮 关联 的下一个视图 ->布局 或者 列表
@@ -81,7 +81,7 @@ public class ContainerFactory {
                             }
 
                         }else{
-                            log.e(TAG,"button next container is err");
+                            Logs.e(TAG,"button next container is err");
                         }
                     }
                     return current;
@@ -99,13 +99,13 @@ public class ContainerFactory {
                             for (int i = 0 ;i<arr.size();i++){
                                 Container buttonContainer = TanslateDataToContainer(arr.get(i),current);
                                 if (buttonContainer==null){
-                                    log.e(TAG," button container is null,index ="+i);
+                                    Logs.e(TAG," button container is null,index ="+i);
                                     continue;
                                 }
                                 current.addChilds(buttonContainer);//布局 添加 button 到 childs
                             }
                         }else{
-                            log.e(TAG,"layout child container is err: dataStore arr :"+arr);
+                            Logs.e(TAG,"layout child container is err: dataStore arr :"+arr);
                         }
                     }
                     return current;
@@ -121,7 +121,7 @@ public class ContainerFactory {
                             for(int i=0;i<arr.size();i++){
                                 Container content = TanslateDataToContainer(arr.get(i),current);//具体内容 web image video
                                 if (content==null){
-                                    log.e(TAG," list content container is null,index ="+i);
+                                    Logs.e(TAG," list content container is null,index ="+i);
                                     continue;
                                 }
                                 current.addChilds(content);
@@ -132,7 +132,7 @@ public class ContainerFactory {
                             current.onClick(null);
 
                         }else{
-                            log.e(TAG,"list child container is err");
+                            Logs.e(TAG,"list child container is err");
                         }
 
                     }
@@ -209,7 +209,7 @@ public class ContainerFactory {
                 wscale  = String.valueOf(farr[0]);
                 hscale = String.valueOf(farr[1]);
             } catch (Exception e) {
-              log.e(TAG," "+e.getMessage());
+              Logs.e(TAG," "+e.getMessage());
             }
             param.put("wscale",wscale);
             param.put("hscale",hscale);

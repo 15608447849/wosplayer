@@ -13,7 +13,7 @@ import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageAttabuteAnimation;
 import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.performer.TimeCalls;
 import com.wosplayer.app.DataList;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
 
 /**
@@ -54,7 +54,7 @@ public class IImagePlayer extends ImageView implements IPlayer{
             this.uri = mp.GetStringDefualt("getcontents", "");
 
         }catch (Exception e){
-            log.e(TAG, "loaddata() " + e.getMessage());
+            Logs.e(TAG, "loaddata() " + e.getMessage());
         }
     }
     @Override
@@ -90,7 +90,7 @@ public class IImagePlayer extends ImageView implements IPlayer{
             lp.height = h;
             this.setLayoutParams(lp);
         } catch (Exception e) {
-          log.e(TAG,"设置布局:" + e.getMessage());
+          Logs.e(TAG,"设置布局:" + e.getMessage());
         }
     }
     //主线程中执行
@@ -100,7 +100,7 @@ public class IImagePlayer extends ImageView implements IPlayer{
             setlayout();//设置布局
             loadMyImage();
         }catch (Exception e){
-            log.e(TAG,"开始:"+e.getMessage());
+            Logs.e(TAG,"开始:"+e.getMessage());
         }
     }
     //加载图片
@@ -109,7 +109,7 @@ public class IImagePlayer extends ImageView implements IPlayer{
         if (fileUtils.checkFileExists(localpath)){
             picassoLoaderImager(localpath);
         }else{
-            log.e(TAG,"图片 路径 不存在 - "+localpath);
+            Logs.e(TAG,"图片 路径 不存在 - "+localpath);
             this.setImageResource(R.drawable.error);
             if (timeCalls!=null){
                 timeCalls.playOvers(this);
@@ -126,7 +126,7 @@ public class IImagePlayer extends ImageView implements IPlayer{
             //移除存在的图片资源
 //            removeMyImage(this);
         }catch (Exception e){
-            log.e(TAG,"停止:"+e.getMessage());
+            Logs.e(TAG,"停止:"+e.getMessage());
         }
     }
 //    //放入主线程
@@ -187,7 +187,7 @@ public class IImagePlayer extends ImageView implements IPlayer{
             super.onDraw(canvas);
             //log.i(TAG,"onDraw()被调用");
         } catch (Exception e) {
-            log.e(TAG,"试图引用　一个　回收的图片 ["+e.getMessage()+"-----"+e.getCause()+"]");
+            Logs.e(TAG,"试图引用　一个　回收的图片 ["+e.getMessage()+"-----"+e.getCause()+"]");
             loadMyImage();
         }
     }
@@ -198,7 +198,7 @@ public class IImagePlayer extends ImageView implements IPlayer{
            // log.i(TAG,"onDetachedFromWindow()被调用");
             setImageDrawable(null);
         }catch (Exception e){
-            log.e(TAG,"onDetachedFromWindow:"+e.getMessage());
+            Logs.e(TAG,"onDetachedFromWindow:"+e.getMessage());
         }
     }
 

@@ -18,7 +18,7 @@
                 <action android:name="com.wos.launcher.show" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>-->
-        <activity android:name=".activity.DisplayActivity"
+        <activity android:name=".app.DisplayActivity"
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -79,7 +79,7 @@
         </receiver>
 
         <!-- 拨叉sdcard 广播 -->
-        <receiver android:name="com.wos.SdcardBroad">
+        <receiver android:name=".tool.SdcardBroad">
             <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.MEDIA_MOUNTED"/>
                 <action android:name="android.intent.action.MEDIA_EJECT" />

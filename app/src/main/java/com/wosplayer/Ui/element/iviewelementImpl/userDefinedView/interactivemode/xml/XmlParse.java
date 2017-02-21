@@ -4,8 +4,8 @@ package com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemod
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.beads.ButtonActive;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.beads.FileActive;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.beads.LayoutActive;
-import com.wosplayer.activity.DisplayActivity;
-import com.wosplayer.app.log;
+import com.wosplayer.app.DisplayActivity;
+import com.wosplayer.app.Logs;
 
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -65,7 +65,7 @@ public class XmlParse {
 
             String bindId = button.element(XML_NOTE.interactive_layout_items_item_bindid).getText();
 
-            log.i(TAG," 获取 到一个 按钮  bindtype=>"+bindType+"绑定的 id"+ bindId );
+            Logs.i(TAG," 获取 到一个 按钮  bindtype=>"+bindType+"绑定的 id"+ bindId );
             ButtonActive buttonActive = new ButtonActive(DisplayActivity.activityContext,
                     bx,
                     by,
@@ -149,7 +149,7 @@ public class XmlParse {
             file.filetype = Integer.parseInt(filetype);
             file.filepath  = web_url==null || web_url.equals("") ?filepath:web_url;
             file.video_image_url = m_video_image_url;
-            log.i(TAG,"解析 button 下面 文件 的 xml type=>"+type+" filetype:"+filetype+"filepath:"+filepath);
+            Logs.i(TAG,"解析 button 下面 文件 的 xml type=>"+type+" filetype:"+filetype+"filepath:"+filepath);
             arr.add(file);
         }
         return arr;

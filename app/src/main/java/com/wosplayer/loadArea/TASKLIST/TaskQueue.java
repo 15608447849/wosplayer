@@ -1,6 +1,6 @@
 package com.wosplayer.loadArea.TASKLIST;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -56,7 +56,7 @@ public class TaskQueue extends Observable { //被观察者
             task.setState(Task.State.FINISHED);
             try {
                 if (task.getCall()!=null){
-                    log.e(TAG,"队列 - - - - 回调- >"+task.getSavePath()+task.getFileName());
+                    Logs.e(TAG,"队列 - - - - 回调- >"+task.getSavePath()+task.getFileName());
                     task.getCall().downloadResult(task.getSavePath()+task.getFileName(),"");
                 }
             } catch (Exception e) {

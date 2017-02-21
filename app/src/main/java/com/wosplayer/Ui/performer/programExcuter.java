@@ -1,8 +1,8 @@
 package com.wosplayer.Ui.performer;
 
-import com.wosplayer.activity.DisplayActivity;
+import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.WosApplication;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ public class programExcuter {
     public programExcuter(XmlNodeEntity program) {
         this.program = program;
         layoutList = new ArrayList<layoutExcuter>();
-        log.i(TAG,"节目:"+program.getXmldata().get("title")+"创建了");
+        Logs.i(TAG,"节目:"+program.getXmldata().get("title")+"创建了");
         //获取背景信息
         getBgInfos();
     }
@@ -37,7 +37,7 @@ public class programExcuter {
         }else{
             bgInfo = WosApplication.config.GetStringDefualt("basepath","")+bgInfo;
         }
-        log.e(TAG,"节目背景 - "+bgInfo);
+        Logs.e(TAG,"节目背景 - "+bgInfo);
     }
 
     public void start(){
@@ -48,11 +48,11 @@ public class programExcuter {
         //获取 布局信息 ,创建布局 执行所有的节目
         ArrayList<XmlNodeEntity> layoutArr = program.getChildren();
         if ( layoutArr==null || layoutArr.size()==0){
-            log.i(TAG," 当前无布局列表");
+            Logs.i(TAG," 当前无布局列表");
             return;
         }
         for (XmlNodeEntity layout:layoutArr){
-        log.i(TAG,"准备创建一个布局执行者:"+layout.getXmldata().get("id"));
+        Logs.i(TAG,"准备创建一个布局执行者:"+layout.getXmldata().get("id"));
             createLayout(layout);
         }
     }
@@ -69,7 +69,7 @@ public class programExcuter {
 
     public void stop(){
         //停止所有 布局
-        log.i(TAG,"节目:"+program.getXmldata().get("title")+"准备停止了");
+        Logs.i(TAG,"节目:"+program.getXmldata().get("title")+"准备停止了");
 
         if (layoutList!=null && layoutList.size()!=0 ){
             for (layoutExcuter layoutexcuter:layoutList){

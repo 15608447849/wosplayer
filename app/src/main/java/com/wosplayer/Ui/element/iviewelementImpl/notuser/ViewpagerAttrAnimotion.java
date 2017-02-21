@@ -3,7 +3,7 @@ package com.wosplayer.Ui.element.iviewelementImpl.notuser;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 /**
  * Created by user on 2016/9/27.
@@ -14,7 +14,7 @@ public class ViewpagerAttrAnimotion {
     private int random = 0;
     private static ViewpagerAttrAnimotion m ;
     private ViewpagerAttrAnimotion(){
-        log.e("初始化 viewpage 切换动画 ");
+        Logs.e("初始化 viewpage 切换动画 ");
     }
     public static ViewpagerAttrAnimotion getInstands(){
         if (m==null){

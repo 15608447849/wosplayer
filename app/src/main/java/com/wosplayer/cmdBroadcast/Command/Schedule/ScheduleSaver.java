@@ -4,9 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.wos.SdCardTools;
+import com.wosplayer.tool.SdCardTools;
 import com.wosplayer.app.WosApplication;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlHelper;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
 import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.Xmlparse;
@@ -70,7 +70,7 @@ public class ScheduleSaver implements iCommand {
         uuks = null;
         rootNode.Clear();
         isNextLoad = false;//不可以下载
-        log.e(TAG," --清理--");
+        Logs.e(TAG," --清理--");
     }
 
 
@@ -83,7 +83,7 @@ public class ScheduleSaver implements iCommand {
      */
     @Override
     public void Execute(String param) {
-        log.i("获取 排期 信息, 当前线程名:"+Thread.currentThread().getName());
+        Logs.i(TAG,"获取 排期 信息, 当前线程名:"+Thread.currentThread().getName());
 
         //repeatedVar(param);
 
@@ -96,10 +96,10 @@ public class ScheduleSaver implements iCommand {
 
         try {
             lock.lock();
-            log.i(TAG," root uri == "+ uri);
+            Logs.i(TAG," root uri == "+ uri);
             startWork(uri);
         } catch (Exception e) {
-            log.e(TAG, "saveData() " + e.getMessage());
+            Logs.e(TAG, "saveData() " + e.getMessage());
         }finally {
             lock.unlock();
         }
@@ -116,10 +116,10 @@ public class ScheduleSaver implements iCommand {
         String result = uriTranslationXml(uri);
         if (result!=null && result.equals("")){
             isNextLoad = false;
-            log.e(TAG," getXMLdata() result 不存在");
+            Logs.e(TAG," getXMLdata() result 不存在");
             return;
         }
-        log.d(TAG," xml data == \n "+result);
+        Logs.d(TAG," xml data == \n "+result);
         ParseResultXml(callType,result, Obj);
     }
 
@@ -143,7 +143,7 @@ public class ScheduleSaver implements iCommand {
             isNextLoad=false;
         }
         Long endTime = System.currentTimeMillis();
-        log.e(TAG,"解析用时 : "+(endTime - startTime)+" 毫秒");
+        Logs.e(TAG,"解析用时 : "+(endTime - startTime)+" 毫秒");
 
         startTime = System.currentTimeMillis();
         //判断是否清理数据
@@ -154,16 +154,16 @@ public class ScheduleSaver implements iCommand {
             SdCardTools.clearTargetDir(WosApplication.config.GetStringDefualt("basepath",""),rootNode.getFtplist());
         }
         endTime = System.currentTimeMillis();
-        log.e(TAG,"清理数据用时 : "+(endTime - startTime)+" 毫秒 \n" +
+        Logs.e(TAG,"清理数据用时 : "+(endTime - startTime)+" 毫秒 \n" +
                 "------------------------------------------------------");
-        log.e(TAG,"是否开启下载:"+isNextLoad);
+        Logs.e(TAG,"是否开启下载:"+isNextLoad);
         if (isNextLoad){
             //开启后台下载线程
-            log.i(TAG,"当前的任务数:"+rootNode.getFtplist().size()+"\n "+rootNode.getFtplist().toString());
+            Logs.i(TAG,"当前的任务数:"+rootNode.getFtplist().size()+"\n "+rootNode.getFtplist().toString());
             if (rootNode.getFtplist().size()>0){
                 sendloadTask();
             }else{
-                log.i(TAG,"无任务 发送通知");
+                Logs.i(TAG,"无任务 发送通知");
                 //发送完成通知
                 Intent intent = new Intent();
                 intent.setAction(completeTaskListBroadcast.action);
@@ -213,10 +213,10 @@ public class ScheduleSaver implements iCommand {
                     if (ruuks.equals("")) throw new Exception("最新xml - uuks  is null");
 
                     if (uuks==null){
-                        log.i(TAG," 本地uuks is null ...  \n 本地 :"+uuks+"  - 最新uuks :"+ruuks);
+                        Logs.i(TAG," 本地uuks is null ...  \n 本地 :"+uuks+"  - 最新uuks :"+ruuks);
 
                     }else if(uuks != null  && !uuks.equals(ruuks)){//本地uuks is null 或者
-                        log.i(TAG," 本地uuks 不等于 最新uuks  ...  \n 本地 :"+uuks+"  - 最新uuks :"+ruuks);
+                        Logs.i(TAG," 本地uuks 不等于 最新uuks  ...  \n 本地 :"+uuks+"  - 最新uuks :"+ruuks);
                         clear();
                     }else{ //uuks == ruuks
                         throw new Exception("排期判定 无改变 ,因为uuks 无变化 ");
@@ -228,7 +228,7 @@ public class ScheduleSaver implements iCommand {
                     if (url.equals("")) throw new Exception("url is null");
 
                 } catch (Exception e) {
-                    log.e(TAG,e.getMessage());
+                    Logs.e(TAG,e.getMessage());
                     return;
                 }
 
@@ -242,7 +242,7 @@ public class ScheduleSaver implements iCommand {
 
                 NodeList scheduleList = root.getElementsByTagName("schedule");
                 if (scheduleList.getLength() == 0) return;
-                log.i(TAG," - 当前排期总数: "+scheduleList.getLength());
+                Logs.i(TAG," - 当前排期总数: "+scheduleList.getLength());
                 for (int i = scheduleList.getLength() - 1; i > -1; i--) {
                     Element scheduleElement = (Element) scheduleList.item(i);
                     Short type = null;
@@ -261,7 +261,7 @@ public class ScheduleSaver implements iCommand {
                     NodeList programsList = scheduleElement.getElementsByTagName("program"); //节目
                     if(programsList.getLength()==0) continue;
 
-                    log.i(TAG,"排期 id :"+schedule_xmldata_map.get("id")+"\n" +
+                    Logs.i(TAG,"排期 id :"+schedule_xmldata_map.get("id")+"\n" +
                             "排期 类型" + schedule_xmldata_map.get("type")+"\n"+
                             "排期名: "+schedule_xmldata_map.get("summary")+"\n"+
                             " 这个排期下面的 节目总数:"+programsList.getLength());
@@ -275,26 +275,27 @@ public class ScheduleSaver implements iCommand {
                         Log.i(TAG, "now to parse program url :" + progUri );
                         //解析 节目:
                         getXMLdata(progUri, SCHEDU_PROG_PARSE, schedule_node.NewSettingNodeEntity());// 下一节点 实体
-                        log.i(TAG,"解析完一个节目\n\r");
+                        Logs.i(TAG,"解析完一个节目\n\r");
                     }
-                    log.i(TAG,"解析完一个排期\n\r");
+                    Logs.i(TAG,"解析完一个排期\n\r");
                 }
                 isNextLoad = true;
-                log.d(TAG,"----------------------------------------------------------------全部解析完成---------------------------------------------------------------------------------");
+                Logs.d(TAG,"----------------------------------------------------------------全部解析完成---------------------------------------------------------------------------------");
                 break;
 
 
             case SCHEDU_PROG_PARSE://解析 一个排期下的其中一个节目
-                log.i(TAG,"开始解析一个节目");
+
                 String program_root_XmlData = result;
                 if (program_root_XmlData.equals("")) return;
+                Logs.i(TAG,"开始解析一个节目-"+program_root_XmlData);
                 Element program_root = XmlHelper.getDomXml(new ByteArrayInputStream(program_root_XmlData.getBytes()));
                 if (program_root == null) return;
                 Element programElement = (Element) program_root.getElementsByTagName("programmes").item(0);
                 if (programElement == null) return;
                 try {
                     String progBgImageUrl = programElement.getElementsByTagName("bgimage").item(0).getAttributes().getNamedItem("src").getNodeValue();
-                    log.i(TAG,"存在背景图片 - url : "+ progBgImageUrl);
+                    Logs.i(TAG,"存在背景图片 - url : "+ progBgImageUrl);
                     rootNode.addUriTast(progBgImageUrl);
                 } catch (Exception e) {
                 }
@@ -312,7 +313,7 @@ public class ScheduleSaver implements iCommand {
                 }
                 NodeList program_layout_List = programElement.getElementsByTagName("layout");
                 if (program_layout_List.getLength()==0 ) return;
-                log.i(TAG,"某节目下面的 布局 总数:"+program_layout_List.getLength());
+                Logs.i(TAG,"某节目下面的 布局 总数:"+program_layout_List.getLength());
                 for (int i = 0; i < program_layout_List.getLength(); i++) {  //节目下面的布局循环
                     Element layout_Element = (Element) program_layout_List.item(i);
                     if (layout_Element==null) continue;
@@ -324,7 +325,7 @@ public class ScheduleSaver implements iCommand {
                     program_layout_node.AddProperty("uuks", uuks);
                     NodeList layout_contentList = layout_Element.getElementsByTagName("contents");//内容
                     if(layout_contentList.getLength()==0) continue;
-                    log.i(TAG,"节目下面的 布局 的 内容总数:"+layout_contentList.getLength());
+                    Logs.i(TAG,"节目下面的 布局 的 内容总数:"+layout_contentList.getLength());
                     for (int j = 0; j < layout_contentList.getLength(); j++) {//循环 节目_布局_内容
                         Element content_Element = (Element) layout_contentList.item(j);
                         if (content_Element==null) continue;
@@ -342,7 +343,7 @@ public class ScheduleSaver implements iCommand {
                         try {
                             contentType = ContentTypeEnum.valueOf(content_type);
                         } catch (IllegalArgumentException e) {
-                            log.e(TAG, "ScheduleSaver_>readContentXmlData_> contentType msg wrong:" + e.getMessage());
+                            Logs.e(TAG, "ScheduleSaver_>readContentXmlData_> contentType msg wrong:" + e.getMessage());
                             continue;
                         }
                         String getcontents = ""; //资源地址
@@ -357,7 +358,7 @@ public class ScheduleSaver implements iCommand {
                             layout_content_text_Node.Level = "root_schedule_programs_layout_content_text";
                             layout_content_text_Node.AddPropertyList(text_xmlDataMap);
                             layout_content_text_Node.AddProperty("uuks", uuks);
-                            log.i(TAG,"\"-----------text end------\"");
+                            Logs.i(TAG,"\"-----------text end------\"");
                         } else if (contentType.equals(ContentTypeEnum.rss)) {
                             Element childfile = (Element) content_Element.getElementsByTagName("childfile").item(0);
                             String xfile = XmlHelper.getFirstChildNodeValue(childfile, "xfile");
@@ -367,16 +368,16 @@ public class ScheduleSaver implements iCommand {
                             if (rssRoot==null) continue;
                             HashMap<String, String> rss_data_map = Xmlparse.ParseXml("/rss", rss_programXmlData, Xmlparse.parseType.OnlyLeaf).get(0);
                             content_xmlDataMap.putAll(rss_data_map);
-                            log.i(TAG,"-----------rss end------");
+                            Logs.i(TAG,"-----------rss end------");
                         } else if (contentType.equals(ContentTypeEnum.interactive)) {
                             //再解析 继续解析
                             getcontents = XmlHelper.getFirstChildNodeValue(content_Element, "getcontents");
-                            log.i(TAG,"interaction uri :"+ getcontents);
+                            Logs.i(TAG,"interaction uri :"+ getcontents);
                             getXMLdata(getcontents, ACTION_PARSE, layout_content_Node.NewSettingNodeEntity());//进入互动
-                            log.i(TAG,"-----------interaction end------");
+                            Logs.i(TAG,"-----------interaction end------");
                         } else {
                             getcontents = XmlHelper.getFirstChildNodeValue(content_Element, "getcontents");
-                            log.i(TAG,"不在需要判断的特殊类型中");
+                            Logs.i(TAG,"不在需要判断的特殊类型中");
                         }
                         if (contentType.needsDown()) {
                             try {
@@ -385,17 +386,17 @@ public class ScheduleSaver implements iCommand {
                                     rootNode.addUriTast(getcontents);
                                 }
                             } catch (Exception e) {
-                                log.e(TAG, e.getMessage());
+                                Logs.e(TAG, e.getMessage());
                                 continue;
                             }
                         }
-                        log.i(TAG, "a schedule on program to end parse");
+                        Logs.i(TAG, "a schedule on program to end parse");
                     }
                 }
                 break;
             case ACTION_PARSE:
                 //互动
-                log.i(TAG,"  - -开始一个互动解析 - -");
+                Logs.i(TAG,"  - -开始一个互动解析 - -");
                 String interaction_XmlData = result;
                 if (interaction_XmlData.equals("")) return;
                 Element interaction_root = XmlHelper.getDomXml(new ByteArrayInputStream(interaction_XmlData.getBytes()));
@@ -411,7 +412,7 @@ public class ScheduleSaver implements iCommand {
                     thumbnailurl = XmlHelper.getFirstChildNodeValue(interaction_root, "thumbnailurl");
                     if (thumbnailurl.equals("")) throw new Exception("thumbnailurl  is null");
                 } catch (Exception e) {
-                        log.e(TAG,e.getMessage());
+                        Logs.e(TAG,e.getMessage());
                     return;
                 }
                 Element action_layoutElement = (Element) interaction_root.getElementsByTagName("layout").item(0);
@@ -428,7 +429,7 @@ public class ScheduleSaver implements iCommand {
                 //获取 缩略图 的地址
                 String layout_thumbnailpath = XmlHelper.getFirstChildNodeValue(action_layoutElement, "thumbnailpath");//封面图片文件名，完整路径需加前缀
                 if (layout_thumbnailpath==null || layout_thumbnailpath.equals("")) {
-                    log.e(TAG,"按钮 背景 解析错误:背景图片名不存在");
+                    Logs.e(TAG,"按钮 背景 解析错误:背景图片名不存在");
                     String errImageBgUri = "http://imgsrc.baidu.com/forum/w%3D580/sign=55460f6a367adab43dd01b4bbbd5b36b/269759ee3d6d55fb1fa4ca646d224f4a20a4dd16.jpg";
                     rootNode.addUriTast(errImageBgUri);
                 }else{
@@ -463,13 +464,13 @@ public class ScheduleSaver implements iCommand {
                 try {
                     bgmode_type = Integer.parseInt(bgmode);
                 } catch (Exception e) {
-                    log.e(TAG, e.getMessage());
+                    Logs.e(TAG, e.getMessage());
                     return;
                 }
                 if (bgmode_type == 2) {
                     String bg = XmlHelper.getFirstChildNodeValue(layout_ItemsElement, "bg");
                     if (bg == null || bg.equals("")) {
-                        log.e(TAG,"一个布局背景解析错误:背景图片名不存在") ;
+                        Logs.e(TAG,"一个布局背景解析错误:背景图片名不存在") ;
 //                        String layoutBgerr = "http://cdn.duitang.com/uploads/item/201205/07/20120507220903_VR22y.thumb.600_0.jpeg";
 //                        rootNode.addUriTast(layoutBgerr); //创建一个ftp任务
                     }else{
@@ -481,7 +482,7 @@ public class ScheduleSaver implements iCommand {
                 //循环得到按钮的信息
                 NodeList items_itemNodeList = layout_ItemsElement.getElementsByTagName("item"); //子按钮
                 if (items_itemNodeList.getLength() == 0) return;
-                log.i(TAG,"一个互动下面的 按钮总数:"+items_itemNodeList.getLength());
+                Logs.i(TAG,"一个互动下面的 按钮总数:"+items_itemNodeList.getLength());
                 for (int i1 = 0; i1 < items_itemNodeList.getLength(); i1++) {
                     Element item_Element = (Element) items_itemNodeList.item(i1);
                     String Item_XmlData = XmlHelper.getNodeToString(item_Element);
@@ -496,18 +497,18 @@ public class ScheduleSaver implements iCommand {
                     try {
                         bindtype_id = Integer.parseInt(bindtype);
                     } catch (Exception e) {
-                        log.e(TAG, e.getMessage());
+                        Logs.e(TAG, e.getMessage());
                     }
                     String uri_Id = XmlHelper.getFirstChildNodeValue(item_Element, "bindid");
                     if (uri_Id.equals("")) continue;
                     String item_uri = null;
                     if (bindtype_id == 0 || bindtype_id == 2) {  //布局类型 0 2
                         item_uri = layouturl + uri_Id;
-                        log.i(TAG, "一个按钮 -布局- url :" + item_uri);
+                        Logs.i(TAG, "一个按钮 -布局- url :" + item_uri);
                         getXMLdata(item_uri, I_LAYOUT_PARSE, interaction_layout_items_item_node.NewSettingNodeEntity());
                     } else if (bindtype_id == 1 || bindtype_id == 3) { // 文件1 3网页
                         item_uri = folderurl + uri_Id;
-                        log.i(TAG, "一个按钮 -文件- url :" + item_uri);
+                        Logs.i(TAG, "一个按钮 -文件- url :" + item_uri);
                         getXMLdata(item_uri, I_FILE_PARSE, interaction_layout_items_item_node.NewSettingNodeEntity());
                     }
                 }
@@ -515,7 +516,7 @@ public class ScheduleSaver implements iCommand {
 
 
             case I_FILE_PARSE://文件
-                log.i(TAG,"开始解析一个文件");
+                Logs.i(TAG,"开始解析一个文件");
                 String interaction_fl_XmlData = result;
                 if (interaction_fl_XmlData.equals("")) return;
                 Element folder_root = XmlHelper.getDomXml(new ByteArrayInputStream(interaction_fl_XmlData.getBytes()));
@@ -533,14 +534,14 @@ public class ScheduleSaver implements iCommand {
                 if (thumbnailpath != null && !thumbnailpath.equals("")) {
                     rootNode.addUriTast(thumbnailpath);//创建一个ftp任务 绑定他 的 按钮的背景图片
                 }else{
-                    log.i(TAG,"按钮 不存在 背景");
+                    Logs.i(TAG,"按钮 不存在 背景");
                     String layoutBgerr = "http://cdn.duitang.com/uploads/item/201205/07/20120507220903_VR22y.thumb.600_0.jpeg";
                     rootNode.addUriTast(layoutBgerr); //创建一个ftp任务
                 }
                 //循环得到子内容信息
                 NodeList floder_item_List = folderElement.getElementsByTagName("item"); //子信息
                 if (floder_item_List.getLength() == 0) return;
-                log.i(TAG,"一个按钮下面绑定文件夹 包含的内容的总数:"+floder_item_List.getLength());
+                Logs.i(TAG,"一个按钮下面绑定文件夹 包含的内容的总数:"+floder_item_List.getLength());
                 for (int i1 = 0; i1 < floder_item_List.getLength(); i1++) {
                     Element floder_item_Element = (Element) floder_item_List.item(i1);
                     String floder_Item_XmlData = XmlHelper.getNodeToString(floder_item_Element);
@@ -552,13 +553,13 @@ public class ScheduleSaver implements iCommand {
                     //文件类型
                     String filetype = XmlHelper.getFirstChildNodeValue(floder_item_Element, "filetype");
                     if (filetype.equals("1006")) {
-                        log.i(TAG,"一个网页资源类型");
+                        Logs.i(TAG,"一个网页资源类型");
                         continue; //网页
                     }
                     //资源路径
                     String filepath = XmlHelper.getFirstChildNodeValue(floder_item_Element, "filepath");//资源路径
                     if(filepath.equals("")||filepath.equals("null")){
-                       log.e(TAG,"互动 下面 的 文件 所需 资源 路径 错误 filepath:"+ filepath);
+                       Logs.e(TAG,"互动 下面 的 文件 所需 资源 路径 错误 filepath:"+ filepath);
                         continue;
                     }else{
                         rootNode.addUriTast(filepath); //创建一个ftp任务
@@ -569,20 +570,20 @@ public class ScheduleSaver implements iCommand {
                         if(filepath.equals("")||filepath.equals("null")){
 
                             filepath="http://img15.3lian.com/2015/f1/59/d/31.jpg";
-                            log.e("视频第一帧不存在,下载默认图片:"+ filepath);
+                            Logs.e("视频第一帧不存在,下载默认图片:"+ filepath);
                         }else {
                            String  mfilepath = filepath.substring(filepath.lastIndexOf("/")+1);
-                            log.i(TAG,"mfilepath:"+mfilepath);
+                            Logs.i(TAG,"mfilepath:"+mfilepath);
                             if (mfilepath.equals("null")){
                                 filepath="http://img15.3lian.com/2015/f1/59/d/31.jpg";
-                                log.e("视频第一帧不存在,下载默认图片:"+ filepath);
+                                Logs.e("视频第一帧不存在,下载默认图片:"+ filepath);
                             }
                         }
                         rootNode.addUriTast(filepath); //创建一个ftp任务
                     }
  //
                 }
-                log.i(TAG, "a interaction to end parse");
+                Logs.i(TAG, "a interaction to end parse");
                 break;
             case I_LAYOUT_PARSE ://布局
                 ParseResultXml(ACTION_PARSE,result,obj);
@@ -601,7 +602,7 @@ public class ScheduleSaver implements iCommand {
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e1) {
-            log.e(TAG,""+ "url wrong:" +urlString +"cause: "+ e1.getMessage());
+            Logs.e(TAG,""+ "url wrong:" +urlString +"cause: "+ e1.getMessage());
             return "";
         }
         URLConnection urlConnection;
@@ -609,7 +610,7 @@ public class ScheduleSaver implements iCommand {
             urlConnection = url.openConnection();
         } catch (IOException ioe) {
 
-            log.e(TAG,""+ "url connect failed:" +  ioe.getMessage());
+            Logs.e(TAG,""+ "url connect failed:" +  ioe.getMessage());
             return "";
         }
 
@@ -625,7 +626,7 @@ public class ScheduleSaver implements iCommand {
             return xmlData.toString();
         } catch (IOException e) {
 
-            log.e(TAG,""+ "get input stream error:" +  e.getMessage());
+            Logs.e(TAG,""+ "get input stream error:" +  e.getMessage());
 
             return "";
         } finally {
@@ -636,7 +637,7 @@ public class ScheduleSaver implements iCommand {
                     in.close();
             } catch (IOException e) {
 
-                log.e(TAG,""+ "close input stream error:" +  urlString+"cause:" +e.getMessage());
+                Logs.e(TAG,""+ "close input stream error:" +  urlString+"cause:" +e.getMessage());
                 e.printStackTrace();
             }
         }

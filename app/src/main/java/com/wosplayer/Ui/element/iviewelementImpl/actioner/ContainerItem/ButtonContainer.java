@@ -10,7 +10,7 @@ import android.widget.ImageButton;
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.actioner.Container;
 import com.wosplayer.app.DataList;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 import java.io.File;
 
@@ -36,7 +36,7 @@ public class ButtonContainer extends Container{
                 try {
                     super.onDraw(canvas);
                 } catch (Exception e) {
-                    log.i(TAG,"布局子按钮,试图引用一个　回收的图片 ["+e.getMessage()+"-----"+e.getCause()+"]");
+                    Logs.i(TAG,"布局子按钮,试图引用一个　回收的图片 ["+e.getMessage()+"-----"+e.getCause()+"]");
                 }
             }
             @Override
@@ -45,7 +45,7 @@ public class ButtonContainer extends Container{
                     super.onDetachedFromWindow();
                     // setImageDrawable(null);
                 }catch (Exception e){
-                    log.e(TAG,"onDetachedFromWindow:"+e.getMessage());
+                    Logs.e(TAG,"onDetachedFromWindow:"+e.getMessage());
                 }
             }
         };
@@ -58,10 +58,10 @@ public class ButtonContainer extends Container{
 
     @Override
     public void onSettingScale(float widthScale, float heightScale) {
-        log.i(TAG,"button: 宽度比例-"+widthScale+", 高度比例-"+ heightScale);
+        Logs.i(TAG,"button: 宽度比例-"+widthScale+", 高度比例-"+ heightScale);
 
         if (widthScale == 0.0 || heightScale== 0.0){
-            log.e(TAG,"scale is err");
+            Logs.e(TAG,"scale is err");
             return;
         }
         w = (int) ((float)this.w *widthScale);
@@ -84,12 +84,12 @@ public class ButtonContainer extends Container{
         try{
             loadBg(bgimage);
         }catch (Exception e){
-            log.e(TAG,"按钮容器:"+e.getMessage());
+            Logs.e(TAG,"按钮容器:"+e.getMessage());
         }
     }
 
     private void loadBg(String filePath) {
-        log.i(TAG,"按钮背景路径:"+filePath);
+        Logs.i(TAG,"按钮背景路径:"+filePath);
         //纯用picasso 加载本地图片
         Picasso.with(context)
                 .load(new File(filePath))
@@ -99,7 +99,7 @@ public class ButtonContainer extends Container{
                 .placeholder(R.drawable.loadding)
                 .error(R.drawable.error)
                 .into((ImageButton)view);
-        log.i(TAG,"按钮背景加载完成");
+        Logs.i(TAG,"按钮背景加载完成");
     }
 
     @Override
@@ -123,7 +123,7 @@ public class ButtonContainer extends Container{
             lp.height = h;
             view.setLayoutParams(lp);
         }catch (Exception e){
-            log.e(TAG,"onLayout() err:" + e.getMessage());
+            Logs.e(TAG,"onLayout() err:" + e.getMessage());
         }
     }
 
@@ -136,7 +136,7 @@ public class ButtonContainer extends Container{
                 this.vp = null;
             }
         }catch (Exception e){
-            log.e(TAG,"onUnlayout() err:" + e.getMessage());
+            Logs.e(TAG,"onUnlayout() err:" + e.getMessage());
         }
     }
 
@@ -148,7 +148,7 @@ public class ButtonContainer extends Container{
             //加载资源
             onBg(null);
         }catch (Exception e){
-            log.e(TAG,"onBind() err:" + e.getMessage());
+            Logs.e(TAG,"onBind() err:" + e.getMessage());
         }
     }
 
@@ -159,7 +159,7 @@ public class ButtonContainer extends Container{
             //解除资源
             onUnbg(null);
         }catch (Exception e){
-            log.e(TAG,"onUnbind() err:" + e.getMessage());
+            Logs.e(TAG,"onUnbind() err:" + e.getMessage());
         }
     }
 
@@ -169,9 +169,9 @@ public class ButtonContainer extends Container{
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    log.i(TAG," tm 老子是 一个 按钮 !");
+                    Logs.i(TAG," tm 老子是 一个 按钮 !");
                     if (next!=null && previous!=null){
-                        log.e(TAG,"进去下一个布局- ->"+next.toString());
+                        Logs.e(TAG,"进去下一个布局- ->"+next.toString());
 //                                = previous
 //                                next.onBind();
 //                                onUnbind();

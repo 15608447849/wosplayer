@@ -14,7 +14,7 @@ import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageStore;
 import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
 import com.wosplayer.app.WosApplication;
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
 
 import java.util.List;
@@ -72,16 +72,16 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
      * 设置我的宽高属性
      */
     private void setMylayoutParma() {
-        log.i(TAG, " 互动执行者-> 绑定的视图->设置自己的布局参数");
+        Logs.i(TAG, " 互动执行者-> 绑定的视图->设置自己的布局参数");
         //获取 与父容器的 宽高比值
-        log.i(TAG, "1f宽度" + mFather.getWidth() + "--f高度" + mFather.getHeight());
-        log.i(TAG, "2f宽度" + mFather.getMeasuredWidth() + "--f高度" + mFather.getMeasuredHeight());
-        log.i(TAG, "3f宽度" + mFather.getLayoutParams().width + "--f高度" + mFather.getLayoutParams().height);
+        Logs.i(TAG, "1f宽度" + mFather.getWidth() + "--f高度" + mFather.getHeight());
+        Logs.i(TAG, "2f宽度" + mFather.getMeasuredWidth() + "--f高度" + mFather.getMeasuredHeight());
+        Logs.i(TAG, "3f宽度" + mFather.getLayoutParams().width + "--f高度" + mFather.getLayoutParams().height);
         wScale = (float) mFather.getLayoutParams().width / (float) this.w;
         hScale = (float) mFather.getLayoutParams().height / (float) this.h;
-        log.i(TAG, "宽度比例" + wScale + "--高度比例" + hScale);
+        Logs.i(TAG, "宽度比例" + wScale + "--高度比例" + hScale);
         if (wScale == 0.0 || hScale == 0.0) {
-            log.e(TAG, " 比例异常 ");
+            Logs.e(TAG, " 比例异常 ");
             return;
         }
         scale_w = (int) ((float) this.w * wScale);
@@ -112,7 +112,7 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
                 AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                     @Override
                     public void call() {
-                        log.i(TAG, " 互动执行者 ->绑定的视图->添加自己到互动执行者");
+                        Logs.i(TAG, " 互动执行者 ->绑定的视图->添加自己到互动执行者");
                         setMylayoutParma();
                         //容器是个绝对布局的话
                         ((AbsoluteLayout) mFather).removeView(LayoutActive.this);
@@ -137,7 +137,7 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
      */
     @Override
     public void AotuLoadingResource() {
-        log.i(TAG, " 互动执行者-> 绑定的视图 ->加载自己的资源");
+        Logs.i(TAG, " 互动执行者-> 绑定的视图 ->加载自己的资源");
         //加载视图
         LoaderSource();
         addMeSubView(); //加载我的子控件
@@ -231,7 +231,7 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
             if (fileUtils.checkFileExists(localpath)) { //资源是否存在
                 setBgImagers(localpath);
             } else {
-                log.e(TAG, "互动布局 图片资源 不存在 - " + localpath + "\n uri:" + uriLoad);
+                Logs.e(TAG, "互动布局 图片资源 不存在 - " + localpath + "\n uri:" + uriLoad);
             }
         }
 
@@ -249,10 +249,10 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
                 throw new NullPointerException("filepath err :" + filePath);
             }
         } catch (Exception e) {
-            log.e(TAG, "layout call() err : " + e.getMessage());
+            Logs.e(TAG, "layout call() err : " + e.getMessage());
             bitmap = ImageStore.getInstants().getButton_err(mcontext);
         }
-        log.i(TAG, "互动布局设置背景图片");
+        Logs.i(TAG, "互动布局设置背景图片");
         LayoutActive.this.setBackgroundDrawable(new BitmapDrawable(bitmap));
     }
 
@@ -267,7 +267,7 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
                 //设置它的画布　　
                 button.setMeCanvasView(LayoutActive.this.mFather);
             }
-            log.i(TAG, " 互动执行者 -> 绑定的视图->加载自己的子项 success");
+            Logs.i(TAG, " 互动执行者 -> 绑定的视图->加载自己的子项 success");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -285,7 +285,7 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
                 button.removeMeToFather(); // 从 父控件中 移除 自己
             }
         } catch (Exception e) {
-            log.e(TAG, "捕获一个 Exception...  " + e.getMessage());
+            Logs.e(TAG, "捕获一个 Exception...  " + e.getMessage());
         }
 
     }
@@ -295,7 +295,7 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
         try {
             super.onDraw(canvas);
         } catch (Exception e) {
-            log.e(TAG, "试图引用　一个　回收的图片 [" + e.getMessage() + "-----" + e.getCause() + "]");
+            Logs.e(TAG, "试图引用　一个　回收的图片 [" + e.getMessage() + "-----" + e.getCause() + "]");
         }
     }
 }

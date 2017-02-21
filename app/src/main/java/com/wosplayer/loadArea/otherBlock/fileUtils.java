@@ -1,6 +1,6 @@
 package com.wosplayer.loadArea.otherBlock;
 
-import com.wosplayer.app.log;
+import com.wosplayer.app.Logs;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,7 +23,7 @@ public class fileUtils {
                 file.mkdirs();
             }
         } catch (Exception e) {
-            log.e(TAG,"创建文件失败"+ e.getMessage());
+            Logs.e(TAG,"创建文件失败"+ e.getMessage());
         }
     }
 
@@ -45,7 +45,7 @@ public class fileUtils {
                     fis = new FileInputStream(file);
                     result = fis.available();
                 } catch (Exception e) {
-                    log.e(TAG,"获取文件大小失败:"+e.getMessage());
+                    Logs.e(TAG,"获取文件大小失败:"+e.getMessage());
                 }
             }
         } catch (Exception e) {
@@ -65,7 +65,7 @@ public class fileUtils {
         if (start != -1 && end != -1) {
             return pathandname.substring(start + 1, end);
         } else {
-            log.e(TAG,"获取文件名失败:"+pathandname);
+            Logs.e(TAG,"获取文件名失败:"+pathandname);
             return null;
         }
     }

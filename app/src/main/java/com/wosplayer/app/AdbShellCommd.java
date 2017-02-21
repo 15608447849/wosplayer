@@ -9,8 +9,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import cn.trinea.android.common.util.FileUtils;
 import cn.trinea.android.common.util.ShellUtils;
-import installUtils.ApkController;
-import installUtils.AppToSystem;
+import com.installUtils.ApkController;
+import com.installUtils.AppToSystem;
 
 /**
  * Created by user on 2016/10/9.
@@ -78,15 +78,12 @@ public class AdbShellCommd extends Thread {
         this.packagepath = context.getApplicationInfo().sourceDir;
         this.isrun_1 = isrun_1;
         this.isrun_2 = isrun_2;
-        log.i("adb shell thread is create ");
+        Logs.i("adb shell thread is create ");
     }
 
     public void handlerSendMsg(String msgStr){
         if (handler!=null && context!=null){
-            Message msg = handler.obtainMessage();
-            msg.obj = msgStr;
-            msg.arg1 = 0x11;
-            handler.sendMessage(msg);
+           AppTools.NotifyHandle(handler,DisplayActivity.HandleEvent.outtext.ordinal(),msgStr);
         }
     }
 
@@ -99,10 +96,10 @@ public class AdbShellCommd extends Thread {
                 handlerSendMsg("拥有root权限,执行初始化.");
                 //卸载 旧app
                 if (ApkController.uninstall("com.wos", context)) {
-                    log.d("检测 卸载 老版本 APP - com.wos - 完成");
+                    Logs.d("检测 卸载 老版本 APP - com.wos - 完成");
                 }
                 if (ApkController.uninstall("com.wos.tools", context)) {
-                    log.d("检测 卸载 老版本 APP - com.wos.tools - 完成");
+                    Logs.d("检测 卸载 老版本 APP - com.wos.tools - 完成");
                 }
 
                 //放入system
@@ -137,11 +134,11 @@ public class AdbShellCommd extends Thread {
                 handlerSendMsg("没有root权限.");
             }
 
-            log.d("--------------------------------------------------------------------------------------------------------------\n");
+            Logs.d("--------------------------------------------------------------------------------------------------------------\n");
 
         } catch (Exception e) {
 //            mLock.unlock();
-            log.e(e.getMessage());
+            Logs.e(e.getMessage());
         }finally {
             context = null;
             handler=null;
@@ -149,12 +146,12 @@ public class AdbShellCommd extends Thread {
     }
 
     public static void startRemoteport() {
-        log.e("commands[] :\n" + commands[0] + commands[1] + commands[2]);
+        Logs.e("commands[] :\n" + commands[0] + commands[1] + commands[2]);
 
         ShellUtils.CommandResult cr = ShellUtils.execCommand(commands, true, true);
 
-        String strs = "远程端口开启结果: " + (cr.result==0?WosApplication.getLocalIpAddress()+":9999 成功打开.":"未启动远程端口.");
-        log.e("Remote", strs);
+        String strs = "远程端口开启结果: " + (cr.result==0?AppTools.getLocalIpAddress()+":9999 成功打开.":"未启动远程端口.");
+        Logs.e("Remote", strs);
 
     }
 

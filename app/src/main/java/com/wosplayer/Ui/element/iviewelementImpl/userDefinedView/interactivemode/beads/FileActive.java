@@ -5,8 +5,8 @@ import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.ActiveImagePlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.ActiveVideoPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.ActiveWebPlayer;
-import com.wosplayer.activity.DisplayActivity;
-import com.wosplayer.app.log;
+import com.wosplayer.app.DisplayActivity;
+import com.wosplayer.app.Logs;
 import com.wosplayer.app.WosApplication;
 
 /**
@@ -44,10 +44,10 @@ public class FileActive {
             String filename = filepath.substring(filepath.lastIndexOf("/") + 1);
             String localPath = WosApplication.config.GetStringDefualt("basepath", "") + filename;
 
-            log.i(TAG, "这个类型:" + type + "资源:" + filepath + "本地资源路径:" + localPath);
+            Logs.i(TAG, "这个类型:" + type + "资源:" + filepath + "本地资源路径:" + localPath);
 
             if (type == 3) { //网页 //|| filetype == 1006
-                log.i(TAG, Thread.currentThread().getName());
+                Logs.i(TAG, Thread.currentThread().getName());
               return new ActiveWebPlayer(DisplayActivity.activityContext,filepath);
 
             } else if (filetype == 1007) { //图片

@@ -87,7 +87,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
 			try {
 				Thread.sleep(3000);
 			} catch (InterruptedException e) {
-				log.e(TAG, "error : ", e);
+				Logs.e(TAG, "error : ", e);
 			}
 
 
@@ -105,7 +105,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
 			((AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE))
 					.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
 
-			log.e("错误收集 发送重启广播");
+			Logs.e("错误收集 发送重启广播");
 
 			//退出程序
 			android.os.Process.killProcess(android.os.Process.myPid());
@@ -138,7 +138,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
 		collectDeviceInfo(mContext);
 		//保存日志文件 
 		String uncauchFile = saveCrashInfo2File(ex);
-		log.e(TAG,"uncauchFile: "+uncauchFile);
+		Logs.e(TAG,"uncauchFile: "+uncauchFile);
 		return true;
 	}
 	
@@ -157,16 +157,16 @@ public class CrashHandler implements UncaughtExceptionHandler {
 				infos.put("versionCode", versionCode);
 			}
 		} catch (NameNotFoundException e) {
-			log.e(TAG, "an error occured when collect package info", e);
+			Logs.e(TAG, "an error occured when collect package info", e);
 		}
 		Field[] fields = Build.class.getDeclaredFields();
 		for (Field field : fields) {
 			try {
 				field.setAccessible(true);
 				infos.put(field.getName(), field.get(null).toString());
-				log.d(TAG, field.getName() + " : " + field.get(null));
+				Logs.d(TAG, field.getName() + " : " + field.get(null));
 			} catch (Exception e) {
-				log.e(TAG, "an error occured when collect crash info", e);
+				Logs.e(TAG, "an error occured when collect crash info", e);
 			}
 		}
 	}
@@ -214,7 +214,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
 			}
 			return fileName;
 		} catch (Exception e) {
-			log.e(TAG, "an error occured while writing file...", e);
+			Logs.e(TAG, "an error occured while writing file...", e);
 		}
 		return null;
 	}

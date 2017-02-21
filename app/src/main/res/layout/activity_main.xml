@@ -1,13 +1,15 @@
 <AbsoluteLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="horizontal"
+
     >
-  <!--  android:background="@android:color/black"  悬浮在上面的一层-->
+  <!-- 左上角关闭app隐藏层 android:background="@android:color/black"  悬浮在上面的一层-->
   <FrameLayout
-      android:layout_width="match_parent"
+      android:layout_width="wrap_content"
       android:layout_height="wrap_content"
+      android:background="@android:color/holo_blue_light"
       >
         <ImageButton
             android:id="@+id/closeappbtn"
@@ -18,7 +20,7 @@
 </FrameLayout>
 
 
-<!--  android:background="@drawable/notschedule" -->
+<!-- UI显示层 android:background="@drawable/notschedule" -->
   <AbsoluteLayout
       android:id="@+id/main"
       android:layout_width="match_parent"
@@ -26,69 +28,7 @@
       >
   </AbsoluteLayout>
 
-  <FrameLayout
-      android:id="@+id/frame_layout"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:layout_gravity="center"
-      android:visibility="gone"
-      android:background="@android:color/holo_green_dark"
-      >
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        >
-      <RelativeLayout
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          android:layout_gravity="center"
-          >
+  <include layout="@layout/activity_action_sublayou" />
+  <include layout="@layout/activity_fragment" />
 
-        <AbsoluteLayout
-            android:id="@+id/frame_layout_main"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_centerInParent="true"
-            android:background="@android:color/holo_red_dark"
-            >
-
-
-
-
-        </AbsoluteLayout>
-
-
-        <ImageView
-            android:id="@+id/frame_load_wait_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/no_found"
-            android:layout_centerInParent="true"
-            android:visibility="gone"
-            />
-
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:onClick="FrameBtnEvent"
-            >
-
-          <Button
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_gravity="center"
-              android:background="@drawable/video_back"
-              android:layout_margin="85dp"
-              android:onClick="FrameBtnEvent"
-              />
-        </FrameLayout>
-      </RelativeLayout>
-
-    </LinearLayout>
-  </FrameLayout>
-
-
-  </AbsoluteLayout>
+</AbsoluteLayout>

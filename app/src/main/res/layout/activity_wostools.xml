@@ -201,13 +201,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="88dp"
-                android:onClick="getId"
                 android:text="获取ID" />
             <Button
                 android:id="@+id/btnSaveData"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="saveData"
                 android:text="保存" />
         </LinearLayout>
     </LinearLayout>

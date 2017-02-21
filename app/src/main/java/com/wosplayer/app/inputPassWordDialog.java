@@ -13,7 +13,7 @@ import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_PASD;
 /**
  * Created by user on 2016/10/8.
  */
-public class inputPassWordDialog {
+public class InputPassWordDialog {
 
 //    private static EditText passwordInput = null;
 //    private static AlertDialog alertDialog = null;
@@ -23,7 +23,7 @@ public class inputPassWordDialog {
         final EditText passwordInput = new EditText(m);
         passwordInput.setTransformationMethod(PasswordTransformationMethod.getInstance());
              new AlertDialog.Builder(m)
-                    .setTitle(WosApplication.getLocalIpAddress()+" 输入管理密码将结束应用")
+                    .setTitle(AppTools.getLocalIpAddress()+" 输入管理密码将结束应用")
                     .setIcon(android.R.drawable.ic_dialog_info)
                     .setView(passwordInput).setPositiveButton("确定", new DialogInterface.OnClickListener() {
                         @Override
