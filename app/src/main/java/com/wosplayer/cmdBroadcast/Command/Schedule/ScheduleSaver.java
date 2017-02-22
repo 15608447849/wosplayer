@@ -52,8 +52,7 @@ public class ScheduleSaver implements iCommand {
     };
 
     public static enum ContentTypeEnum {
-        interactive, webpage, url, rss, text, video, image, flash;
-
+        interactive, fudianbank,webpage, url, rss, text, video, image;
         public boolean needsDown() {
             return this.compareTo(video) >= 0;
         }
@@ -65,7 +64,6 @@ public class ScheduleSaver implements iCommand {
     public static void Serialize() {
         rootNode.SettingNodeEntitySave();
     }
-
     public static void clear(){
         uuks = null;
         rootNode.Clear();
@@ -74,7 +72,6 @@ public class ScheduleSaver implements iCommand {
     }
 
 
-//    private static Scheduler.Worker helper =  Schedulers.io().createWorker();
     /**
      * 执行
      *
@@ -84,8 +81,6 @@ public class ScheduleSaver implements iCommand {
     @Override
     public void Execute(String param) {
         Logs.i(TAG,"获取 排期 信息, 当前线程名:"+Thread.currentThread().getName());
-
-        //repeatedVar(param);
 
         saveData(param);
     }
@@ -116,10 +111,10 @@ public class ScheduleSaver implements iCommand {
         String result = uriTranslationXml(uri);
         if (result!=null && result.equals("")){
             isNextLoad = false;
-            Logs.e(TAG," getXMLdata() result 不存在");
+            Logs.e(TAG,"getXMLdata() result 不存在");
             return;
         }
-        Logs.d(TAG," xml data == \n "+result);
+//        Logs.d(TAG," xml data == \n "+result);
         ParseResultXml(callType,result, Obj);
     }
 
@@ -134,7 +129,6 @@ public class ScheduleSaver implements iCommand {
      */
     private static boolean isNextLoad = false;
     private void startWork(final String uri){
-
         Long startTime = System.currentTimeMillis();
         try {
             getXMLdata(uri,ROOT_PARSE,null); //解析数据
@@ -144,10 +138,8 @@ public class ScheduleSaver implements iCommand {
         }
         Long endTime = System.currentTimeMillis();
         Logs.e(TAG,"解析用时 : "+(endTime - startTime)+" 毫秒");
-
         startTime = System.currentTimeMillis();
         //判断是否清理数据
-
         if(SdCardTools.justFileBlockVolume(WosApplication.config.GetStringDefualt("basepath",""),
                 WosApplication.config.GetStringDefualt("storageLimits","50"))){
 
@@ -169,7 +161,6 @@ public class ScheduleSaver implements iCommand {
                 intent.setAction(completeTaskListBroadcast.action);
                 WosApplication.appContext.sendBroadcast(intent);
             }
-
         }
     }
 
@@ -184,9 +175,10 @@ public class ScheduleSaver implements iCommand {
         Intent intent = new Intent(WosApplication.appContext, loaderManager.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         Bundle bundle = new Bundle();
-        bundle.putCharSequenceArrayList(loaderManager.taskKey,tasklist);
-        bundle.putString("terminalNo", WosApplication.config.GetStringDefualt("terminalNo","0000"));
-        bundle.putString("savepath", WosApplication.config.GetStringDefualt("basepath", "/sdcard/mnt/playlist"));
+        bundle.putInt(loaderManager.KEY_TYPE,loaderManager.KEY_TYPE_SCHDULE);
+        bundle.putCharSequenceArrayList(loaderManager.KEY_TASK_LIST,tasklist);
+        bundle.putString(loaderManager.KEY_TERMINAL_NUM, WosApplication.config.GetStringDefualt("terminalNo",""));
+        bundle.putString(loaderManager.KEY_SAVE_PATH, WosApplication.config.GetStringDefualt("basepath", ""));
         intent.putExtras(bundle);
         WosApplication.appContext.startService(intent);
     }
@@ -288,7 +280,9 @@ public class ScheduleSaver implements iCommand {
 
                 String program_root_XmlData = result;
                 if (program_root_XmlData.equals("")) return;
-                Logs.i(TAG,"开始解析一个节目-"+program_root_XmlData);
+
+                Logs.i(TAG,"开始解析一个节目-");
+//                Logs.i(TAG,program_root_XmlData);
                 Element program_root = XmlHelper.getDomXml(new ByteArrayInputStream(program_root_XmlData.getBytes()));
                 if (program_root == null) return;
                 Element programElement = (Element) program_root.getElementsByTagName("programmes").item(0);
@@ -369,7 +363,7 @@ public class ScheduleSaver implements iCommand {
                             HashMap<String, String> rss_data_map = Xmlparse.ParseXml("/rss", rss_programXmlData, Xmlparse.parseType.OnlyLeaf).get(0);
                             content_xmlDataMap.putAll(rss_data_map);
                             Logs.i(TAG,"-----------rss end------");
-                        } else if (contentType.equals(ContentTypeEnum.interactive)) {
+                        } else if (contentType.equals(ContentTypeEnum.interactive)) {//互动
                             //再解析 继续解析
                             getcontents = XmlHelper.getFirstChildNodeValue(content_Element, "getcontents");
                             Logs.i(TAG,"interaction uri :"+ getcontents);
@@ -377,7 +371,7 @@ public class ScheduleSaver implements iCommand {
                             Logs.i(TAG,"-----------interaction end------");
                         } else {
                             getcontents = XmlHelper.getFirstChildNodeValue(content_Element, "getcontents");
-                            Logs.i(TAG,"不在需要判断的特殊类型中");
+                            Logs.i(TAG,getcontents+" - 不在需要判断的特殊类型中");
                         }
                         if (contentType.needsDown()) {
                             try {

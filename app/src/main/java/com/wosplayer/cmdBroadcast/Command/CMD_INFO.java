@@ -235,6 +235,11 @@ public final class CMD_INFO {
 
     /**
      * 建行xml数据 转换 本地xml数据
+     * 本地默认排期
      */
     public static String TSLT = "TSLT:";
+    /**
+    * 富滇银行金融模块
+     */
+    public static String FFBK = "FFBK:";
 }

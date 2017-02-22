@@ -2,6 +2,7 @@ package com.wosplayer.app;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,9 +41,6 @@ public class DataList implements Parcelable {
             return defualtValue;
         }
     }
-
-
-
     public int GetIntDefualt(String key, int defualtValue) {
         try {
             Object object = map.get(key);
@@ -56,8 +54,6 @@ public class DataList implements Parcelable {
             return defualtValue;
         }
     }
-
-
     public double GetdoubleDefualt(String key, double defualtValue) {
         try {
             Object object = map.get(key);
@@ -71,7 +67,6 @@ public class DataList implements Parcelable {
             return defualtValue;
         }
     }
-
     public void put(String key, String value) {
         map.put(key, value);
     }
@@ -81,26 +76,21 @@ public class DataList implements Parcelable {
     public void clear(){
         map.clear();
     }
-
     @Override
     public int describeContents() {
         return 0;
     }
-
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.key);
         dest.writeSerializable(this.map);
     }
-
     public DataList() {
     }
-
     protected DataList(Parcel in) {
         this.key = in.readString();
         this.map = (HashMap<String, String>) in.readSerializable();
     }
-
     public static final Parcelable.Creator<DataList> CREATOR = new Parcelable.Creator<DataList>() {
         @Override
         public DataList createFromParcel(Parcel source) {
@@ -112,7 +102,6 @@ public class DataList implements Parcelable {
             return new DataList[size];
         }
     };
-
     /**
      *打印数据
      */
@@ -127,7 +116,7 @@ public class DataList implements Parcelable {
             Map.Entry entry = (Map.Entry) iter.next();
             Object key = entry.getKey();
             Object val = entry.getValue();
-            System.out.println(key + " ->  "+val);
+            Log.d("本机信息", key + " -  "+val);
         }
     }
 }

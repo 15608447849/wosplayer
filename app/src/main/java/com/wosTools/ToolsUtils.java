@@ -255,7 +255,7 @@ public class ToolsUtils {
                     fileOutputStream.write(buffer, 0 ,length);
                 }
                 fileOutputStream.flush();
-                System.out.println("ReadAssectsDataToSdCard() ----------success--------------");
+               Logs.i("assets文件夹",fileName+"-> "+dirPath+"  success");
                 return true;
             }
         } catch (Exception e) {

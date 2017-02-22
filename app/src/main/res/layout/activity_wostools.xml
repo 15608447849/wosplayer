@@ -6,7 +6,13 @@
     android:gravity="center"
     >
 
+    <TextView
+        android:id="@+id/storedir"
+        android:layout_width="288dp"
+        android:layout_height="wrap_content"
+        android:text="媒体播放器根目录：">
 
+    </TextView>
     <LinearLayout
         android:layout_width="288dp"
         android:layout_height="wrap_content"
@@ -191,6 +197,13 @@
                 <requestFocus />
             </EditText>
         </LinearLayout>
+        <!-- 下拉框 选择播放类型 -->
+            <Spinner
+                android:id="@+id/playtype"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:layout_height="wrap_content">
+            </Spinner>
         <!-- button -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -209,5 +222,6 @@
                 android:text="保存" />
         </LinearLayout>
     </LinearLayout>
+
 
 </LinearLayout>

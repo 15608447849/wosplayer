@@ -104,7 +104,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
         this.y =y;
         this.w =w;
         this.h =h;
-        Logs.i(TAG,"video layout param:"+x+","+y+","+w+","+h);
+        Logs.i(TAG,"视频 layout param:"+x+","+y+","+w+","+h);
         if (layout == null){
             return;
         }
@@ -118,7 +118,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
                 lp.width = w;
                 lp.height = h;
                 this.setLayoutParams(lp);
-                Logs.i(TAG,"视频播放器设置布局...");
+                //Logs.i(TAG,"视频播放器设置布局...");
                 isLayouted = true;
             } catch (Exception e) {
                 Logs.e(TAG,"视频播放设置布局失败：" + e.getMessage());
@@ -170,7 +170,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
             if (!isLayouted) { //如果没布局
                 requestLayout(); //请求布局
                 invalidate();    //刷新视图
-                Logs.d(TAG,"布局 完成");
+               // Logs.d(TAG,"布局 完成");
             }
         }catch (Exception e){
             Logs.e(TAG,"setVideoURI err- "+e.getMessage());
@@ -186,14 +186,14 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
             //设置布局
             this.setMyLayout(this.x, this.y, this.h, this.w);
             if (mMediaPlayer != null && mIsPrepared) {
-                Logs.d(TAG,"开启视频播放中,请稍后...");
+              //  Logs.d(TAG,"开启视频播放中,请稍后...");
                 mMediaPlayer.start();
 
                 mStartWhenPrepared = false;
-                Logs.d(TAG,"mStartWhenPrepared shetting is false");
+             //   Logs.d(TAG,"mStartWhenPrepared shetting is false");
             } else {
                 mStartWhenPrepared = true;
-                Logs.d(TAG,"mStartWhenPrepared shetting is true");
+             //   Logs.d(TAG,"mStartWhenPrepared shetting is true");
             }
         } catch (Exception e) {
             Logs.e(TAG,"Video start error :" + e.getMessage());
@@ -205,7 +205,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
      */
     public void pause() {
         if (isDestroy){
-            Logs.e(TAG,"video 是销毁的");
+          //  Logs.e(TAG,"video 是销毁的");
             return;
         }
         if (mMediaPlayer != null && mIsPrepared) {//如果媒体播放器存在,并且准备完成的
@@ -224,7 +224,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
             return;
         }
         if (!isDestroy){
-            Logs.i(TAG,filename+"视频停止播放");
+            Logs.i(TAG,filename+" 视频停止播放");
             isDestroy = true;
             mMediaPlayer.stop();
             mMediaPlayer.release();
@@ -236,7 +236,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
      * 初始化
      */
     public void initVideoView(boolean isLoop) {
-        Logs.d(TAG,"myvideoplayer initViderView ,isloop - " + isLoop );
+        Logs.d(TAG,"视频组件初始化中 isloop - " + isLoop );
         mVideoWidth = 0; //视频宽度
         mVideoHeight = 0;   //视频高度
         getHolder().addCallback(mySurfaceHolderCallback); //表层回调
@@ -247,22 +247,21 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
 
 
         if (isLoop){
-            Log.d(TAG,"循环播放");
+            //Log.d(TAG,"循环播放");
            setOnCompletionListener_(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    Logs.d(TAG,"video play over ... Completion");
+                  //  Logs.d(TAG,"video play over ... Completion");
                     //设置循环播放
                     setVideoPath(filename);
                     start();
-                    Logs.d(TAG,"initVideoView this.setOnCompletionListener complete!");
+                   // Logs.d(TAG,"initVideoView this.setOnCompletionListener complete!");
                 }
             });
             Logs.d(TAG,"设置循环成功");
         }else{
             Logs.d(TAG,"未设置循环播放");
         }
-
 
     }
 
@@ -279,7 +278,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
         //如果 播放路径不存在 或者 表层持有者 不存在
         if (mUri == null || mSurfaceHolder == null) {
             // not ready for playback just yet, will try again later (没有准备好回放,稍后会再试一次)
-            Logs.e(TAG,"如果 播放路径不存在 或者 表层持有者 不存在,not ready for playback just yet, will try again later \nmUri = "+mUri);
+            Logs.e(TAG,"打开视频错误：mUri = "+mUri + " - mSurfaceHolder ："+ mSurfaceHolder);
             return;
         }
         // 发送广播，关掉系统的音乐播放器
@@ -289,13 +288,13 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
 
         // 播放器存在
         if (mMediaPlayer != null) { //释放
-            Logs.e(TAG," 播放器 已存在") ;
+//            Logs.e(TAG," 播放器 已存在") ;
             mMediaPlayer.stop();
             mMediaPlayer.reset(); //重置释放
             mMediaPlayer.release();
 
             mMediaPlayer = null; //置为空
-            Logs.e(TAG,"释放底层播放器 成功");
+//            Logs.e(TAG,"释放底层播放器 成功");
         }
 
 
@@ -303,36 +302,36 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
             mIsPrepared = false; //是否准备完成 no!
 
             mMediaPlayer = new MediaPlayer(); //新建播放器
-            Logs.d(TAG," 创建视频播放器 ");
+//            Logs.d(TAG," 创建视频播放器 ");
             mMediaPlayer.setOnPreparedListener(mPreparedListener); //准备监听
-            Logs.d(TAG," 设置准备监听完成");
+//            Logs.d(TAG," 设置准备监听完成");
             mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);//改变监听
-            Logs.d(TAG," 设置改变监听完成");
+//            Logs.d(TAG," 设置改变监听完成");
             mDuration = -1; //持续时间
 
             mMediaPlayer.setOnErrorListener(mErrorListener);//错误监听
-            Logs.d(TAG," 错误监听完成");
+//            Logs.d(TAG," 错误监听完成");
 
             mMediaPlayer.setOnCompletionListener(mCompletionListener);//播放完成
-            Logs.d(TAG," 设置播放完成监听 完成 setOnCompletionListener() "+mCompletionListener);
+//            Logs.d(TAG," 设置播放完成监听 完成 setOnCompletionListener() "+mCompletionListener);
 
             mMediaPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);//缓冲更新
-            Logs.d(TAG," 缓冲更新完成");
+//            Logs.d(TAG," 缓冲更新完成");
             mCurrentBufferPercentage = 0;//缓冲百分比 per cent age
             mMediaPlayer.setDataSource(mContext, mUri); //设置数据源
-            Logs.d(TAG," 设置数据源完成");
+//            Logs.d(TAG," 设置数据源完成");
             mSurfaceHolder.setSizeFromLayout();//设置surface大小来自布局
-            Logs.d(TAG," 设置大小来源布局 完成");
+//            Logs.d(TAG," 设置大小来源布局 完成");
             mMediaPlayer.setDisplay(getHolder());//设置播放器图层显示在哪
-            Logs.d(TAG," 设置视频图片显示层对象 完成");
+//            Logs.d(TAG," 设置视频图片显示层对象 完成");
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);//设置播放器音频流
-            Logs.d(TAG," 设置音频流 完成");
+//            Logs.d(TAG," 设置音频流 完成");
             mMediaPlayer.setScreenOnWhilePlaying(true);//设置屏幕回放
-            Logs.d(TAG," 设置 设置是否使用 SurfaceHolder 显示 true");
+//            Logs.d(TAG," 设置 设置是否使用 SurfaceHolder 显示 true");
             mMediaPlayer.setLooping(true);
-            Logs.d(TAG," 设置loop 完成->设置是否循环播放");
+//            Logs.d(TAG," 设置loop 完成->设置是否循环播放");
             mMediaPlayer.prepareAsync();//异步准备
-            Logs.d(TAG," 异步准备 被调用 完成");
+//            Logs.d(TAG," 异步准备 被调用 完成");
         } catch (Exception e) {
             // TODO Auto-generated catch block
             //e.printStackTrace();
@@ -467,10 +466,10 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
     private MediaPlayer.OnPreparedListener mPreparedListener = new MediaPlayer.OnPreparedListener(){
 
         public void onPrepared(MediaPlayer mp) {
-            Logs.d("-- 准备完成 -- 监听事件 -- 开始执行 --");
+//            Logs.d("-- 准备完成 -- 监听事件 -- 开始执行 --");
 
             if (mOnPreparedListener != null) {//如果准备监听不为空
-                Logs.d(TAG,"mOnPreparedListener 存在");
+//                Logs.d(TAG,"mOnPreparedListener 存在");
                 mOnPreparedListener.onPrepared(mMediaPlayer);
             }
 
@@ -478,24 +477,24 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
             mVideoWidth = mp.getVideoWidth();
             mVideoHeight = mp.getVideoHeight();
 
-            Logs.d(TAG,"设置视频宽高:("+mVideoWidth+","+mVideoHeight);
+//            Logs.d(TAG,"设置视频宽高:("+mVideoWidth+","+mVideoHeight);
             if (mVideoWidth != 0 && mVideoHeight != 0) { //宽高不等于0
 
                 getHolder().setFixedSize(mVideoWidth, mVideoHeight);//fixed 固定
-                Logs.d(TAG,"固定 holder");
+//                Logs.d(TAG,"固定 holder");
 
                 if (mSurfaceWidth == mVideoWidth  && mSurfaceHeight == mVideoHeight){ //如果 表层宽高 等于 视频宽高
-                    Logs.d(TAG,"表层 == 视频宽高");
+//                    Logs.d(TAG,"表层 == 视频宽高");
                     if (mSeekWhenPrepared != 0) { //准备完成播放点不在初始点 设置当前点播放 并还原初始点
-                        Logs.d(TAG,"准备完成播放点不在初始点 设置当前点播放 并还原初始点");
+//                        Logs.d(TAG,"准备完成播放点不在初始点 设置当前点播放 并还原初始点");
                         mMediaPlayer.seekTo(mSeekWhenPrepared);
                         mSeekWhenPrepared = 0;
                     }
                     if (mStartWhenPrepared) { //准备完成何时开始 == true
-                        Logs.d(TAG,"mPreparedListener restart 视频准备完成监听 重启");
+//                        Logs.d(TAG,"mPreparedListener restart 视频准备完成监听 重启");
                         mMediaPlayer.start();
                         mStartWhenPrepared = false;
-                        Logs.d(TAG,"mStartWhenPrepared setting is false");
+//                        Logs.d(TAG,"mStartWhenPrepared setting is false");
                     } else if (!isPlaying() && (mSeekWhenPrepared != 0 || getCurrentPosition() > 0)) {//如果 不在播放中 并且 准备完成播放点 不是初始点 或者 现在的播放点大于初始点
                         Logs.e(TAG,"mPreparedListener 当前不在播放中 ,播放点不在初始点...");
                     }
@@ -510,27 +509,27 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
                 Logs.d(TAG,"未知的视频大小");
                 if (mSeekWhenPrepared != 0) {
                     mMediaPlayer.seekTo(mSeekWhenPrepared);
-                    Logs.d(TAG,"mMediaPlayer seekTo mSeekWhenPrepared ,"+mSeekWhenPrepared);
+//                    Logs.d(TAG,"mMediaPlayer seekTo mSeekWhenPrepared ,"+mSeekWhenPrepared);
                     mSeekWhenPrepared = 0;
                 }
                 if (mStartWhenPrepared) {
 
-                    Logs.d(TAG,"mPreparedListener restart 视频准备完成监听: 重启");
+//                    Logs.d(TAG,"mPreparedListener restart 视频准备完成监听: 重启");
                     mMediaPlayer.start();
                     mStartWhenPrepared = false;
                 }
             }
 
             mIsPrepared = true; //准备完成
-            Logs.d(TAG,"mIsPrepared setting true");
-            Logs.d(TAG,"mPreparedListener 执行完毕");
+//            Logs.d(TAG,"mIsPrepared setting true");
+//            Logs.d(TAG,"mPreparedListener 执行完毕");
 
         }
     };
 
     //设置准备完成监听
     public void setOnPreparedListener_(MediaPlayer.OnPreparedListener l) {
-        Logs.d(TAG,"准备完成 setOnPreparedListener()");
+//        Logs.d(TAG,"准备完成 setOnPreparedListener()");
         mOnPreparedListener = l;
     }
 
@@ -540,7 +539,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
     private MediaPlayer.OnCompletionListener mOnCompletionListener = null;
     private MediaPlayer.OnCompletionListener mCompletionListener=new MediaPlayer.OnCompletionListener() {
         public void onCompletion(MediaPlayer mp) {
-            Logs.e(TAG,"video mCompletionListener() _ onCompletion() "+ mOnCompletionListener);
+//            Logs.e(TAG,"video mCompletionListener() _ onCompletion() "+ mOnCompletionListener);
 
             if (mOnCompletionListener != null) {
 
@@ -569,9 +568,9 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
         int height = getDefaultSize(mVideoHeight, heightMeasureSpec);
 
         try {
-            Logs.i(TAG, "视频播放器 onMeasure() 绘制 w:"+width+" - h:"+height);
+//            Logs.i(TAG, "视频播放器 onMeasure() 绘制 w:"+width+" - h:"+height);
             setMeasuredDimension(width, height); //设置绘制大小
-            Logs.d(TAG,"* 绘制完成");
+//            Logs.d(TAG,"* 绘制完成");
         }catch (Exception e){
             Logs.e(TAG," onMeasure err : "+e.getMessage());
         }
@@ -651,27 +650,5 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
             }
         }
     };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }

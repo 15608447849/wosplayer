@@ -27,7 +27,6 @@ public class Task {
     //文件名
     private String fileName;
 
-
     private int state;
     private String url;
     private LoaderCall call;

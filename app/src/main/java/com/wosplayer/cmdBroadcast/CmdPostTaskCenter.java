@@ -8,6 +8,7 @@ import com.wosplayer.app.Logs;
 import com.wosplayer.cmdBroadcast.Command.CMD_INFO;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_CAPT;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Close_App;
+import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_FdRer;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_PASD;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Reboot_App;
 import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_Reboot_Sys;
@@ -80,12 +81,15 @@ public class CmdPostTaskCenter extends BroadcastReceiver {
         commandList.put(CMD_INFO.PASD,new Command_PASD());
         //建行对接接口
         commandList.put(CMD_INFO.TSLT,new Command_TSLT(commandList.get(CMD_INFO.UPSC)));
+
+        //富滇银行
+        commandList.put(CMD_INFO.FFBK,new Command_FdRer());
     }
 
     private void postCmd(final String cmd, final String param){
 
         if (commandList.containsKey(cmd)) {
-            Logs.i("准备 执行指令:"+cmd +" 所在线程:"+Thread.currentThread().getName()+"- 当前线程数:"+Thread.getAllStackTraces().size());
+            //Logs.i("准备 执行指令:"+cmd +" 所在线程:"+Thread.currentThread().getName()+"- 当前线程数:"+Thread.getAllStackTraces().size());
             if (cmd.equals(CMD_INFO.REBO) || cmd.equals(CMD_INFO.UIRE) || cmd.equals(CMD_INFO.UPDC)
                     || cmd.equals(CMD_INFO.SHDO) || cmd.equals(CMD_INFO.SHDP) || cmd.equals(CMD_INFO.UPLG)
                     || cmd.equals(CMD_INFO.SCRN) || cmd.equals(CMD_INFO.CAPT) || cmd.equals(CMD_INFO.TSLT)
@@ -101,12 +105,10 @@ public class CmdPostTaskCenter extends BroadcastReceiver {
                 helper2.schedule(new Action0() {
                     @Override
                     public void call() {
-
                         commandList.get(cmd).Execute(param);
                     }
                 });
             }
-
         }
 
     }

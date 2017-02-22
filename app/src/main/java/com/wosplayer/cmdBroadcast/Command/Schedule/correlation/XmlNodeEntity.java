@@ -129,7 +129,7 @@ public class XmlNodeEntity implements Parcelable {
             this.AddProperty("md5", md5);
             String savedata = binder.toJson(this);
             Logs.i(TAG,"序列化数据:"+savedata);
-            writeShareDataSelf("settingNodeEntity", savedata);
+            writeShareDataSelf("settingNodeEntity", savedata);//保存的排期信息
         }catch(Exception e)
         {
             Logs.e(TAG ,e.getMessage());

@@ -1,5 +1,6 @@
 package com.wosplayer.cmdBroadcast.Command.OtherCmd;
 
+import com.wosplayer.app.AppTools;
 import com.wosplayer.app.Logs;
 import com.wosplayer.app.WosApplication;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleSaver;
@@ -23,24 +24,45 @@ import com.wosplayer.cmdBroadcast.Command.iCommand;
  */
 public class Command_TSLT implements iCommand {
     private static final String TAG = "_TSLT";
-    ScheduleSaver saver = null;
-
+    private iCommand saver = null;
+    //构造
     public Command_TSLT(iCommand saver) {
-        try {
-            this.saver = (ScheduleSaver)saver;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+      this.saver = saver;
     }
 
     @Override
     public void Execute(String param) {
         if (param.equals("default_")) {
+            //执行默认节目
             getDefaultProg();
         }
     }
 
 
+    //本地默认排期
+    public void getDefaultProg() {
+        try {
+            String defaultPath = WosApplication.config.GetStringDefualt("default","");
+            if (defaultPath.isEmpty()) return;
+
+            if (!cn.trinea.android.common.util.FileUtils.isFileExist(defaultPath+"default_sche.xml")) {
+                ///文件不存在 - 解压缩
+                AppTools.defaultProgram(WosApplication.appContext,defaultPath);
+                Logs.i(TAG,"解压缩默认排期完成");
+            }
+            defaultPath = "file://"+defaultPath+"default_sche.xml";
+            //发送广播 -> 排期
+            if (saver == null) {
+                saver = new ScheduleSaver();
+            }
+            ScheduleSaver.clear();
+            saver.Execute(defaultPath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //兼容建设银行 暂未启动
     public Object getSrcFile() {
         try {
             //sdcard -> mnt/internal_sd
@@ -66,24 +88,4 @@ public class Command_TSLT implements iCommand {
         }
         return null;
     }
-
-    //本地默认排期
-    public void getDefaultProg() {
-        try {
-            if (cn.trinea.android.common.util.FileUtils.isFileExist("/mnt/sdcard/wosplayer/default/default_sche.xml")) { //文件存在
-                String str = "file:///mnt/sdcard/wosplayer/default/default_sche.xml";
-                //发送广播 -> 排期
-                if (saver == null) {
-                    saver = new ScheduleSaver();
-                }
-                    ScheduleSaver.clear();
-                    saver.Execute(str);
-            }else{
-                Logs.d(TAG,"没有找到默认排期 - /mnt/sdcard/wosplayer/default/default_sche.xml");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
 }

@@ -137,14 +137,14 @@ public class Command_UPDC implements iCommand {
             IntentFilter filter=new IntentFilter();
             filter.addAction(UPDCbroad.ACTION);
             WosApplication.appContext.registerReceiver(broad, filter); //只需要注册一次
-
             //发送 远程升级
             Intent intent = new Intent(WosApplication.appContext, loaderManager.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             Bundle bundle = new Bundle();
-            bundle.putString("terminalNo", WosApplication.config.GetStringDefualt("terminalNo","0000"));
-            bundle.putString("savepath", WosApplication.config.GetStringDefualt("basepath", "/sdcard/mnt/playlist"));
-            bundle.putString("UPDC",uri);
+            bundle.putInt(loaderManager.KEY_TYPE,loaderManager.KEY_TYPE_UPDATE_APK);
+            bundle.putString(loaderManager.KEY_TERMINAL_NUM, WosApplication.config.GetStringDefualt("terminalNo",""));
+            bundle.putString(loaderManager.KEY_SAVE_PATH, WosApplication.config.GetStringDefualt("basepath", ""));
+            bundle.putString(loaderManager.KEY_TASK_SINGLE,uri);
             intent.putExtras(bundle);
             WosApplication.appContext.startService(intent);
         }

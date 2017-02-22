@@ -23,7 +23,18 @@ import java.util.concurrent.locks.ReentrantLock;
 public class loaderManager extends IntentService
 {
 
-    public static final String taskKey = "loaderTaskArr";
+    public static final String KEY_TYPE="type";
+    public static final int KEY_TYPE_SCHDULE = 1;
+    public static final int KEY_TYPE_UPDATE_APK = 2;
+    public static final int KEY_TYPE_FFBK = 3;
+
+
+    public static final String KEY_TERMINAL_NUM="terminalNo";
+    public static final String KEY_SAVE_PATH="savepath";
+    public static final String KEY_ALIAS="alias";
+    public static final String KEY_TASK_LIST="loaderTaskArr";
+    public static final String KEY_TASK_SINGLE="loaderTasksingle";
+
     private static final String TAG = "_loaderManager";
     public loaderManager() {
         super("loaderManager");
@@ -39,56 +50,73 @@ public class loaderManager extends IntentService
         super.onDestroy();
         Logs.i("-------------------------------------------loaderManager destroy----------------------------------------------------------");
     }
-    private String terminalNo ;
-    private String savepath ;
-    private ArrayList<CharSequence> TaskList = null;
-    private String updcUrl;
+
     @Override
     protected void onHandleIntent(final Intent intent) {
-        TaskList =   intent.getExtras().getCharSequenceArrayList(taskKey);
-        terminalNo = intent.getExtras().getString("terminalNo","");
-        savepath = intent.getExtras().getString("savepath","");
+        Bundle bundle = intent.getExtras();
+        int loadType = bundle.getInt(KEY_TYPE);
+        String terminalNo = bundle.getString(KEY_TERMINAL_NUM,"");//终端id
+        String savepath = bundle.getString(KEY_SAVE_PATH,"");//保存路径
+        String alias = bundle.getString(KEY_ALIAS,"");//别名
+        ArrayList<CharSequence> taskList = bundle.getCharSequenceArrayList(KEY_TASK_LIST);//任务列表
+        String singUrl = bundle.getString(KEY_TASK_SINGLE,"");//单一任务
 
-        if (TaskList == null || TaskList.size() == 0){
-            updcUrl = intent.getExtras().getString("UPDC","");
-            if (updcUrl==null || "".equals(updcUrl)){
-                return;
-            }else{
-                Log.i(TAG,"下载升级apk - >>>"+updcUrl+"\nsavepath - "+savepath+"\nterminalNo - "+terminalNo);
-                TaskQueue.getInstants().addTask(new Task(savepath, terminalNo, updcUrl, new LoaderCall() {
-                    @Override
-                    public void downloadResult(String filePath, String state) {
-                        try {
-                            Logs.i(TAG,"下载成功 升级apk - 路径- "+filePath );
-                            sendUPDCBroad(filePath);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }));
-            }
+
+        if (loadType == KEY_TYPE_SCHDULE){
+            //排期发来的资源下载列表
+            scheduleSourceLoad(terminalNo,savepath,taskList);
+        }else
+        if (loadType == KEY_TYPE_UPDATE_APK){
+            //更新apk
+            updateAPK(terminalNo,savepath,singUrl);
+        }else
+        if (loadType == KEY_TYPE_FFBK){
+            //富滇银行 资源文件下载
+            loadResource(terminalNo,savepath,singUrl,alias);
         }else{
-            Log.i(TAG,"收到一个 下载队列, 队列大小:"+TaskList.size()+"\n terminalNo="+terminalNo+"\nsavepath="+savepath);
-            testWork();
+           Logs.d(TAG, "onHandleIntent: 错误的下载任务类型");
         }
+    }
+
+    //下载富癫银行的资源文件
+    private void loadResource(String terminalNo, String savepath, String singUrl, String alias) {
+        Logs.i(TAG,"下载 web resouce - "+singUrl+"\n savepath - "+savepath+"\n terminalNo - "+terminalNo+"\n alias: "+alias);
+        Task task = new Task(savepath,terminalNo,singUrl,null);
+        task.setFileName(alias);
+        TaskQueue.getInstants().addTask(task);
+    }
+
+    //更新apk
+    private void updateAPK(String terminalNo, String savepath, String singUrl) {
+        Logs.i(TAG,"下载 apk - "+singUrl+"\n savepath - "+savepath+"\n terminalNo - "+terminalNo);
+        TaskQueue.getInstants().addTask(new Task(savepath, terminalNo, singUrl, new LoaderCall() {
+            @Override
+            public void downloadResult(String filePath, String state) {
+                try {
+                    Logs.i(TAG,"下载apk成功  - 路径- "+ filePath );
+                    Intent intent = new Intent();
+                    intent.setAction(UPDCbroad.ACTION);
+                    Bundle bundle = new Bundle();
+                    bundle.putString(UPDCbroad.key,filePath);
+                    intent.putExtras(bundle);
+                    getApplicationContext().sendBroadcast(intent);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }));
 
     }
 
-    private void testWork() {
-        for (int i = 0;i<TaskList.size();i++){
-            TaskQueue.getInstants().addTask(new Task(savepath,terminalNo,(String)TaskList.get(i),null));
+    private void scheduleSourceLoad(String terminalNo,String savepath,ArrayList<CharSequence> taskList) {
+        Log.i(TAG,"收到一个 排期资源下载队列, 队列大小:"+taskList.size()+"\n terminalNo="+terminalNo+"\n savepath="+savepath);
+        for (int i = 0;i<taskList.size();i++){
+            TaskQueue.getInstants().addTask(new Task(savepath,terminalNo,(String)taskList.get(i),null));
         }
         Intent intent = new Intent();
         intent.setAction(completeTaskListBroadcast.action);
         getApplicationContext().sendBroadcast(intent);
     }
 
-    public void sendUPDCBroad(String filepath){
-        Intent intent = new Intent();
-        intent.setAction(UPDCbroad.ACTION);
-        Bundle bundle = new Bundle();
-        bundle.putString("updc",filepath);
-        intent.putExtras(bundle);
-        getApplicationContext().sendBroadcast(intent);
-    }
+
 }

@@ -130,17 +130,22 @@ public class DisplayActivity extends Activity {
             @Override
             public boolean onLongClick(View v) {
 
-                AppTools.settingServerInfo(activityContext,false);
-                //停止工作
-                StopWork(false);
-                AppTools.Toals(appContext,"2秒后进入配置界面");
-                //打开配置界面
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        openWosTools();
-                    }
-                },2*1000);
+                if (frgAct!=null){
+                    AppTools.Toals(appContext,"请设置播放器参数");
+                }else{
+                    AppTools.settingServerInfo(activityContext,false);
+                    //停止工作
+                    StopWork(false);
+                    AppTools.Toals(appContext,"2秒后进入配置界面");
+                    //打开配置界面
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            openWosTools();
+                        }
+                    },2*1000);
+                }
+
                 return true;
             }
         });
@@ -315,8 +320,7 @@ public class DisplayActivity extends Activity {
 
         if (activityContext!=null){
             //初始化数据
-                ((WosApplication)this.getApplication()).initConfig();
-                ((WosApplication)this.getApplication()).initDefaultSource();
+           ((WosApplication)this.getApplication()).initConfig();
             //开启通讯服务
             WosApplication.startCommunicationService(this);
             PlayTypeStart();
@@ -327,19 +331,13 @@ public class DisplayActivity extends Activity {
 
     //结束工作
     private void StopWork(boolean isclose){
-
-
             WosApplication.stopCommunicationService(this); //关闭服务
             PlayTypeStop();
-            if (isclose) {
-                finish();
-            }
-
+            if (isclose) finish();
     }
 
     private void PlayTypeStart() {
         //如果是富滇银行-全屏数据显示
-
         try {
             ScheduleSaver.clear();
             ScheduleReader.clear();
@@ -443,9 +441,9 @@ public class DisplayActivity extends Activity {
         Fragment wostools= fm.findFragmentByTag(AppToolsFragment.FLAG);
         if (wostools!=null){
             ft.hide(wostools);
-            frgAct = null;
             ft.commitAllowingStateLoss();
         }
+        frgAct = null;
         findViewById(R.id.frgment_layout).setVisibility(View.GONE);
     }
 }

@@ -19,7 +19,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>-->
         <activity android:name=".app.DisplayActivity"
-            android:launchMode="singleTask">
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

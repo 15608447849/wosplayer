@@ -143,7 +143,6 @@ public class layoutExcuter implements TimeCalls{
         String UUKS = content.getXmldata().get("uuks");
         String contentsname = content.getXmldata().get("contentsname");
 
-
         datalist.put("x",x);
         datalist.put("y",y);
         datalist.put("width",width);
@@ -205,6 +204,10 @@ public class layoutExcuter implements TimeCalls{
                 Logs.e(TAG,"互动模块 存在多个 布局 无法解析 ...");
                 return new Object[]{datalist,ob};
             }
+        }
+        if (fileproterty.equals("fudianbank")){
+
+            datalist.put("fudianpath",WosApplication.config.GetStringDefualt("fudianpath",""));
         }
         return  new Object[]{datalist,ob};
     }

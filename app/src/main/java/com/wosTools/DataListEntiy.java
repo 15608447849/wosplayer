@@ -77,7 +77,6 @@ public class DataListEntiy {
             Object val = entry.getValue();
             ToolsUtils.writeShareData(WosApplication.appContext,key.toString(), val.toString());
         }
-
     }
 
 

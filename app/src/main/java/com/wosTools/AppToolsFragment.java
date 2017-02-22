@@ -2,6 +2,7 @@ package com.wosTools;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -11,15 +12,25 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.wosplayer.R;
 import com.wosplayer.app.AppTools;
+import com.wosplayer.app.BackRunner;
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
+import com.wosplayer.app.SystemConfig;
 import com.wosplayer.tool.SdCardTools;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import cn.trinea.android.common.util.FileUtils;
 
 /**
  * Created by 79306 on 2017/2/20.
@@ -45,6 +56,7 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
         super.onDetach();
     }
 
+    private TextView storeDir;
     private EditText serverip;
     private EditText serverport;
     private EditText companyid;
@@ -55,8 +67,10 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
     private EditText RestartBeatInterval;
     private Button btnGetID;
     private Button btnSaveData;
-    public DisplayMetrics m_dm;
-    public DataListEntiy dataList;
+    private Spinner playtype;
+    private SpnnerAdpter adapter;
+    private SystemConfig dataList;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -65,6 +79,7 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
 
     private View initView(LayoutInflater inflater) {
         ViewGroup vp = (ViewGroup) inflater.inflate(R.layout.activity_wostools,null);
+        storeDir=(TextView)vp.findViewById(R.id.storedir);
         serverip=(EditText)vp.findViewById(R.id.serverip);
         serverport=(EditText)vp.findViewById(R.id.serverport);
         companyid=(EditText)vp.findViewById(R.id.companyid);
@@ -77,6 +92,23 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
         btnGetID.setOnClickListener(this);
         btnSaveData = (Button) vp.findViewById(R.id.btnSaveData);
         btnSaveData.setOnClickListener(this);
+        playtype = (Spinner) vp.findViewById(R.id.playtype);
+        adapter = new SpnnerAdpter(activity);
+        playtype.setAdapter(adapter);
+        playtype.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                //选择完成
+                Logs.d(TAG,"选择模式 - "+adapter.getDataOnIndex(position));
+                view.setBackgroundColor(Color.WHITE);
+                dataList.put("playMode",adapter.getDataOnIndex(position));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
         return vp;
     }
 
@@ -86,20 +118,33 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
         InitValue();
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        //结束线程
+        RequstTerminal.EndRequst();
+    }
+
     /**
      * 加载配置
      */
     public  void InitConfig()
     {
-        Logs.i(TAG, "开始加载数据");
-        m_dm = new DisplayMetrics();
-        //获取手机分辨率
-        activity.getWindowManager().getDefaultDisplay().getMetrics(m_dm);
         //检测sd卡
         SdCardTools.checkSdCard(activity);
-        dataList=new DataListEntiy();
-        dataList.ReadShareData();
-        RequstTerminal.setHandler(activity.mHandler);
+
+        Logs.i(TAG, "-------------------开始加载本机数据--------------------------------");
+        dataList= SystemConfig.get().read();
+        DisplayMetrics m_dm = new DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getMetrics(m_dm);
+        //获取手机分辨率
+        dataList.put("width",Integer.toString(m_dm.widthPixels));
+        dataList.put("height",Integer.toString(m_dm.heightPixels));
+        //获取本机地址
+        dataList.put("tip",AppTools.getLocalIpAddress());
+        //获取本机机器码
+        dataList.put("mac",AppTools.GetMac(activity));
+
     }
 
     /**
@@ -109,12 +154,13 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
     {
         try
         {
+            storeDir.setText("媒体播放器主目录:"+SdCardTools.getAppSourceDir(activity));
             serverip.setText(dataList.GetStringDefualt("serverip", "127.0.0.1"));
             serverport.setText(dataList.GetStringDefualt("serverport", "8000"));
             companyid.setText(dataList.GetStringDefualt("companyid", "999"));
             terminalNo.setText(dataList.GetStringDefualt("terminalNo", ""));
             heartbeattime.setText(dataList.GetStringDefualt("HeartBeatInterval", "30"));
-            BasePath.setText(catPathfile(dataList.GetStringDefualt("basepath", "")));
+            BasePath.setText(catPathfile(dataList.GetStringDefualt("basepath", "")));//资源地址
             StorageLimits.setText(dataList.GetStringDefualt("storageLimits","50"));
             RestartBeatInterval.setText(dataList.GetStringDefualt("RestartBeatInterval","30"));
             //焦点默认在这个控件上
@@ -137,30 +183,31 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
 
 
 
-    /**
-     * 保存
-     */
-    public void save(){
-        GetViewValue();
-        dataList.SaveShareData();
-        if (!"".equals(terminalNo.getText().toString())){
-            AppTools.settingServerInfo(activity,true);
-        }
-    }
+
 
     /**
      * 获取控件传入的数据并封装
      */
     public void GetViewValue()
     {
+        ArrayList<String> pathList = new ArrayList<>();
+
+        String serverId = serverip.getText().toString();
+        String serverPort = serverport.getText().toString();
+        String CaptureURL = String.format("http://%s:%s/wos/captureManagerServlet",
+                serverId,
+                serverPort);
+
         dataList.put("terminalNo",terminalNo.getText().toString());//终端id
-        dataList.put("serverip",  serverip.getText().toString());//服务器ip
-        dataList.put("serverport",  serverport.getText().toString());//终端端口
+        dataList.put("serverip", serverId);//服务器ip
+        dataList.put("serverport",serverPort);//终端端口
+
+        dataList.put("CaptureURL", CaptureURL);//截图上传url
         dataList.put("companyid",  companyid.getText().toString());//公司id
         dataList.put("HeartBeatInterval",  heartbeattime.getText().toString());//心跳
         dataList.put("RestartBeatInterval",RestartBeatInterval.getText().toString()); //重启时间
         dataList.put("storageLimits",StorageLimits.getText().toString());//sdcard 清理阔值
-        String basepath=BasePath.getText().toString();//资源存储的 文件名
+        String basepath=BasePath.getText().toString();//资源存储的文件名
 //      例: xxx前缀 /basepath/资源1
         if (!basepath.startsWith("/")){
             basepath = "/"+basepath;
@@ -172,15 +219,40 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
 
         basepath = SdCardTools.getAppSourceDir(activity)+basepath;
         dataList.put("basepath",  basepath);
-
+        pathList.add(basepath);
+//        dataList.put("CAPTIMAGEPATH", basepath + "screen.png");//截图本地存放位置
+//        dataList.put("defaultVideo", basepath + "default.mp4");//默认视频本地位置
         //建设银行接口资源下载位置
         basepath = SdCardTools.getAppSourceDir(activity)+SdCardTools.Construction_Bank_dir_source;
         dataList.put("bankPathSource",basepath);
-
+        pathList.add(basepath);
         basepath = SdCardTools.getAppSourceDir(activity)+SdCardTools.Construction_Bank_dir_xmlfile;
         dataList.put("bankPathXml",basepath);
+        pathList.add(basepath);
+        final ArrayList<String> mlist = pathList;
+        final Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                for (String path:mlist){
+                    Log.d(TAG, "后台进程: 创建文件夹 "+path +" 结果："+FileUtils.makeDirs(path));
+                }
+            }
+        };
+        BackRunner.runBackground(runnable);
     }
-
+    /**
+     * 保存 - 获取值 - 创建所有文件路径
+     */
+    public void save(){
+        GetViewValue();
+        dataList.save();
+        if (!"".equals(terminalNo.getText().toString())){
+            AppTools.settingServerInfo(activity,true);
+            activity.mHandler.sendEmptyMessage(DisplayActivity.HandleEvent.close.ordinal());
+        }else{
+            AppTools.Toals(activity,"配置信息不可用，请联系客服");
+        }
+    }
     public void setcompanyid(String value)
     {
         try
@@ -203,19 +275,16 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
     @Override
     public void onClick(View v) {
         int vid = v.getId();
-        if (vid == R.id.btnGetID){
-            if(dataList!=null && m_dm!=null){
-                //结束线程
-                RequstTerminal.EndRequst();
+        if (vid == R.id.btnGetID){ //获取id
+            if(dataList!=null){
                 //把数据封装到集合中
                 GetViewValue();
                 //开启线程
-                RequstTerminal.BeginRequst(dataList,m_dm);
+                RequstTerminal.BeginRequst(dataList,activity.mHandler);
             }
         }
         if (vid == R.id.btnSaveData){ //保存数据
             save();
-            activity.mHandler.sendEmptyMessage(DisplayActivity.HandleEvent.close.ordinal());
         }
     }
 
