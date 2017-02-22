@@ -2,7 +2,7 @@ package com.wosplayer.Ui.performer;
 
 import android.graphics.Typeface;
 
-import com.wosplayer.Ui.element.IPlayer;
+import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.IVideoPlayer;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.WosApplication;

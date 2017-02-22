@@ -1,4 +1,4 @@
-package com.wosplayer.Ui.element;
+package com.wosplayer.Ui.element.interfaces;
 
 import com.wosplayer.Ui.performer.TimeCalls;
 import com.wosplayer.app.DataList;
@@ -8,12 +8,11 @@ import com.wosplayer.app.DataList;
  */
 
 public interface IPlayer{
-
-    public void loadData(DataList mp,Object ob);
-    public void start();
-    public void stop();
-    public void setlayout ();
-    public DataList getDatalist();
+     void loadData(DataList mp,Object ob);
+     void start();
+     void stop();
+//     void setlayout ();
+//     DataList getDatalist();
     void setTimerCall(TimeCalls timer);
     void unTimerCall();
 }

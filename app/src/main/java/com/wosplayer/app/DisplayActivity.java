@@ -26,14 +26,13 @@ import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.MyVideoView;
 import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageStore;
 import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageViewPicassocLoader;
-import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
+import com.wosplayer.Ui.element.interfaces.IviewPlayer;
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleReader;
 import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleSaver;
 import com.wosplayer.service.MonitorService;
 import com.wosplayer.service.RestartApplicationBroad;
 
-import com.wosTools.RequstTerminal;
 import static com.wosplayer.app.WosApplication.appContext;
 import static com.wosplayer.app.WosApplication.config;
 

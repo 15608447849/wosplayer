@@ -5,7 +5,7 @@ import android.media.MediaPlayer;
 import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
 
-import com.wosplayer.Ui.element.IPlayer;
+import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.MyVideoView;
 import com.wosplayer.Ui.performer.TimeCalls;
 import com.wosplayer.app.DataList;
@@ -21,39 +21,38 @@ import com.wosplayer.loadArea.otherBlock.fileUtils;
 
 public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
     private static final java.lang.String TAG = "IVideoPlayer";
-    private Context mCcontext;
-    private ViewGroup mfatherView = null;
-    private int x=0;
-    private int y=0;
-    private int h=0;
-    private int w=0;
-    private boolean isExistOnLayout = false;//是否已经布局
+    private Context context;
+    private ViewGroup superView = null;
+
+    private boolean isLayout = false;//是否已经布局
 
     //播放器
     private MyVideoView video = null;
     public IVideoPlayer(Context context,ViewGroup vp) {
         super(context);
-        this.mfatherView = vp;
-        mCcontext =context;
-        video = new MyVideoView(context,this);
+        this.superView = vp;
+        this.context =context;
+
     }
 
-    private String singleFileLocalPath = null;
+    private String localPath = null;
     public String singleFileUri = null;
     private DataList mp = null;
     @Override
     public void loadData(DataList mp, Object ob) {
         try {
-        this.mp = mp;
-        this.x = mp.GetIntDefualt("x", 0);
-        this.y = mp.GetIntDefualt("y", 0);
-        this.w = mp.GetIntDefualt("width", 0);
-        this.h = mp.GetIntDefualt("height", 0);
 
-
-        this.singleFileLocalPath = mp.GetStringDefualt("localpath", "");
+            video = new MyVideoView(context,this);
+            int x,y,h,w;
+        x = mp.GetIntDefualt("x", 0);
+        y = mp.GetIntDefualt("y", 0);
+        w = mp.GetIntDefualt("width", 0);
+        h = mp.GetIntDefualt("height", 0);
+        this.setLayoutParams(new AbsoluteLayout.LayoutParams(w,h,x,y));
+        video.setLayoutParam(x,y,w,h);
+        this.localPath = mp.GetStringDefualt("localpath", "");
         this.singleFileUri = mp.GetStringDefualt("getcontents", "");
-        Logs.d(TAG,"获取到一个视频 - "+x+y+"-"+w+","+h+"  - "+singleFileLocalPath);
+        Logs.d(TAG,"获取到一个视频 - "+x+y+"-"+w+","+h+"  - "+localPath);
         video.initVideoView(true);//false 不循环
             video.setOnCompletionListener_(new MediaPlayer.OnCompletionListener() {
                 @Override
@@ -72,35 +71,19 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
         }
     }
 
-    @Override
-    public void setlayout() {
-        try {
-            if (!isExistOnLayout){
-                mfatherView.addView(this);
-                isExistOnLayout = true;
-            }
-
-            AbsoluteLayout.LayoutParams lp = (AbsoluteLayout.LayoutParams) this
-                    .getLayoutParams();
-            lp.x = x;
-            lp.y = y;
-            lp.width = w;
-            lp.height = h;
-            this.setLayoutParams(lp);
-            //设置播放器
-            video.setMyLayout(x,y,w,h);
-        } catch (Exception e) {
-            Logs.e(TAG,"设置布局:" + e.getMessage());
-        }
-    }
+ 
 
     @Override
     public void start() {
         try{
-            setlayout();//设置布局
-                    if(!fileUtils.checkFileExists(singleFileLocalPath)) {//fileUtils.checkFileExists(filename)
+
+            if (!isLayout){
+                superView.addView(this);
+                isLayout = true;
+            }
+                    if(!fileUtils.checkFileExists(localPath)) {
                         //不存在
-                        Logs.e(TAG, "开始 - 视频资源 不存在 - " + singleFileLocalPath);
+                        Logs.e(TAG, "视频资源 不存在 - " + localPath);
                         callTo();
 //                        //播放默认视频
                         String del = WosApplication.getConfigValue("defaultVideo");
@@ -108,7 +91,7 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
                             playVideo(del);
                         }
                     }else{
-                        playVideo(singleFileLocalPath);
+                        playVideo(localPath);
                     }
         }catch (Exception e){
             Logs.e(TAG,"开始:"+e.getMessage());
@@ -118,19 +101,19 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
     @Override
     public void stop() {
         try {
-            //移除父视图
-            mfatherView.removeView(this);
-            isExistOnLayout = false;
+            if (isLayout){
+                //移除父视图
+                superView.removeView(this);
+                isLayout = false;
+            }
+
         }catch (Exception e){
             Logs.e(TAG,"停止:"+e.getMessage());
         }
     }
 
-    @Override
-    public DataList getDatalist() {
-        return mp;
-    }
 
+    //开始播放视频
     private void playVideo(String filename){
         video.loadRouce(filename);//第一个开始 有多个的话每播放完一个 播下一个,到最后 跳到第一个
         video.start();

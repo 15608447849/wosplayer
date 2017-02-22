@@ -18,7 +18,7 @@ import android.widget.FrameLayout;
 
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.IinteractionPlayer;
-import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
+import com.wosplayer.Ui.element.interfaces.IviewPlayer;
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
 

@@ -5,7 +5,7 @@ import android.graphics.Color;
 import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
 
-import com.wosplayer.Ui.element.IPlayer;
+import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.actioner.ContainerItem.LayoutContainer;
 import com.wosplayer.Ui.performer.TimeCalls;
 import com.wosplayer.app.DataList;

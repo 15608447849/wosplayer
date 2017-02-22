@@ -5,7 +5,7 @@ import android.graphics.Typeface;
 import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
 
-import com.wosplayer.Ui.element.IPlayer;
+import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.mSurfaceview;
 import com.wosplayer.Ui.performer.TimeCalls;
 import com.wosplayer.app.DataList;
@@ -17,30 +17,22 @@ import com.wosplayer.app.Logs;
 public class IrunTextPlayer implements IPlayer{
     private static final java.lang.String TAG = IrunTextPlayer.class.getName();
 
-    private Context mCcontext;
-    private ViewGroup mfatherView = null;
+    private Context context;
+    private ViewGroup superView = null;
 
-    private int x=0;
-    private int y=0;
-    private int h=0;
-    private int w=0;
-    private boolean isExistOnLayout = false;
+    private boolean isLayout = false;
 
     private mSurfaceview text = null;
 
     public IrunTextPlayer(Context context, ViewGroup vp){
-        mCcontext =context;
-        this.mfatherView = vp;
+        this.context =context;
+        this.superView = vp;
     }
 
-    private DataList mp;
 
     @Override
     public void loadData(DataList mp, Object ob) {
         try{
-            this.mp = mp;
-            //创建 surfaceview
-            text = new mSurfaceview(mCcontext);
 
             //背景色
            String bgcolor = mp.GetStringDefualt("bgcolor","#FFFFFF");
@@ -76,6 +68,16 @@ public class IrunTextPlayer implements IPlayer{
             //方向
             int orientation = mp.GetIntDefualt("orientation",mSurfaceview.MOVE_LEFT);
 
+            //创建 surfaceview
+            text = new mSurfaceview(context);
+            //属性参数
+            int x,y,w,h;
+            x = mp.GetIntDefualt("x", 0);
+            y = mp.GetIntDefualt("y", 0);
+            w = mp.GetIntDefualt("width", 0);
+            h = mp.GetIntDefualt("height", 0);
+            AbsoluteLayout.LayoutParams layoutParams = new AbsoluteLayout.LayoutParams(w,h,x,y);
+            text.setLayoutParams(layoutParams);
             //设置
             text.setBgColor(bgcolor);
             text.setBgalpha(bgalpha);
@@ -89,46 +91,14 @@ public class IrunTextPlayer implements IPlayer{
             text.setSpeed(speed);
             text.setFontStyle(textstyle);
             text.setTypeFace(texttype);
-
-
-            //属性参数
-            this.x = mp.GetIntDefualt("x", 0);
-            this.y = mp.GetIntDefualt("y", 0);
-            this.w = mp.GetIntDefualt("width", 0);
-            this.h = mp.GetIntDefualt("height", 0);
-
-
         }catch (Exception e){
             Logs.e(TAG, "loadData :"+ e.getMessage());
         }
     }
 
-    @Override
-    public void setlayout() {
-        //设置布局
-        try{
-        if (!isExistOnLayout){
-            //添加到上面去
-            mfatherView.addView(text);
-            isExistOnLayout = true;
-        }
-            AbsoluteLayout.LayoutParams lp = (AbsoluteLayout.LayoutParams) text.getLayoutParams();
-            lp.x = x;
-            lp.y = y;
-            lp.width = w;
-            lp.height = h;
-            text.setLayoutParams(lp);
-
-        }catch (Exception e){
-            Logs.e(TAG, "setlayout :"+ e.getMessage());
-        }
-    }
 
 
-    @Override
-    public DataList getDatalist() {
-        return mp;
-    }
+
 
 
 
@@ -137,13 +107,16 @@ public class IrunTextPlayer implements IPlayer{
     @Override
     public void  start(){
         try{
-            setlayout();
+            if (!isLayout){
+                //添加到上面去
+                superView.addView(text);
+                isLayout = true;
+            }
             if (textHelper == null){
                 textHelper = new Thread(text);
             }
             text.setLoop(true);
             textHelper.start();
-
         }catch (Exception e){
             Logs.e(TAG, "start :"+ e.getMessage());
         }
@@ -156,8 +129,10 @@ public class IrunTextPlayer implements IPlayer{
                 text.setLoop(false);
                 textHelper=null;
             }
-            mfatherView.removeView(text);
-            isExistOnLayout=false;
+            if (isLayout){
+                superView.removeView(text);
+                isLayout=false;
+            }
         }catch (Exception e){
             Logs.e(TAG, "stop :"+ e.getMessage());
         }

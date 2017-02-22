@@ -22,8 +22,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -239,5 +242,47 @@ public class AppTools {
         Gson gson = new Gson();
         String jsonStr = gson.toJson(map);
         return jsonStr;
+    }
+    /**
+     * 把url转化为xml格式数据
+     *
+     * @param urlString
+     * @return the xml data or "" if catch Exception
+     */
+    public static String uriTranslationXml(String urlString) { // http:// xxxxx   -> file://xxx
+        URL url;
+        try {
+            url = new URL(urlString);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        URLConnection urlConnection;
+        try {
+            urlConnection = url.openConnection();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+            StringBuilder xmlData = new StringBuilder();
+            String temp;
+            while ((temp = br.readLine()) != null)
+                xmlData.append(temp).append("\n");
+            return xmlData.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            try {
+                if (br != null)
+                    br.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

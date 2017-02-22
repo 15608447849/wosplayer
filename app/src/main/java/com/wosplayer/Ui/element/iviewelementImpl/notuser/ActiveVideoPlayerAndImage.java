@@ -9,7 +9,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.wosplayer.Ui.element.iviewelementImpl.IinteractionPlayer;
-import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
+import com.wosplayer.Ui.element.interfaces.IviewPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.ActiveImagePlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.ActiveVideoPlayer;
 import com.wosplayer.app.DisplayActivity;

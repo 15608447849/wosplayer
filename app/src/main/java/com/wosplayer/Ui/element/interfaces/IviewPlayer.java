@@ -1,4 +1,4 @@
-package com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode;
+package com.wosplayer.Ui.element.interfaces;
 
 import android.view.View;
 

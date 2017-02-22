@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
 
 import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.MyVideoView;
-import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
+import com.wosplayer.Ui.element.interfaces.IviewPlayer;
 import com.wosplayer.app.WosApplication;
 import com.wosplayer.app.Logs;
 import com.wosplayer.loadArea.excuteBolock.Loader;
@@ -35,7 +35,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer {
 
     //初始化开始
     private void mInitStart(String filePath) {
-        video.setMyLayout(0, 0, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);//设置布局
+        video.setLayoutParam(0, 0, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);//设置布局
         video.initVideoView(false);//不循环
         video.setOnPreparedListener_(new MediaPlayer.OnPreparedListener() {
             @Override

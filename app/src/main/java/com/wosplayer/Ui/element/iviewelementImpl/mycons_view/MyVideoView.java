@@ -99,12 +99,16 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
      * @param w
      * @param h
      */
-    public void setMyLayout(int x,int y,int w,int h){
+    public void setLayoutParam(int x,int y,int w,int h){
         this.x =x;
         this.y =y;
         this.w =w;
         this.h =h;
-        Logs.i(TAG,"视频 layout param:"+x+","+y+","+w+","+h);
+        Logs.i(TAG,"设置视频 layout param:"+x+","+y+","+w+","+h);
+    }
+
+
+    private void setMyLayout(){
         if (layout == null){
             return;
         }
@@ -126,6 +130,8 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
         }
 
     }
+
+
     /**
      * 加载本地资源
      */
@@ -184,7 +190,7 @@ public class MyVideoView extends SurfaceView implements MediaController.MediaPla
         try {
             Logs.d(TAG," - -视频播放器  start()被调用 ,开始播放 ");
             //设置布局
-            this.setMyLayout(this.x, this.y, this.h, this.w);
+            this.setMyLayout();
             if (mMediaPlayer != null && mIsPrepared) {
               //  Logs.d(TAG,"开启视频播放中,请稍后...");
                 mMediaPlayer.start();

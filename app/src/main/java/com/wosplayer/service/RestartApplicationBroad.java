@@ -40,7 +40,6 @@ public class RestartApplicationBroad extends BroadcastReceiver {
             }
 
             Logs.e("收到 重启app 广播,执行时间: "+var+" 秒");
-            if (true) return;
             Intent intenta = new Intent();
             intenta.putExtra(RestartApplicationBroad.IS_START,true);
             intenta.setAction(RestartApplicationBroad.action);

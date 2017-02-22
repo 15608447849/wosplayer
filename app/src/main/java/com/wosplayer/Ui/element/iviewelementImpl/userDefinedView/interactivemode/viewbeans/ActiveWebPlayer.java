@@ -13,7 +13,7 @@ import android.widget.ImageButton;
 
 import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.IinteractionPlayer;
-import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
+import com.wosplayer.Ui.element.interfaces.IviewPlayer;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;

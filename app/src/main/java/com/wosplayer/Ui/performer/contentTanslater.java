@@ -5,7 +5,7 @@ import android.util.Log;
 import android.util.LruCache;
 import android.view.ViewGroup;
 
-import com.wosplayer.Ui.element.IPlayer;
+import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.Logs;
@@ -31,6 +31,7 @@ public final class contentTanslater {
         String packageName = "com.wosplayer.Ui.element.iviewelementImpl.";
         referenceViewMap.put("image",packageName+"IImagePlayer");
         referenceViewMap.put("webpage",packageName+"IWebPlayer");
+        referenceViewMap.put("fudianbank",packageName+"IWebPlayer");//富癫银行项目
         referenceViewMap.put("video",packageName+"IVideoPlayer");
         referenceViewMap.put("text",packageName+"IrunTextPlayer");
         referenceViewMap.put("interactive",packageName+"IinteractionPlayer");

@@ -8,7 +8,7 @@ import android.widget.AbsoluteLayout;
 import android.widget.ImageButton;
 
 import com.wosplayer.R;
-import com.wosplayer.Ui.element.IPlayer;
+import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.actioner.Container;
 import com.wosplayer.Ui.performer.contentTanslater;
 import com.wosplayer.app.DataList;

@@ -7,8 +7,9 @@ import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebViewClient;
+import android.widget.AbsoluteLayout;
 
-import com.wosplayer.Ui.element.IPlayer;
+import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.performer.TimeCalls;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.Logs;
@@ -21,27 +22,25 @@ import com.wosplayer.cmdBroadcast.CmdPostTaskCenter;
 public class IWebPlayer extends android.webkit.WebView implements IPlayer {
     private static final java.lang.String TAG = IWebPlayer.class.getName();
     private Context context;
-    private ViewGroup fView = null;
-    private int x = 0;
-    private int y = 0;
-    private int h = 0;
-    private int w = 0;
+    private ViewGroup superView = null;
+
     private boolean isLayout = false;
 
     public IWebPlayer(Context context, ViewGroup mfatherView) {
         super(context);
         this.context = context;
-        this.fView = mfatherView;
+        this.superView = mfatherView;
     }
     private String uri = null;
     @Override
     public void loadData(DataList mp, Object ob) {
         try {
-            this.x = mp.GetIntDefualt("x", 0);
-            this.y = mp.GetIntDefualt("y", 0);
-            this.w = mp.GetIntDefualt("width", 0);
-            this.h = mp.GetIntDefualt("height", 0);
-
+            int x,y,w,h;
+            x = mp.GetIntDefualt("x", 0);
+            y = mp.GetIntDefualt("y", 0);
+            w = mp.GetIntDefualt("width", 0);
+            h = mp.GetIntDefualt("height", 0);
+            this.setLayoutParams(new AbsoluteLayout.LayoutParams(w,h,x,y));
             this.uri = mp.GetStringDefualt("fudianpath","");
             if (this.uri.isEmpty()){
                 //http链接
@@ -74,36 +73,37 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
     //初始化webview参数
     private void initParam() {
         WebSettings webSettings = this.getSettings();
+
         webSettings.setJavaScriptEnabled(true);//js
+        webSettings.setAllowFileAccess(true); //设置可以访问文件
         webSettings.setAllowFileAccessFromFileURLs(true);// js读取本地文件内容
+
+        webSettings.setSupportZoom(true); //支持缩放，默认为true
+        webSettings.setBuiltInZoomControls(true); //设置内置的缩放控件。若为false，则该WebView不可缩放
+        webSettings.setDisplayZoomControls(false); //隐藏原生的缩放控件
+
+        //设置自适应屏幕，两者合用
+        webSettings.setUseWideViewPort(true); //将图片调整到适合webview的大小
+//        webSettings.setLoadWithOverviewMode(true); // 缩放至屏幕的大小
+
+//        webSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK); //webview中缓存
+        //缓存模式如下：
+        //LOAD_CACHE_ONLY: 不使用网络，只读取本地缓存数据
+        //LOAD_DEFAULT: （默认）根据cache-control决定是否从网络上取数据。
+        //LOAD_NO_CACHE: 不使用缓存，只从网络获取数据.
+        //LOAD_CACHE_ELSE_NETWORK，只要本地有，无论是否过期，或者no-cache，都使用缓存中的数据
+        //不使用缓存:
+        webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+
+        webSettings.setLoadsImagesAutomatically(true); //支持自动加载图片
  //       this.getSettings().setPluginState(WebSettings.PluginState.ON);//flash 有关系
-        webSettings.setDefaultTextEncodingName("UTF-8");//编码
+        webSettings.setDefaultTextEncodingName("UTF-8");//设置编码格式
         this.setWebChromeClient(new WebChromeClient());
         this.setWebViewClient(new WebViewClient());
         this.getSettings().setLoadWithOverviewMode(true);
     }
-    @Override
-    public void setlayout() {
-        try {
-            if (!isLayout) {
-                fView.addView(this);
-                isLayout = true;
-            }
-            LayoutParams lp = (LayoutParams) this.getLayoutParams();
-            lp.x = x;
-            lp.y = y;
-            lp.width = w;
-            lp.height = h;
-            this.setLayoutParams(lp);
-        } catch (Exception e) {
-            Logs.e(TAG, "setlayout() " + e.getMessage());
-        }
-    }
 
-    @Override
-    public DataList getDatalist() {
-        return null;
-    }
+
 
     //时间回调
     private TimeCalls timeCalls = null;
@@ -121,7 +121,10 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
     @Override
     public void start() {//主线程执行
         try {
-            setlayout();
+            if (!isLayout) {
+                superView.addView(this);
+                isLayout = true;
+            }
             this.onResume();
             this.loadUrl(this.uri);
         } catch (Exception e) {
@@ -134,8 +137,11 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
         try {
             this.loadUrl("about:blank");
             this.onPause();
-            fView.removeView(IWebPlayer.this);
-            isLayout = false;
+            if (isLayout){
+                superView.removeView(IWebPlayer.this);
+                isLayout = false;
+            }
+            this.destroy();
         } catch (Exception e) {
             Logs.e(TAG, "web stop():" + e.getMessage());
         }

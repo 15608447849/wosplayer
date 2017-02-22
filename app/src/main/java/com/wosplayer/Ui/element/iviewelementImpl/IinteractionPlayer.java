@@ -10,8 +10,8 @@ import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
-import com.wosplayer.Ui.element.IPlayer;
-import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.IviewPlayer;
+import com.wosplayer.Ui.element.interfaces.IPlayer;
+import com.wosplayer.Ui.element.interfaces.IviewPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.beads.LayoutActive;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.iCache.InteractionCache;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.xml.XmlParse;
@@ -34,66 +34,47 @@ import rx.schedulers.Schedulers;
 
 public class IinteractionPlayer extends AbsoluteLayout implements IPlayer{
 
-    private static final java.lang.String TAG ="IinteractionPlayer" ;//IinteractionPlayer.class.getName();
-    private Context mCcontext;
-    private ViewGroup mfatherView = null;
-    private int x=0;
-    private int y=0;
-    private int h=0;
-    private int w=0;
-    private boolean isExistOnLayout = false;
+    private static final java.lang.String TAG ="互动底层" ;
+    private Context context;
+    private ViewGroup superView = null;
+    private boolean isLayout = false;
 
-    public IinteractionPlayer(Context context,ViewGroup mfatherView) {
+    public IinteractionPlayer(Context context,ViewGroup superView) {
         super(context);
-        mCcontext =context;
-        this.mfatherView = mfatherView;
+        this.context =context;
+        this.superView = superView;
     }
 
-    private DataList mp = null;
+
     private String mUri = null;
     private String name = null;
     @Override
     public void loadData(DataList mp, Object ob) {
         try {
-            this.mp = mp;
-            this.x = mp.GetIntDefualt("x", 0);
-            this.y = mp.GetIntDefualt("y", 0);
-            this.w = mp.GetIntDefualt("width", 0);
-            this.h = mp.GetIntDefualt("height", 0);
-            this.mUri = mp.GetStringDefualt("getcontents", "");
-            InteractionCache.uid = mp.GetStringDefualt("uuks","ffffffff");
-            name = mp.GetStringDefualt("contentsname","null");
+
+            int x,y,w,h;
+            w = mp.GetIntDefualt("width", 0);
+            h = mp.GetIntDefualt("height", 0);
+            x = mp.GetIntDefualt("x", 0);
+            y = mp.GetIntDefualt("y", 0);
+            Logs.d(TAG,"设置布局:"+x+"-"+y+"-"+w+"-"+h);
+            this.setLayoutParams(new AbsoluteLayout.LayoutParams(w,h,x,y));
+            mUri = mp.GetStringDefualt("getcontents", "");//互动xml的布局文件
+            InteractionCache.uid = mp.GetStringDefualt("uuks","ffffffff");//缓存的标识
+            name = mp.GetStringDefualt("contentsname","null");//内容名字
         }catch (Exception e){
             Logs.e(TAG, "loaddata() " + e.getMessage());
-        }
-
-    }
-    @Override
-    public void setlayout() {
-        Logs.d(TAG,"设置布局 isExistOnLayout :"+isExistOnLayout);
-        Logs.d(TAG,"设置布局:"+x+"-"+y+"-"+w+"-"+h);
-        try {
-            if (!isExistOnLayout){
-                mfatherView.addView(this);
-                isExistOnLayout = true;
-                Logs.d(TAG,"添加到父布局上 成功");
-            }
-            AbsoluteLayout.LayoutParams lp =
-                    (AbsoluteLayout.LayoutParams) this.getLayoutParams();
-            lp.x = x;
-            lp.y = y;
-            lp.width = w;
-            lp.height = h;
-            this.setLayoutParams(lp);
-        } catch (Exception e) {
-            Logs.e(TAG,"设置布局:" + e.getMessage());
         }
     }
 
     @Override
     public void start() {
         try{
-            setlayout();//设置布局
+            if (!isLayout){
+                superView.addView(this);
+                isLayout = true;
+                Logs.d(TAG,"添加到父布局上 成功");
+            }
             startActive();
             //开始互动模块
         }catch (Exception e){
@@ -104,10 +85,12 @@ public class IinteractionPlayer extends AbsoluteLayout implements IPlayer{
     @Override
     public void stop() {
         try {
-            Logs.d(TAG,"清理视图 开始");
-            //移除父视图
-            mfatherView.removeView(this);
-            isExistOnLayout = false;
+            if (isLayout){
+                //移除视图
+                superView.removeView(this);
+                isLayout = false;
+            }
+
             stopActive();
             // 移除 互动模块
             Logs.d(TAG,"清理视图 结束");
@@ -115,10 +98,7 @@ public class IinteractionPlayer extends AbsoluteLayout implements IPlayer{
             Logs.e(TAG,"停止:"+e.getMessage());
         }
     }
-    @Override
-    public DataList getDatalist() {
-        return mp;
-    }
+
     //执行互动加载工作-------------------------------------------------------------------------------------------------------------
     public static final Scheduler.Worker worker = Schedulers.io().createWorker();
     private static ReentrantLock lock = new ReentrantLock();

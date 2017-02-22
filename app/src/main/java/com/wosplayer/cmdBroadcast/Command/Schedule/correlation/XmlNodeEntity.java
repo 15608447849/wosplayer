@@ -55,25 +55,13 @@ public class XmlNodeEntity implements Parcelable {
 
     private  static JsonBinder binder = JsonBinder.buildNonDefaultBinder();
 
-
-
-
-
     public void addUriTast(String uri){
-        Logs.i(TAG,"准备添加一个uri :"+uri);
         if (uri.equals("") || uri.equals("null") || uri==null) return;
-
-        if (ftplist.contains(uri)){
-            Logs.i(TAG,"准备添加一个uri"+uri+"---- 已存在");
-            return;
+        if (!ftplist.contains(uri)){
+            Logs.i(TAG,"添加一个uri"+uri);
+            ftplist.add(uri);
         }
-        ftplist.add(uri);
-
     }
-
-
-
-
 
     //添加属性
     public void AddProperty(String key, String value)
