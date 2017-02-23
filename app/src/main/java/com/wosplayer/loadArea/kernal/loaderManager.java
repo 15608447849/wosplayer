@@ -81,37 +81,46 @@ public class loaderManager extends IntentService
     //下载富癫银行的资源文件
     private void loadResource(String terminalNo, String savepath, String singUrl, String alias) {
         Logs.i(TAG,"下载 web resouce - "+singUrl+"\n savepath - "+savepath+"\n terminalNo - "+terminalNo+"\n alias: "+alias);
-        Task task = new Task(savepath,terminalNo,singUrl,null);
-        task.setFileName(alias);
+
+
+       Task task =  Task.TaskFactory.createFtpTask(terminalNo,singUrl,savepath,alias,true);
         TaskQueue.getInstants().addTask(task);
     }
 
     //更新apk
     private void updateAPK(String terminalNo, String savepath, String singUrl) {
         Logs.i(TAG,"下载 apk - "+singUrl+"\n savepath - "+savepath+"\n terminalNo - "+terminalNo);
-        TaskQueue.getInstants().addTask(new Task(savepath, terminalNo, singUrl, new LoaderCall() {
+
+
+        Task task =  Task.TaskFactory.createFtpTask(terminalNo,singUrl,savepath,"update.apk",true);
+        task.setResult(new Task.TaskResult() {
             @Override
-            public void downloadResult(String filePath, String state) {
+            public void onComplete(Task task) {
                 try {
-                    Logs.i(TAG,"下载apk成功  - 路径- "+ filePath );
+                    String lpath = task.getLocalPath()+task.getLocalName();
+                    Logs.i(TAG,"下载apk成功  - 路径- "+ task.getLocalPath()+task.getLocalName() );
                     Intent intent = new Intent();
                     intent.setAction(UPDCbroad.ACTION);
                     Bundle bundle = new Bundle();
-                    bundle.putString(UPDCbroad.key,filePath);
+                    bundle.putString(UPDCbroad.key,lpath);
                     intent.putExtras(bundle);
                     getApplicationContext().sendBroadcast(intent);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-        }));
-
+        });
+        TaskQueue.getInstants().addTask(task);
     }
 
     private void scheduleSourceLoad(String terminalNo,String savepath,ArrayList<CharSequence> taskList) {
-        Log.i(TAG,"收到一个 排期资源下载队列, 队列大小:"+taskList.size()+"\n terminalNo="+terminalNo+"\n savepath="+savepath);
+        Log.i(TAG,"收到一个 排期资源下载队列, 队列大小:"+taskList.size()+" ;terminalNo="+terminalNo+"\n savepath = "+savepath);
         for (int i = 0;i<taskList.size();i++){
-            TaskQueue.getInstants().addTask(new Task(savepath,terminalNo,(String)taskList.get(i),null));
+
+            Task task = Task.TaskFactory.createMutTask(terminalNo,savepath,(String)taskList.get(i));
+            if (task!=null){
+                TaskQueue.getInstants().addTask(task);
+            }
         }
         Intent intent = new Intent();
         intent.setAction(completeTaskListBroadcast.action);

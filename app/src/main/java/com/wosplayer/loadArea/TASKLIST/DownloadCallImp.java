@@ -38,16 +38,15 @@ public class DownloadCallImp implements LoaderCall{
     /**
      *
      * @param task
-     * @param DownloadState
+     * @param DownloadState 0 success ; 1 failt
      */
     public void downloadResult(Task task,int DownloadState){
         if (DownloadState==0){ //成功
-            nitifyMsg(task.getTerminalNo(),task.getFileName(),1);
+            nitifyMsg(task.getTerminalNo(),task.getLocalName(),1);
         }
         if (DownloadState==1){//失败
-            nitifyMsg(task.getTerminalNo(),task.getFileName(),4);
+            nitifyMsg(task.getTerminalNo(),task.getLocalName(),4);
         }
-
         //删除任务
         TaskQueue.getInstants().finishTask(task);
     }

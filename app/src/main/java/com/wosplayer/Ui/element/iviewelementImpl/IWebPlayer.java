@@ -141,7 +141,7 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
                 superView.removeView(IWebPlayer.this);
                 isLayout = false;
             }
-            this.destroy();
+//            this.destroy();
         } catch (Exception e) {
             Logs.e(TAG, "web stop():" + e.getMessage());
         }

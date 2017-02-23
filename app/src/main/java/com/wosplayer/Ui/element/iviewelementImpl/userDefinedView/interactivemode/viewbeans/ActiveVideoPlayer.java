@@ -11,7 +11,7 @@ import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.MyVideoView;
 import com.wosplayer.Ui.element.interfaces.IviewPlayer;
 import com.wosplayer.app.WosApplication;
 import com.wosplayer.app.Logs;
-import com.wosplayer.loadArea.excuteBolock.Loader;
+
 import com.wosplayer.loadArea.otherBlock.fileUtils;
 
 /**
@@ -96,7 +96,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer {
     private String UriPath;
     private String videoFileLocalPath;//播放的文件路径
     private ViewGroup mFather; //父容器
-    private Loader load;//资源下载者
+
     private boolean isloading = false;//是否正在下载中
     private boolean isremove = false;//是否移除
 

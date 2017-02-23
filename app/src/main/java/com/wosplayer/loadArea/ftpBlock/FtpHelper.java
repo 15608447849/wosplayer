@@ -2,8 +2,10 @@ package com.wosplayer.loadArea.ftpBlock;
 
 
 import com.wosplayer.app.Logs;
+import com.wosplayer.loadArea.TASKLIST.Task;
 import com.wosplayer.loadArea.otherBlock.fileUtils;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPClientConfig;
 import org.apache.commons.net.ftp.FTPFile;
@@ -44,13 +46,13 @@ public class FtpHelper {
      * FTP连接.
      */
     private FTPClient ftpClient;
-
+    private static final String tem = ".tem"; //临时文件后缀
     /**
      * FTP重新链接次数
      */
     private int reConnectCount = 0;
-    public FtpHelper(String hostName, int serverPort, String userName, String password) {
-        init(hostName,serverPort,userName,password);
+    public FtpHelper(Task.FtpUser ftpUser) {
+        init(ftpUser.getHost(),ftpUser.getPort(),ftpUser.getUserName(),ftpUser.getPassword());
     }
     private void init(String hostName, int serverPort, String userName, String password){
         this.reConnectCount = 0;
@@ -65,7 +67,7 @@ public class FtpHelper {
      * @throws IOException
      */
     public void openConnect() throws IOException {
-        Logs.i(TAG,"连接ftp...");
+//        Logs.i(TAG,"连接ftp...");
         if (ftpClient==null){
             ftpClient = new FTPClient();
         }
@@ -120,7 +122,7 @@ public class FtpHelper {
         } finally {
             try {
                 if (ftpClient != null) {
-                    Logs.i(TAG,"关闭ftp连接");
+//                    Logs.i(TAG,"关闭ftp连接");
                     ftpClient.disconnect();
                     ftpClient=null;
                 }
@@ -139,56 +141,67 @@ public class FtpHelper {
 
     /**
          * 下载单个文件，可实现断点下载.
-         *
-         * @param serverPath
-         *            Ftp目录及文件全路径
-         * @param localPath
-         *            本地目录
-         * @param fileName
-         *            下载之后的文件名称
-         * @param listener
-         *            监听器
+
          * @throws IOException
          */
-    public synchronized  void downloadSingleFile(String serverPath, String localPath, String fileName, int reconnectCount, OnFtpListener listener){
-        String localFilePath = localPath+fileName ;
-//        log.i(TAG,"准备下载 :["+serverPath+fileName"]\n 远程服务器文件本地路径 : "+localFilePath);
-        String tem = ".tem"; //临时文件后缀
-        String tmp_localPath = localPath + fileName+tem;
+    public synchronized  void downloadSingleFile(Task task, int reconnectCount, onListener listener){
+
+        String remotePath =task.getRemotePath();
+        String remoteName = task.getRemoteName();
+        String localPath = task.getLocalPath();
+        String localName = task.getLocalName();
+
+        String localFilePath = localPath+localName ;//本地文件路径
+        //判断是否覆盖
+        if (!task.isCover()){
+            //不覆盖
+            //判断本地文件是否存在
+            boolean isExist = cn.trinea.android.common.util.FileUtils.isFileExist(localFilePath);
+            if (isExist){
+                //存在 直接返回
+                listener.downLoadSuccess(task);
+                return;
+            }
+        }
+
+        //远程文件路径
+        String remoteFilePath = remotePath+remoteName;
+
+
+        String tmp_localPath = localFilePath+tem;//临时文件路径
         try {
             // 打开FTP服务
 //            log.i(TAG,"连接服务器 : FTP://"+ hostName+":"+serverPort  +"\n user : "+userName+"  password : "+password);
             this.openConnect();
-            listener.ftpConnectState(FTP_CONNECT_SUCCESSS,hostName,serverPort,userName,password,fileName);
+            listener.ftpConnectState(FTP_CONNECT_SUCCESSS,task);
         } catch (Exception e) {
             listener.error(e);
-            reConnectionFTP(serverPath, localPath, fileName, reconnectCount, listener);
+            reConnectionFTP(task, reconnectCount, listener);
             return;
         }
 
         // 先判断服务器文件是否存在
         FTPFile[] files = null;
         try {
-            files =  ftpClient.listFiles(serverPath+fileName); //远程服务器文件
+            files =  ftpClient.listFiles(remoteFilePath); //远程服务器文件
             if (files==null || files.length == 0){
 //                log.i(TAG,"服务器文件 不存在 : ["+ serverPath+"]");
-                listener.ftpNotFountFile(serverPath,fileName);
+                listener.ftpNotFountFile(task);
                 closeConnect();
                 return;
             }
         } catch (Exception e) {
             listener.error(e);
-            reConnectionFTP(serverPath, localPath, fileName, reconnectCount, listener);
+            reConnectionFTP(task,reconnectCount, listener);
             return;
         }
-
-
 
         //创建本地文件夹
         File mkFile = new File(localPath);
         if (!mkFile.exists()) {
             mkFile.mkdirs();
         }
+        boolean isDelete = false;
         boolean isLoad = true;
         // 接着判断下载的文件是否能断点下载
         long serverSize = files[0].getSize(); // 获取远程文件的长度
@@ -197,19 +210,25 @@ public class FtpHelper {
         File tmp_localFile = new File(tmp_localPath);//临时文件
 //        log.i("本地路径 :"+localFilePath);
 //        log.i("临时文件路径:"+tmp_localPath);
-        if(localFile.exists()){
+        if(localFile!=null && localFile.exists()){
             //如果有同名文件
             long localfile_Size = localFile.length(); // 获取文件的长度
 //            log.i(TAG,"本地 已存在文件 长度 :"+ localfile_Size);
             if( localfile_Size == serverSize){
 //                log.i(TAG,"文件已存在"+localFile.getName());
-                listener.downLoadSuccess(localFile,serverPath,localPath,fileName,hostName,serverPort,userName,password);
-                // 下载完成之后关闭连接
-                closeConnect();
-                return;
+                if (!task.isCover()){//不覆盖
+                    listener.downLoadSuccess(task);
+                    // 下载完成之后关闭连接
+                    closeConnect();
+                    return;
+                }else{
+                    //覆盖文件
+                    isDelete = true;
+                }
             }else{
 //                log.i(TAG,"删除一个同名文件:"+localFile.getAbsolutePath());
-                localFile.delete();
+//                localFile.delete();
+
             }
         }
 
@@ -219,19 +238,20 @@ public class FtpHelper {
 //            log.i(TAG,"临时文件长度: "+localSize);
             if (localSize == serverSize) { //临时文件长度 和 服务器 的大小一样 不下载
                 isLoad = false;
-//                log.i(TAG,"不下载 - "+tmp_localFile.getName());
+//                Logs.i(TAG,"不下载 - "+tmp_localFile.getName()+" 和服务器文件大小相同");
             }if (localSize<serverSize){ //断点续传
 //                log.i(TAG,"临时文件:"+tmp_localPath+" - 大小:"+localSize+" \n 服务器存在大小:"+serverSize);
             }else if (localSize>serverSize){
 //                log.i(TAG,"删除一个临时文件:"+tmp_localPath+" - 大小:"+localSize+"\n 服务器存在大小:"+serverSize);
-                new File(tmp_localPath).delete();
+                tmp_localFile.delete();
                 localSize = 0;
             }
         }
 
-        if (isLoad) {//如果　没有下载过　准备下载．
+        if (isLoad) {
+            //如果　没有下载过　准备下载．
 
-//            log.i(TAG,"准备下载文件 - "+serverPath +" -> "+ localFilePath );
+//            Logs.i(TAG,"准备下载文件 - "+remoteFilePath +" -> "+ localFilePath );
             //下载前　设置下载中所需值
             long step = serverSize / 100; //下标位置
             long process = 0; // 进度
@@ -246,7 +266,6 @@ public class FtpHelper {
                 out = new FileOutputStream(tmp_localFile, true); //本地文件输出流 - 临时文件
             } catch (FileNotFoundException e) {
                 listener.error(e);
-                listener.localNotFountFile(tmp_localFile.getAbsolutePath(),fileName);
                 closeConnect();
                 return;
             }
@@ -255,16 +274,16 @@ public class FtpHelper {
             InputStream input  = null;
             try {
                 ftpClient.setRestartOffset(localSize);  //设置下载点
-                input = ftpClient.retrieveFileStream(serverPath+fileName);//远程ftp 文件输入流
+                input = ftpClient.retrieveFileStream(remoteFilePath);//远程ftp 文件输入流
             } catch (Exception e) {
                 listener.error(e);
-                reConnectionFTP(serverPath, localPath, fileName, reconnectCount, listener);
+                reConnectionFTP(task, reconnectCount, listener);
                 return;
             }
 
             //下载中
             try {
-                byte[] b = new byte[1024];//缓存大小
+                byte[] b = new byte[1024*10];//缓存大小
                 int length = 0;
                 currentTime = System.currentTimeMillis();//当前毫秒数
                 double timeDiff = 0;
@@ -290,19 +309,15 @@ public class FtpHelper {
                             oldSize = currentSize;
 //                            log.d(fileName +" - 下载速度:" + speedTem +" kb/s");
                             speed = String.format("%f",speedTem) + "kb/s";
-                            listener.downLoading(process, speed, fileName);
+                            listener.downLoading(task,process, speed, remoteName);
                         }
                     }
                 }
 
-                String nNmae = tmp_localPath.substring(0,tmp_localPath.lastIndexOf("."));//正式文件名
-                fileUtils.renamefile(tmp_localPath,nNmae);//转换名字
-                File Nf = new File(nNmae);
-//                log.i(TAG,",转换前文件名["+tmp_localPath+"]\n新文件名: "+nNmae);
-                listener.downLoadSuccess(Nf,serverPath,localPath,fileName,hostName,serverPort,userName,password);
+
             } catch (IOException e) {
                 listener.error(e);
-                listener.downLoadFailt(serverPath,fileName);
+                listener.downLoadFailt(task);
             }finally {
                 try {
                     if (out!=null){
@@ -319,7 +334,16 @@ public class FtpHelper {
             }
 
         }
+        if (isDelete){
+            //删除同名文件
+            if (localFile!=null){
+                localFile.delete();
+            }
+        }
 
+        fileUtils.renamefile(tmp_localPath,localFilePath);//转换名字
+//                log.i(TAG,",转换前文件名["+tmp_localPath+"]\n新文件名: "+nNmae);
+        listener.downLoadSuccess(task);
     }
 
 
@@ -327,26 +351,23 @@ public class FtpHelper {
 
     /**
      * 重新链接
-     * @param serverPath
-     * @param localPath
-     * @param fileName
-     * @param reconnectCount
-     * @param listener
      * @return
      */
-    private void reConnectionFTP(String serverPath, String localPath, String fileName, int reconnectCount, OnFtpListener listener) {
+    private void reConnectionFTP(Task task, int reconnectCount, onListener listener) {
         closeConnect();
         if (reConnectCount++<reconnectCount){
             try {
                 Thread.sleep(10*1000);
             }catch (InterruptedException e){
                 e.printStackTrace();
-                listener.ftpConnectState(FTP_CONNECT_FAIL,hostName,serverPort,userName,password,fileName);
+                listener.ftpConnectState(FTP_CONNECT_FAIL,task);
             }
-            Logs.e(TAG,"重新连接FTP...\n当前第"+reConnectCount+"次尝试.\n服务器ip:"+this.hostName+"端口:"+this.serverPort+"用户名:"+this.userName+"密码:"+this.password);
-            downloadSingleFile(serverPath,localPath,fileName,reconnectCount,listener);
+            Logs.e(TAG,"重新连接FTP,当前第"+reConnectCount+"次尝试.");
+            Logs.e(TAG,task.getFtpUser().toString());
+
+            downloadSingleFile(task,reconnectCount,listener);
         }else{
-            listener.ftpConnectState(FTP_CONNECT_FAIL,hostName,serverPort,userName,password,fileName);
+            listener.ftpConnectState(FTP_CONNECT_FAIL,task);
         }
     }
 
@@ -361,36 +382,29 @@ public class FtpHelper {
     public static final int FTP_FILE_NOTEXISTS = 7;//"ftp文件不存在";
     public static final int FTP_LOCAL_FILE_NOTEXISIS = 8;//"本地文件不存在或者创建失败";
 
-    public interface OnFtpListener {
+    public interface onListener{
         /**
          * 连接成功
-         * @param stateCode
-         * @param ftpHost
-         * @param port
-         * @param userName
-         * @param ftpPassword
          */
-        public void ftpConnectState(int stateCode,String ftpHost,int port,String userName,String ftpPassword,String fileName);//1 success 2failt
+        public void ftpConnectState(int stateCode, Task task);//1 success 2failt
 
         //ftp 不存在文件
-        public void ftpNotFountFile(String remoteFileName,String fileName);
-        public void localNotFountFile(String localFilePath,String fileName);
+        public void ftpNotFountFile(Task task);
 
        /*
         *   下载进度监听
         */
-       public void downLoading(long downProcess, String speed, String fileName);
+       public void downLoading(Task task,long downProcess, String speed, String fileName);
 
         /**
          * 下载成功
-         * @param localFile
          */
-        public void downLoadSuccess(File localFile,String remotePath,String localPath,String fileName,String ftpHost,int port,String userName,String ftpPassword);
+        public void downLoadSuccess(Task task);
 
         /**
          * 下载失败
          */
-        public void downLoadFailt(String remotePath,String fileName);
+        public void downLoadFailt(Task task);
 
         /**
          * 错误

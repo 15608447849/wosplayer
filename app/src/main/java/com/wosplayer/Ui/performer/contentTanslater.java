@@ -21,6 +21,21 @@ import java.util.Map;
 public final class contentTanslater {
     private static final String TAG = "content Tanslater";
 
+
+    /**
+     * 节目类型
+     */
+    public static enum  ContentTypeEnum {
+        interactive, fudianbank,webpage, url, rss, text, video, image;
+        public boolean needsDown() {
+            return this.compareTo(video) >= 0;
+        }
+    }
+
+    private static String getType(ContentTypeEnum typeEnum){
+        return String.valueOf(typeEnum);
+    }
+
     /**
      * 初始化 反射具体内容 的映射信息
      * key = 内容的类型
@@ -29,13 +44,12 @@ public final class contentTanslater {
     private static Map<String,String> referenceViewMap = new HashMap<String,String>();
     static{
         String packageName = "com.wosplayer.Ui.element.iviewelementImpl.";
-        referenceViewMap.put("image",packageName+"IImagePlayer");
-        referenceViewMap.put("webpage",packageName+"IWebPlayer");
-        referenceViewMap.put("fudianbank",packageName+"IWebPlayer");//富癫银行项目
-        referenceViewMap.put("video",packageName+"IVideoPlayer");
-        referenceViewMap.put("text",packageName+"IrunTextPlayer");
-        referenceViewMap.put("interactive",packageName+"IinteractionPlayer");
-
+        referenceViewMap.put(getType(ContentTypeEnum.image),packageName+"IImagePlayer");
+        referenceViewMap.put(getType(ContentTypeEnum.webpage),packageName+"IWebPlayer");
+        referenceViewMap.put(getType(ContentTypeEnum.fudianbank),packageName+"IWebPlayer");//富癫银行项目
+        referenceViewMap.put(getType(ContentTypeEnum.video),packageName+"IVideoPlayer");
+        referenceViewMap.put(getType(ContentTypeEnum.text),packageName+"IrunTextPlayer");
+        referenceViewMap.put(getType(ContentTypeEnum.interactive),packageName+"IinteractionPlayer");
 
       /*  referenceViewMap.put("interactive","com.wosplayer.Ui.element.iviewelementImpl.actioner."+"Actioner");
         referenceViewMap.put("1007",packageName+"IImagePlayer");

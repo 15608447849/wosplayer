@@ -65,17 +65,14 @@ public class LoaderHelper implements Observer {//观察者
      */
     private void parseDatas(Task task){
 
-        int type = task.getType();
-
-        if (type == Task.Type.HTTP){
+        Task.Type type = task.getType();
+        if (type.equals(Task.Type.HTTP) ){
             httpDownload(task);
         }
-
-        if (type == Task.Type.FTP){
-            ftpDownloadSetting(task);
+        if (type.equals(Task.Type.FTP)){
+            ftpDownloadImp(task);
         }
-
-        if (type== Task.Type.FILE){
+        if (type.equals(Task.Type.FILE)){
             cpFile(task);
         }
     }
@@ -85,8 +82,10 @@ public class LoaderHelper implements Observer {//观察者
         try {
             jhFile = new File( new URI(task.getUrl()));
             if (jhFile.exists()){
-                Log.i(TAG,"复制建行资源文件到app资源目录 - \n"+jhFile.getAbsolutePath()+" -> "+task.getSavePath()+task.getFileName());
-                FileUtils.copyFile(jhFile, new File(task.getSavePath()+task.getFileName()));
+
+                String desPath = task.getLocalPath()+task.getLocalName();
+                Log.i(TAG,"复制建行资源文件到app资源目录 - \n"+jhFile.getAbsolutePath()+" -> "+desPath);
+                FileUtils.copyFile(jhFile, new File(desPath));
                 caller.downloadResult(task,0);
                 return;
             }
@@ -97,96 +96,80 @@ public class LoaderHelper implements Observer {//观察者
          caller.downloadResult(task,1);
     }
 
-    //设置ftp值
-    private void ftpDownloadSetting(final Task task) {
-        String uri = task.getUrl();
-        String str = uri.substring(uri.indexOf("//") + 2);
-        String user = str.substring(0, str.indexOf(":"));
-        String pass = str.substring(str.indexOf(":") + 1, str.indexOf("@"));
-        String host = str.substring(str.indexOf("@") + 1, str.indexOf("/"));
-        String remotePath = str.substring(str.indexOf("/"), str.lastIndexOf("/") + 1);
-        String remoteFileName = str.substring(str.lastIndexOf("/") + 1);
-        String localPath = task.getSavePath();
-        ftpDownloadImp(task,user,pass,host,remotePath,remoteFileName,localPath);
-    }
+
 
     //Ftp 下载助手
-    private void ftpDownloadImp(final Task task, final String user, final String pass, final String host, final String remotePath, final String fileName, final String localPath) {
-        new FtpHelper(host,21,user,pass)
+    private void ftpDownloadImp(Task task) {
+        new FtpHelper(task.getFtpUser())
                 .downloadSingleFile(
-                        remotePath,
-                        localPath,
-                        fileName,
+                        task,
                         3,
-                        new FtpHelper.OnFtpListener() {
+                        new FtpHelper.onListener() {
 
                             @Override
-                            public void ftpConnectState(int stateCode, String ftpHost, int port, String userName, String ftpPassword, String fileName) {
-                                Logs.i(TAG,"连接服务器 : ip:"+ ftpHost+" port:"+port  +"\nuser:"+userName+" password:"+ftpPassword);
+                            public void ftpConnectState(int stateCode,Task task) {
+                                Logs.i(TAG,"连接服务器 - "+task.getFtpUser().toString());
                                 if (stateCode==FtpHelper.FTP_CONNECT_SUCCESSS){
-                                    Logs.i(TAG,"ftp 连接成功");
-                                    caller.nitifyMsg(task.getTerminalNo(),fileName,1);
-                                    caller.nitifyMsg(task.getTerminalNo(),fileName,2);
+                                    Logs.i(TAG,"连接成功");
+                                    caller.nitifyMsg(task.getTerminalNo(),task.getRemoteName(),1);
+                                    caller.nitifyMsg(task.getTerminalNo(),task.getRemoteName(),2);
                                 }
                                 if (stateCode==FtpHelper.FTP_CONNECT_FAIL){
                                     Logs.e(TAG,"ftp 连接失败");
-                                    caller.nitifyMsg(task.getTerminalNo(),fileName,4);
-                                    caller.downloadResult(task,1,fileName,".md5");
+                                    caller.nitifyMsg(task.getTerminalNo(),task.getRemoteName(),4);
+                                    caller.downloadResult(task,1,task.getRemoteName(),".md5");
                                 }
                             }
-
                             @Override
-                            public void ftpNotFountFile(String remoteFileName, String fileName) {
-                                Logs.e(TAG,"ftp 服务器未发现文件 : "+remoteFileName+fileName);
+                            public void ftpNotFountFile(Task task) {
+                                Logs.e(TAG,"ftp 服务器未发现文件 : "+ task.getRemoteName());
                                 caller.downloadResult(task,1);
-                                caller.nitifyMsg(task.getTerminalNo(),fileName,4);
+                                caller.nitifyMsg(task.getTerminalNo(),task.getRemoteName(),4);
                             }
 
                             @Override
-                            public void localNotFountFile(String localFilePath, String fileName) {
-                                Logs.e(TAG,"本地文件不存在或无法创建 : "+localFilePath);
-                                caller.nitifyMsg(task.getTerminalNo(),fileName,4);
-                                caller.downloadResult(task,1,fileName,".md5");
-
-                            }
-
-                            @Override
-                            public void downLoading(long downProcess, String speed, String fileName) {
+                            public void downLoading(Task task,long downProcess, String speed, String fileName) {
                                 caller.notifyProgress(task.getTerminalNo(),fileName,downProcess+"%",speed);
                             }
-
-
-
                             @Override
-                            public void downLoadFailt(String remotePath, String fileName) {
-                                Logs.e(TAG,"ftp 下载失败 : "+fileName);
-                                caller.nitifyMsg(task.getTerminalNo(),fileName,4);
-                                caller.downloadResult(task,1,fileName,".md5");
+                            public void downLoadFailt(Task task) {
+                                Logs.e(TAG,"FTP 下载失败 : "+task.toString());
+                                caller.nitifyMsg(task.getTerminalNo(),task.getRemoteName(),4);
+                                caller.downloadResult(task,1,task.getRemoteName(),".md5");
                             }
-
                             @Override
                             public void error(Exception e) {
                                 e.printStackTrace();
                             }
                             @Override
-                            public void downLoadSuccess(File localFile, String remotePath, String localPath, String fileName, String ftpHost, int port, String userName, String ftpPassword) {
-                                Logs.i(TAG, "ftp下载succsee -"+ localFile.getAbsolutePath() +" - 线程 - "+ Thread.currentThread().getName());
-                                if (caller.downloadResult(task,0,fileName,".md5")){
+                            public void downLoadSuccess(Task task) {
+                                Logs.i(TAG, "FTP 成功下载 -"+ task.toString() +" - 当前线程 - "+ Thread.currentThread().getName());
+                                if (caller.downloadResult(task,0,task.getRemoteName(),".png")
+                                        || caller.downloadResult(task,0,task.getRemoteName(),".jpg")
+                                        || caller.downloadResult(task,0,task.getRemoteName(),".mp4")
+                                        ){
+                                    Task ntask = Task.TaskFactory.createFtpTask(task,task.getRemoteName()+".md5");
+                                    //下载MD5值
+                                    TaskQueue.getInstants().addTask(ntask);
 
-                                        //获取源文件 code
-                                        String sPath = localPath+fileName.substring(0,fileName.lastIndexOf("."));
-                                        Logs.e(TAG,"文件 - "+sPath +" 比较 MD5值");
-                                        String sCode = MD5Util.getFileMD5String(new File(sPath));
-                                        if (sCode!=null){
-                                            //比较md5
-                                            if(MD5Util.FTPMD5(sCode, localFile.getAbsolutePath()) == 1){
-                                                //md5 效验失败 删除文件
-                                                cn.trinea.android.common.util.FileUtils.deleteFile(sPath);
-                                                Logs.e(TAG,"文件 - "+sPath +" 比较 MD5值 失败 已删除");
-                                            }
+                                }else if (caller.downloadResult(task,0,task.getRemoteName(),".md5")){
+                                    //md5文件
+                                    //获取源文件code
+
+                                    String md5Path = task.getLocalPath()+task.getLocalName();
+                                    String sPath = task.getLocalPath()+task.getLocalName().substring(0,task.getLocalName().lastIndexOf("."));
+
+                                    String sCode = MD5Util.getFileMD5String(new File(sPath));
+                                    if (sCode!=null){
+                                        //比较md5
+                                        if(MD5Util.FTPMD5(sCode, md5Path) == 1){
+                                            //md5 效验失败 删除文件
+                                            cn.trinea.android.common.util.FileUtils.deleteFile(sPath);
+                                            Logs.e(TAG,"文件 - "+sPath +" 比较 MD5值 失败 已删除");
+                                        }else{
+                                            Logs.e(TAG,"文件 - "+sPath +" 比较 MD5值 正确");
                                         }
-                                }else{
-                                    ftpDownloadImp(task,user,pass,host,remotePath,fileName+".md5",localPath);
+                                    }
                                 }
 
                             }
@@ -197,7 +180,8 @@ public class LoaderHelper implements Observer {//观察者
     // http xiazai
     private void httpDownload(final Task task) {
        final String url = task.getUrl();
-        final String filePath = task.getSavePath()+task.getFileName();
+       final String filePath = task.getLocalPath()+task.getLocalName();
+
       http.download(url,
               filePath,
               false,
@@ -222,18 +206,18 @@ public class LoaderHelper implements Observer {//观察者
                       oldLoadingSize = current;
                       double speedTem = (temSize/(1024 * 1.0))/((currentTime-oldTime)/(1000*1.0)) ;
                       speed = String.format("%f",speedTem)+"kb/s";
-                      caller.notifyProgress(task.getTerminalNo(),url.substring(url.lastIndexOf("/")+1),(current/total)+"",(speedTem/(1024 * 1.0))+" kb");
+                      caller.notifyProgress(task.getTerminalNo(),task.getLocalName(),(current/total)+"",(speedTem/(1024 * 1.0))+" kb");
                   }
                   @Override
                   public void onSuccess(ResponseInfo<File> responseInfo) {
                       final String path  =responseInfo.result.getPath();
                       caller.downloadResult(task,0);
-                      caller.nitifyMsg(task.getTerminalNo(),url.substring(url.lastIndexOf("/")+1),3);
+                      caller.nitifyMsg(task.getTerminalNo(),task.getLocalName(),3);
                   }
                   @Override
                   public void onFailure(HttpException e, String s) {
                       caller.downloadResult(task,1);
-                      caller.nitifyMsg(task.getTerminalNo(),url.substring(url.lastIndexOf("/")+1),4);
+                      caller.nitifyMsg(task.getTerminalNo(),task.getLocalName(),4);
                   }
               });
     }
@@ -258,11 +242,6 @@ public class LoaderHelper implements Observer {//观察者
     public boolean fileIsExist(String filename){
         return   fileUtils.checkFileExists(filename);
     }
-
-
-
-
-
 
 
 

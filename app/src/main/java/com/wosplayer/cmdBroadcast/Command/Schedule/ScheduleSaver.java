@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.wosplayer.Ui.performer.contentTanslater.ContentTypeEnum;
 import com.wosplayer.app.AppTools;
 import com.wosplayer.tool.SdCardTools;
 import com.wosplayer.app.WosApplication;
@@ -43,15 +44,6 @@ public class ScheduleSaver implements iCommand {
     private final int I_LAYOUT_PARSE = 14;
     private final int I_FILE_PARSE = 15;
 
-    /**
-     * 节目类型
-     */
-    public static enum ContentTypeEnum {
-        interactive, fudianbank,webpage, url, rss, text, video, image;
-        public boolean needsDown() {
-            return this.compareTo(video) >= 0;
-        }
-    }
     public static XmlNodeEntity rootNode = new XmlNodeEntity();//只存在一个
     /**
      * 序列化排期
@@ -313,11 +305,12 @@ public class ScheduleSaver implements iCommand {
                     Logs.e(TAG, "内容类型错误,未知类型:" + e.getMessage());
                     continue;
                 }
-                String getcontents = XmlHelper.getFirstChildNodeValue(content_Element, "getcontents").trim(); //资源地址 或者 xml数据
+
                 if (contentType.equals(ContentTypeEnum.text))//文本
                 {
-                    String text_xml=  getcontents;
+                    String text_xml=  XmlHelper.getFirstChildToString(content_Element, "getcontents");
                     HashMap<String, String> text_xmlDataMap = Xmlparse.ParseXml("/getcontents", text_xml, Xmlparse.parseType.OnlyLeaf).get(0);
+                   if(text_xmlDataMap==null || text_xmlDataMap.size()==0) continue;
                     XmlNodeEntity layout_content_text_Node = layout_content_Node.NewSettingNodeEntity();
                     layout_content_text_Node.Level = "root_schedule_programs_layout_content_text";
                     layout_content_text_Node.AddPropertyList(text_xmlDataMap);
@@ -334,16 +327,15 @@ public class ScheduleSaver implements iCommand {
                     content_xmlDataMap.putAll(rss_data_map);
                     Logs.i(TAG,"rss类型解析完成");
                 } else if (contentType.equals(ContentTypeEnum.interactive)) {//互动
+                    String url = XmlHelper.getFirstChildNodeValue(content_Element, "getcontents").trim(); //资源地址 或者 xml数据
                     //再解析 继续解析
-                    Logs.i(TAG,"互动xml文件 url :"+ getcontents);
-                    getXMLdata(getcontents, ACTION_PARSE, layout_content_Node.NewSettingNodeEntity());//进入互动
+                    Logs.i(TAG,"互动xml文件 url :"+ url);
+                    getXMLdata(url, ACTION_PARSE, layout_content_Node.NewSettingNodeEntity());//进入互动
                     Logs.i(TAG,"interactive类型解析完成");
                 } else if (contentType.needsDown()){
-                    getcontents = XmlHelper.getFirstChildNodeValue(content_Element, "getcontents").trim();
-                    rootNode.addUriTast(getcontents);
+                    String resourceUrl = XmlHelper.getFirstChildNodeValue(content_Element, "getcontents").trim(); //资源地址 或者 xml数据
+                    rootNode.addUriTast(resourceUrl);
                 }
-
-                Logs.i(TAG, "内容解析完成");
             }
         }
     }

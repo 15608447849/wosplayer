@@ -55,9 +55,8 @@ public class TaskQueue extends Observable { //被观察者
 //            log.i(TAG,"finishTask()"+task.getUrl());
             task.setState(Task.State.FINISHED);
             try {
-                if (task.getCall()!=null){
-                    Logs.e(TAG,"队列 - - - - 回调- >"+task.getSavePath()+task.getFileName());
-                    task.getCall().downloadResult(task.getSavePath()+task.getFileName(),"");
+                if (task.getResult()!=null){
+                    task.getResult().onComplete(task);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -73,7 +72,8 @@ public class TaskQueue extends Observable { //被观察者
                 while (it.hasNext()) {
                     task = it.next();
                     //寻找一个新建的任务
-                    if (Task.State.NEW == task.getState()) {
+                    if (Task.State.NEW.equals(task.getState())) {
+//                        Logs.d(TAG,"getTask - "+task +" - " +task.getState());
                         //把任务状态置为运行中
                         task.setState(Task.State.RUNNING);
 //                        log.i(TAG,"getTask()"+task.getUrl() +"queue size = "+queue.size());

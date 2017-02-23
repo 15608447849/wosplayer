@@ -105,8 +105,8 @@ public class MD5Util {
     public static int FTPMD5(String sourcefile_md5code, String dirFile) {
 //        String strs = readFileByLines(sp);
         String dstr = readFileByLines(dirFile);
+        deleteFile(dirFile);
         if (sourcefile_md5code.equals(dstr)){
-            deleteFile(dirFile);
             return 0;
         }else{
             return 1;
@@ -121,11 +121,11 @@ public class MD5Util {
      */
     public static void deleteFile(String fileName) {
         try {
-            Logs.e("MD5"," 删除文件 - "+fileName);
+//            Logs.e("MD5"," 删除文件 - "+fileName);
             File file = new File(fileName);
             if (file.exists()) {
-                Logs.e("MD5"," 删除文件 - "+fileName +" * success");
                 file.delete();
+                Logs.e("MD5"," 已删除文件 - "+fileName );
             }
         } catch (Exception e) {
             Logs.e("util", "delete file error with exception" + e.toString()

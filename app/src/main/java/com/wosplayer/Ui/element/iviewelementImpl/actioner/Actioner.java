@@ -84,7 +84,7 @@ public class Actioner extends AbsoluteLayout implements IPlayer{
     @Override
     public void start() {
         try{
-            setlayout();//设置布局
+        //    setlayout();//设置布局
             loadContainer();
         }catch (Exception e){
             Logs.e(TAG,"开始:"+e.getMessage());
@@ -121,32 +121,32 @@ public class Actioner extends AbsoluteLayout implements IPlayer{
         }
     }
 
-    @Override
-    public void setlayout() {
-        try {
-            if (!isExistOnLayout){
-                this.setBackgroundColor(Color.YELLOW);
-                vp.addView(this);
-                isExistOnLayout = true;
-            }
+//    @Override
+//    public void setlayout() {
+//        try {
+//            if (!isExistOnLayout){
+//                this.setBackgroundColor(Color.YELLOW);
+//                vp.addView(this);
+//                isExistOnLayout = true;
+//            }
+//
+//            AbsoluteLayout.LayoutParams lp = (AbsoluteLayout.LayoutParams) this
+//                    .getLayoutParams();
+//            lp.x = x;
+//            lp.y = y;
+//            lp.width = w;
+//            lp.height = h;
+//            this.setLayoutParams(lp);
+//
+//        } catch (Exception e) {
+//            Logs.e(TAG,"设置布局:" + e.getMessage());
+//        }
+//    }
 
-            AbsoluteLayout.LayoutParams lp = (AbsoluteLayout.LayoutParams) this
-                    .getLayoutParams();
-            lp.x = x;
-            lp.y = y;
-            lp.width = w;
-            lp.height = h;
-            this.setLayoutParams(lp);
-
-        } catch (Exception e) {
-            Logs.e(TAG,"设置布局:" + e.getMessage());
-        }
-    }
-
-    @Override
-    public DataList getDatalist() {
-        return null;
-    }
+//    @Override
+//    public DataList getDatalist() {
+//        return null;
+//    }
 
     @Override
     public void setTimerCall(TimeCalls timer) {
