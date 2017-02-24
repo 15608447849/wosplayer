@@ -17,7 +17,7 @@ import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.element.interfaces.IviewPlayer;
 import com.wosplayer.app.Logs;
-import com.wosplayer.loadArea.otherBlock.fileUtils;
+import com.wosplayer.download.util.DownloadFileUtil;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
@@ -186,7 +186,7 @@ public class ActiveImagePlayer extends ImageView implements IviewPlayer {
         }
 
         //  查看本地
-        if (fileUtils.checkFileExists(localPath)) {
+        if (DownloadFileUtil.checkFileExists(localPath)) {
             //存在
             picassoLoaderImager(localPath);
         } else {

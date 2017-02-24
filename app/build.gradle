@@ -9,6 +9,16 @@ android {
         minSdkVersion 16
         targetSdkVersion 23
          }
+    sourceSets {
+        main {
+//            manifest.srcFile = ['src/main/AndroidManifest.xml']
+//            java.srcDirs = ['src/main/java'] //Java代码
+//            res.srcDirs = ['src/main/res']  //资源文件
+            jniLibs.srcDirs = ['src/main/jniLibs'] //so库
+//            aidl.srcDirs = ['src/main/aidl'] //aidl文件
+//            renderscript.srcDirs = ['src/mian/']
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -16,6 +26,7 @@ android {
         }
     }
 }
+
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')

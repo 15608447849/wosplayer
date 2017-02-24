@@ -67,8 +67,9 @@ public class DataList implements Parcelable {
             return defualtValue;
         }
     }
-    public void put(String key, String value) {
+    public SystemConfig put(String key, String value) {
         map.put(key, value);
+        return SystemConfig.get();
     }
     public void setMap(HashMap<String, String> map) {
         this.map = map;

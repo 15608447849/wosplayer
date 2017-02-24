@@ -5,9 +5,9 @@ import android.graphics.Typeface;
 import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.IVideoPlayer;
 import com.wosplayer.app.DataList;
-import com.wosplayer.app.WosApplication;
+import com.wosplayer.app.DisplayerApplication;
 import com.wosplayer.app.Logs;
-import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
+import com.wosplayer.command.operation.schedules.correlation.XmlNodeEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -138,7 +138,7 @@ public class layoutExcuter implements TimeCalls{
         String height = layout.getXmldata().get("height");
         String fileproterty = content.getXmldata().get("fileproterty");//类型
         String getcontents = content.getXmldata().get("getcontents");//uri
-        String localpath = WosApplication.config.GetStringDefualt("basepath","")+content.getXmldata().get("contentsnewname");//本地路径
+        String localpath = DisplayerApplication.config.GetStringDefualt("basepath","")+content.getXmldata().get("contentsnewname");//本地路径
         String timelength = content.getXmldata().get("timelength");
         String UUKS = content.getXmldata().get("uuks");
         String contentsname = content.getXmldata().get("contentsname");
@@ -207,7 +207,7 @@ public class layoutExcuter implements TimeCalls{
         }
         if (fileproterty.equals("fudianbank")){
 
-            datalist.put("fudianpath",WosApplication.config.GetStringDefualt("fudianpath",""));
+            datalist.put("fudianpath", DisplayerApplication.config.GetStringDefualt("fudianpath",""));
         }
         return  new Object[]{datalist,ob};
     }

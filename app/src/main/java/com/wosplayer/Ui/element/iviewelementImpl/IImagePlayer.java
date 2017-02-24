@@ -3,7 +3,6 @@ package com.wosplayer.Ui.element.iviewelementImpl;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
 import android.widget.ImageView;
 
@@ -14,7 +13,7 @@ import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageViewPicassocLoader
 import com.wosplayer.Ui.performer.TimeCalls;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.Logs;
-import com.wosplayer.loadArea.otherBlock.fileUtils;
+import com.wosplayer.download.util.DownloadFileUtil;
 
 /**
  * Created by Administrator on 2016/7/24.
@@ -85,7 +84,7 @@ public class IImagePlayer extends ImageView implements IPlayer{
     //加载图片
     private void loadMyImage() {
         //先判断文件是不是存在
-        if (fileUtils.checkFileExists(localpath)){
+        if (DownloadFileUtil.checkFileExists(localpath)){
             picassoLoaderImager(localpath);
         }else{
             Logs.e(TAG,"图片路径不存在 - "+localpath);

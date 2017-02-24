@@ -13,9 +13,9 @@ import com.wosplayer.Ui.element.iviewelementImpl.IinteractionPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageStore;
 import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.element.interfaces.IviewPlayer;
-import com.wosplayer.app.WosApplication;
+import com.wosplayer.app.DisplayerApplication;
 import com.wosplayer.app.Logs;
-import com.wosplayer.loadArea.otherBlock.fileUtils;
+import com.wosplayer.download.util.DownloadFileUtil;
 
 import java.util.List;
 
@@ -226,9 +226,9 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
 
         } else if (bgType == 2) {
             String uriLoad = bgImagelurl + bgImagename; //下载地址
-            String localpath = WosApplication.config.GetStringDefualt("basepath", "") + bgImagename; //本地路径
+            String localpath = DisplayerApplication.config.GetStringDefualt("basepath", "") + bgImagename; //本地路径
 
-            if (fileUtils.checkFileExists(localpath)) { //资源是否存在
+            if (DownloadFileUtil.checkFileExists(localpath)) { //资源是否存在
                 setBgImagers(localpath);
             } else {
                 Logs.e(TAG, "互动布局 图片资源 不存在 - " + localpath + "\n uri:" + uriLoad);

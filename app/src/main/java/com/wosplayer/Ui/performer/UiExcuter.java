@@ -1,7 +1,7 @@
 package com.wosplayer.Ui.performer;
 
 import com.wosplayer.app.Logs;
-import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
+import com.wosplayer.command.operation.schedules.correlation.XmlNodeEntity;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -6,7 +6,7 @@ import android.content.Intent;
 
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.app.Logs;
-import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
+import com.wosplayer.command.operation.schedules.correlation.XmlNodeEntity;
 
 import rx.Scheduler;
 import rx.functions.Action0;

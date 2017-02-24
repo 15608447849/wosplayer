@@ -1,7 +1,6 @@
 package com.wosplayer.Ui.element.iviewelementImpl.actioner;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
 
@@ -10,7 +9,7 @@ import com.wosplayer.Ui.element.iviewelementImpl.actioner.ContainerItem.LayoutCo
 import com.wosplayer.Ui.performer.TimeCalls;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.Logs;
-import com.wosplayer.cmdBroadcast.Command.Schedule.correlation.XmlNodeEntity;
+import com.wosplayer.command.operation.schedules.correlation.XmlNodeEntity;
 
 /**
  * Created by user on 2016/8/2.

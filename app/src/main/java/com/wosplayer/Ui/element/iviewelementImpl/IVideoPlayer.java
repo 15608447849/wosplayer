@@ -9,9 +9,9 @@ import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.MyVideoView;
 import com.wosplayer.Ui.performer.TimeCalls;
 import com.wosplayer.app.DataList;
-import com.wosplayer.app.WosApplication;
+import com.wosplayer.app.DisplayerApplication;
 import com.wosplayer.app.Logs;
-import com.wosplayer.loadArea.otherBlock.fileUtils;
+import com.wosplayer.download.util.DownloadFileUtil;
 
 /**
  * Created by Administrator on 2016/7/26.
@@ -81,12 +81,12 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
                 superView.addView(this);
                 isLayout = true;
             }
-                    if(!fileUtils.checkFileExists(localPath)) {
+                    if(!DownloadFileUtil.checkFileExists(localPath)) {
                         //不存在
                         Logs.e(TAG, "视频资源 不存在 - " + localPath);
                         callTo();
 //                        //播放默认视频
-                        String del = WosApplication.getConfigValue("defaultVideo");
+                        String del = DisplayerApplication.getConfigValue("defaultVideo");
                         if (!del.equals("")){
                             playVideo(del);
                         }

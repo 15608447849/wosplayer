@@ -9,10 +9,10 @@ import android.widget.AbsoluteLayout;
 
 import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.MyVideoView;
 import com.wosplayer.Ui.element.interfaces.IviewPlayer;
-import com.wosplayer.app.WosApplication;
+import com.wosplayer.app.DisplayerApplication;
 import com.wosplayer.app.Logs;
 
-import com.wosplayer.loadArea.otherBlock.fileUtils;
+import com.wosplayer.download.util.DownloadFileUtil;
 
 /**
  * Created by user on 2016/7/4.
@@ -117,12 +117,12 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer {
             return;
         }
         //  查看本地
-        if (fileUtils.checkFileExists(videoFileLocalPath)) {
+        if (DownloadFileUtil.checkFileExists(videoFileLocalPath)) {
             //存在
             mInitStart(videoFileLocalPath);
         } else {
             Logs.e(TAG, "视频资源不存在 - " + videoFileLocalPath);
-            String del = WosApplication.getConfigValue("defaultVideo");
+            String del = DisplayerApplication.getConfigValue("defaultVideo");
             if (!del.equals("")) {
                 mInitStart(del);
             }

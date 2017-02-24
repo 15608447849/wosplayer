@@ -28,13 +28,12 @@ import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageStore;
 import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.element.interfaces.IviewPlayer;
 import com.wosplayer.Ui.performer.UiExcuter;
-import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleReader;
-import com.wosplayer.cmdBroadcast.Command.Schedule.ScheduleSaver;
-import com.wosplayer.service.MonitorService;
-import com.wosplayer.service.RestartApplicationBroad;
+import com.wosplayer.command.operation.schedules.ScheduleReader;
+import com.wosplayer.command.operation.schedules.ScheduleSaver;
 
-import static com.wosplayer.app.WosApplication.appContext;
-import static com.wosplayer.app.WosApplication.config;
+
+import static com.wosplayer.app.DisplayerApplication.appContext;
+import static com.wosplayer.app.DisplayerApplication.config;
 
 /**
  *  Timer timer = new Timer();
@@ -68,7 +67,6 @@ public class DisplayActivity extends Activity {
 
             if (msg.what == HandleEvent.success.ordinal()){
                 if (frgAct!=null){
-
                     frgAct.sendMessage(msg.obj);
                 }
         }
@@ -81,10 +79,7 @@ public class DisplayActivity extends Activity {
         }
     };
 
-
-
-    private static final java.lang.String TAG = "_DisplayerActivity";
-    public static boolean isSendRestartBroad = true;
+    private static final java.lang.String TAG = "播放器activity";
     public static AbsoluteLayout baselayout = null;
 
     public  static AbsoluteLayout main = null;    //存放所有 排期视图 的主容器
@@ -97,29 +92,22 @@ public class DisplayActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ((WosApplication)getApplication()).startAppInit(mHandler);
+        activityContext = this;
+        ((DisplayerApplication)getApplication()).startAppInit(mHandler);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//保持屏幕常亮
         setContentView(R.layout.activity_main);//设置布局文件
         baselayout = (AbsoluteLayout) LayoutInflater.from(this).inflate(R.layout.activity_main,null);
         main = (AbsoluteLayout) this.findViewById(R.id.main);
         frame = (FrameLayout)this.findViewById(R.id.frame_layout);
         frame_main = (AbsoluteLayout)this.findViewById(R.id.frame_layout_main);
-
         closebtn =  (ImageButton)findViewById(R.id.closeappbtn);
-
-        activityContext = this;
-
         Logs.i(TAG,"onCreate() 正在执行的所有线程数:"+ Thread.getAllStackTraces().size());
 
-        //开启监听服务
-       Intent intent = new Intent(this, MonitorService.class);
-        Logs.e(TAG,"-------------------------------------------------------------- 开启<监听>服务 -----------------------------------------------------------");
-        this.startService(intent);
         //弹出密码输入框
         closebtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               InputPassWordDialog.ShowDialog(DisplayActivity.this);
+               OverAppDialog.ShowDialog(DisplayActivity.this);
             }
         });
         //长按 显示/隐藏 信息输出
@@ -192,17 +180,6 @@ public class DisplayActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         Logs.i(TAG,"onDestroy");
-        try {
-            if(isSendRestartBroad){
-                Intent intent  = new Intent();
-                intent.setAction(RestartApplicationBroad.action);
-                intent.putExtra(RestartApplicationBroad.IS_START,false);
-                intent.putExtra(RestartApplicationBroad.KEYS, config.GetStringDefualt("RestartBeatInterval","10"));
-                sendBroadcast(intent);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -319,18 +296,18 @@ public class DisplayActivity extends Activity {
 
         if (activityContext!=null){
             //初始化数据
-           ((WosApplication)this.getApplication()).initConfig();
+           ((DisplayerApplication)this.getApplication()).initConfig();
             //开启通讯服务
-            WosApplication.startCommunicationService(this);
+            DisplayerApplication.startCommunicationService(this);
             PlayTypeStart();
         }
     }
 
 
 
-    //结束工作
+    //结束工作 - true,关闭 activity
     private void StopWork(boolean isclose){
-            WosApplication.stopCommunicationService(this); //关闭服务
+            DisplayerApplication.stopCommunicationService(this); //关闭服务
             PlayTypeStop();
             if (isclose) finish();
     }

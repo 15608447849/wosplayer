@@ -10,7 +10,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.wosplayer.tool.SdCardTools;
-import com.wosplayer.app.WosApplication;
+import com.wosplayer.app.DisplayerApplication;
 import com.wosplayer.app.AppTools;
 import com.wosplayer.app.Logs;
 
@@ -65,7 +65,7 @@ public class ToolsUtils {
      */
     public static String GetKey(String key,String defualtValue)
     {
-        String value= readShareData(WosApplication.appContext,key).trim();
+        String value= readShareData(DisplayerApplication.appContext,key).trim();
         return  (value!="")?value:defualtValue;
     }
     /**
@@ -73,7 +73,7 @@ public class ToolsUtils {
      * @return
      */
     public static String GetMac(){
-        return AppTools.GetMac(WosApplication.appContext);
+        return AppTools.GetMac(DisplayerApplication.appContext);
     }
     /**
      * 生成ip
@@ -85,8 +85,8 @@ public class ToolsUtils {
     public static String getAppVersionName() {
         String versionName = "";
         try {
-            PackageManager pm = WosApplication.appContext.getPackageManager();
-            PackageInfo pi = pm.getPackageInfo(WosApplication.appContext.getPackageName(), 0);
+            PackageManager pm = DisplayerApplication.appContext.getPackageManager();
+            PackageInfo pi = pm.getPackageInfo(DisplayerApplication.appContext.getPackageName(), 0);
             versionName = pi.versionName;
             if (versionName == null || versionName.length() <= 0) {
                 return "";
@@ -197,7 +197,7 @@ public class ToolsUtils {
     }
     public  static void showToast(String msg)
     {
-        Toast toast=Toast.makeText(WosApplication.appContext, msg, Toast.LENGTH_SHORT);
+        Toast toast=Toast.makeText(DisplayerApplication.appContext, msg, Toast.LENGTH_SHORT);
         toast.show();
     }
 

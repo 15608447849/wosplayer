@@ -21,7 +21,7 @@ import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.InteractionContentShowExer;
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.xml.XmlParse;
 import com.wosplayer.Ui.performer.UiExcuter;
-import com.wosplayer.app.WosApplication;
+import com.wosplayer.app.DisplayerApplication;
 import com.wosplayer.app.Logs;
 
 import java.util.ArrayList;
@@ -410,7 +410,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
         Logs.i(TAG, "互动 - 按钮 -背景图片 bg image uri " + myBgUri);
         if (myBgUri != null) {
             String filename = myBgUri.substring(myBgUri.lastIndexOf("/") + 1);
-            filename = WosApplication.config.GetStringDefualt("basepath", "") + filename;
+            filename = DisplayerApplication.config.GetStringDefualt("basepath", "") + filename;
             Logs.i(TAG, "bg image local path - " + filename);
             if (FileUtils.isFileExist(filename)) {
                 //存在直接设置

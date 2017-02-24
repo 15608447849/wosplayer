@@ -7,7 +7,7 @@ import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.ActiveWebPlayer;
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
-import com.wosplayer.app.WosApplication;
+import com.wosplayer.app.DisplayerApplication;
 
 /**
  * Created by Administrator on 2016/6/28.
@@ -42,7 +42,7 @@ public class FileActive {
         try {
             //先判断资源文件 本地是否存在
             String filename = filepath.substring(filepath.lastIndexOf("/") + 1);
-            String localPath = WosApplication.config.GetStringDefualt("basepath", "") + filename;
+            String localPath = DisplayerApplication.config.GetStringDefualt("basepath", "") + filename;
 
             Logs.i(TAG, "这个类型:" + type + "资源:" + filepath + "本地资源路径:" + localPath);
 

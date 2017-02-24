@@ -13,7 +13,6 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.wosplayer.service.RestartApplicationBroad;
 import com.wosplayer.service.serviceLog;
 
 import java.io.File;
@@ -87,31 +86,11 @@ public class CrashHandler implements UncaughtExceptionHandler {
 			try {
 				Thread.sleep(3000);
 			} catch (InterruptedException e) {
-				Logs.e(TAG, "error : ", e);
 			}
-
-
-
-
-			Intent intenta = new Intent();
-			intenta.putExtra(RestartApplicationBroad.IS_START,true);
-			intenta.setAction(RestartApplicationBroad.action);
-
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTimeInMillis(System.currentTimeMillis());
-			calendar.add(Calendar.SECOND, (int)10);
-
-			PendingIntent pi = PendingIntent.getBroadcast(mContext,0,intenta,0);
-			((AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE))
-					.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
-
-			Logs.e("错误收集 发送重启广播");
-
 			//退出程序
-			android.os.Process.killProcess(android.os.Process.myPid());
-			System.exit(1);
+//			android.os.Process.killProcess(android.os.Process.myPid());
+//			System.exit(1);
 		}
-
 	}
 
 	/**

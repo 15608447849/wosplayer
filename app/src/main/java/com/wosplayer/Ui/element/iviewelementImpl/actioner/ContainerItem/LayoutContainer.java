@@ -17,7 +17,7 @@ import com.wosplayer.R;
 import com.wosplayer.Ui.element.iviewelementImpl.actioner.Container;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.Logs;
-import com.wosplayer.loadArea.otherBlock.fileUtils;
+import com.wosplayer.download.util.DownloadFileUtil;
 
 import java.util.ArrayList;
 
@@ -113,7 +113,7 @@ public class LayoutContainer extends Container{
                 }
 
             }else if (bgmode==2){ //image
-                if (fileUtils.checkFileExists(bgName)) { //资源是否存在
+                if (DownloadFileUtil.checkFileExists(bgName)) { //资源是否存在
                    loadBg();
                 } else {
                     Logs.e(TAG," 互动背景 资源不存在 ");

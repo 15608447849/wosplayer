@@ -11,8 +11,8 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.wosplayer.app.Logs;
-import com.wosplayer.cmdBroadcast.CmdPostTaskCenter;
-import com.wosplayer.cmdBroadcast.Command.OtherCmd.Command_UPDC;
+import com.wosplayer.command.kernal.CommandCenter;
+import com.wosplayer.command.operation.other.Command_UPDC;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -256,9 +256,9 @@ public class CommunicationService extends Service{
     private void postTask(String cmd, String param) {
         b.clear();
         Logs.i("命令:"+cmd+" 参数"+param);
-        i.setAction(CmdPostTaskCenter.action);
-        b.putString(CmdPostTaskCenter.cmd,cmd);
-        b.putString(CmdPostTaskCenter.param,param);
+        i.setAction(CommandCenter.action);
+        b.putString(CommandCenter.cmd,cmd);
+        b.putString(CommandCenter.param,param);
         i.putExtras(b);
         getApplicationContext().sendBroadcast(i);
     }

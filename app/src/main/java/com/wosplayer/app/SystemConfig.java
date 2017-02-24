@@ -45,6 +45,8 @@ public class SystemConfig extends DataList{
         if (!FileUtils.isFileExist(PATH)){
             //创建文件夹并且成功设置默认值
             DefaultValue();
+        }else{
+            read();
         };
     }
 
@@ -66,7 +68,8 @@ public class SystemConfig extends DataList{
         //心跳时间
         map.put("HeartBeatInterval","30");
         //重启时间
-        map.put("RestartBeatInterval","30");//
+        map.put("RestartBeatInterval","30");
+        map.put("watchValue","0");//是否监听
         //sdcard 清理阔值
         map.put("storageLimits","50");
         //机器码
@@ -86,7 +89,7 @@ public class SystemConfig extends DataList{
         map.put("default","/mnt/sdcard/wosplayer/default/");//默认资源路径
         map.put("defaultVideo", "/mnt/sdcard/wosplayer/default/def.mp4");//默认视频本地位置
         map.put("fudianpath","/mnt/sdcard/wosplayer/ffbk/");//富颠银行本地web资源
-        map.put("CAPTIMAGEPATH", "/mnt/sdcard/wosplayer/screen.png");//截图本地位置
+        map.put("CapturePath", "/mnt/sdcard/wosplayer/screen.png");//截图本地位置
         this.setMap(map);
         //保存数据
         boolean isWrite = FileUtils.writeFile(PATH,AppTools.mapToJson(map));

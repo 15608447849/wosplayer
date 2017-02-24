@@ -14,7 +14,7 @@ import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode
 import com.wosplayer.Ui.element.iviewelementImpl.userDefinedView.interactivemode.viewbeans.ActiveVideoPlayer;
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
-import com.wosplayer.loadArea.otherBlock.fileUtils;
+import com.wosplayer.download.util.DownloadFileUtil;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
@@ -159,7 +159,7 @@ public class ActiveVideoPlayerAndImage extends AbsoluteLayout implements IviewPl
         }
 
         //  查看本地
-        if (fileUtils.checkFileExists(videoFileLocalPath)) {
+        if (DownloadFileUtil.checkFileExists(videoFileLocalPath)) {
             //存在
             image_Src_isOK = true;
         } else {

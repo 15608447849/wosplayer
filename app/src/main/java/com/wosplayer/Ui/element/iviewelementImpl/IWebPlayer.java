@@ -13,7 +13,7 @@ import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.performer.TimeCalls;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.Logs;
-import com.wosplayer.cmdBroadcast.CmdPostTaskCenter;
+import com.wosplayer.command.kernal.CommandCenter;
 
 /**
  * Created by Administrator on 2016/7/24.
@@ -63,10 +63,10 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
         if (url.isEmpty()) return;
         Logs.d(TAG,"拉取资源文件，发送本地指令FFBK");
         Intent intent = new Intent();
-        intent.setAction(CmdPostTaskCenter.action);
+        intent.setAction(CommandCenter.action);
         Bundle b = new Bundle();
-        b.putString(CmdPostTaskCenter.cmd,"FFBK:");
-        b.putString(CmdPostTaskCenter.param,url);
+        b.putString(CommandCenter.cmd,"FFBK:");
+        b.putString(CommandCenter.param,url);
         intent.putExtras(b);
         context.sendBroadcast(intent);
     }
