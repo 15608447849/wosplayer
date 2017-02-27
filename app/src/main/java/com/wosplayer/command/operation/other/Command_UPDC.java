@@ -13,6 +13,7 @@ import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
+import com.wosplayer.app.AppTools;
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.AdbCommand;
 import com.wosplayer.app.DisplayerApplication;
@@ -106,18 +107,25 @@ public class Command_UPDC implements iCommand {
     private void compareVersion(int remoteVersion, String uri) {
         int local = getLocalVersionCode();
         int remote = remoteVersion;
-        Logs.i(TAG,"本地版本:"+ local+" ,升级包版本:"+remote);
+        Logs.i(TAG,"本地版本号:"+ local+" ,升级包版本号:"+remote);
         if (local<remote){
-            //下载升级包
-            Intent intent = new Intent(DisplayerApplication.appContext, DownloadManager.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            Bundle bundle = new Bundle();
-            bundle.putInt(DownloadManager.KEY_TYPE, DownloadManager.KEY_TYPE_UPDATE_APK);
-            bundle.putString(DownloadManager.KEY_TERMINAL_NUM, DisplayerApplication.config.GetStringDefualt("terminalNo",""));
-            bundle.putString(DownloadManager.KEY_SAVE_PATH, DisplayerApplication.config.GetStringDefualt("basepath", ""));
-            bundle.putString(DownloadManager.KEY_TASK_SINGLE,uri);
-            intent.putExtras(bundle);
-            DisplayerApplication.appContext.startService(intent);
+            String tepPath = DisplayerApplication.config.GetStringDefualt("updatepath", "");
+            ShellUtils.CommandResult result = ShellUtils.execCommand("chmod 777 "+tepPath,true);
+            if (result.result == 0) {
+                //下载升级包
+                Intent intent = new Intent(DisplayerApplication.appContext, DownloadManager.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                Bundle bundle = new Bundle();
+                bundle.putInt(DownloadManager.KEY_TYPE, DownloadManager.KEY_TYPE_UPDATE_APK);
+                bundle.putString(DownloadManager.KEY_TERMINAL_NUM, DisplayerApplication.config.GetStringDefualt("terminalNo", ""));
+                bundle.putString(DownloadManager.KEY_SAVE_PATH, tepPath);
+                bundle.putString(DownloadManager.KEY_TASK_SINGLE, uri);
+                intent.putExtras(bundle);
+                DisplayerApplication.appContext.startService(intent);
+            }
+            else{
+                Logs.e(TAG,"无法发送文件到下载服务,路径:"+tepPath+"无法执行权限设置.");
+            }
         }
     }
     /**
@@ -126,14 +134,8 @@ public class Command_UPDC implements iCommand {
      * @return
      */
     public static int getLocalVersionCode() {
-        int versionCode = 0;
-        try {
-            // 获取软件版本号
-            versionCode = DisplayerApplication.appContext.getPackageManager().getPackageInfo(DisplayerApplication.appContext.getPackageName(), 0).versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        return versionCode;
+         // 获取软件版本号
+        return AppTools.getAppVersion(DisplayerApplication.appContext);
     }
 }
 

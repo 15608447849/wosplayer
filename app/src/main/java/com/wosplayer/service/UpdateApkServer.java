@@ -49,21 +49,25 @@ public class UpdateApkServer extends IntentService {
     /**
      * 安装APK文件
      */
-    public void installApk(String apkLocalPath) {
+    public synchronized void installApk(String apkLocalPath) {
         File apkfile = new File(apkLocalPath);
         if (!apkfile.exists()) {
             Logs.e(TAG,"安装apk失败, "+apkLocalPath +" 升级包不存在.");
             return;
         }
+        apkfile.setExecutable(true);//设置可执行权限
+        apkfile.setReadable(true);//设置可读权限
+        apkfile.setWritable(true);//设置可写权限
+        ShellUtils.CommandResult result = ShellUtils.execCommand("chmod 777 "+apkLocalPath,true);
 
-        Logs.i(TAG," 安装升级包并且结束程序,update.apk 路径 :"+apkLocalPath);
+        Logs.i(TAG," 安装包赋予权限结果执行结果:"+result.result+",路径 :"+apkLocalPath);
         int code =  PackageUtils.install(getApplicationContext(),apkLocalPath);
-        Logs.e(TAG," 安装结果 返回值 : "+code);
+        Logs.e(TAG," PackageUtils.install 安装结果 返回值 : "+code);
         if (code == PackageUtils.INSTALL_SUCCEEDED){
             ShellUtils.execCommand(AdbCommand.commands_startApp,true);//尝试打开app
         }
         else{
-            AdbCommand.RuningInstallApk(TAG,apkLocalPath,"update.apk");
+            AdbCommand.RuningInstallApk(TAG,apkLocalPath,null);
         }
     }
 

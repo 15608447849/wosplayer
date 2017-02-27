@@ -45,9 +45,8 @@ public class SystemConfig extends DataList{
         if (!FileUtils.isFileExist(PATH)){
             //创建文件夹并且成功设置默认值
             DefaultValue();
-        }else{
+        }
             read();
-        };
     }
 
     //设置默认值
@@ -80,7 +79,8 @@ public class SystemConfig extends DataList{
         map.put("CaptureURL", String.format("http://%s:%s/wos/captureManagerServlet","192.168.6.66","8000"));
         //本地资源存储目录
         map.put("basepath", "/mnt/sdcard/wosplayer/resource/");
-
+        //apk下载路径
+        map.put("updatepath", "/data/local/tmp/");
         //建设银行接口资源下载位置
         map.put("bankPathSource","mnt/sdcard/wosplayer"+SdCardTools.Construction_Bank_dir_source);
         map.put("bankPathXml","mnt/sdcard"+SdCardTools.Construction_Bank_dir_xmlfile);

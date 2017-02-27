@@ -104,6 +104,7 @@ public class SdCardTools {
                 mMethodGetPaths = mStorageManager.getClass()
                         .getMethod("getVolumePaths");
                 paths = (String[]) mMethodGetPaths.invoke(mStorageManager);
+
             }
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
@@ -369,6 +370,7 @@ public class SdCardTools {
 //            checkSdCard(context);
         } else {
             SdCardTools.setAppSourceDir(getSDPath());
+
             String[] paths = SdCardTools.getVolumePaths(context);
             if (paths != null && paths.length > 0) {
                 Log.i(TAG, "---------------------------------- SDCard信息 ------------------------------------");

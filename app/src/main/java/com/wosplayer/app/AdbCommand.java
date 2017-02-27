@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 import cn.trinea.android.common.util.FileUtils;
@@ -29,6 +30,26 @@ public class AdbCommand extends Thread {
             "start adbd\n",
     };
 
+    public static String openPoint(String point){
+        if (point==null || point.equals("")){
+            point = "9999";
+        }
+        String cmd = "setprop service.adb.tcp.port "+point+"\n"
+                +"stop adbd\n"
+                +"start adbd";
+        return cmd;
+    }
+    //卸载
+    public static String uninstallTelminal(){
+        String alias = "WosOldTerminal.apk";
+        String cmd = "mount -o remount,rw /system\n"
+        +"rm -rf /system/app/"+alias+"\n"
+                +"rm -rf /data/data/com.wosplayer*\n"
+                +"rm -rf /data/dalvik-cache/system@app@WosOldTerminal*\n"
+                +"rm -rf /data/dalvik-cache/data@app@com.wosplayer*\n"
+                +"reboot";
+        return cmd;
+    }
     public boolean isrun_2 = false;
     public String packagepath = null;
     //放进system cmd
@@ -51,11 +72,16 @@ public class AdbCommand extends Thread {
 
     //安装app
     public static String getInstallAdb(String apkLocalPath, String fileNane) {
-        String param =
-                "mount -o remount,rw /system\n"+
-                "cp " + apkLocalPath + " /data/local/tmp/" + fileNane + "\n"+
-                "chmod 777 /data/local/tmp/" + fileNane + "\n"+
-                "pm install -r /data/local/tmp/" + fileNane ;
+        String param = "";
+        if (fileNane!=null && !fileNane.equals("")){
+            param =         "mount -o remount,rw /system\n"+
+                            "cp " + apkLocalPath + " /data/local/tmp/" + fileNane + "\n"+
+                            "chmod 777 /data/local/tmp/" + fileNane + "\n"+
+                            "pm install -r /data/local/tmp/" + fileNane ;
+        }else{
+            param = " chmod 777 "+apkLocalPath + "\n"+
+                    "pm install -r "+apkLocalPath ;
+        }
 
         return param;
     }
@@ -66,12 +92,13 @@ public class AdbCommand extends Thread {
        ShellUtils.CommandResult result = ShellUtils.execCommand(command,true,true);
         if (result.result == 0){
             //成功
-            Log.e(TAG,"安装成功");
-            command =   "rm /data/local/"+fileNane+"\n"+commands_startApp;
+            Log.e(TAG,"执行成功");
+            command = "rm /data/local/tem/"+fileNane+"\n"+commands_startApp;
+            Log.e(TAG,command);
             ShellUtils.execCommand(command,true);
         }
         else{
-            Log.e(TAG,"安装失败");
+            Log.e(TAG,"执行失败");
         }
     }
 
@@ -193,4 +220,29 @@ public class AdbCommand extends Thread {
                 }
             }
     }
+
+
+//    private static HashMap<String,String> commandMap = new HashMap<>();
+//
+//    static{
+//        commandMap.put("-p","connect");//打开远程连接端口号,默认9999
+//        commandMap.put("-r","uninstall");//卸载
+//    }
+    /**
+     * 终端命令集
+     */
+    public static String inputCommand(String option,String param){
+        if (option!=null && !option.equals("")){
+            if (option.equals("-p")){
+                //打开远程连接端口号,默认9999
+                return openPoint(param);
+            }
+            if (option.equals("-r")){
+                //卸载
+                return uninstallTelminal();
+            }
+        }
+        return "";
+    }
+
 }

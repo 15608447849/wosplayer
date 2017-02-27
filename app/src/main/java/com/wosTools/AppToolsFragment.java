@@ -20,17 +20,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.wosplayer.R;
+import com.wosplayer.app.AdbCommand;
 import com.wosplayer.app.AppTools;
 import com.wosplayer.app.BackRunner;
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
 import com.wosplayer.app.SystemConfig;
+import com.wosplayer.command.operation.other.Command_UPDC;
 import com.wosplayer.tool.SdCardTools;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import cn.trinea.android.common.util.FileUtils;
+import cn.trinea.android.common.util.ShellUtils;
 
 /**
  * Created by 79306 on 2017/2/20.
@@ -71,6 +74,12 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
     private SpnnerAdpter adapter;
     private SystemConfig dataList;
 
+    //本机信息
+    private TextView localip;
+    private Button sure;
+    private EditText command;
+    private TextView version;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -109,6 +118,11 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
 
             }
         });
+        localip = (TextView) vp.findViewById(R.id.localip);
+        command = (EditText) vp.findViewById(R.id.command_input);
+        version = (TextView)vp.findViewById(R.id.version);
+        sure = (Button) vp.findViewById(R.id.sure);
+        sure.setOnClickListener(this);
         return vp;
     }
 
@@ -154,7 +168,7 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
     {
         try
         {
-            storeDir.setText("媒体播放器主目录:"+SdCardTools.getAppSourceDir(activity));
+            storeDir.setText(SdCardTools.getAppSourceDir(activity));
             serverip.setText(dataList.GetStringDefualt("serverip", "127.0.0.1"));
             serverport.setText(dataList.GetStringDefualt("serverport", "8000"));
             companyid.setText(dataList.GetStringDefualt("companyid", "999"));
@@ -165,6 +179,9 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
             RestartBeatInterval.setText(dataList.GetStringDefualt("RestartBeatInterval","30"));
             //焦点默认在这个控件上
             serverip.setFocusable(true);
+
+            localip.setText(dataList.GetStringDefualt("tip","127.0.0.1"));
+            version.setText(AppTools.getAppVersion(activity)+"");
 
         }catch(Exception e)
         {
@@ -286,7 +303,58 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
         if (vid == R.id.btnSaveData){ //保存数据
             save();
         }
+        if (vid == R.id.sure){
+            final String cmd = command.getText().toString();
+            if (cmd == null || cmd.equals("")) {
+                AppTools.Toals(activity,"请输入终端命令");
+            }
+            BackRunner.runBackground(new Runnable() {
+                @Override
+                public void run() {
+                    //分解字符串
+                    excute(cmd);
+                }
+            });
+        }
     }
+    public  void NotityActivty(String msg)
+    {
+        if(activity!=null)
+        {
+            AppTools.NotifyHandle(activity.mHandler, DisplayActivity.HandleEvent.outtext.ordinal(),msg);
+        }
+    }
+    private void excute(String cmd) {
+        //分解字符串
+        String[] cmds = cmd.split("\\s+");
+        if (cmds[0].equals("tcmd")){
+            String option = null;
+            String param = null;
+            try {
+                option = cmds[1];
+            } catch (Exception e) {
+                NotityActivty("无效选项");
+            }
+            try {
+                param = cmds[2];
+            } catch (Exception e) {
+            }
 
-
+            String result = AdbCommand.inputCommand(option,param);
+            if (result.equals("")) {
+                NotityActivty("不匹配命令或选项");
+            }
+            else{
+                //执行
+                ShellUtils.CommandResult rt = ShellUtils.execCommand(result,true);
+                if (rt.result == 0){
+                    NotityActivty("执行成功");
+                }else{
+                    NotityActivty("执行失败");
+                }
+            }
+        }else{
+            NotityActivty("无效命令");
+        }
+    }
 }

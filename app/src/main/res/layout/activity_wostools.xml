@@ -6,18 +6,53 @@
     android:gravity="center"
     >
 
-    <TextView
-        android:id="@+id/storedir"
-        android:layout_width="288dp"
-        android:layout_height="wrap_content"
-        android:text="媒体播放器根目录：">
-
-    </TextView>
     <LinearLayout
         android:layout_width="288dp"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
+        <!-- 播放器ip地址 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="10dp">
+            <TextView
+                android:layout_width="88dp"
+                android:layout_height="wrap_content"
+                android:text="本机ip地址:"
+                android:textStyle="bold"
+                />
+            <TextView
+
+                android:id="@+id/localip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:text="127.0.0.1"
+                android:layout_weight="1"/>
+        </LinearLayout>
+        <!-- 本地根路径 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="10dp">
+            <TextView
+                android:layout_width="88dp"
+                android:layout_height="wrap_content"
+                android:text="主目录:"
+                android:textStyle="bold"
+                />
+
+            <TextView
+                android:id="@+id/storedir"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:text="/mnt/sdcard/wosplayer/"
+                android:layout_weight="1" />
+        </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -221,6 +256,44 @@
                 android:layout_height="wrap_content"
                 android:text="保存" />
         </LinearLayout>
+        <!-- 本机信息 -->
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <LinearLayout
+                android:id="@+id/open_layout"
+                android:layout_alignParentTop="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/command_input"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    />
+                <Button
+                    android:id="@+id/sure"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="执行"
+                    />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/version"
+                android:layout_below="@id/open_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:text="1.0"
+                />
+
+        </RelativeLayout>
     </LinearLayout>
 
 

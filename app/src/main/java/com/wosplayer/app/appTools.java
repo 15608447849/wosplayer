@@ -2,6 +2,7 @@ package com.wosplayer.app;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
@@ -48,11 +49,44 @@ public class AppTools {
      * @return
      */
     public static String GetMac(Context context) {
+
         String mac = getLocalMacAddressFromWifiInfo(context);
+        if (mac==null || "".equals(mac))
+            mac = getMacAddress();
         if (mac==null || "".equals(mac))
             mac = getLocalMacAddressFromBusybox();
         return mac;
     }
+    //本地以太网mac地址文件
+    private static String getMacAddress()
+    {
+        String strMacAddr = "";
+        byte[] b;
+        try
+        {
+            NetworkInterface NIC = NetworkInterface.getByName("eth0");
+            b = NIC.getHardwareAddress();
+            StringBuffer buffer = new StringBuffer();
+            for (int i = 0; i < b.length; i++)
+            {
+//                if (i != 0)
+//                {
+//                    buffer.append(':');
+//                }
+                String str = Integer.toHexString(b[i] & 0xFF);
+                buffer.append(str.length() == 1 ? 0 + str : str);
+            }
+            strMacAddr = buffer.toString().toUpperCase();
+        }
+        catch (SocketException e)
+        {
+            e.printStackTrace();
+        }
+        Log.i(TAG, "--- DVB Mac Address : " + strMacAddr);
+
+        return strMacAddr;
+    }
+
 
     //根据Wifi信息获取本地Mac
     public static String getLocalMacAddressFromWifiInfo(Context context){
@@ -283,5 +317,14 @@ public class AppTools {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static int getAppVersion(Context context){
+        try {
+            return context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return 1;
     }
 }
