@@ -13,6 +13,7 @@ import cn.trinea.android.common.util.ShellUtils;
 import com.installUtils.ApkController;
 import com.installUtils.AppToSystem;
 import com.wos.play.rootdir.model_monitor.soexcute.RunJniHelper;
+import com.wosplayer.tool.SdCardTools;
 
 /**
  * Created by user on 2016/10/9.
@@ -49,17 +50,33 @@ public class AdbCommand extends Thread {
     public static final String commands_startApp = "am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n com.wosplayer/com.wosplayer.app.DisplayActivity";
 
     //安装app
-    public static String[] getInstallAdb(String apkLocalPath, String filane) {
-        String[] param = {
-                "shell remount\n",
-                "adb shell\n",
-                "cp " + apkLocalPath + " /data/local/tmp/" + filane + "\n",
-                "chmod 777 /data/local/tmp/" + filane + "\n",
-                "pm install -r /data/local/tmp/" + filane + "\n",
-                // "rm /data/local/tmp.apk\n"
-        };
+    public static String getInstallAdb(String apkLocalPath, String fileNane) {
+        String param =
+                "mount -o remount,rw /system\n"+
+                "cp " + apkLocalPath + " /data/local/tmp/" + fileNane + "\n"+
+                "chmod 777 /data/local/tmp/" + fileNane + "\n"+
+                "pm install -r /data/local/tmp/" + fileNane ;
+
         return param;
     }
+
+    public  static void RuningInstallApk(String TAG,String apkLocalPath, String fileNane){
+        String command = getInstallAdb(apkLocalPath,fileNane);
+        Log.e(TAG,command);
+       ShellUtils.CommandResult result = ShellUtils.execCommand(command,true,true);
+        if (result.result == 0){
+            //成功
+            Log.e(TAG,"安装成功");
+            command =   "rm /data/local/"+fileNane+"\n"+commands_startApp;
+            ShellUtils.execCommand(command,true);
+        }
+        else{
+            Log.e(TAG,"安装失败");
+        }
+    }
+
+
+
     /**
      * @param context 环境
      * @param isrun_1 控制后台端口打开true

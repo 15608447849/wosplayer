@@ -9,6 +9,7 @@ import com.wosplayer.app.Logs;
 import com.wosplayer.command.operation.other.UPDCbroad;
 import com.wosplayer.download.operation.Task;
 import com.wosplayer.download.operation.TaskQueue;
+import com.wosplayer.service.UpdateApkServer;
 
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
@@ -36,18 +37,18 @@ public class DownloadManager extends IntentService
 
     private static final String TAG = "_loaderManager";
     public DownloadManager() {
-        super("loaderManager");
+        super(TAG);
     }
     private static ReentrantLock lock = new ReentrantLock();
     @Override
     public void onCreate() {
         super.onCreate();
-        Logs.i("--------------------------------------------loaderManager create--------------------------------------------------------");
+        Logs.i("--------------------------------------------下载管理员 onCreate--------------------------------------------------------");
     }
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Logs.i("-------------------------------------------loaderManager destroy----------------------------------------------------------");
+        Logs.i("-------------------------------------------下载管理员 onDestroy----------------------------------------------------------");
     }
 
     @Override
@@ -89,8 +90,6 @@ public class DownloadManager extends IntentService
     //更新apk
     private void updateAPK(String terminalNo, String savepath, String singUrl) {
         Logs.i(TAG,"下载 apk - "+singUrl+"\n savepath - "+savepath+"\n terminalNo - "+terminalNo);
-
-
         Task task =  Task.TaskFactory.createFtpTask(terminalNo,singUrl,savepath,"update.apk",true);
         task.setResult(new Task.TaskResult() {
             @Override
@@ -98,12 +97,12 @@ public class DownloadManager extends IntentService
                 try {
                     String lpath = task.getLocalPath()+task.getLocalName();
                     Logs.i(TAG,"下载apk成功  - 路径- "+ task.getLocalPath()+task.getLocalName() );
-                    Intent intent = new Intent();
-                    intent.setAction(UPDCbroad.ACTION);
+
                     Bundle bundle = new Bundle();
-                    bundle.putString(UPDCbroad.key,lpath);
+                    bundle.putString(UpdateApkServer.APK_PATH,lpath);
+                    Intent intent = new Intent(getApplicationContext(),UpdateApkServer.class);
                     intent.putExtras(bundle);
-                    getApplicationContext().sendBroadcast(intent);
+                    getApplicationContext().startService(intent);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

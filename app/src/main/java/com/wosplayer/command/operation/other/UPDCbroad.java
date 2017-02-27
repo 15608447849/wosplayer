@@ -23,7 +23,7 @@ public class UPDCbroad extends BroadcastReceiver {
     @Override
         public void onReceive(Context context, Intent intent) {
             Logs.e(TAG,"---------------------- 收到升级广播 -------------------------------");
-            updcer.installApk(intent.getExtras().getString(key,"没有文件路径"));
+//            updcer.installApk(intent.getExtras().getString(key,"没有文件路径"));
         }
     }
 

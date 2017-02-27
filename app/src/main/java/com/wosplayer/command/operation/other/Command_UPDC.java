@@ -1,9 +1,12 @@
 package com.wosplayer.command.operation.other;
 
+import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.exception.HttpException;
@@ -35,12 +38,11 @@ import cn.trinea.android.common.util.ShellUtils;
  */
 public class Command_UPDC implements iCommand {
 
-    private  static final String TAG = " #UPDC";
+    private  static final String TAG = "终端升级";
 
-    private String packagename = "com.wosplayer";
     @Override
     public void Execute(String param) {
-        Logs.i(TAG,"更新app,远程版本号:"+param);
+        Logs.i(TAG,"更新app: "+param);
         getRemoteVersionCode(param);
     }
 
@@ -60,17 +62,18 @@ public class Command_UPDC implements iCommand {
 
                     @Override
                     public void onSuccess(ResponseInfo<String> responseInfo) {
-                        Logs.i(TAG,"upload version info:"+responseInfo.result);
+                        Logs.i(TAG,"版本升级文本信息:"+responseInfo.result);
                         parseRemoteInfo(responseInfo.result);
                     }
 
                     @Override
                     public void onStart() {
+
                     }
 
                     @Override
                     public void onFailure(HttpException error, String msg) {
-                        Logs.i(TAG,"upload version info:"+msg);
+                        Logs.i(TAG,"升级包下载失败:" + msg);
                     }
                 });
     }
@@ -92,47 +95,20 @@ public class Command_UPDC implements iCommand {
         //获取根节点元素对象
         Element antivirus = document.getRootElement();
         String code = antivirus.element("code").getText();
-        String path = antivirus.element("path").getText();
-        try {
-            String spackagename = antivirus.element("packagename").getText();
+        String url = antivirus.element("path").getText();
 
-            if (spackagename != null && !spackagename.equals("")) {
-                packagename = spackagename;
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        compareVersion(Integer.parseInt(code),path);//比较版本
+        compareVersion(Integer.parseInt(code),url);//比较版本
     }
-    private UPDCbroad broad;
+
     /**
      * 比较版本号
      */
     private void compareVersion(int remoteVersion, String uri) {
         int local = getLocalVersionCode();
         int remote = remoteVersion;
-
-        Logs.i(TAG,"upload  LocalVersion :"+ local+" remoteVersion:"+remote);
-
-
-        DisplayerApplication.sendMsgToServer("terminalNo:"+ DisplayerApplication.config.GetStringDefualt("terminalNo","0000")+",localVersionNumber:"+local+",serverVersionNumber:"+remote);
-
+        Logs.i(TAG,"本地版本:"+ local+" ,升级包版本:"+remote);
         if (local<remote){
-
-            isUploading =false;
-            if (broad!=null){
-                try {
-                    DisplayerApplication.appContext.unregisterReceiver(broad);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                broad=null;
-            }
-            broad = new UPDCbroad(this);
-            IntentFilter filter=new IntentFilter();
-            filter.addAction(UPDCbroad.ACTION);
-            DisplayerApplication.appContext.registerReceiver(broad, filter); //只需要注册一次
-            //发送 远程升级
+            //下载升级包
             Intent intent = new Intent(DisplayerApplication.appContext, DownloadManager.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             Bundle bundle = new Bundle();
@@ -144,7 +120,6 @@ public class Command_UPDC implements iCommand {
             DisplayerApplication.appContext.startService(intent);
         }
     }
-
     /**
      * 获取软件版本号
      *
@@ -160,36 +135,6 @@ public class Command_UPDC implements iCommand {
         }
         return versionCode;
     }
-
-private boolean isUploading = false;
-/**
- * 安装APK文件
- */
-public void installApk(String apkLocalPath) {
-    File apkfile = new File(apkLocalPath);
-    if (!apkfile.exists()) {
-        Logs.e(TAG,"install apk is not exists >>> "+apkLocalPath +" <<<");
-        return;
-    }
-    if (isUploading){
-        return;
-    }
-    isUploading = true;
-    Logs.e(TAG," 安装升级包并且结束程序,upadte.apk 路径 :"+apkLocalPath);
-    int code =  PackageUtils.install(DisplayActivity.activityContext,apkLocalPath);
-    Logs.e(TAG," 安装结果 返回值 : "+code);
-    if (code == PackageUtils.INSTALL_SUCCEEDED){
-        ShellUtils.execCommand(AdbCommand.commands_startApp,false,false);
-    }
-    /*else{
-        String filane = apkLocalPath.substring(apkLocalPath.lastIndexOf("/")+1);
-        String param[] = AdbShellCommd.getInstallAdb(apkLocalPath,filane);
-        Log.e(TAG,"shell 命令安装 >>> \n"+param[0]+param[1]+param[2]+param[3]+param[4]);
-        ShellUtils.execCommand(param,true,true);
-        ShellUtils.execCommand(AdbShellCommd.commands_startApp,false,true);
-        //String p = "adb shell am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n com.wosplayer/com.wosplayer.activity.DisplayActivity\n";
-    }*/
-
 }
 
 
@@ -201,17 +146,38 @@ public void installApk(String apkLocalPath) {
 
 
 
+//    Intent intent = new Intent();
+//                    intent.setAction(UPDCbroad.ACTION);
+//                    Bundle bundle = new Bundle();
+//                    bundle.putString(UPDCbroad.key,lpath);
+//                    intent.putExtras(bundle);
+//                    getApplicationContext().sendBroadcast(intent);
 
 
 
+//    private UPDCbroad broad;
+//try {
+//        String spackagename = antivirus.element("packagename").getText();
+//
+//        if (spackagename != null && !spackagename.equals("")) {
+//        packagename = spackagename;
+//        }
+//        }catch (Exception e){
+//        e.printStackTrace();
+//        }
+//    private String packagename = "com.wosplayer";
 
-
-
-
-
-
-
-
-
-
-}
+//        DisplayerApplication.sendMsgToServer("terminalNo:"+ DisplayerApplication.config.GetStringDefualt("terminalNo","0000")+","+"localVersionNumber:"+local+",serverVersionNumber:"+remote);
+//            isUploading =false;
+//            if (broad!=null){
+//                try {
+//                    DisplayerApplication.appContext.unregisterReceiver(broad);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//                broad=null;
+//            }
+//            broad = new UPDCbroad(this);
+//            IntentFilter filter=new IntentFilter();
+//            filter.addAction(UPDCbroad.ACTION);
+//            DisplayerApplication.appContext.registerReceiver(broad, filter); //只需要注册一次

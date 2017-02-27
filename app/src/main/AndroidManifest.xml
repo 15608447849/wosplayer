@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.wosplayer"
-    android:versionCode="14"
-    android:versionName="14.0"
+    android:versionCode="15"
+    android:versionName="15.0"
     android:screenOrientation="portrait">
 
     <application
@@ -46,6 +46,8 @@
         <!-- 接受下载 队列 android:process=":remote_loader" -->
         <service android:name=".download.kernal.DownloadManager" android:process=":remote_download"/>
 
+        <!-- 更新apk-->
+        <service android:name=".service.UpdateApkServer" android:process=":remote_update"/>
         <!-- log-->
         <!-- 记录日志sever  android:process=":remote_log_upload"-->
         <service android:name=".service.serviceLog"  android:process=":remote_log_upload"/>
@@ -82,7 +84,6 @@
                 <action android:name="android.intent.action.PACKAGE_VERIFIED" />
             </intent-filter>
         </receiver>
-
 
     </application>
 
