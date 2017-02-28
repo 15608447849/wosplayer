@@ -20,16 +20,9 @@ import java.util.concurrent.ThreadFactory;
  * Created by Administrator on 2016/7/19.
  */
 
-public class DisplayerApplication extends Application {
-
-
-
-
-
-
-
-
+public class PlayApplication extends Application {
     public static Context appContext ;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -37,22 +30,17 @@ public class DisplayerApplication extends Application {
         //系统配置监听值
         SystemConfig.get().put("watchValue","0").save();
         //捕获异常
-        //CrashHandler.getInstance().init(appContext);
+        CrashHandler.getInstance().init(appContext);
     }
 
+    /**
+     * 在 activity 中调用
+     * @param handler
+     */
     public void startAppInit(Handler handler){
-
         //放入系统目录
-        new AdbCommand(appContext,handler,true,true).start();//会开端口,会重启
-        //new AdbShellCommd(this.getApplicationContext(),true,false).start();//开端口,不重启
-        //new AdbShellCommd(this.getApplicationContext(),false,true).start();//不开远程端口.会重启
-//       new AdbShellCommd(this.getApplicationContext(),false,false).start();//不开远程端口,不重启
-        //初始化 配置信息
-        //init(false);
+        BackRunner.runBackground( new AdbCommand(appContext,handler));//初始化
     }
-
-
-
 
     //本机信息
     public static DataList config = null;
@@ -60,10 +48,11 @@ public class DisplayerApplication extends Application {
      *
      */
     public void initConfig() {
-      config = SystemConfig.get().read();;
+      config = SystemConfig.get().read();
+      config.printData();
       final String defaultPath = config.GetStringDefualt("default","");
-        final String fudianpath = config.GetStringDefualt("fudianpath","");
-        if (defaultPath.isEmpty()||fudianpath.isEmpty()) return;
+      final String fudianpath = config.GetStringDefualt("fudianpath","");
+      if (defaultPath.isEmpty() || fudianpath.isEmpty()) return;
       BackRunner.runBackground(new Runnable() {
           @Override
           public void run() {
@@ -76,10 +65,8 @@ public class DisplayerApplication extends Application {
               Logs.i("后台任务","富颠金融网页模板解压缩完成");
           }
       });
-        config.printData();
+
     }
-
-
     //获取配置信息值
     public static String getConfigValue(String key){
         if (config!=null){
@@ -95,7 +82,6 @@ public class DisplayerApplication extends Application {
      HeartBeatTime = intent.getExtras().getLong("HeartBeatTime");
      */
     public static void startCommunicationService(Context mc) {
-        try {
             Intent intent = new Intent(mc, CommunicationService.class);
             //传递参数
             Bundle b = new Bundle();
@@ -104,25 +90,17 @@ public class DisplayerApplication extends Application {
             b.putString("terminalNo",config.GetStringDefualt("terminalNo","127.0.0.1"));
             b.putLong("HeartBeatTime",(config.GetIntDefualt("HeartBeatInterval",10)));
             intent.putExtras(b);
-            Logs.i("wosPlayerApp: 尝试开启通讯服务...");
             mc.startService(intent);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
     /**
      * 停止通讯服务
      */
     public static void stopCommunicationService(Context mc){
-        try {
             if (mc==null){
                 mc = appContext;
             }
             Intent server = new Intent(mc, CommunicationService.class);
             mc.stopService(server);
-        } catch (Exception e) {
-            Logs.e("停止通讯服务Err:" +e.getMessage());
-        }
     }
     //发送消息到通讯服务
     public static void sendMsgToServer(String msg){

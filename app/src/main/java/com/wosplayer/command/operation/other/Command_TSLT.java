@@ -2,7 +2,7 @@ package com.wosplayer.command.operation.other;
 
 import com.wosplayer.app.AppTools;
 import com.wosplayer.app.Logs;
-import com.wosplayer.app.DisplayerApplication;
+import com.wosplayer.app.PlayApplication;
 import com.wosplayer.command.operation.schedules.ScheduleSaver;
 import com.wosplayer.command.kernal.iCommand;
 
@@ -42,12 +42,12 @@ public class Command_TSLT implements iCommand {
     //本地默认排期
     public void getDefaultProg() {
         try {
-            String defaultPath = DisplayerApplication.config.GetStringDefualt("default","");
+            String defaultPath = PlayApplication.config.GetStringDefualt("default","");
             if (defaultPath.isEmpty()) return;
 
             if (!cn.trinea.android.common.util.FileUtils.isFileExist(defaultPath+"default_sche.xml")) {
                 ///文件不存在 - 解压缩
-                AppTools.defaultProgram(DisplayerApplication.appContext,defaultPath);
+                AppTools.defaultProgram(PlayApplication.appContext,defaultPath);
                 Logs.i(TAG,"解压缩默认排期完成");
             }
             defaultPath = "file://"+defaultPath+"default_sche.xml";
@@ -70,7 +70,7 @@ public class Command_TSLT implements iCommand {
             //xml    1.ScheduleNode.txt  2.ProgramNode.txt
             //资源  source  -> /mnt/external_sd/wosplayer/construction_bank/source/
             // xml -> /mnt/external_sd/wosplayer/construction_bank/xml/
-            String str = "file://" + DisplayerApplication.config.GetStringDefualt("bankPathXml", "/mnt/external/") + "ScheduleNode.txt";
+            String str = "file://" + PlayApplication.config.GetStringDefualt("bankPathXml", "/mnt/external/") + "ScheduleNode.txt";
 //        str =  ScheduleSaver.uriTranslationXml(str);
 //        log.i(TAG," 排期 : \n" + str);
 //

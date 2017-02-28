@@ -3,26 +3,20 @@ package com.wosplayer.app;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
-
-import java.util.HashMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 import cn.trinea.android.common.util.FileUtils;
 import cn.trinea.android.common.util.ShellUtils;
-import com.installUtils.ApkController;
-import com.installUtils.AppToSystem;
+
 import com.wos.play.rootdir.model_monitor.soexcute.RunJniHelper;
-import com.wosplayer.tool.SdCardTools;
+import com.wosplayer.R;
 
 /**
  * Created by user on 2016/10/9.
  */
-public class AdbCommand extends Thread {
-    public Context context = null;
-    public Handler handler = null;
-    public boolean isrun_1 = false;
+public class AdbCommand implements Runnable {
+
+
     //预留远程端口号
     public static String[] commands = new String[]{
             "setprop service.adb.tcp.port 9999\n",
@@ -30,6 +24,7 @@ public class AdbCommand extends Thread {
             "start adbd\n",
     };
 
+    //打开执行端口 默认9999
     public static String openPoint(String point){
         if (point==null || point.equals("")){
             point = "9999";
@@ -39,7 +34,8 @@ public class AdbCommand extends Thread {
                 +"start adbd";
         return cmd;
     }
-    //卸载
+
+    //卸载播放器
     public static String uninstallTelminal(){
         String alias = "WosOldTerminal.apk";
         String cmd = "mount -o remount,rw /system\n"
@@ -50,26 +46,18 @@ public class AdbCommand extends Thread {
                 +"reboot";
         return cmd;
     }
-    public boolean isrun_2 = false;
+
+
     public String packagepath = null;
-    //放进system cmd
-    public String getParam(String _packagepath) {
-        String paramString =// "adb push MySMS.apk /system/app" +"\n"+
-                "adb shell" + "\n" +
-                        "su" + "\n" +
-                        // "mount -o remount,rw -t yaffs2 /dev/block/mtdblock3 /system" +"\n"+
-                        "mount -o remount,rw /system" + "\n" +
-                        "cp " + _packagepath + " /system/app/wosplayer.apk" + "\n" +
-                        //"mount -o remount,ro -t yaffs2 /dev/block/mtdblock3 /system" +"\n"+
-                        "mount -o remount,ro /system" + "\n" +
-                        "reboot" + "\n" +
-                        "exit" + "\n" +
-                        "exit";
-        return paramString;
-    }
+    public Context context = null;
+    public Handler handler = null;
+
     //启动应用adb shell am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n com.wosplayer/com.wosplayer.app.DisplayActivity
     public static final String commands_startApp = "am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n com.wosplayer/com.wosplayer.app.DisplayActivity";
-
+    //打开一个activity
+    public static String adbStartActivity(String packageName,String mainActivityClassPath){
+        return "am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n "+packageName+"/"+mainActivityClassPath;
+    }
     //安装app
     public static String getInstallAdb(String apkLocalPath, String fileNane) {
         String param = "";
@@ -82,11 +70,10 @@ public class AdbCommand extends Thread {
             param = " chmod 777 "+apkLocalPath + "\n"+
                     "pm install -r "+apkLocalPath ;
         }
-
         return param;
     }
-
-    public  static void RuningInstallApk(String TAG,String apkLocalPath, String fileNane){
+    //运行时安装apk
+    public  static void runingInstallApk(String TAG, String apkLocalPath, String fileNane){
         String command = getInstallAdb(apkLocalPath,fileNane);
         Log.e(TAG,command);
        ShellUtils.CommandResult result = ShellUtils.execCommand(command,true,true);
@@ -102,21 +89,16 @@ public class AdbCommand extends Thread {
         }
     }
 
-
-
     /**
      * @param context 环境
-     * @param isrun_1 控制后台端口打开true
-     * @param isrun_2 放入系统目录true
      */
-    public AdbCommand(Context context, Handler handler, boolean isrun_1, boolean isrun_2) {
+    public AdbCommand(Context context, Handler handler) {
         this.context = context;
         this.handler = handler;
         this.packagepath = context.getApplicationInfo().sourceDir;
-        this.isrun_1 = isrun_1;
-        this.isrun_2 = isrun_2;
-        Log.e("执行adb命令","后台执行 - 创建成功");
     }
+
+    //发送信息到ui界面
     public void handlerSendMsg(String msgStr){
         if (handler!=null && context!=null){
            AppTools.NotifyHandle(handler,DisplayActivity.HandleEvent.outtext.ordinal(),msgStr);
@@ -127,26 +109,12 @@ public class AdbCommand extends Thread {
         try {
             if (ShellUtils.checkRootPermission()) {
                 handlerSendMsg("拥有root权限,执行初始化.");
-//                //卸载 旧app
-//                if (ApkController.uninstall("com.wos", context)) {
-//                    Logs.d("检测 卸载 老版本 APP - com.wos - 完成");
-//                }
-//                if (ApkController.uninstall("com.wos.tools", context)) {
-//                    Logs.d("检测 卸载 老版本 APP - com.wos.tools - 完成");
-//                }
                 //放入system
-                if (isrun_2) {
-                    excuteAppMoveSystem(context);
-                }
-                //尝试开启远程端口
-                if (isrun_1) {
-                   // startRemoteport();
-                }
+                 excuteAppMoveSystem(context);
             } else {
                 Logs.d("执行adb命令","没有root权限");
                 handlerSendMsg("没有root权限.");
             }
-            ;
         } catch (Exception e) {
             Logs.e(e.getMessage());
         }finally {
@@ -154,82 +122,58 @@ public class AdbCommand extends Thread {
             handler=null;
         }
     }
-    public static void startRemoteport() {
-        Logs.e("commands[] :\n" + commands[0] + commands[1] + commands[2]);
 
-        ShellUtils.CommandResult cr = ShellUtils.execCommand(commands, true, true);
-
-        String strs = "远程端口开启结果: " + (cr.result==0?AppTools.getLocalIpAddress()+":9999 成功打开.":"未启动远程端口.");
-        Logs.e("Remote", strs);
-
-    }
     //放进system cmd
-    public String genereteCommand(String _packagePath,String _packageName, String alias) {
+    public String getAppChangerPath(String _packagePath, String _packageName, String alias) {
         return "mount -o remount,rw /system" + "\n" +
-                "mkdir /system/libtem" + "\n" +
-                "cp /data/data/"+_packageName+"/lib/* /system/lib" + "\n" +
-                "chmod 777 /system/lib/*" + "\n" +
-                "cp " + _packagePath + " /system/app/" + alias + "\n" +
-                "chmod 777 /system/app/" + alias + "\n" +
-                "rm -rf " + _packagePath + "\n" +
-                "rm -rf /data/dalvik-cache/data*" + "\n";
+                "cp /data/data/"+_packageName+"/lib/* /system/lib" + "\n" + //复制so文件到目录下
+                "chmod 777 /system/lib/*" + "\n" + //设置so权限
+                "cp " + _packagePath + " /system/app/" + alias + "\n" + //复制app到system
+                "chmod 777 /system/app/" + alias + "\n" + //赋权
+                "rm -rf " + _packagePath + "\n" + //删除data目录下面的app
+                "rm -rf /data/dalvik-cache/data*" + "\n";//删除虚拟机缓存
     }
 
     //检测root权限 放入system
     private void excuteAppMoveSystem(Context context) {
-
             ApplicationInfo appinfo = context.getApplicationInfo();
-            String packagepath = appinfo.sourceDir;
-            String packageName = appinfo.packageName;
-            Logs.d("执行adb命令","初始化app信息,package 路径 - "+packagepath +"; 包名: "+packageName);
+            String packagepath = appinfo.sourceDir; //包路径
+            String packageName = appinfo.packageName; // 包名
+            //Logs.d("执行adb命令","初始化app信息,package 路径 - "+packagepath +"; 包名: "+packageName);
+
+            String TAG = "执行adb命令";
+            String alias = "WosOldTerminal.apk";
             //如果不在system目录下  (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) > 0 //系统程序存在/system/app下
-            boolean flag = ((appinfo.flags & ApplicationInfo.FLAG_SYSTEM) > 0);
-            if (!flag) {
-                //packagepath.contains("/data/app/")
-//                String alias = packagepath.substring(packagepath.lastIndexOf("/") + 1);
-
-                String alias = "WosOldTerminal.apk";
-                if (FileUtils.isFileExist("/system/app/"+alias)){
-                    handlerSendMsg("系统应用");
-                    return;
-                }
-
-
-
+            if ( (appinfo.flags & ApplicationInfo.FLAG_SYSTEM) > 0 || FileUtils.isFileExist("/system/app/"+alias) ) {
+                handlerSendMsg("系统应用");
+                return;
+            }
                 //第一次执行
                 RunJniHelper.startWatch(context);//打开监听服务
-
-                Log.e("执行adb命令","源apk路径:" + packagepath + " - 移动路径 :/sysytem/app/" + alias);
-                handlerSendMsg("源apk路径:" + packagepath + " - 移动路径 :/sysytem/app/" + alias);
-
-                String cmd = genereteCommand(packagepath,packageName, alias);
-                Log.e("执行adb命令",cmd);
+                Log.e(TAG,"源apk路径:" + packagepath + " - 移动路径 :/sysytem/app/" + alias);
+                String cmd = getAppChangerPath(packagepath,packageName, alias);
+                Log.e(TAG,cmd);
                 ShellUtils.CommandResult cr = ShellUtils.execCommand(cmd, true, true);
-                Log.e("执行adb命令","提升权限结果:" + cr.result);
-                handlerSendMsg("提升权限结果:" + cr.result);
+                Log.e(TAG,"提升权限结果:" + cr.result);
+                handlerSendMsg("提升权限结果:" + (cr.result==0?" 成功":" 失败"));
                 if (cr.result == 0) {
                     //发送重启通知
                     try {
-                        handlerSendMsg("初始化系统完成,在30秒后重启.");
-                        sleep(30 * 1000);
+                        handlerSendMsg("请注意,初始化系统完成,将在30秒后重启.");
+                        Thread.sleep(30 * 1000);
+                        handlerSendMsg(" [ 即将重新启动 ] ");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     } finally {
                         ShellUtils.execCommand("reboot", true);
                     }
                 }
-            }
     }
 
-
-//    private static HashMap<String,String> commandMap = new HashMap<>();
-//
-//    static{
-//        commandMap.put("-p","connect");//打开远程连接端口号,默认9999
-//        commandMap.put("-r","uninstall");//卸载
-//    }
     /**
      * 终端命令集
+     * tcmp -p 端口号
+     * tcmp -r 卸载
      */
     public static String inputCommand(String option,String param){
         if (option!=null && !option.equals("")){

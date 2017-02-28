@@ -1,12 +1,7 @@
 package com.wosplayer.command.operation.other;
 
-import android.app.Service;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.support.annotation.Nullable;
 
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.exception.HttpException;
@@ -14,9 +9,7 @@ import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
 import com.wosplayer.app.AppTools;
-import com.wosplayer.app.DisplayActivity;
-import com.wosplayer.app.AdbCommand;
-import com.wosplayer.app.DisplayerApplication;
+import com.wosplayer.app.PlayApplication;
 import com.wosplayer.app.Logs;
 import com.wosplayer.command.kernal.iCommand;
 import com.wosplayer.download.kernal.DownloadManager;
@@ -28,10 +21,8 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.InputStream;
 
-import cn.trinea.android.common.util.PackageUtils;
 import cn.trinea.android.common.util.ShellUtils;
 
 /**
@@ -109,19 +100,19 @@ public class Command_UPDC implements iCommand {
         int remote = remoteVersion;
         Logs.i(TAG,"本地版本号:"+ local+" ,升级包版本号:"+remote);
         if (local<remote){
-            String tepPath = DisplayerApplication.config.GetStringDefualt("updatepath", "");
+            String tepPath = PlayApplication.config.GetStringDefualt("updatepath", "");
             ShellUtils.CommandResult result = ShellUtils.execCommand("chmod 777 "+tepPath,true);
             if (result.result == 0) {
                 //下载升级包
-                Intent intent = new Intent(DisplayerApplication.appContext, DownloadManager.class);
+                Intent intent = new Intent(PlayApplication.appContext, DownloadManager.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 Bundle bundle = new Bundle();
                 bundle.putInt(DownloadManager.KEY_TYPE, DownloadManager.KEY_TYPE_UPDATE_APK);
-                bundle.putString(DownloadManager.KEY_TERMINAL_NUM, DisplayerApplication.config.GetStringDefualt("terminalNo", ""));
+                bundle.putString(DownloadManager.KEY_TERMINAL_NUM, PlayApplication.config.GetStringDefualt("terminalNo", ""));
                 bundle.putString(DownloadManager.KEY_SAVE_PATH, tepPath);
                 bundle.putString(DownloadManager.KEY_TASK_SINGLE, uri);
                 intent.putExtras(bundle);
-                DisplayerApplication.appContext.startService(intent);
+                PlayApplication.appContext.startService(intent);
             }
             else{
                 Logs.e(TAG,"无法发送文件到下载服务,路径:"+tepPath+"无法执行权限设置.");
@@ -135,7 +126,7 @@ public class Command_UPDC implements iCommand {
      */
     public static int getLocalVersionCode() {
          // 获取软件版本号
-        return AppTools.getAppVersion(DisplayerApplication.appContext);
+        return AppTools.getAppVersion(PlayApplication.appContext);
     }
 }
 

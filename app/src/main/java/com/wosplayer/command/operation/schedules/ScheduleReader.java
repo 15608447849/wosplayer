@@ -5,7 +5,7 @@ import android.os.Bundle;
 
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.Ui.uiBroadcast.UibrocdCastReceive;
-import com.wosplayer.app.DisplayerApplication;
+import com.wosplayer.app.PlayApplication;
 import com.wosplayer.app.Logs;
 import com.wosplayer.command.kernal.CommandCenter;
 import com.wosplayer.command.operation.other.Command_SYTI;
@@ -324,7 +324,7 @@ public class ScheduleReader {
         b.putString(CommandCenter.cmd,"TSLT:");
         b.putString(CommandCenter.param,"default_");
         intent.putExtras(b);
-        DisplayerApplication.appContext.sendBroadcast(intent);
+        PlayApplication.appContext.sendBroadcast(intent);
     }
 
 
@@ -454,7 +454,7 @@ public class ScheduleReader {
             Bundle b = new Bundle();
             b.putParcelable(UibrocdCastReceive.key,entity);
             intent.putExtras(b);
-            DisplayerApplication.appContext.sendBroadcast(intent);
+            PlayApplication.appContext.sendBroadcast(intent);
         }else{
             Logs.e(TAG,"播放默认排期");
         }

@@ -3,7 +3,7 @@ package com.wosplayer.command.operation.other;
 import android.content.SharedPreferences;
 
 import com.wosplayer.app.Logs;
-import com.wosplayer.app.DisplayerApplication;
+import com.wosplayer.app.PlayApplication;
 import com.wosplayer.command.kernal.iCommand;
 
 /**
@@ -28,14 +28,14 @@ public class Command_PASD implements iCommand {
 
         boolean glag = savaUnlockPassword(param);
 
-        DisplayerApplication.sendMsgToServer("PASD:"+glag);
+        PlayApplication.sendMsgToServer("PASD:"+glag);
     }
 
     //保存密码
     private boolean savaUnlockPassword(String password) {
 
         int ret = 0;
-        SharedPreferences sp = DisplayerApplication.appContext.getSharedPreferences(sharedPreferences_txt, DisplayerApplication.appContext.MODE_PRIVATE);
+        SharedPreferences sp = PlayApplication.appContext.getSharedPreferences(sharedPreferences_txt, PlayApplication.appContext.MODE_PRIVATE);
         SharedPreferences.Editor mEditor = sp.edit();
         mEditor.putString(PASSWORD_KEY,password);
         return mEditor.commit();
@@ -45,7 +45,7 @@ public class Command_PASD implements iCommand {
 
     //获取本地密码
 public static String getUnlockPassword(){
-    SharedPreferences sp = DisplayerApplication.appContext.getSharedPreferences(sharedPreferences_txt, DisplayerApplication.appContext.MODE_PRIVATE);
+    SharedPreferences sp = PlayApplication.appContext.getSharedPreferences(sharedPreferences_txt, PlayApplication.appContext.MODE_PRIVATE);
     SharedPreferences.Editor mEditor = sp.edit();
     String psd = sp.getString(PASSWORD_KEY,defpassword);
 

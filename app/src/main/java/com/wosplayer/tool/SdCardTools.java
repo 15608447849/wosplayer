@@ -11,6 +11,7 @@ import android.os.storage.StorageManager;
 import android.util.Log;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -415,10 +416,15 @@ public class SdCardTools {
             File file = new File(pathdir);
             if (!file.exists()) {
                 boolean isSuccess = file.mkdirs();
-                Log.i(TAG, "创建文件夹 - " + pathdir + (isSuccess ? " 成功" : " 失败"));
+                if (!isSuccess){
+                    throw new IOException("创建文件夹失败:"+pathdir);
+                }
+                //Log.i(TAG, "创建文件夹 - " + pathdir + (isSuccess ? " 成功" : " 失败"));
             }
-            if (file.exists()) {
+            if (file.exists() && file.isDirectory()) {
                 return true;
+            }else{
+                throw new IOException("已存在的文件:"+pathdir);
             }
         } catch (Exception e) {
             Log.e(TAG, "创建文件夹错误：" + e.getMessage());

@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -32,8 +31,7 @@ import com.wosplayer.command.operation.schedules.ScheduleReader;
 import com.wosplayer.command.operation.schedules.ScheduleSaver;
 
 
-import static com.wosplayer.app.DisplayerApplication.appContext;
-import static com.wosplayer.app.DisplayerApplication.config;
+import static com.wosplayer.app.PlayApplication.appContext;
 
 /**
  *  Timer timer = new Timer();
@@ -58,7 +56,7 @@ public class DisplayActivity extends Activity {
         success,outtext,close,
     }
 
-    public  Handler mHandler = new Handler(){
+    public final  Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
            if (msg.what == HandleEvent.outtext.ordinal()){
@@ -79,7 +77,7 @@ public class DisplayActivity extends Activity {
         }
     };
 
-    private static final java.lang.String TAG = "播放器activity";
+    private static final java.lang.String TAG = "播放器UI界面控制";
     public static AbsoluteLayout baselayout = null;
 
     public  static AbsoluteLayout main = null;    //存放所有 排期视图 的主容器
@@ -93,7 +91,7 @@ public class DisplayActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activityContext = this;
-        ((DisplayerApplication)getApplication()).startAppInit(mHandler);
+        ((PlayApplication)getApplication()).startAppInit(mHandler);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//保持屏幕常亮
         setContentView(R.layout.activity_main);//设置布局文件
         baselayout = (AbsoluteLayout) LayoutInflater.from(this).inflate(R.layout.activity_main,null);
@@ -296,9 +294,9 @@ public class DisplayActivity extends Activity {
 
         if (activityContext!=null){
             //初始化数据
-           ((DisplayerApplication)this.getApplication()).initConfig();
+           ((PlayApplication)this.getApplication()).initConfig();
             //开启通讯服务
-            DisplayerApplication.startCommunicationService(this);
+            PlayApplication.startCommunicationService(this);
             PlayTypeStart();
         }
     }
@@ -307,7 +305,7 @@ public class DisplayActivity extends Activity {
 
     //结束工作 - true,关闭 activity
     private void StopWork(boolean isclose){
-            DisplayerApplication.stopCommunicationService(this); //关闭服务
+            PlayApplication.stopCommunicationService(this); //关闭服务
             PlayTypeStop();
             if (isclose) finish();
     }

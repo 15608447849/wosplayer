@@ -1,13 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.wosplayer"
-    android:versionCode="11"
-    android:versionName="11.0"
+    android:versionCode="16"
+    android:versionName="16.0"
     android:screenOrientation="portrait">
 
     <application
-        android:name=".app.DisplayerApplication"
+        android:name=".app.PlayApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/image_log"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"

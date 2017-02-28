@@ -9,7 +9,7 @@ import android.widget.AbsoluteLayout;
 
 import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.MyVideoView;
 import com.wosplayer.Ui.element.interfaces.IviewPlayer;
-import com.wosplayer.app.DisplayerApplication;
+import com.wosplayer.app.PlayApplication;
 import com.wosplayer.app.Logs;
 
 import com.wosplayer.download.util.DownloadFileUtil;
@@ -122,7 +122,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer {
             mInitStart(videoFileLocalPath);
         } else {
             Logs.e(TAG, "视频资源不存在 - " + videoFileLocalPath);
-            String del = DisplayerApplication.getConfigValue("defaultVideo");
+            String del = PlayApplication.getConfigValue("defaultVideo");
             if (!del.equals("")) {
                 mInitStart(del);
             }

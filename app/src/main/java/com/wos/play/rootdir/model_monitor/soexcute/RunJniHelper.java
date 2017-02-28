@@ -38,7 +38,7 @@ public class RunJniHelper {
 
     public native void startMservice(String srvName,String sdcard);
 
-    //打开监听服务
+    //打开监听服务 -请勿修改
     public static void startWatch(Context context) {
         //获取包名
         String packageName = context.getPackageName();

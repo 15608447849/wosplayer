@@ -1,7 +1,7 @@
 package com.wosplayer.Ui.performer;
 
 import com.wosplayer.app.DisplayActivity;
-import com.wosplayer.app.DisplayerApplication;
+import com.wosplayer.app.PlayApplication;
 import com.wosplayer.app.Logs;
 import com.wosplayer.command.operation.schedules.correlation.XmlNodeEntity;
 
@@ -35,7 +35,7 @@ public class programExcuter {
             //如果是颜色
             bgInfo = program.getXmldata().get("bgcolor");
         }else{
-            bgInfo = DisplayerApplication.config.GetStringDefualt("basepath","")+bgInfo;
+            bgInfo = PlayApplication.config.GetStringDefualt("basepath","")+bgInfo;
         }
         Logs.e(TAG,"节目背景 - "+bgInfo);
     }

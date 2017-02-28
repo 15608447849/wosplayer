@@ -21,14 +21,12 @@ import java.util.Date;
  * Created by user on 2016/7/19.
  */
 public class serviceLog extends IntentService {
-    private static final String TAG = "logSaveServer:";
+    private static final String TAG = "错误日志保存服务";
     /**
      * sd卡中日志文件的最多保存天数
      */
     private static final int SDCARD_LOG_FILE_SAVE_DAYS = 30;
-
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");// 日志名称格式
-
     /**
      * 日志文件在sdcard中的路径
      */
@@ -38,15 +36,12 @@ public class serviceLog extends IntentService {
             +File.separator
             +"crashlist"
             +File.separator;
-
-
     /**
      * 必须定义一个无参数的构造方法，并调用super(name)进行初始化，否则出错。
      */
     public serviceLog() {
-        super("serviceLog");
+        super(TAG);
     }
-
     /**
      * 创建日志目录
      */
@@ -60,7 +55,6 @@ public class serviceLog extends IntentService {
             }
         }
     }
-
     /**
      * 删除内存下过期的日志
      */
@@ -76,16 +70,13 @@ public class serviceLog extends IntentService {
                 String createDateInfo = getFileNameWithoutExtension(fileName);//过来后缀得到一个文件名
                 if (canDeleteSDLog(createDateInfo)) { //判断 是不是可以删除了
                     logFile.delete();
-                    Logs.e(TAG, "delete expired log success,the log path is:"
-                            + logFile.getAbsolutePath());
-
+                    Logs.e(TAG, "删除日志文件:"+ logFile.getAbsolutePath());
                 }
             }
         }
     }
     /**
      * 去除文件的扩展类型（.log）
-     *
      * @param fileName
      * @return
      */
@@ -94,7 +85,6 @@ public class serviceLog extends IntentService {
     }
     /**
      * 判断sdcard上的日志文件是否可以删除
-     *
      * @param createDateStr
      * @return
      */
@@ -112,7 +102,6 @@ public class serviceLog extends IntentService {
         }
         return canDel;
     }
-
     /**
     * 根据当前的存储位置得到日志的绝对存储路径
     *
@@ -123,13 +112,11 @@ public class serviceLog extends IntentService {
         String logFileName = sdf.format(new Date()) + ".log";// 日志文件名称
         return LOG_PATH_SDCARD_DIR + File.separator + logFileName;
     }
-
     /**
      * 写入sd卡
      * @param content
      */
     private void writeLog(String content){
-
         File file=new File(getLogPath());
         try {
             OutputStreamWriter outSw = new OutputStreamWriter(new FileOutputStream(file,true),"UTF-8");
@@ -146,7 +133,6 @@ public class serviceLog extends IntentService {
             e.printStackTrace();
         }
     }
-
     public static final String serviceLogKey = "LogContent";
     @Override
     public void onCreate() {
@@ -156,15 +142,13 @@ public class serviceLog extends IntentService {
         //判断是否有过期的 log文件
         deleteSDcardExpiredLog();
     }
-
     @Override
     protected void onHandleIntent(Intent intent) {
         String saveLogMsg = intent.getExtras().getString(serviceLogKey);
         if (saveLogMsg.equals("")){
-            Logs.e(TAG," log msg is null ,unwrite to file");
+           // Logs.e(TAG," log msg is null ,unwrite to file");
             return;
         }
         writeLog(saveLogMsg);
     }
-
 }

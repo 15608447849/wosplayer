@@ -1,6 +1,6 @@
 package com.wosplayer.download.operation;
 
-import com.wosplayer.app.DisplayerApplication;
+import com.wosplayer.app.PlayApplication;
 
 /**
  * Created by user on 2016/11/25.
@@ -16,14 +16,14 @@ public class DownloadCaller {
      *
      */
     public void nitifyMsg(String terminalNo,String filename, int type){
-        DisplayerApplication.sendMsgToServer("FTPS:"+terminalNo+";" + filename+ ";"+type);
+        PlayApplication.sendMsgToServer("FTPS:"+terminalNo+";" + filename+ ";"+type);
     }
 
     public void notifyProgress(String terminalNo,String filename, String process, String speed){
         String command = "PRGS:" +  terminalNo
                 + "," + filename + ","
                 + process + "," + speed;
-        DisplayerApplication.sendMsgToServer(command);
+        PlayApplication.sendMsgToServer(command);
     }
 
     // 指定类型 不匹配

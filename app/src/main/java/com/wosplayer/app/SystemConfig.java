@@ -4,6 +4,8 @@ import android.util.Log;
 
 import com.wosplayer.tool.SdCardTools;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,26 +17,21 @@ import cn.trinea.android.common.util.FileUtils;
 
 public class SystemConfig extends DataList{
     private static final String TAG = "播放器系统配置";
+    private static final String DIR = "/mnt/sdcard/wosplayer/";
     //文件保存路径
-    private static final String PATH = "/mnt/sdcard/wosplayer/config.conf";
+    private static final String PATH = DIR+"config.conf";
     private static SystemConfig systemConfig = null;
 
-    final Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-
-        }
-    };
     private SystemConfig()
     {
-//        BackRunner.runBackground(runnable);
-        check();
+     SdCardTools.MkDir(DIR);
     }
 
     public static SystemConfig get(){
         if (systemConfig==null){
             systemConfig = new SystemConfig();
         }
+        systemConfig.check();
         return systemConfig;
     }
 
@@ -46,12 +43,15 @@ public class SystemConfig extends DataList{
             //创建文件夹并且成功设置默认值
             DefaultValue();
         }
+        else{
             read();
+        }
     }
 
     //设置默认值
     private void DefaultValue() {
-        HashMap<String,String> map = new HashMap<>();
+        HashMap<String,String> map = getMap();
+        map.clear();
         //终端id
         map.put("terminalNo","");
         //通信模式
@@ -68,7 +68,8 @@ public class SystemConfig extends DataList{
         map.put("HeartBeatInterval","30");
         //重启时间
         map.put("RestartBeatInterval","30");
-        map.put("watchValue","0");//是否监听
+        //是否监听
+        map.put("watchValue","0");
         //sdcard 清理阔值
         map.put("storageLimits","50");
         //机器码
@@ -90,10 +91,10 @@ public class SystemConfig extends DataList{
         map.put("defaultVideo", "/mnt/sdcard/wosplayer/default/def.mp4");//默认视频本地位置
         map.put("fudianpath","/mnt/sdcard/wosplayer/ffbk/");//富颠银行本地web资源
         map.put("CapturePath", "/mnt/sdcard/wosplayer/screen.png");//截图本地位置
-        this.setMap(map);
+
         //保存数据
         boolean isWrite = FileUtils.writeFile(PATH,AppTools.mapToJson(map));
-        if (isWrite){Logs.d(TAG, " --- 还原默认设置 ---");}
+        if (isWrite){Logs.d(TAG, " ---播放器配置已还原默认设置 ---");}
     }
 
 
@@ -105,22 +106,22 @@ public class SystemConfig extends DataList{
             if (!content.isEmpty()) {
                 Map map = AppTools.jsonTxtToMap(content);
                 this.setMap((HashMap<String, String>) map);
-                Logs.i(TAG,"系统配置文件读取成功" );
+//                Logs.i(TAG,"系统配置文件读取成功" );
             }
         } catch (Exception e) {
             Logs.e(TAG,"系统配置文件读取异常" );
             //恢复默认值
             DefaultValue();
         }
-        return systemConfig;
+        return this;
     }
     //保存数据 list->file
     public void save(){
         if (map.isEmpty()) return;
         String content = AppTools.mapToJson(map);
-        Logs.d(TAG,"保存配置文件："+content);
+//        Logs.d(TAG,"保存配置文件："+content);
         boolean flag =  FileUtils.writeFile(PATH,content);
-        Logs.i(TAG,"保存系统配置文件存储结果:"+flag );
+        Logs.i(TAG,"保存系统配置文件存储结果:"+(flag?" 成功":" 失败"));
     }
 
 }

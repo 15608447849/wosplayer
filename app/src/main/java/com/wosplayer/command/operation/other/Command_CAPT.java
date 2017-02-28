@@ -11,10 +11,9 @@ import android.view.ViewGroup;
 import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.MyVideoView;
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
-import com.wosplayer.app.DisplayerApplication;
+import com.wosplayer.app.PlayApplication;
 import com.wosplayer.command.kernal.iCommand;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpPost;
@@ -25,15 +24,12 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import cn.trinea.android.common.util.ShellUtils;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
 
 /**
  * Created by user on 2016/7/29.
@@ -44,9 +40,9 @@ public class Command_CAPT implements iCommand {
     @Override
     public void Execute(String param) {
 //        String command = "screencap -p "+ basepath;
-        String capturePath = DisplayerApplication.config.GetStringDefualt("CapturePath","");
-        String uploadUrl = DisplayerApplication.config.GetStringDefualt("CaptureURL","");
-        String terminalNo = DisplayerApplication.config.GetStringDefualt("terminalNo","");
+        String capturePath = PlayApplication.config.GetStringDefualt("CapturePath","");
+        String uploadUrl = PlayApplication.config.GetStringDefualt("CaptureURL","");
+        String terminalNo = PlayApplication.config.GetStringDefualt("terminalNo","");
         liunxCommadScreen(terminalNo,capturePath,uploadUrl);
     }
 

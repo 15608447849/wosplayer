@@ -7,7 +7,7 @@ import android.util.Log;
 import com.wosplayer.Ui.performer.contentTanslater.ContentTypeEnum;
 import com.wosplayer.app.AppTools;
 import com.wosplayer.tool.SdCardTools;
-import com.wosplayer.app.DisplayerApplication;
+import com.wosplayer.app.PlayApplication;
 import com.wosplayer.app.Logs;
 import com.wosplayer.command.operation.schedules.correlation.XmlHelper;
 import com.wosplayer.command.operation.schedules.correlation.XmlNodeEntity;
@@ -96,10 +96,10 @@ public class ScheduleSaver implements iCommand {
         Logs.e(TAG,"解析用时 : "+(endTime - startTime)+" 毫秒");
         startTime = System.currentTimeMillis();
         //判断是否清理数据
-        if(SdCardTools.justFileBlockVolume(DisplayerApplication.config.GetStringDefualt("basepath",""),
-                DisplayerApplication.config.GetStringDefualt("storageLimits","50"))){
+        if(SdCardTools.justFileBlockVolume(PlayApplication.config.GetStringDefualt("basepath",""),
+                PlayApplication.config.GetStringDefualt("storageLimits","50"))){
 
-            SdCardTools.clearTargetDir(DisplayerApplication.config.GetStringDefualt("basepath",""),rootNode.getFtplist());
+            SdCardTools.clearTargetDir(PlayApplication.config.GetStringDefualt("basepath",""),rootNode.getFtplist());
         }
         endTime = System.currentTimeMillis();
         Logs.e(TAG,"清理数据用时 : "+(endTime - startTime)+" 毫秒 \n" +
@@ -115,7 +115,7 @@ public class ScheduleSaver implements iCommand {
                 //发送完成通知
                 Intent intent = new Intent();
                 intent.setAction(DownloadCompleterBroadcast.action);
-                DisplayerApplication.appContext.sendBroadcast(intent);
+                PlayApplication.appContext.sendBroadcast(intent);
             }
         }
     }
@@ -143,15 +143,15 @@ public class ScheduleSaver implements iCommand {
         for (int i = 0; i<rootNode.getFtplist().size();i++){
             tasklist.add(rootNode.getFtplist().get(i));
         }
-        Intent intent = new Intent(DisplayerApplication.appContext, DownloadManager.class);
+        Intent intent = new Intent(PlayApplication.appContext, DownloadManager.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         Bundle bundle = new Bundle();
         bundle.putInt(DownloadManager.KEY_TYPE, DownloadManager.KEY_TYPE_SCHDULE);
         bundle.putCharSequenceArrayList(DownloadManager.KEY_TASK_LIST,tasklist);
-        bundle.putString(DownloadManager.KEY_TERMINAL_NUM, DisplayerApplication.config.GetStringDefualt("terminalNo",""));
-        bundle.putString(DownloadManager.KEY_SAVE_PATH, DisplayerApplication.config.GetStringDefualt("basepath", ""));
+        bundle.putString(DownloadManager.KEY_TERMINAL_NUM, PlayApplication.config.GetStringDefualt("terminalNo",""));
+        bundle.putString(DownloadManager.KEY_SAVE_PATH, PlayApplication.config.GetStringDefualt("basepath", ""));
         intent.putExtras(bundle);
-        DisplayerApplication.appContext.startService(intent);
+        PlayApplication.appContext.startService(intent);
     }
 
 

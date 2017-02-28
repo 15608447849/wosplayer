@@ -2,7 +2,7 @@ package com.wosplayer.command.operation.other;
 
 import android.text.format.Time;
 
-import com.wosplayer.app.DisplayerApplication;
+import com.wosplayer.app.PlayApplication;
 import com.wosplayer.app.Logs;
 import com.wosplayer.command.operation.schedules.ScheduleReader;
 import com.wosplayer.command.kernal.iCommand;
@@ -29,8 +29,8 @@ public class Command_SYTI implements iCommand {
 	//显示系统时间
 	public  void disableSystemSyncTime()
 	{
-		android.provider.Settings.System.putInt(DisplayerApplication.appContext.getContentResolver(), android.provider.Settings.System.AUTO_TIME, 0);//1 获取网络时间
-		android.provider.Settings.System.putInt(DisplayerApplication.appContext.getContentResolver(), android.provider.Settings.System.AUTO_TIME_ZONE, 0);
+		android.provider.Settings.System.putInt(PlayApplication.appContext.getContentResolver(), android.provider.Settings.System.AUTO_TIME, 0);//1 获取网络时间
+		android.provider.Settings.System.putInt(PlayApplication.appContext.getContentResolver(), android.provider.Settings.System.AUTO_TIME_ZONE, 0);
 	}
 
 	private String getSystemTime(){

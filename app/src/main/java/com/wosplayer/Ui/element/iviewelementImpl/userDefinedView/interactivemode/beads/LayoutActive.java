@@ -13,7 +13,7 @@ import com.wosplayer.Ui.element.iviewelementImpl.IinteractionPlayer;
 import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageStore;
 import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.element.interfaces.IviewPlayer;
-import com.wosplayer.app.DisplayerApplication;
+import com.wosplayer.app.PlayApplication;
 import com.wosplayer.app.Logs;
 import com.wosplayer.download.util.DownloadFileUtil;
 
@@ -226,7 +226,7 @@ public class LayoutActive extends AbsoluteLayout implements IviewPlayer {
 
         } else if (bgType == 2) {
             String uriLoad = bgImagelurl + bgImagename; //下载地址
-            String localpath = DisplayerApplication.config.GetStringDefualt("basepath", "") + bgImagename; //本地路径
+            String localpath = PlayApplication.config.GetStringDefualt("basepath", "") + bgImagename; //本地路径
 
             if (DownloadFileUtil.checkFileExists(localpath)) { //资源是否存在
                 setBgImagers(localpath);

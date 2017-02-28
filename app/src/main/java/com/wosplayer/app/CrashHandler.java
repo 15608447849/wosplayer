@@ -37,7 +37,7 @@ import java.util.Map;
  */
 public class CrashHandler implements UncaughtExceptionHandler {
 	
-	public static final String TAG = "CrashHandler";
+	public static final String TAG = "异常捕获";
 	
 	//系统默认的UncaughtException处理类 
 	private Thread.UncaughtExceptionHandler mDefaultHandler;
@@ -103,21 +103,21 @@ public class CrashHandler implements UncaughtExceptionHandler {
 		if (ex == null) {
 			return false;
 		}
+
+		//收集设备参数信息 
+		collectDeviceInfo(mContext);
+		//保存日志文件 
+		final String uncauchFile = saveCrashInfo2File(ex);
+//		Logs.e(TAG,"uncauchFile: "+uncauchFile);
 		//使用Toast来显示异常信息
 		new Thread() {
 			@Override
 			public void run() {
 				Looper.prepare();
-				Toast.makeText(mContext, "I'm sorry, the program appears unusual, be about to exit.", Toast.LENGTH_LONG).show();
+				Toast.makeText(mContext, "系统执行异常被捕获,文件名: "+uncauchFile, Toast.LENGTH_LONG).show();
 				Looper.loop();
-
 			}
 		}.start();
-		//收集设备参数信息 
-		collectDeviceInfo(mContext);
-		//保存日志文件 
-		String uncauchFile = saveCrashInfo2File(ex);
-		Logs.e(TAG,"uncauchFile: "+uncauchFile);
 		return true;
 	}
 	
@@ -136,7 +136,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
 				infos.put("versionCode", versionCode);
 			}
 		} catch (NameNotFoundException e) {
-			Logs.e(TAG, "an error occured when collect package info", e);
+			e.printStackTrace();
 		}
 		Field[] fields = Build.class.getDeclaredFields();
 		for (Field field : fields) {
@@ -145,7 +145,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
 				infos.put(field.getName(), field.get(null).toString());
 				Logs.d(TAG, field.getName() + " : " + field.get(null));
 			} catch (Exception e) {
-				Logs.e(TAG, "an error occured when collect crash info", e);
+				e.printStackTrace();
 			}
 		}
 	}
@@ -186,15 +186,15 @@ public class CrashHandler implements UncaughtExceptionHandler {
 				if (!dir.exists()) {
 					dir.mkdirs();
 				}
-				Log.e(""," CrashHandler _ error file dir path: "+ dir.getAbsolutePath());
+//				Log.e(""," CrashHandler _ error file dir path: "+ dir.getAbsolutePath());
 				FileOutputStream fos = new FileOutputStream(path + fileName);
 				fos.write(sb.toString().getBytes());
 				fos.close();
 			}
 			return fileName;
 		} catch (Exception e) {
-			Logs.e(TAG, "an error occured while writing file...", e);
+			e.printStackTrace();
 		}
-		return null;
+		return "";
 	}
 }
