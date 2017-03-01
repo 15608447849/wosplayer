@@ -25,16 +25,23 @@ public class SystemConfig extends DataList{
     private SystemConfig()
     {
      SdCardTools.MkDir(DIR);
+     check();
     }
 
     public static SystemConfig get(){
         if (systemConfig==null){
             systemConfig = new SystemConfig();
         }
-        systemConfig.check();
+
         return systemConfig;
     }
 
+
+
+    public SystemConfig putOr(String key, String value) {
+        this.put(key, value);
+        return this;
+    }
 
     //检测配置文件是否存在
     private void  check(){
@@ -68,8 +75,7 @@ public class SystemConfig extends DataList{
         map.put("HeartBeatInterval","30");
         //重启时间
         map.put("RestartBeatInterval","30");
-        //是否监听
-        map.put("watchValue","0");
+
         //sdcard 清理阔值
         map.put("storageLimits","50");
         //机器码
@@ -92,6 +98,10 @@ public class SystemConfig extends DataList{
         map.put("fudianpath","/mnt/sdcard/wosplayer/ffbk/");//富颠银行本地web资源
         map.put("CapturePath", "/mnt/sdcard/wosplayer/screen.png");//截图本地位置
 
+        //系统使用参数
+
+        map.put("watchValue","0");  //监听服务是否监听
+        map.put("uuks",""); //当前播放的节目uuks标识
         //保存数据
         boolean isWrite = FileUtils.writeFile(PATH,AppTools.mapToJson(map));
         if (isWrite){Logs.d(TAG, " ---播放器配置已还原默认设置 ---");}
@@ -102,7 +112,7 @@ public class SystemConfig extends DataList{
     public SystemConfig read(){
         try {
             String content =  FileUtils.readFile(PATH,"utf-8").toString();
-            Logs.d(TAG,"读取配置文件："+content);
+            Logs.d(TAG,"读取配置文件:\n"+content);
             if (!content.isEmpty()) {
                 Map map = AppTools.jsonTxtToMap(content);
                 this.setMap((HashMap<String, String>) map);
@@ -121,7 +131,7 @@ public class SystemConfig extends DataList{
         String content = AppTools.mapToJson(map);
 //        Logs.d(TAG,"保存配置文件："+content);
         boolean flag =  FileUtils.writeFile(PATH,content);
-        Logs.i(TAG,"保存系统配置文件存储结果:"+(flag?" 成功":" 失败"));
+        Logs.d(TAG,"存储系统配置文件["+PATH+"]结果:"+(flag?" 成功":" 失败"));
     }
 
 }

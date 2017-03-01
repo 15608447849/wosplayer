@@ -6,6 +6,8 @@ import android.util.Log;
 
 import com.wosplayer.Ui.performer.contentTanslater.ContentTypeEnum;
 import com.wosplayer.app.AppTools;
+import com.wosplayer.app.SystemConfig;
+import com.wosplayer.command.operation.schedules.correlation.StringUtils;
 import com.wosplayer.tool.SdCardTools;
 import com.wosplayer.app.PlayApplication;
 import com.wosplayer.app.Logs;
@@ -13,7 +15,6 @@ import com.wosplayer.command.operation.schedules.correlation.XmlHelper;
 import com.wosplayer.command.operation.schedules.correlation.XmlNodeEntity;
 import com.wosplayer.command.operation.schedules.correlation.Xmlparse;
 import com.wosplayer.command.kernal.iCommand;
-import com.wosplayer.download.kernal.DownloadCompleterBroadcast;
 import com.wosplayer.download.kernal.DownloadManager;
 
 import org.w3c.dom.Element;
@@ -44,18 +45,17 @@ public class ScheduleSaver implements iCommand {
     private final int I_LAYOUT_PARSE = 14;
     private final int I_FILE_PARSE = 15;
 
-    public static XmlNodeEntity rootNode = new XmlNodeEntity();//只存在一个
+    private static XmlNodeEntity rootNode = new XmlNodeEntity();//只存在一个
     /**
      * 序列化排期
      */
-    public static void Serialize() {
+    private static void Serialize() {
         rootNode.SettingNodeEntitySave();
     }
-    public static void clear(){
-        uuks = null;
+    //清理
+    private static void clear(){
         rootNode.Clear();
-        isNextLoad = false;//不可以下载
-        Logs.e(TAG," --清理排期存储--");
+        Logs.e(TAG,"-------清理排期存储-------");
     }
 
     /**
@@ -83,14 +83,13 @@ public class ScheduleSaver implements iCommand {
         }
     }
 
-    private static boolean isNextLoad = false;
     private void startWork(final String uri){
         Long startTime = System.currentTimeMillis();
         try {
-            getXMLdata(uri,ROOT_PARSE,null); //解析数据
+        getXMLdata(uri,ROOT_PARSE,null); //解析数据
         } catch (Exception e) {
-            e.printStackTrace();
-            isNextLoad=false;
+            Logs.e(TAG,"解析排期失败: "+e.getMessage());
+            return;
         }
         Long endTime = System.currentTimeMillis();
         Logs.e(TAG,"解析用时 : "+(endTime - startTime)+" 毫秒");
@@ -104,20 +103,27 @@ public class ScheduleSaver implements iCommand {
         endTime = System.currentTimeMillis();
         Logs.e(TAG,"清理数据用时 : "+(endTime - startTime)+" 毫秒 \n" +
                 "------------------------------------------------------");
-        Logs.e(TAG,"是否开启下载:"+isNextLoad);
-        if (isNextLoad){
+
             //开启后台下载线程
             Logs.i(TAG,"当前的任务数:"+rootNode.getFtplist().size()+"\n "+rootNode.getFtplist().toString());
             if (rootNode.getFtplist().size()>0){
                 sendloadTask();
-            }else{
-                Logs.i(TAG,"无任务 发送通知");
-                //发送完成通知
-                Intent intent = new Intent();
-                intent.setAction(DownloadCompleterBroadcast.action);
-                PlayApplication.appContext.sendBroadcast(intent);
             }
+            sendCompleteNotify();
+    }
+    //排期接受完毕
+    private void sendCompleteNotify() {
+        //序列化数据
+        Serialize();
+        Logs.i(TAG,"执行排期数据解析序列化保存完成");
+        //执行 数据读取者
+        try {
+            ScheduleReader.clear();
+            ScheduleReader.Start(false);
+        } catch (Exception e) {
+            Logs.e(TAG," 开始读取本地排期数据时异常:" + e.getMessage());
         }
+
     }
 
     /**
@@ -129,7 +135,6 @@ public class ScheduleSaver implements iCommand {
     private void getXMLdata(String uri, int callType,Object Obj) {
         String result = AppTools.uriTranslationXml(uri);
         if (result==null){
-            isNextLoad = false;
             Logs.e(TAG,"getXMLdata() 返回值不存在");
             return;
         }
@@ -153,10 +158,6 @@ public class ScheduleSaver implements iCommand {
         intent.putExtras(bundle);
         PlayApplication.appContext.startService(intent);
     }
-
-
-
-    private static String uuks = null;//全局 唯一标识 当前正在执行的排期标识
 
     /**
      * 解析 result
@@ -189,30 +190,21 @@ public class ScheduleSaver implements iCommand {
         if (root == null) return;
         rootNode.Level="root";//设置等级
             String preUrl = XmlHelper.getFirstChildNodeValue(root, "url");
-            if (preUrl.equals("")) {
-                Logs.e(TAG,"不可执行的排期,节目xml链接前缀url空值");
-                return;
-            }
+            if (preUrl.equals("")) new IllegalStateException("不可执行的排期,获取'节目数据'的前缀url空值");
+            String cuuks = SystemConfig.get().read().GetStringDefualt("uuks","");//当前执行中的uuks
             String ruuks = XmlHelper.getFirstChildNodeValue(root, "uuks");
-            if (ruuks.equals("")){
-                Logs.e(TAG,"不可识别的排期标识uuks空值");
-                return;
-            }
-             if(uuks != null  && uuks.equals(ruuks)){
-                 Logs.e(TAG,"正在执行中的排期,uuks相同 - "+ruuks);
-                    return;
-                }
-            clear();
-            uuks = ruuks;
+            if (StringUtils.isEmpty(ruuks)) new IllegalStateException("不可识别的排期标识uuks空值");
+            if(cuuks != null  && cuuks.equals(ruuks)) new IllegalStateException("正在执行中的排期,uuks相同 - "+ruuks);
+            clear(); //清理保存的排期
+
         //排期节点列表
         NodeList scheduleList = root.getElementsByTagName("schedule");
         if (scheduleList==null || scheduleList.getLength() == 0) return;
-        parseSchdulerOnProgram(preUrl, scheduleList);
-        isNextLoad = true;
+        parseSchdulerOnProgram(preUrl,ruuks, scheduleList);
         Logs.i(TAG,"=========解析完成========");
     }
 
-    private void parseSchdulerOnProgram(String preUrl, NodeList scheduleList) {
+    private void parseSchdulerOnProgram(String preUrl,String uuks, NodeList scheduleList) {
         Logs.i(TAG,"当前排期总数: "+scheduleList.getLength());
         for (int i = scheduleList.getLength() - 1; i > -1; i--) {
             Element scheduleElement = (Element) scheduleList.item(i);
@@ -265,7 +257,7 @@ public class ScheduleSaver implements iCommand {
         XmlNodeEntity program_node = obj;
         program_node.Level = "root_schedule_programs";
         program_node.AddPropertyList(program_xmldataMap);
-        program_node.AddProperty("uuks", uuks);
+
         if (program_xmldataMap.containsKey("src")) {
             String url = program_xmldataMap.get("src").trim();
             rootNode.addUriTast(url); //创建一个ftp任务
@@ -282,7 +274,7 @@ public class ScheduleSaver implements iCommand {
             XmlNodeEntity program_layout_node = program_node.NewSettingNodeEntity();
             program_layout_node.Level = "root_schedule_programs_layout";
             program_layout_node.AddPropertyList(layout_xmldataMap);
-            program_layout_node.AddProperty("uuks", uuks);
+
             NodeList layout_contentList = layout_Element.getElementsByTagName("contents");//内容
             if(layout_contentList==null || layout_contentList.getLength()==0) continue;
             Logs.i(TAG,"节目下面的 布局 的 内容总数:"+layout_contentList.getLength());
@@ -294,7 +286,7 @@ public class ScheduleSaver implements iCommand {
                 XmlNodeEntity layout_content_Node = program_layout_node.NewSettingNodeEntity();
                 layout_content_Node.Level = "root_schedule_programs_layout_content";
                 layout_content_Node.AddPropertyList(content_xmlDataMap);
-                layout_content_Node.AddProperty("uuks", uuks);
+
                 //内容类型
                 String content_type = XmlHelper.getFirstChildNodeValue(content_Element, "fileproterty");
                 Logs.i(TAG,"内容类型 : "+content_type);
@@ -314,7 +306,7 @@ public class ScheduleSaver implements iCommand {
                     XmlNodeEntity layout_content_text_Node = layout_content_Node.NewSettingNodeEntity();
                     layout_content_text_Node.Level = "root_schedule_programs_layout_content_text";
                     layout_content_text_Node.AddPropertyList(text_xmlDataMap);
-                    layout_content_text_Node.AddProperty("uuks", uuks);
+
                     Logs.i(TAG,"text类型解析完成");
                 } else if (contentType.equals(ContentTypeEnum.rss)) {
                     Element childfile = (Element) content_Element.getElementsByTagName("childfile").item(0);
@@ -363,7 +355,6 @@ public class ScheduleSaver implements iCommand {
         XmlNodeEntity interaction_layout_node = obj;//
         interaction_layout_node.Level = "interaction_layout";
         interaction_layout_node.AddPropertyList(layout_xmldataMap);
-        interaction_layout_node.AddProperty("uuks", uuks);
         interaction_layout_node.AddProperty("layouturl", layouturl);
         interaction_layout_node.AddProperty("folderurl", folderurl);
         interaction_layout_node.AddProperty("thumbnailurl", thumbnailurl);
@@ -386,7 +377,7 @@ public class ScheduleSaver implements iCommand {
             XmlNodeEntity interaction_layout_ad_node = interaction_layout_node.NewSettingNodeEntity();
             interaction_layout_ad_node.Level = "interaction_layout_ad";
             interaction_layout_ad_node.AddPropertyList(ad_xmldataList);
-            interaction_layout_ad_node.AddProperty("uuks", uuks);
+
         }
         //items 包含了 布局的东西
         Element layout_ItemsElement = (Element) action_layoutElement.getElementsByTagName("items").item(0);
@@ -425,7 +416,7 @@ public class ScheduleSaver implements iCommand {
             XmlNodeEntity interaction_layout_items_item_node = interaction_layout_items_node.NewSettingNodeEntity();
             interaction_layout_items_item_node.Level = "interaction_layout_items_item";
             interaction_layout_items_item_node.AddPropertyList(item_xmldataMap);
-            interaction_layout_items_item_node.AddProperty("uuks", uuks);
+
             //再次访问网络获取xml文件
 
             String uri_Id = XmlHelper.getFirstChildNodeValue(item_Element, "bindid");
@@ -465,7 +456,7 @@ public class ScheduleSaver implements iCommand {
         XmlNodeEntity interaction_layout_items_item_folder_node = obj;//父节点实体
         interaction_layout_items_item_folder_node.Level = "interaction_layout_items_item_folder";
         interaction_layout_items_item_folder_node.AddPropertyList(folder_xmldataList);
-        interaction_layout_items_item_folder_node.AddProperty("uuks", uuks);
+
         //创建ftp对象
         String thumbnailpath = XmlHelper.getFirstChildNodeValue(folderElement, "thumbnailpath");//封面图
         if (thumbnailpath != null && !thumbnailpath.equals("")) {
@@ -486,7 +477,7 @@ public class ScheduleSaver implements iCommand {
             XmlNodeEntity interaction_layout_items_item_floder_item_node = interaction_layout_items_item_folder_node.NewSettingNodeEntity();
             interaction_layout_items_item_floder_item_node.Level = "interaction_layout_items_item_floder_item";
             interaction_layout_items_item_floder_item_node.AddPropertyList(item_xml_dataMap);
-            interaction_layout_items_item_floder_item_node.AddProperty("uuks", uuks);
+
             //文件内容类型
             String filetype = XmlHelper.getFirstChildNodeValue(floder_item_Element, "filetype");
             if (filetype.equals("1006")) {

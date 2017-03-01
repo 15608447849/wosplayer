@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -27,35 +29,19 @@ import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageStore;
 import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.element.interfaces.IviewPlayer;
 import com.wosplayer.Ui.performer.UiExcuter;
+import com.wosplayer.command.kernal.CommandCenter;
 import com.wosplayer.command.operation.schedules.ScheduleReader;
 import com.wosplayer.command.operation.schedules.ScheduleSaver;
 
 
 import static com.wosplayer.app.PlayApplication.appContext;
 
-/**
- *  Timer timer = new Timer();
- timer.schedule(new TimerTask() {
-@Override
-public void run() {
-String terminalNo = wosPlayerApp.config.GetStringDefualt("terminalNo","00000");
-String msg = "123:" + terminalNo;
-wosPlayerApp.sendMsgToServer(msg);
-}
-},5000);
- */
 
 public class DisplayActivity extends Activity {
-    /**
-     *
-     public static final int sucess = 0x05;
-     public static final int outtext = 0x06;
-     */
-
+    private static final java.lang.String TAG = "播放器UI界面控制";
     public enum HandleEvent{
         success,outtext,close,
     }
-
     public final  Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -77,14 +63,11 @@ public class DisplayActivity extends Activity {
         }
     };
 
-    private static final java.lang.String TAG = "播放器UI界面控制";
     public static AbsoluteLayout baselayout = null;
-
-    public  static AbsoluteLayout main = null;    //存放所有 排期视图 的主容器
+    public  static AbsoluteLayout main = null; //存放所有排期视图的主容器
     public static FrameLayout frame = null;  //隐藏图层
     public static AbsoluteLayout frame_main = null; //隐藏图层上面的 容器图层
     public static DisplayActivity activityContext = null;
-
     private ImageButton closebtn ;//左上角 隐藏的 按钮
 
     @Override
@@ -232,9 +215,7 @@ public class DisplayActivity extends Activity {
 
         //显示
         frame.setVisibility(View.VISIBLE);
-
         frame.setLayoutParams(p);
-
         if (isShowLoadWaitImage){
             //显示 图片
             findViewById(R.id.frame_load_wait_image).setVisibility(View.VISIBLE);
@@ -291,46 +272,73 @@ public class DisplayActivity extends Activity {
     //-----------------------------------------------------------------------
     //开始工作
     private void StartWork(){
-
         if (activityContext!=null){
             //初始化数据
            ((PlayApplication)this.getApplication()).initConfig();
+            //注册指令广播
+            registCommand();
             //开启通讯服务
             PlayApplication.startCommunicationService(this);
             PlayTypeStart();
         }
     }
 
-
+    /**
+     * 接受命令的广播
+     */
+    private BroadcastReceiver commandCenter = null;
+    private void registCommand() {
+        if (commandCenter!=null) return;
+        commandCenter = new CommandCenter();
+        IntentFilter ifl = new IntentFilter();
+        ifl.addAction(CommandCenter.action);
+        this.registerReceiver(commandCenter,ifl);
+    }
+    private void unregistCommand() {
+    if (commandCenter!=null){
+        try {
+            this.unregisterReceiver(commandCenter);
+        } catch (Exception e) {
+        }finally {
+            commandCenter = null;
+        }
+    }
+    }
 
     //结束工作 - true,关闭 activity
     private void StopWork(boolean isclose){
+            //注销指令广播
+            unregistCommand();
             PlayApplication.stopCommunicationService(this); //关闭服务
             PlayTypeStop();
             if (isclose) finish();
     }
 
+
+
     private void PlayTypeStart() {
-        //如果是富滇银行-全屏数据显示
         try {
-            ScheduleSaver.clear();
-            ScheduleReader.clear();
-            ScheduleReader.Start(false);
+            BackRunner.runBackground(new Runnable() {
+                @Override
+                public void run() {
+                    ScheduleReader.clear();
+                    ScheduleReader.Start(false);
+                }
+            });
         } catch (Exception e) {
             Logs.e(TAG,"activity 开始执行读取排期失败");
         }
 
     }
     private void PlayTypeStop() {
-        //如果是富癫银行- 清理fragment
+
         try {
+            ScheduleReader.clear();
+            UiExcuter.getInstancs().StopExcuter();
+            ImageStore.getInstants().clearCache();
         } catch (Exception e) {
             Logs.e(TAG,"activity 停止执行播放排期 时 err:"+ e.getMessage());
         }
-        ScheduleSaver.clear();
-        ScheduleReader.clear();
-        UiExcuter.getInstancs().StopExcuter();
-        ImageStore.getInstants().clearCache();
     }
 
 

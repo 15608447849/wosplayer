@@ -208,7 +208,6 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
     public void GetViewValue()
     {
         ArrayList<String> pathList = new ArrayList<>();
-
         String serverId = serverip.getText().toString();
         String serverPort = serverport.getText().toString();
         String CaptureURL = String.format("http://%s:%s/wos/captureManagerServlet",

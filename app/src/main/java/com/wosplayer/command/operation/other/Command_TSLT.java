@@ -55,7 +55,6 @@ public class Command_TSLT implements iCommand {
             if (saver == null) {
                 saver = new ScheduleSaver();
             }
-            ScheduleSaver.clear();
             saver.Execute(defaultPath);
         } catch (Exception e) {
             e.printStackTrace();
@@ -70,7 +69,7 @@ public class Command_TSLT implements iCommand {
             //xml    1.ScheduleNode.txt  2.ProgramNode.txt
             //资源  source  -> /mnt/external_sd/wosplayer/construction_bank/source/
             // xml -> /mnt/external_sd/wosplayer/construction_bank/xml/
-            String str = "file://" + PlayApplication.config.GetStringDefualt("bankPathXml", "/mnt/external/") + "ScheduleNode.txt";
+            String str = "file://" + PlayApplication.config.GetStringDefualt("bankPathXml", "") + "ScheduleNode.txt";
 //        str =  ScheduleSaver.uriTranslationXml(str);
 //        log.i(TAG," 排期 : \n" + str);
 //
@@ -81,7 +80,7 @@ public class Command_TSLT implements iCommand {
             if (saver == null) {
                 saver = new ScheduleSaver();
             }
-            ScheduleSaver.clear();
+
             saver.Execute(str);
         } catch (Exception e) {
             e.printStackTrace();

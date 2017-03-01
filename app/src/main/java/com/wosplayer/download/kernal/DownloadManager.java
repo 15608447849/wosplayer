@@ -120,9 +120,6 @@ public class DownloadManager extends IntentService
                 TaskQueue.getInstants().addTask(task);
             }
         }
-        Intent intent = new Intent();
-        intent.setAction(DownloadCompleterBroadcast.action);
-        getApplicationContext().sendBroadcast(intent);
     }
 
 

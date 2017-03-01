@@ -6,17 +6,7 @@ package com.wosplayer.command.operation.schedules.correlation;
 public class StringUtils {
     public static boolean isEmpty(String inputstring)
     {
-        if(inputstring==null||inputstring=="")
-        {
-            return true;
-        }else
-        {
-            return false;
-        }
-    }
-    public static boolean isNotBlank(String pattern)
-    {
-        if(pattern==null||pattern=="")
+        if(inputstring==null||inputstring==""|| inputstring.isEmpty())
         {
             return true;
         }else

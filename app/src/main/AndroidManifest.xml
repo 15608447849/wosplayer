@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.wosplayer"
-    android:versionCode="16"
-    android:versionName="16.0"
+    android:versionCode="15"
+    android:versionName="15.0"
     android:screenOrientation="portrait">
 
     <application
@@ -22,24 +22,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- 接受通讯服务的广播 -> 派发任务-->
-        <receiver android:name=".command.kernal.CommandCenter">
-            <intent-filter>
-                <action android:name="com.post.cmd.broad" />
-            </intent-filter>
-        </receiver>
-        <!-- 下载完成广播-->
-        <receiver android:name=".download.kernal.DownloadCompleterBroadcast" >
-            <intent-filter>
-                <action android:name="com.complete.taskList"/>
-            </intent-filter>
-        </receiver>
-        <!-- 通知ui执行者 广播接受-->
-        <receiver android:name=".Ui.uiBroadcast.UibrocdCastReceive" >
-            <intent-filter>
-                <action android:name="com.wos.ui.refresh" />
-            </intent-filter>
-        </receiver>
+        <!-- 接受通讯服务的广播 -> 派发任务 动态注册! -->
+        <!--<receiver android:name=".command.kernal.CommandCenter">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="com.post.cmd.broad" />-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
+
+
 
         <!-- 通讯服务 android:process=":remote_communication" -->
         <service android:name=".service.CommunicationService" android:process=":remote_communication"/>

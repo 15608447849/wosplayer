@@ -59,7 +59,7 @@ public class UiExcuter {
     }
 
     public void StopExcuter() {
-        Logs.i(TAG, "ui执行者 清理...................");
+        Logs.i(TAG, "ui执行者 清理");
 //        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
 //            @Override
 //            public void call() {

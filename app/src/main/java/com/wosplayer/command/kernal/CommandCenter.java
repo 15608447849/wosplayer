@@ -31,22 +31,17 @@ import rx.schedulers.Schedulers;
  */
 
 public class CommandCenter extends BroadcastReceiver {
-
     public static final String action = "com.post.cmd.broad";
     public static final String cmd = "toCmd";
     public static final String param = "toParam";
-    private static final java.lang.String TAG =CommandCenter.class.getName() ;
+    private static final java.lang.String TAG = "命令分发中心" ;
     private static final Scheduler.Worker helper1 =  Schedulers.newThread().createWorker();
     private static final Scheduler.Worker helper2 =  Schedulers.newThread().createWorker();
     @Override
     public void onReceive(Context context, Intent intent) {
         String msgCmd = intent.getExtras().getString(cmd);
         String msgParam =  intent.getExtras().getString(param);
-
         if (msgCmd==null) return;
-
-        Logs.i("收到一个命令 => "+msgCmd+ " 参数:"+ msgParam);
-
         postCmd(msgCmd,msgParam);
     }
 
@@ -79,13 +74,12 @@ public class CommandCenter extends BroadcastReceiver {
         commandList.put(CommandType.PASD,new Command_PASD());
         //建行对接接口
         commandList.put(CommandType.TSLT,new Command_TSLT(commandList.get(CommandType.UPSC)));
-
         //富滇银行
         commandList.put(CommandType.FFBK,new Command_FdRer());
     }
 
     private void postCmd(final String cmd, final String param){
-
+        Logs.i(TAG,"[ "+cmd+ " - "+ param+" ]");
         if (commandList.containsKey(cmd)) {
             //Logs.i("准备 执行指令:"+cmd +" 所在线程:"+Thread.currentThread().getName()+"- 当前线程数:"+Thread.getAllStackTraces().size());
             if (cmd.equals(CommandType.REBO) || cmd.equals(CommandType.UIRE) || cmd.equals(CommandType.UPDC)

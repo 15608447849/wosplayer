@@ -15,7 +15,7 @@ public class Command_Close_App implements iCommand {
                 return;
             }
             //设置系统配置-是否监听的值
-            SystemConfig.get().put("watchValue","1").save();
+            SystemConfig.get().putOr("watchValue","1").save();
             Logs.i("===== 强制停止播放器运行 =====");
             PlayApplication.stopCommunicationService(null);
             android.os.Process.killProcess(android.os.Process.myPid());

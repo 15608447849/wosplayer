@@ -28,7 +28,7 @@ public class PlayApplication extends Application {
         super.onCreate();
         appContext = this.getApplicationContext();
         //系统配置监听值
-        SystemConfig.get().put("watchValue","0").save();
+        SystemConfig.get().putOr("watchValue","0").save();
         //捕获异常
         CrashHandler.getInstance().init(appContext);
     }

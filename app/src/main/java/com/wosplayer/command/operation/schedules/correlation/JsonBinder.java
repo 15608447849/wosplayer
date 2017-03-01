@@ -13,10 +13,7 @@ import java.text.SimpleDateFormat;
  * Created by user on 2016/7/16.
  */
 public class JsonBinder {
-
     private ObjectMapper mapper;
-
-
     public JsonBinder(JsonSerialize.Inclusion inclusion) {
         mapper = new ObjectMapper();
         mapper.getSerializationConfig().setSerializationInclusion(inclusion);
@@ -24,8 +21,6 @@ public class JsonBinder {
                 .set(org.codehaus.jackson.map.DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES,
                         false);
     }
-
-
 
 
     public static JsonBinder buildNormalBinder() {
@@ -60,7 +55,6 @@ public class JsonBinder {
      * @return
      */
     public String toJson(Object object) {
-
         try {
             return mapper.writeValueAsString(object);
         } catch (IOException e) {
@@ -68,18 +62,14 @@ public class JsonBinder {
             return null;
         }
     }
-
-
     public void setDateFormat(String pattern) {
-        if (StringUtils.isNotBlank(pattern)) {
+        if (StringUtils.isEmpty(pattern)) {
             DateFormat df = new SimpleDateFormat(pattern);
             mapper.getSerializationConfig().setDateFormat(df);
             mapper.getDeserializationConfig().setDateFormat(df);
         }
     }
-
     public ObjectMapper getMapper() {
         return mapper;
     }
-
 }
