@@ -16,7 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 
 public class UiExcuter {
-    private static final java.lang.String TAG = "Ui Excute";
+    private static final java.lang.String TAG = "Ui执行";
     private static UiExcuter uiExcuter = null;
 
     private UiExcuter() {
@@ -29,67 +29,44 @@ public class UiExcuter {
         }
         return uiExcuter;
     }
-
     private static ReentrantLock lock = new ReentrantLock();
     public static boolean isStoping = false;
-
     public void StartExcuter(XmlNodeEntity schedule) {
-        Logs.i(TAG, "ui执行者 所在线程:" + Thread.currentThread().getName());
+        Logs.i(TAG, "线程名:" + Thread.currentThread().getName());
         try {
             if (schedule == null) {
-                Logs.e(TAG, " ui执行者不执行 ,schedule is null");
+                Logs.e(TAG, "不执行空排期");
                 return;
             }
-
             lock.lock();
-            try {
-                StopExcuter();
-            } catch (Exception e) {
-                Logs.e(TAG, "UI Executer stop err:" + e.getMessage());
-            }
-            Logs.i(TAG, "uiExcuter setting schedule");
-            uiExcuter.setPlaySchedule(schedule);
-
+            StopExcuter();
+            Logs.i(TAG, "开始关联数据");
+            uiExcuter.settingSchedule(schedule);
         } catch (Exception e) {
             Logs.e(TAG, "ui 执行者 开始异常 " + e.getMessage());
         } finally {
             lock.unlock();
         }
-
     }
 
     public void StopExcuter() {
-        Logs.i(TAG, "ui执行者 清理");
-//        AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
-//            @Override
-//            public void call() {
+                Logs.i(TAG, "清理界面中");
                 isStoping = true;
                 //清理 : 1 存在的定时器 2.初始化_index 3.清理节目执行者
                 clearTimer();
                 _index = 0;
                 contentTanslater.clearCache();
                 clearProgramExcuter();
-//                if (DisplayActivity.activityContext != null) {
-//                    //隐藏层布局
-//                    DisplayActivity.activityContext.goneLayoutdialog();
-//                }
                 isStoping = false;
-                Logs.i(TAG, "ui执行者 清理完毕");
-//            }
-//        });
+                Logs.i(TAG, "清理完毕");
     }
 
 
     /**
      * @param schedule
      */
-    private void setPlaySchedule(XmlNodeEntity schedule) {
-
-        //得到排期的类型创建定时器 时长计算: 布局下的内容的总时长 得到布局的 时长   布局时长最长的就是 节目的时长
-        String type = schedule.getXmldata().get("type");
-        Logs.i(TAG, "准备执行的排期类型:" + type + " ,  [1=轮播,2=点播,3=重复,4=插播,5=重复]");
-
-
+    private void settingSchedule(XmlNodeEntity schedule) {
+        //得到排期的类型创建定时器 时长计算: 1.布局下的内容的总时长得到布局的时长 2.布局时长最长的就是节目的时长
         ArrayList<XmlNodeEntity> ProgramTimerList = new ArrayList<XmlNodeEntity>();
         //得到节目数组
         ArrayList<XmlNodeEntity> programArr = schedule.getChildren();
@@ -97,7 +74,6 @@ public class UiExcuter {
             Logs.e(TAG, "当前排期无节目列表");
             return;
         }
-
         for (XmlNodeEntity program : programArr) {
             Logs.i(TAG, "计算当前节目 << " + program.getXmldata().get("title") + " >> 的时长中");
             long programTime = getProgramTimeLength(program);
@@ -105,13 +81,12 @@ public class UiExcuter {
             ProgramTimerList.add(program);
         }
 
-
         if (ProgramTimerList.size() == 1) {
-            //只有一个节目
-            //直接执行 节目执行者
+            //只有一个节目 直接执行 节目执行者
             createProgramExcuter(ProgramTimerList.get(0));
         } else {
-            //创建定时器 去执行节目执行者
+
+            //创建定时器去执行节目执行者
             startProgramTimerExcuter(ProgramTimerList);
         }
     }
@@ -123,7 +98,6 @@ public class UiExcuter {
     private void startProgramTimerExcuter(final ArrayList<XmlNodeEntity> programTimerlist) {
         //取消存在的定时器
         clearTimer();
-
         //执行 节目执行者
         Logs.i(TAG, "执行节目执行者: " + programTimerlist.get(_index).getXmldata().get("title") + "当前时间毫秒数:" + System.currentTimeMillis());
         long second = Long.parseLong(programTimerlist.get(_index).getXmldata().get("programTime"));
@@ -169,6 +143,7 @@ public class UiExcuter {
         ArrayList<Long> layoutTimeArr = new ArrayList<Long>();
         //得到布局的数组
         ArrayList<XmlNodeEntity> layoutArr = program.getChildren();
+        if (layoutArr==null || layoutArr.size() == 0) return 9999;
         for (XmlNodeEntity layout : layoutArr) {
             Logs.i(TAG, "当前节目下一个布局:" + layout.getXmldata().get("id"));
             long layoutTime = -1;

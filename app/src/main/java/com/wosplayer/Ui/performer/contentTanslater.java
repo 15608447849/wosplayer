@@ -6,6 +6,7 @@ import android.util.LruCache;
 import android.view.ViewGroup;
 
 import com.wosplayer.Ui.element.interfaces.IPlayer;
+import com.wosplayer.Ui.element.interfaces.TimeCalls;
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.Logs;
@@ -43,7 +44,7 @@ public final class contentTanslater {
      */
     private static Map<String,String> referenceViewMap = new HashMap<String,String>();
     static{
-        String packageName = "com.wosplayer.Ui.element.iviewelementImpl.";
+        String packageName = "com.wosplayer.Ui.element.uiViewimp.";
         referenceViewMap.put(getType(ContentTypeEnum.image),packageName+"IImagePlayer");
         referenceViewMap.put(getType(ContentTypeEnum.webpage),packageName+"IWebPlayer");
         referenceViewMap.put(getType(ContentTypeEnum.fudianbank),packageName+"IWebPlayer");//富癫银行项目

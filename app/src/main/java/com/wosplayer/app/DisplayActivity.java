@@ -16,22 +16,17 @@ import android.os.Message;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
 import com.wosTools.AppToolsFragment;
 import com.wosplayer.R;
-import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.MyVideoView;
-import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageStore;
-import com.wosplayer.Ui.element.iviewelementImpl.uitools.ImageViewPicassocLoader;
-import com.wosplayer.Ui.element.interfaces.IviewPlayer;
+import com.wosplayer.Ui.element.uitools.ImageStore;
+import com.wosplayer.Ui.element.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.command.kernal.CommandCenter;
 import com.wosplayer.command.operation.schedules.ScheduleReader;
-import com.wosplayer.command.operation.schedules.ScheduleSaver;
 
 
 import static com.wosplayer.app.PlayApplication.appContext;
@@ -65,8 +60,6 @@ public class DisplayActivity extends Activity {
 
     public static AbsoluteLayout baselayout = null;
     public  static AbsoluteLayout main = null; //存放所有排期视图的主容器
-    public static FrameLayout frame = null;  //隐藏图层
-    public static AbsoluteLayout frame_main = null; //隐藏图层上面的 容器图层
     public static DisplayActivity activityContext = null;
     private ImageButton closebtn ;//左上角 隐藏的 按钮
 
@@ -79,8 +72,6 @@ public class DisplayActivity extends Activity {
         setContentView(R.layout.activity_main);//设置布局文件
         baselayout = (AbsoluteLayout) LayoutInflater.from(this).inflate(R.layout.activity_main,null);
         main = (AbsoluteLayout) this.findViewById(R.id.main);
-        frame = (FrameLayout)this.findViewById(R.id.frame_layout);
-        frame_main = (AbsoluteLayout)this.findViewById(R.id.frame_layout_main);
         closebtn =  (ImageButton)findViewById(R.id.closeappbtn);
         Logs.i(TAG,"onCreate() 正在执行的所有线程数:"+ Thread.getAllStackTraces().size());
 
@@ -173,102 +164,6 @@ public class DisplayActivity extends Activity {
         return super.onKeyDown(keyCode, event);
     }
 
-
-    /////////////////////////////////////////////////////////////////////////////////////
-    public void FrameBtnEvent(View view){
-        goneLayoutdialog();
-    }//返回按钮
-
-    //隐藏帧布局
-    public void goneLayoutdialog(){
-        //退出 framelayout
-        if (frame != null){
-
-            //如果是显示的  销毁上面的绝对布局上面的所有视图
-            if (frame.getVisibility() == View.GONE){
-                return;
-            }
-
-            for (int i = 0; i < frame_main.getChildCount(); i++){
-                View v =  frame_main.getChildAt(i);
-
-                if (v instanceof IviewPlayer){
-                    ((IviewPlayer)v).removeMeToFather();
-                }
-            }
-            //隐藏
-            frame.setVisibility(View.GONE);
-           // openOtherVideo(main);
-        }
-    }
-
-
-    /**
-     * 显示帧布局
-     */
-    public void visibleLayoutDialog(boolean isShowLoadWaitImage,AbsoluteLayout.LayoutParams p){
-        //如果是显示的
-        if (frame.getVisibility() == View.VISIBLE){
-            Logs.e("帧布局 已显示");
-            return;
-        }
-
-        //显示
-        frame.setVisibility(View.VISIBLE);
-        frame.setLayoutParams(p);
-        if (isShowLoadWaitImage){
-            //显示 图片
-            findViewById(R.id.frame_load_wait_image).setVisibility(View.VISIBLE);
-        }else{
-            findViewById(R.id.frame_load_wait_image).setVisibility(View.GONE);
-        }
-
-        Logs.e("main childs :"+main.getChildCount());
-     //   closeOtherVideo(main);
-    }
-
-    /**
-     * 打开
-     */
-    private void openOtherVideo(ViewGroup vg){
-        for (int i = 0;i<vg.getChildCount();i++){
-
-            Logs.e("");
-            View view = vg.getChildAt(i);
-            if (view instanceof AbsoluteLayout ||  view instanceof ViewGroup){
-                closeOtherVideo((ViewGroup) view);
-            }
-//            if (view instanceof IVideoPlayer){
-//                IVideoPlayer v = (IVideoPlayer)view;
-//                v.start();
-//            }
-            if (view instanceof MyVideoView){
-                MyVideoView v = (MyVideoView)view;
-                v.start();
-            }
-        }
-    }
-    /**
-     * 关闭 其他视频资源
-     */
-    private void closeOtherVideo(ViewGroup vg){
-
-        for (int i = 0;i<vg.getChildCount();i++){
-
-            View view = vg.getChildAt(i);
-            if (view instanceof AbsoluteLayout || view instanceof ViewGroup ){
-                closeOtherVideo((ViewGroup) view);
-            }
-//            if (view instanceof IVideoPlayer){
-//                IVideoPlayer v = (IVideoPlayer)view;
-//                v.stop();
-//            }
-            if (view instanceof MyVideoView){
-                MyVideoView v = (MyVideoView)view;
-                v.pause();
-            }
-        }
-    }
     //-----------------------------------------------------------------------
     //开始工作
     private void StartWork(){

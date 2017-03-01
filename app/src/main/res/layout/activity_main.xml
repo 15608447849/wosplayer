@@ -27,8 +27,6 @@
       android:layout_height="match_parent"
       >
   </AbsoluteLayout>
-
-  <include layout="@layout/activity_action_sublayou" />
+  <!-- app 设置界面 fragment 需要-->
   <include layout="@layout/activity_fragment" />
-
 </AbsoluteLayout>

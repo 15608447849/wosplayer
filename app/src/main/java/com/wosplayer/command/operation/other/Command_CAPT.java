@@ -8,7 +8,7 @@ import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.wosplayer.Ui.element.iviewelementImpl.mycons_view.MyVideoView;
+import com.wosplayer.Ui.element.definedView.MyVideoView;
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
 import com.wosplayer.app.PlayApplication;

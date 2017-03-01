@@ -3,7 +3,8 @@ package com.wosplayer.Ui.performer;
 import android.graphics.Typeface;
 
 import com.wosplayer.Ui.element.interfaces.IPlayer;
-import com.wosplayer.Ui.element.iviewelementImpl.IVideoPlayer;
+import com.wosplayer.Ui.element.interfaces.TimeCalls;
+import com.wosplayer.Ui.element.uiViewimp.IVideoPlayer;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.PlayApplication;
 import com.wosplayer.app.Logs;
@@ -22,7 +23,7 @@ import rx.functions.Action0;
  * Created by user on 2016/7/25.
  * 执行布局
  */
-public class layoutExcuter implements TimeCalls{
+public class layoutExcuter implements TimeCalls {
     private static final java.lang.String TAG = "layout Excuter";
     private XmlNodeEntity layout ;
     private IPlayer currentIplayer=null ;
@@ -206,7 +207,6 @@ public class layoutExcuter implements TimeCalls{
             }
         }
         if (fileproterty.equals("fudianbank")){
-
             datalist.put("fudianpath", PlayApplication.config.GetStringDefualt("fudianpath",""));
         }
         return  new Object[]{datalist,ob};
