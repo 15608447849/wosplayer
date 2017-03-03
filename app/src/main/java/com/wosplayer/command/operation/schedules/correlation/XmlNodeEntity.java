@@ -11,7 +11,9 @@ import com.wosplayer.app.PlayApplication;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -85,7 +87,14 @@ public class XmlNodeEntity implements Parcelable {
     {
         if (list.size() > 0)
         {
-            xmldata = list;
+            //迭代
+            Iterator<Map.Entry<String,String>> iterator =  list.entrySet().iterator();
+            Map.Entry<String,String> entry;
+            while (iterator.hasNext()){
+                entry = iterator.next();
+                AddProperty(entry.getKey(),entry.getValue());
+            }
+//            xmldata = list;
         }
     }
 

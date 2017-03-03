@@ -2,9 +2,12 @@ package com.wosplayer.command.operation.other;
 
 import android.util.Log;
 
+import com.wosplayer.app.AdbCommand;
+import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
+import com.wosplayer.app.OverAppDialog;
 import com.wosplayer.app.PlayApplication;
-import com.wosplayer.command.kernal.iCommand;
+import com.wosplayer.command.operation.interfaces.iCommand;
 
 import cn.trinea.android.common.util.ShellUtils;
 
@@ -14,21 +17,15 @@ import cn.trinea.android.common.util.ShellUtils;
 public class Command_Reboot_Sys implements iCommand {
     @Override
     public void Execute(String param) {
+
         try {
-            Logs.e("-----------------------------------重启终端-----------------------------------------");
-
-//        Intent intent = new Intent(DisplayActivity.activityContext, MonitorService.class);
-//        DisplayActivity.activityContext.stopService(intent);
-
-            //Command_CAPT.executeLiunx("reboot");//
-//        AppToSystem.execRootCmdSilent("reboot");
-
-            PlayApplication.sendMsgToServer("OFLI:" + PlayApplication.config.GetStringDefualt("terminalNo","0000"));
-
-            String cmd = "reboot";
-            Log.e("#####","\n"+cmd);
-            ShellUtils.CommandResult cr = ShellUtils.execCommand(cmd,true,true);
-            Logs.e(" reboot result:"+cr.result);
+            Logs.e("重启终端","-----------------------------------重启终端-----------------------------------------");
+            int time = 5;
+            PlayApplication.stopCommunicationService();
+            if(DisplayActivity.activityContext != null){
+                OverAppDialog.popWind(DisplayActivity.activityContext,"系统将在"+time+"秒后重启",time);
+            }
+            ShellUtils.execCommand(AdbCommand.rebootTelOnTime(time),true);
         } catch (Exception e) {
             e.printStackTrace();
         }

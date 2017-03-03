@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.wosplayer.app.PlayApplication;
-import com.wosplayer.command.kernal.iCommand;
+import com.wosplayer.command.operation.interfaces.iCommand;
 import com.wosplayer.download.kernal.DownloadManager;
 
 /**

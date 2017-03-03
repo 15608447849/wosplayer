@@ -5,12 +5,10 @@
     android:layout_height="match_parent"
     android:gravity="center"
     >
-
     <LinearLayout
         android:layout_width="288dp"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
-
         <!-- 播放器ip地址 -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -24,12 +22,12 @@
                 android:textStyle="bold"
                 />
             <TextView
-
                 android:id="@+id/localip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:text="127.0.0.1"
+                android:text="none"
+                android:textStyle="bold"
                 android:layout_weight="1"/>
         </LinearLayout>
         <!-- 本地根路径 -->
@@ -44,13 +42,13 @@
                 android:text="主目录:"
                 android:textStyle="bold"
                 />
-
             <TextView
                 android:id="@+id/storedir"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:text="/mnt/sdcard/wosplayer/"
+                android:text=""
+                android:textStyle="bold"
                 android:layout_weight="1" />
         </LinearLayout>
         <LinearLayout
@@ -70,10 +68,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:text=""
-                android:layout_weight="1">
-                <requestFocus />
-            </EditText>
+                android:layout_weight="1"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
@@ -92,10 +87,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:text=""
-                android:layout_weight="1">
-                <requestFocus />
-            </EditText>
+                android:layout_weight="1"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
@@ -114,10 +106,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:text=""
-                android:layout_weight="1">
-                <requestFocus />
-            </EditText>
+                android:layout_weight="1"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
@@ -136,10 +125,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:text=""
-                android:layout_weight="1">
-                <requestFocus />
-            </EditText>
+                android:layout_weight="1"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
@@ -158,10 +144,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:text=""
-                android:layout_weight="1">
-                <requestFocus />
-            </EditText>
+                android:layout_weight="1"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
@@ -180,10 +163,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:text=""
-                android:layout_weight="1">
-                <requestFocus />
-            </EditText>
+                android:layout_weight="1"/>
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
@@ -204,9 +184,7 @@
                 android:singleLine="true"
                 android:text=""
                 android:layout_weight="1"
-                android:inputType="number">
-                <requestFocus />
-            </EditText>
+                android:inputType="number"/>
         </LinearLayout>
 
         <LinearLayout
@@ -228,10 +206,15 @@
                 android:singleLine="true"
                 android:text=""
                 android:layout_weight="1"
-                android:inputType="number">
-                <requestFocus />
-            </EditText>
+                android:inputType="number"/>
         </LinearLayout>
+        <!-- 选择可用的 存储路径 -->
+        <Spinner
+            android:id="@+id/store_switch"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:layout_height="wrap_content">
+        </Spinner>
         <!-- 下拉框 选择播放类型 -->
             <Spinner
                 android:id="@+id/playtype"
@@ -292,7 +275,6 @@
                 android:textStyle="bold"
                 android:text="1.0"
                 />
-
         </RelativeLayout>
     </LinearLayout>
 

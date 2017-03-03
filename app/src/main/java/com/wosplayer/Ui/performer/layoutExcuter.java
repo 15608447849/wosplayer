@@ -31,7 +31,7 @@ public class layoutExcuter implements TimeCalls {
     private List<String> videoNameList = null;
     public layoutExcuter(XmlNodeEntity layout) {
         this.layout = layout;
-        Logs.i(TAG,"创建成功");
+       // Logs.i(TAG,"创建成功");
         //收集 有效 视频 数量
         takeVideoVaildCount();
     }
@@ -86,8 +86,8 @@ public class layoutExcuter implements TimeCalls {
 
         //获取内容播放时长
         long second = Long.parseLong(contentArr.get(_index).getXmldata().get("timelength"));
-        Logs.i(TAG,"执行具体内容的播放: ["+contentArr.get(_index).getXmldata().get("contentsnewname") + "]当前时间毫秒数:"+System.currentTimeMillis());
-        Logs.i(TAG,"在"+(second*1000)+"后执行下一个内容");
+       // Logs.i(TAG,"执行具体内容的播放: ["+contentArr.get(_index).getXmldata().get("contentsnewname") + "]当前时间毫秒数:"+System.currentTimeMillis());
+        //Logs.i(TAG,"在"+(second*1000)+"后执行下一个内容");
         startContent(contentArr.get(_index));
         //创建定时器任务
         //创建定时器
@@ -221,7 +221,7 @@ public class layoutExcuter implements TimeCalls {
         //停止定时器
         clearTimer();
         //清除数据
-        Logs.i(TAG,"----"+layout.getChildren());
+//        Logs.i(TAG,"----"+layout.getChildren());
         layout = null;
         contentArr=null;
         //清理 内容 放在 主线程
@@ -259,7 +259,7 @@ public class layoutExcuter implements TimeCalls {
             currentIplayer.stop();
             currentIplayer = null;
         }
-        Logs.i("清理 布局 下 的 内容");
+      //  Logs.i(TAG,"清理 布局 下 的 内容");
     }
 
     @Override

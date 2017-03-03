@@ -3,30 +3,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-
     >
   <!-- 左上角关闭app隐藏层 android:background="@android:color/black"  悬浮在上面的一层-->
-  <FrameLayout
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:background="@android:color/holo_blue_light"
-      >
-        <ImageButton
-            android:id="@+id/closeappbtn"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:background="@drawable/close_btn_img"
-            />
-</FrameLayout>
-
-
-<!-- UI显示层 android:background="@drawable/notschedule" -->
-  <AbsoluteLayout
-      android:id="@+id/main"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      >
-  </AbsoluteLayout>
+  <include layout="@layout/activity_closs" />
+  <!-- UI显示层 android:background="@drawable/notschedule" -->
+  <include layout="@layout/actuvity_uilayer" />
   <!-- app 设置界面 fragment 需要-->
   <include layout="@layout/activity_fragment" />
 </AbsoluteLayout>

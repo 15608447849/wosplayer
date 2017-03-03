@@ -248,6 +248,9 @@ public class AppTools {
     public static void Toals(Context context,String msg){
         Toast.makeText(context,msg,Toast.LENGTH_SHORT).show();
     }
+    public static void LongToals(Context context,String msg){
+        Toast.makeText(context,msg,Toast.LENGTH_LONG).show();
+    }
 
     public static void NotifyHandle(Handler h,int what,Object data){
         if (h!=null){

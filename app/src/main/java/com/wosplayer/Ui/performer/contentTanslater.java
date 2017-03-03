@@ -88,19 +88,19 @@ public final class contentTanslater {
         if (mLruCache==null){
             mLruCache =  new LruCache<String,IPlayer>((int) (Runtime.getRuntime().maxMemory() / 8));//最大内存的1/3
         }
-        Logs.i(TAG,"准备转换视图控件,所在线程:"+Thread.currentThread().getName());
+        //Logs.i(TAG,"准备转换视图控件,所在线程:"+Thread.currentThread().getName());
         IPlayer iplay = null;
 
         try {
             //查看缓存是否存在
             String key = list.getKey();
-            Logs.i(TAG,"iplayer key:"+key);
+            //Logs.i(TAG,"iplayer key:"+key);
             iplay = getIplayerToCache(key);
-            Logs.i(TAG,"视图 缓存 队列 是否存在 :"+iplay);
+            //Logs.i(TAG,"视图 缓存 队列 是否存在 :"+iplay);
             if (iplay == null) {
                 //先获取 type
                 String fileproterty = list.GetStringDefualt("fileproterty","");
-                Logs.i(TAG,"类型 :"+fileproterty);
+                //Logs.i(TAG,"类型 :"+fileproterty);
                 if (!referenceViewMap.containsKey(fileproterty)){
                     Log.e(TAG,"无法执行的类型" + fileproterty);
                     return iplay;

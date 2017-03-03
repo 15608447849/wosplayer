@@ -78,13 +78,13 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
         webSettings.setAllowFileAccess(true); //设置可以访问文件
         webSettings.setAllowFileAccessFromFileURLs(true);// js读取本地文件内容
 
-        webSettings.setSupportZoom(true); //支持缩放，默认为true
-        webSettings.setBuiltInZoomControls(true); //设置内置的缩放控件。若为false，则该WebView不可缩放
-        webSettings.setDisplayZoomControls(false); //隐藏原生的缩放控件
+        webSettings.setSupportZoom(false); //支持缩放，默认为true
+        webSettings.setBuiltInZoomControls(false); //设置内置的缩放控件。若为false，则该WebView不可缩放
+        webSettings.setDisplayZoomControls(true); //隐藏原生的缩放控件
 
         //设置自适应屏幕，两者合用
         webSettings.setUseWideViewPort(true); //将图片调整到适合webview的大小
-//        webSettings.setLoadWithOverviewMode(true); // 缩放至屏幕的大小
+        webSettings.setLoadWithOverviewMode(true); // 缩放至屏幕的大小
 
 //        webSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK); //webview中缓存
         //缓存模式如下：

@@ -72,20 +72,21 @@ import cn.trinea.android.common.util.FileUtils;
  * restat(String path)      解释：执行一个由该对象所引用的文件系统
  */
 public class SdCardTools {
-    private static final String TAG = "sdcard设置";
+    private static final String TAG = "储存卡设置";
     public static final String app_dir = "/wosplayer";
     public static final String Construction_Bank_dir_source = "/consbank/source/";
     public static final String Construction_Bank_dir_xmlfile = "/consbank/xml/";
     private static String appSourcePath = null;
 
     public static void setAppSourceDir(String path) {
-        appSourcePath = path;
-        Log.i(TAG, "设置app 根目录 - [" + appSourcePath + "]");
+        if(path == null) return;
+        appSourcePath = path + SdCardTools.app_dir;
+        Log.i(TAG, "设置播放器存储根目录 - [" + appSourcePath + "]");
     }
 
     public static String
     getAppSourceDir(Context context) {
-        return appSourcePath == null ? getDataDataAppDir(context) : appSourcePath;
+        return appSourcePath == null ? appSourcePath = getDataDataAppDir(context) : appSourcePath;
     }
 
     private static String getDataDataAppDir(Context context) {
@@ -147,10 +148,10 @@ public class SdCardTools {
             sdDir = Environment.getExternalStorageDirectory();//获取跟目录
         }
         if (sdDir.exists()) {
-            Log.i(TAG, "获取当前sd卡路径 : "+sdDir.toString());
+//            Log.i(TAG, "获取当前sd卡路径 : "+sdDir.toString());
             return sdDir.toString();
         }
-        return "/mnt/sdcard";
+        return null;
     }
 
     /**
@@ -366,45 +367,48 @@ public class SdCardTools {
      */
     public static void checkSdCard(Context context) {
         if (!SdCardTools.existSDCard()) {
-            Log.e(TAG, " sdcard 不存在 ");
-            Log.e(TAG, " 应用存储目录 -> " + getAppSourceDir(context));
-//            checkSdCard(context);
+            Log.e(TAG, "sdcard不存在,应用存储目录: " + getAppSourceDir(context));
         } else {
-            SdCardTools.setAppSourceDir(getSDPath());
-
-            String[] paths = SdCardTools.getVolumePaths(context);
-            if (paths != null && paths.length > 0) {
-                Log.i(TAG, "---------------------------------- SDCard信息 ------------------------------------");
-                for (String path : paths) {
-                    Log.i(TAG, " 读取到 - " + path);
-                    if (path.equals("/mnt/external_sd")) { //优先外置卡
-                        if (testDirc(path)) break;
-                    } else if (path.equals("/mnt/internal_sd") || path.equals("/mnt/sdcard")) { //内置卡
-                        if (testDirc(path)) break;;
-                    } else if (path.contains("usb")) { //最后
-                        if (testDirc(path)) break;
-                    }
-                }
-            }
-            Log.i(TAG, " 当前 sdcard path:" + getSDPath());
-            SdCardTools.setAppSourceDir(getAppSourceDir(context) + SdCardTools.app_dir);
-            MkDir(appSourcePath);
+            if (testDirc(getSDPath(),true)){
+                MkDir(appSourcePath);//创建目录
+            };
         }
     }
+
     /**
      * 测试目录
      */
-    public static boolean testDirc(String path) {
-
-        if (MkDir(path + "/test")) {
+    public static boolean testDirc(String path,boolean isSetting) {
             try {
-                org.apache.commons.io.FileUtils.deleteDirectory(new File(path + "/test"));
+                String testpath = path+"/test";
+                if (MkDir(testpath)) {
+                    org.apache.commons.io.FileUtils.deleteDirectory(new File(testpath));
+                    if (isSetting) SdCardTools.setAppSourceDir(path);
+                    return true;
+                }
             } catch (Exception e) {
+                e.printStackTrace();
             }
-            SdCardTools.setAppSourceDir(path);
-            return true;
-        } else return false;
+       return false;
     }
+    /**
+     * 获取 可用的存储路径
+     */
+    public static ArrayList<String> getAllStorePath(Context context){
+        String[] paths = SdCardTools.getVolumePaths(context);
+        if (paths != null && paths.length > 0) {
+            ArrayList<String> list = new ArrayList<>();
+            Log.i(TAG, "可用存储列表:");
+            for (int i = 0;i< paths.length ;i++) {
+                Log.i(TAG, i+ " - " + paths[i]);
+                if (testDirc(paths[i],false)) list.add(paths[i]);
+            }
+            return list.size()>0?list:null;
+        }
+        return null;
+    }
+
+
 
     /**
      * 创建文件

@@ -45,7 +45,7 @@ public class IImagePlayer extends ImageView implements IPlayer{
             y = mp.GetIntDefualt("y", 0);
             w = mp.GetIntDefualt("width",0 );
             h = mp.GetIntDefualt("height", 0);
-            Logs.d(TAG,"设置布局:"+x+"-"+y+"-"+w+"-"+h);
+            //Logs.d(TAG,"设置布局:"+x+"-"+y+"-"+w+"-"+h);
             this.setLayoutParams(new AbsoluteLayout.LayoutParams(w,h,x,y));
 
             this.localpath = mp.GetStringDefualt("localpath", "");

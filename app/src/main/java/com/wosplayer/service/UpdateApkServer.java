@@ -67,7 +67,7 @@ public class UpdateApkServer extends IntentService {
             ShellUtils.execCommand(AdbCommand.commands_startApp,true);//尝试打开app
         }
         else{
-            AdbCommand.runingInstallApk(TAG,apkLocalPath,null);
+            AdbCommand.runingInstallApk(apkLocalPath,null);
         }
     }
 

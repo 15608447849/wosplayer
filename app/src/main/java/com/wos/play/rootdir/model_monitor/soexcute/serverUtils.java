@@ -88,9 +88,11 @@ public class serverUtils {
 
     public static boolean isRunningForeground(Context c,List<String> activityList) {
         try {
-            ActivityManager am = (ActivityManager) c
-                    .getSystemService(Context.ACTIVITY_SERVICE);
-            ComponentName cn = am.getRunningTasks(1).get(0).topActivity;
+            ActivityManager am = (ActivityManager) c.getSystemService(Context.ACTIVITY_SERVICE);
+
+            List<ActivityManager.RunningTaskInfo> amrInfo = am.getRunningTasks(1);
+            if (amrInfo == null || amrInfo.size()<0 ) return false;
+            ComponentName cn = amrInfo.get(0).topActivity;
             String currentPackageName = cn.getClassName();
             for (String activityClassName : activityList){
                 //Log.i("监听服务"," 获取 " +activityClassName +" - 当前 "+currentPackageName);

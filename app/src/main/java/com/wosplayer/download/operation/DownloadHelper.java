@@ -144,6 +144,7 @@ public class DownloadHelper implements Observer {//观察者
                             @Override
                             public void downLoadSuccess(Task task) {
                                 Logs.i(TAG, "FTP 成功下载 -"+ task.toString() +" - 当前线程 - "+ Thread.currentThread().getName());
+                                caller.nitifyMsg(task.getTerminalNo(),task.getRemoteName(),3);
                                 if (caller.downloadResult(task,0,task.getRemoteName(),".png")
                                         || caller.downloadResult(task,0,task.getRemoteName(),".jpg")
                                         || caller.downloadResult(task,0,task.getRemoteName(),".mp4")

@@ -1,5 +1,6 @@
 package com.wosplayer.Ui.performer;
 
+import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
 import com.wosplayer.command.operation.schedules.correlation.XmlNodeEntity;
 
@@ -33,11 +34,15 @@ public class UiExcuter {
     public static boolean isStoping = false;
     public void StartExcuter(XmlNodeEntity schedule) {
         Logs.i(TAG, "线程名:" + Thread.currentThread().getName());
-        try {
             if (schedule == null) {
                 Logs.e(TAG, "不执行空排期");
                 return;
             }
+            if (!DisplayActivity.isPlay) {
+                Logs.e(TAG, "不执行绘制UI界面");
+                return;
+            }
+        try {
             lock.lock();
             StopExcuter();
             Logs.i(TAG, "开始关联数据");
@@ -75,7 +80,7 @@ public class UiExcuter {
             return;
         }
         for (XmlNodeEntity program : programArr) {
-            Logs.i(TAG, "计算当前节目 << " + program.getXmldata().get("title") + " >> 的时长中");
+           // Logs.i(TAG, "计算当前节目 << " + program.getXmldata().get("title") + " >> 的时长中");
             long programTime = getProgramTimeLength(program);
             program.getXmldata().put("programTime", String.valueOf(programTime));
             ProgramTimerList.add(program);
@@ -145,7 +150,7 @@ public class UiExcuter {
         ArrayList<XmlNodeEntity> layoutArr = program.getChildren();
         if (layoutArr==null || layoutArr.size() == 0) return 9999;
         for (XmlNodeEntity layout : layoutArr) {
-            Logs.i(TAG, "当前节目下一个布局:" + layout.getXmldata().get("id"));
+            //Logs.i(TAG, "当前节目下一个布局:" + layout.getXmldata().get("id"));
             long layoutTime = -1;
             //得到布局下面的内容
             ArrayList<XmlNodeEntity> contentArr = layout.getChildren();
@@ -159,7 +164,7 @@ public class UiExcuter {
                     continue;
                 }
             }
-            Logs.i(TAG, "得到一个布局的时长:" + layoutTime);
+           // Logs.i(TAG, "得到一个布局的时长:" + layoutTime);
             layoutTimeArr.add(layoutTime);
         }
         //排序
@@ -170,7 +175,6 @@ public class UiExcuter {
                 return lhs - rhs > 0 ? -1 : lhs - rhs == 0 ? 0 : 1;  //-1代表前者小，0代表两者相等，1代表前者大。
             }
         });
-
         programTime = layoutTimeArr.get(0);
         return programTime;
     }

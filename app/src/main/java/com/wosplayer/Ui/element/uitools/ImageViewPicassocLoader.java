@@ -93,7 +93,7 @@ public class ImageViewPicassocLoader {
             if (file != null && file.exists()) {
                 is = new FileInputStream(file);
                 bitmap = createImageThumbnail(is);
-                Log.d("image utils ", "获取完毕 bitmap _success -\nfile -" + file.getAbsolutePath() + "\n");
+                //Log.d("image utils ", "获取完毕 bitmap _success -\nfile -" + file.getAbsolutePath() + "\n");
             }
         } catch (Exception e) {
             Log.e("", "loading image err: " + e.getMessage());

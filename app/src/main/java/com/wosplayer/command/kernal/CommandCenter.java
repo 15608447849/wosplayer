@@ -4,7 +4,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.wosplayer.app.Logs;
+import com.wosplayer.app.DisplayActivity;
+import com.wosplayer.app.PlayApplication;
+import com.wosplayer.command.operation.interfaces.CommandType;
+import com.wosplayer.command.operation.interfaces.iCommand;
 import com.wosplayer.command.operation.other.Command_CAPT;
 import com.wosplayer.command.operation.other.Command_Close_App;
 import com.wosplayer.command.operation.other.Command_FdRer;
@@ -18,6 +21,8 @@ import com.wosplayer.command.operation.other.Command_UPDC;
 import com.wosplayer.command.operation.other.Command_UPLG;
 import com.wosplayer.command.operation.other.Command_VOLU;
 import com.wosplayer.command.operation.schedules.ScheduleSaver;
+import com.wosplayer.command.operation.schedules.correlation.StringUtils;
+import com.wosplayer.service.CommunicationService;
 
 import java.util.HashMap;
 
@@ -29,7 +34,6 @@ import rx.schedulers.Schedulers;
 /**
  * Created by Administrator on 2016/7/20.
  */
-
 public class CommandCenter extends BroadcastReceiver {
     public static final String action = "com.post.cmd.broad";
     public static final String cmd = "toCmd";
@@ -37,12 +41,19 @@ public class CommandCenter extends BroadcastReceiver {
     private static final java.lang.String TAG = "命令分发中心" ;
     private static final Scheduler.Worker helper1 =  Schedulers.newThread().createWorker();
     private static final Scheduler.Worker helper2 =  Schedulers.newThread().createWorker();
+    public static final String COMMONICATION_LIVE = "commonicationkey";
+    private DisplayActivity activity;
+
+    public CommandCenter(DisplayActivity activity) {
+        this.activity = activity;
+//        Logs.i(TAG," 创建完成 ");
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         String msgCmd = intent.getExtras().getString(cmd);
         String msgParam =  intent.getExtras().getString(param);
-        if (msgCmd==null) return;
-        postCmd(msgCmd,msgParam);
+        if (!StringUtils.isEmpty(msgCmd)) postCmd(msgCmd,msgParam);
     }
 
 
@@ -79,8 +90,12 @@ public class CommandCenter extends BroadcastReceiver {
     }
 
     private void postCmd(final String cmd, final String param){
-        Logs.i(TAG,"[ "+cmd+ " - "+ param+" ]");
-        if (commandList.containsKey(cmd)) {
+       // Logs.i(TAG,"[ "+cmd+ " - "+ param+" ]");
+        //发送通讯服务 收到消息
+        PlayApplication.sendMsgToServer(CommunicationService.OK);
+        if (cmd.equals(COMMONICATION_LIVE)){
+            if (activity!=null) activity.communicationLives();
+        }else if (commandList.containsKey(cmd)) {
             //Logs.i("准备 执行指令:"+cmd +" 所在线程:"+Thread.currentThread().getName()+"- 当前线程数:"+Thread.getAllStackTraces().size());
             if (cmd.equals(CommandType.REBO) || cmd.equals(CommandType.UIRE) || cmd.equals(CommandType.UPDC)
                     || cmd.equals(CommandType.SHDO) || cmd.equals(CommandType.SHDP) || cmd.equals(CommandType.UPLG)

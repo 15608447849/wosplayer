@@ -27,19 +27,13 @@ public class PlayApplication extends Application {
     public void onCreate() {
         super.onCreate();
         appContext = this.getApplicationContext();
-        //系统配置监听值
-        SystemConfig.get().putOr("watchValue","0").save();
         //捕获异常
         CrashHandler.getInstance().init(appContext);
+        InitSystem();
     }
 
-    /**
-     * 在 activity 中调用
-     * @param handler
-     */
-    public void startAppInit(Handler handler){
-        //放入系统目录
-        BackRunner.runBackground( new AdbCommand(appContext,handler));//初始化
+    private void InitSystem(){
+         AdbCommand.initSystem(appContext);//初始化系统,放入系统目录
     }
 
     //本机信息
@@ -47,15 +41,18 @@ public class PlayApplication extends Application {
     /**
      *
      */
-    public void initConfig() {
-      config = SystemConfig.get().read();
-      config.printData();
-      final String defaultPath = config.GetStringDefualt("default","");
-      final String fudianpath = config.GetStringDefualt("fudianpath","");
-      if (defaultPath.isEmpty() || fudianpath.isEmpty()) return;
+    public static void initConfig() {
+        SystemConfig scg  = SystemConfig.get().read();
+        //系统配置监听值
+        scg.putOr("watchValue","0").save();
+        config = scg;
+        config.printData();
       BackRunner.runBackground(new Runnable() {
           @Override
           public void run() {
+              String defaultPath = config.GetStringDefualt("default","");
+              String fudianpath = config.GetStringDefualt("fudianpath","");
+              if (defaultPath.isEmpty() || fudianpath.isEmpty()) return;
               //将默认排期放入指定文件夹下
               AppTools.defaultProgram(appContext,defaultPath);
               Logs.i("后台任务","默认排期解压缩完成");
@@ -65,7 +62,6 @@ public class PlayApplication extends Application {
               Logs.i("后台任务","富颠金融网页模板解压缩完成");
           }
       });
-
     }
     //获取配置信息值
     public static String getConfigValue(String key){
@@ -81,8 +77,8 @@ public class PlayApplication extends Application {
      terminalNo = intent.getExtras().getString("terminalNo");
      HeartBeatTime = intent.getExtras().getLong("HeartBeatTime");
      */
-    public static void startCommunicationService(Context mc) {
-            Intent intent = new Intent(mc, CommunicationService.class);
+    public static void startCommunicationService() {
+            Intent intent = new Intent(appContext, CommunicationService.class);
             //传递参数
             Bundle b = new Bundle();
             b.putString("ip",config.GetStringDefualt("serverip","127.0.0.1"));
@@ -90,17 +86,14 @@ public class PlayApplication extends Application {
             b.putString("terminalNo",config.GetStringDefualt("terminalNo","127.0.0.1"));
             b.putLong("HeartBeatTime",(config.GetIntDefualt("HeartBeatInterval",10)));
             intent.putExtras(b);
-            mc.startService(intent);
+            appContext.startService(intent);
     }
     /**
      * 停止通讯服务
      */
-    public static void stopCommunicationService(Context mc){
-            if (mc==null){
-                mc = appContext;
-            }
-            Intent server = new Intent(mc, CommunicationService.class);
-            mc.stopService(server);
+    public static void stopCommunicationService(){
+        Intent server = new Intent(appContext, CommunicationService.class);
+        appContext.stopService(server);
     }
     //发送消息到通讯服务
     public static void sendMsgToServer(String msg){

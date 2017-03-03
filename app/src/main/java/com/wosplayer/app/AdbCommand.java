@@ -1,7 +1,9 @@
 package com.wosplayer.app;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
@@ -9,13 +11,15 @@ import cn.trinea.android.common.util.FileUtils;
 import cn.trinea.android.common.util.ShellUtils;
 
 import com.wos.play.rootdir.model_monitor.soexcute.RunJniHelper;
-import com.wosplayer.R;
+import com.wosplayer.command.kernal.CommandCenter;
+import com.wosplayer.command.operation.interfaces.CommandType;
 
 /**
  * Created by user on 2016/10/9.
  */
-public class AdbCommand implements Runnable {
+public class AdbCommand{
 
+   private static final String TAG = "执行adb命令";
 
     //预留远程端口号
     public static String[] commands = new String[]{
@@ -46,11 +50,16 @@ public class AdbCommand implements Runnable {
                 +"reboot";
         return cmd;
     }
+    //多少秒后关机
+    public static String closeTelOnTime(int time){
+        //关机
+       return "sleep "+time+" && reboot -p";
+    }
 
-
-    public String packagepath = null;
-    public Context context = null;
-    public Handler handler = null;
+    //多少秒后重启
+    public static String rebootTelOnTime(int time){
+        return "sleep "+time+" && reboot";
+    }
 
     //启动应用adb shell am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n com.wosplayer/com.wosplayer.app.DisplayActivity
     public static final String commands_startApp = "am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n com.wosplayer/com.wosplayer.app.DisplayActivity";
@@ -73,7 +82,7 @@ public class AdbCommand implements Runnable {
         return param;
     }
     //运行时安装apk
-    public  static void runingInstallApk(String TAG, String apkLocalPath, String fileNane){
+    public  static void runingInstallApk(String apkLocalPath, String fileNane){
         String command = getInstallAdb(apkLocalPath,fileNane);
         Log.e(TAG,command);
        ShellUtils.CommandResult result = ShellUtils.execCommand(command,true,true);
@@ -88,43 +97,22 @@ public class AdbCommand implements Runnable {
             Log.e(TAG,"执行失败");
         }
     }
-
-    /**
-     * @param context 环境
-     */
-    public AdbCommand(Context context, Handler handler) {
-        this.context = context;
-        this.handler = handler;
-        this.packagepath = context.getApplicationInfo().sourceDir;
-    }
-
-    //发送信息到ui界面
-    public void handlerSendMsg(String msgStr){
-        if (handler!=null && context!=null){
-           AppTools.NotifyHandle(handler,DisplayActivity.HandleEvent.outtext.ordinal(),msgStr);
-        }
-    }
-    @Override
-    public void run() {
+    //系统初始化提权
+    public static void initSystem(Context context) {
         try {
             if (ShellUtils.checkRootPermission()) {
-                handlerSendMsg("拥有root权限,执行初始化.");
                 //放入system
                  excuteAppMoveSystem(context);
             } else {
-                Logs.d("执行adb命令","没有root权限");
-                handlerSendMsg("没有root权限.");
+                Logs.d(TAG,"没有root权限");
             }
         } catch (Exception e) {
-            Logs.e(e.getMessage());
-        }finally {
-            context = null;
-            handler=null;
+            Logs.e(TAG,e.getMessage());
         }
     }
 
     //放进system cmd
-    public String getAppChangerPath(String _packagePath, String _packageName, String alias) {
+    public static String  getAppChangerPath(String _packagePath, String _packageName, String alias) {
         return "mount -o remount,rw /system" + "\n" +
                 "cp /data/data/"+_packageName+"/lib/* /system/lib" + "\n" + //复制so文件到目录下
                 "chmod 777 /system/lib/*" + "\n" + //设置so权限
@@ -135,17 +123,14 @@ public class AdbCommand implements Runnable {
     }
 
     //检测root权限 放入system
-    private void excuteAppMoveSystem(Context context) {
+    private static void excuteAppMoveSystem(Context context) {
             ApplicationInfo appinfo = context.getApplicationInfo();
             String packagepath = appinfo.sourceDir; //包路径
             String packageName = appinfo.packageName; // 包名
-            //Logs.d("执行adb命令","初始化app信息,package 路径 - "+packagepath +"; 包名: "+packageName);
-
-            String TAG = "执行adb命令";
+            //Logs.d(TAG,"初始化app信息,package 路径 - "+packagepath +"; 包名: "+packageName);
             String alias = "WosOldTerminal.apk";
             //如果不在system目录下  (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) > 0 //系统程序存在/system/app下
             if ( (appinfo.flags & ApplicationInfo.FLAG_SYSTEM) > 0 || FileUtils.isFileExist("/system/app/"+alias) ) {
-                handlerSendMsg("系统应用");
                 return;
             }
                 //第一次执行
@@ -155,18 +140,8 @@ public class AdbCommand implements Runnable {
                 Log.e(TAG,cmd);
                 ShellUtils.CommandResult cr = ShellUtils.execCommand(cmd, true, true);
                 Log.e(TAG,"提升权限结果:" + cr.result);
-                handlerSendMsg("提升权限结果:" + (cr.result==0?" 成功":" 失败"));
                 if (cr.result == 0) {
-                    //发送重启通知
-                    try {
-                        handlerSendMsg("请注意,初始化系统完成,将在30秒后重启.");
-                        Thread.sleep(30 * 1000);
-                        handlerSendMsg(" [ 即将重新启动 ] ");
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } finally {
-                        ShellUtils.execCommand("reboot", true);
-                    }
+                    ShellUtils.execCommand("reboot",true);
                 }
     }
 

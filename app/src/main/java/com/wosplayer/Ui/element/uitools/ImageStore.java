@@ -78,7 +78,7 @@ public class ImageStore {
                 return;
             }
             if (CacheMap.get(tag) == null || CacheMap.get(tag).isRecycled()) {
-                Log.i(TAG,"添加 bitmap - key - "+tag +"\n bitmap - "+bitmap);
+               // Log.i(TAG,"添加 bitmap - key - "+tag +"\n bitmap - "+bitmap);
                 CacheMap.put(tag,bitmap);
             }
 

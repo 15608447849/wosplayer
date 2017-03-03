@@ -20,7 +20,7 @@ public class programExcuter {
     public programExcuter(XmlNodeEntity program) {
         this.program = program;
         layoutList = new ArrayList<layoutExcuter>();
-        Logs.i(TAG,"节目:"+program.getXmldata().get("title")+"创建了");
+       // Logs.i(TAG,"节目:"+program.getXmldata().get("title")+"创建了");
         //获取背景信息
         getBgInfos();
     }
@@ -37,7 +37,7 @@ public class programExcuter {
         }else{
             bgInfo = PlayApplication.config.GetStringDefualt("basepath","")+bgInfo;
         }
-        Logs.e(TAG,"节目背景 - "+bgInfo);
+        //Logs.e(TAG,"节目背景 - "+bgInfo);
     }
 
     public void start(){
@@ -52,7 +52,7 @@ public class programExcuter {
             return;
         }
         for (XmlNodeEntity layout:layoutArr){
-        Logs.i(TAG,"准备创建一个布局执行者:"+layout.getXmldata().get("id"));
+        //Logs.i(TAG,"准备创建一个布局执行者:"+layout.getXmldata().get("id"));
             createLayout(layout);
         }
     }
@@ -69,7 +69,7 @@ public class programExcuter {
 
     public void stop(){
         //停止所有 布局
-        Logs.i(TAG,"节目:"+program.getXmldata().get("title")+"准备停止了");
+       // Logs.i(TAG,"节目:"+program.getXmldata().get("title")+"准备停止了");
 
         if (layoutList!=null && layoutList.size()!=0 ){
             for (layoutExcuter layoutexcuter:layoutList){

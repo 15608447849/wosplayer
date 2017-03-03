@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -17,7 +15,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.wosplayer.R;
 import com.wosplayer.app.AdbCommand;
@@ -26,11 +23,9 @@ import com.wosplayer.app.BackRunner;
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
 import com.wosplayer.app.SystemConfig;
-import com.wosplayer.command.operation.other.Command_UPDC;
 import com.wosplayer.tool.SdCardTools;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import cn.trinea.android.common.util.FileUtils;
 import cn.trinea.android.common.util.ShellUtils;
@@ -39,7 +34,7 @@ import cn.trinea.android.common.util.ShellUtils;
  * Created by 79306 on 2017/2/20.
  */
 
-public class AppToolsFragment extends Fragment implements DisplayActivity.onFragAction,View.OnClickListener{
+public class AppToolsFragment extends Fragment implements DisplayActivity.onFragAction,View.OnClickListener,AdapterView.OnItemSelectedListener{
     private static final String TAG = "APP配置页面";
     public static final String FLAG ="wostools";
     private DisplayActivity activity;
@@ -64,16 +59,18 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
     private EditText serverport;
     private EditText companyid;
     private EditText terminalNo;
-    private EditText BasePath;
+    private EditText basePath;
     private EditText heartbeattime;
-    private EditText StorageLimits;
-    private EditText RestartBeatInterval;
+    private EditText storageLimits;
+    private EditText restartBeatInterval;
     private Button btnGetID;
     private Button btnSaveData;
     private Spinner playtype;
     private SpnnerAdpter adapter;
     private SystemConfig dataList;
 
+    private Spinner storeSwitch;
+    private SpnnerAdpter adapter2;
     //本机信息
     private TextView localip;
     private Button sure;
@@ -90,13 +87,21 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
         ViewGroup vp = (ViewGroup) inflater.inflate(R.layout.activity_wostools,null);
         storeDir=(TextView)vp.findViewById(R.id.storedir);
         serverip=(EditText)vp.findViewById(R.id.serverip);
+        serverip.clearFocus();
         serverport=(EditText)vp.findViewById(R.id.serverport);
+        serverport.clearFocus();
         companyid=(EditText)vp.findViewById(R.id.companyid);
+        companyid.clearFocus();
         terminalNo=(EditText)vp.findViewById(R.id.terminalNo);
-        BasePath=(EditText)vp.findViewById(R.id.BasePath);
+        terminalNo.clearFocus();
+        basePath =(EditText)vp.findViewById(R.id.BasePath);
+        basePath.clearFocus();
         heartbeattime=(EditText)vp.findViewById(R.id.HeartBeatInterval);
-        StorageLimits=(EditText)vp.findViewById(R.id.StorageLimits);
-        RestartBeatInterval=(EditText)vp.findViewById(R.id.RestartBeatInterval);
+        heartbeattime.clearFocus();
+        storageLimits =(EditText)vp.findViewById(R.id.StorageLimits);
+        storageLimits.clearFocus();
+        restartBeatInterval=(EditText)vp.findViewById(R.id.RestartBeatInterval);
+        restartBeatInterval.clearFocus();
         btnGetID = (Button) vp.findViewById(R.id.btnGetID);
         btnGetID.setOnClickListener(this);
         btnSaveData = (Button) vp.findViewById(R.id.btnSaveData);
@@ -104,20 +109,13 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
         playtype = (Spinner) vp.findViewById(R.id.playtype);
         adapter = new SpnnerAdpter(activity);
         playtype.setAdapter(adapter);
-        playtype.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                //选择完成
-                Logs.d(TAG,"选择模式 - "+adapter.getDataOnIndex(position));
-                view.setBackgroundColor(Color.WHITE);
-                dataList.put("playMode",adapter.getDataOnIndex(position));
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
+        adapter.settingData("通用模式");
+        playtype.setOnItemSelectedListener(this);
+        storeSwitch = (Spinner) vp.findViewById(R.id.store_switch);
+        adapter2 = new SpnnerAdpter(activity);
+        storeSwitch.setAdapter(adapter2);
+        adapter2.settingDataList(SdCardTools.getAllStorePath(activity));
+        storeSwitch.setOnItemSelectedListener(this);
         localip = (TextView) vp.findViewById(R.id.localip);
         command = (EditText) vp.findViewById(R.id.command_input);
         version = (TextView)vp.findViewById(R.id.version);
@@ -174,12 +172,9 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
             companyid.setText(dataList.GetStringDefualt("companyid", "999"));
             terminalNo.setText(dataList.GetStringDefualt("terminalNo", ""));
             heartbeattime.setText(dataList.GetStringDefualt("HeartBeatInterval", "30"));
-            BasePath.setText(catPathfile(dataList.GetStringDefualt("basepath", "")));//资源地址
-            StorageLimits.setText(dataList.GetStringDefualt("storageLimits","50"));
-            RestartBeatInterval.setText(dataList.GetStringDefualt("RestartBeatInterval","30"));
-            //焦点默认在这个控件上
-            serverip.setFocusable(true);
-
+            basePath.setText(catPathfile(dataList.GetStringDefualt("basepath", "")));//资源地址
+            storageLimits.setText(dataList.GetStringDefualt("storageLimits","50"));
+            restartBeatInterval.setText(dataList.GetStringDefualt("RestartBeatInterval","30"));
             localip.setText(dataList.GetStringDefualt("tip","127.0.0.1"));
             version.setText(AppTools.getAppVersion(activity)+"");
 
@@ -196,34 +191,27 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
         return path.equals("")?"playlist":path;
     }
 
-
-
-
-
-
-
     /**
      * 获取控件传入的数据并封装
      */
     public void GetViewValue()
     {
+
         ArrayList<String> pathList = new ArrayList<>();
         String serverId = serverip.getText().toString();
         String serverPort = serverport.getText().toString();
         String CaptureURL = String.format("http://%s:%s/wos/captureManagerServlet",
                 serverId,
                 serverPort);
-
         dataList.put("terminalNo",terminalNo.getText().toString());//终端id
         dataList.put("serverip", serverId);//服务器ip
         dataList.put("serverport",serverPort);//终端端口
-
         dataList.put("CaptureURL", CaptureURL);//截图上传url
         dataList.put("companyid",  companyid.getText().toString());//公司id
         dataList.put("HeartBeatInterval",  heartbeattime.getText().toString());//心跳
-        dataList.put("RestartBeatInterval",RestartBeatInterval.getText().toString()); //重启时间
-        dataList.put("storageLimits",StorageLimits.getText().toString());//sdcard 清理阔值
-        String basepath=BasePath.getText().toString();//资源存储的文件名
+        dataList.put("RestartBeatInterval",restartBeatInterval.getText().toString()); //重启时间
+        dataList.put("storageLimits", storageLimits.getText().toString());//sdcard 清理阔值
+        String basepath= basePath.getText().toString();//资源存储的文件名
 //      例: xxx前缀 /basepath/资源1
         if (!basepath.startsWith("/")){
             basepath = "/"+basepath;
@@ -236,8 +224,6 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
         basepath = SdCardTools.getAppSourceDir(activity)+basepath;
         dataList.put("basepath",  basepath);
         pathList.add(basepath);
-//        dataList.put("CAPTIMAGEPATH", basepath + "screen.png");//截图本地存放位置
-//        dataList.put("defaultVideo", basepath + "default.mp4");//默认视频本地位置
         //建设银行接口资源下载位置
         basepath = SdCardTools.getAppSourceDir(activity)+SdCardTools.Construction_Bank_dir_source;
         dataList.put("bankPathSource",basepath);
@@ -262,6 +248,7 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
     public void save(){
         GetViewValue();
         dataList.save();
+
         if (!"".equals(terminalNo.getText().toString())){
             AppTools.settingServerInfo(activity,true);
             activity.mHandler.sendEmptyMessage(DisplayActivity.HandleEvent.close.ordinal());
@@ -295,6 +282,7 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
             if(dataList!=null){
                 //把数据封装到集合中
                 GetViewValue();
+                InitValue();//刷新
                 //开启线程
                 RequstTerminal.BeginRequst(dataList,activity.mHandler);
             }
@@ -356,4 +344,35 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
             NotityActivty("无效命令");
         }
     }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        //选择完成
+        view.setBackgroundColor(Color.WHITE);
+        int vid = parent.getId();
+        if (vid == playtype.getId()){
+            dataList.put("playMode",adapter.getDataOnIndex(position));
+        }
+        if (vid == storeSwitch.getId()){
+            SdCardTools.setAppSourceDir(adapter2.getDataOnIndex(position));
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+    }
+
+//    new Spinner.OnItemSelectedListener() {
+//        @Override
+//        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//            //选择完成
+//            view.setBackgroundColor(Color.WHITE);
+//            dataList.put("playMode",adapter.getDataOnIndex(position));
+//        }
+//
+//        @Override
+//        public void onNothingSelected(AdapterView<?> parent) {
+//
+//        }
+//    }
 }

@@ -5,7 +5,7 @@ import android.text.format.Time;
 import com.wosplayer.app.PlayApplication;
 import com.wosplayer.app.Logs;
 import com.wosplayer.command.operation.schedules.ScheduleReader;
-import com.wosplayer.command.kernal.iCommand;
+import com.wosplayer.command.operation.interfaces.iCommand;
 
 import java.io.DataOutputStream;
 import java.text.DateFormat;
@@ -14,7 +14,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,29 +33,29 @@ public class Command_SYTI implements iCommand {
 	}
 
 	private String getSystemTime(){
-		Logs.i(TAG,"当前时区 - "+ TimeZone.getDefault().getDisplayName());
+		//Logs.i(TAG,"当前时区 - "+ TimeZone.getDefault().getDisplayName());
 		long time= System.currentTimeMillis();
 		final Calendar mCalendar= Calendar.getInstance();
 		mCalendar.setTimeInMillis(time);
 		int mYear = mCalendar.get(Calendar.YEAR);//年
 		int mMonth = mCalendar.get(Calendar.MONTH);//月
 		int mDate = mCalendar.get(Calendar.DATE);//日
-		Logs.i(TAG,"mCalendar >>> "+mYear+"-"+mMonth+"-"+mDate);
+		//Logs.i(TAG,"mCalendar >>> "+mYear+"-"+mMonth+"-"+mDate);
 		int mHour=mCalendar.get(Calendar.HOUR_OF_DAY);//取得小时：
 		int mMinuts=mCalendar.get(Calendar.MINUTE);//取得分钟：
 		int mSecond=mCalendar.get(Calendar.SECOND);//取得秒
-		Logs.i(TAG,"mCalendar >>> "+mHour+":"+mMinuts+":"+mSecond);
+		//Logs.i(TAG,"mCalendar >>> "+mHour+":"+mMinuts+":"+mSecond);
 
 		Time t=new Time(); // or Time t=new Time("GMT+8"); 加上Time Zone资料
 		t.setToNow(); // 取得系统时间。
 		int year = t.year;
 		int month = t.month;
 		int date = t.monthDay;
-		Logs.i(TAG,"Time() >>> \n"+year+"-"+month+"-"+date);
+		//Logs.i(TAG,"Time() >>> \n"+year+"-"+month+"-"+date);
 		int hour = t.hour;    // 0-23
 		int minuts = t.minute;
 		int seconds = t.second;
-		Logs.i(TAG,"Time() >>> \n"+hour+":"+minuts+":"+seconds);
+		//Logs.i(TAG,"Time() >>> \n"+hour+":"+minuts+":"+seconds);
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String times = df.format(new Date());
 		return times;
@@ -74,9 +73,9 @@ public class Command_SYTI implements iCommand {
 			return;
 		}
 		String settingTime = param.replaceAll("-", "").replace(":","").replaceAll(" ", ".");
-		Logs.i(TAG,"准备设置时间参数 >date>> "+settingTime);
+		//Logs.i(TAG,"准备设置时间参数 >date>> "+settingTime);
 		liunx_SU_syncTimeCmd(settingTime,"Asia/Shanghai");
-		Logs.i(TAG,"当前设置时区 Asia/Shanghai >>> 时间 - "+getSystemTime());
+		//Logs.i(TAG,"当前设置时区 Asia/Shanghai >>> 时间 - "+getSystemTime());
 
 		//再次执行排期读取
 		ScheduleReader.clear();
@@ -92,7 +91,7 @@ public class Command_SYTI implements iCommand {
 			long currentTime = dataFormatUtils.parse(androidTime).getTime();    //当前时间
 
 			if (Math.abs(currentTime-systemTime) < (5 * 1000)){
-				Logs.i(TAG, "时间正确 - android"+currentTime +"   server - "+systemTime);
+				//Logs.i(TAG, "时间正确 - android"+currentTime +"   server - "+systemTime);
 				return true;
 			}else{
 				Logs.i(TAG, "时间错误 android  "+currentTime +"   server - "+systemTime);
@@ -106,7 +105,7 @@ public class Command_SYTI implements iCommand {
 
 
 	private String  liunx_SU_syncTimeCmd(String param,String timeZone){
-				Logs.i(TAG,"yyyyMMdd.HHmmss ==>"+param);
+				//Logs.i(TAG,"yyyyMMdd.HHmmss ==>"+param);
 				Process process = null;
 				DataOutputStream os = null;
 				try {
@@ -119,7 +118,7 @@ public class Command_SYTI implements iCommand {
 					os.writeBytes("exit\n");
 					os.flush();
 					process.waitFor();
-					Logs.i(TAG,"时间同步成功:"+getSystemTime());
+					//Logs.i(TAG,"时间同步成功:"+getSystemTime());
 
 					return getSystemTime();
 

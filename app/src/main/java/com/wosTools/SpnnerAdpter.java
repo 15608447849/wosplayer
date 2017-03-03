@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Created by 79306 on 2017/2/21.
@@ -21,12 +22,29 @@ public class SpnnerAdpter extends BaseAdapter{
 
         private Context context;
 
-        public SpnnerAdpter(Context context){
-            data_list = new ArrayList<String>();
-            data_list.add("通用模式");
-            //data_list.add("富滇银行");
-            this.context = context;
+//        public SpnnerAdpter(Context context){
+//            data_list = new ArrayList<String>();
+//            data_list.add("通用模式");
+//            //data_list.add("富滇银行");
+//            this.context = context;
+//        }
+    public SpnnerAdpter(Context context){
+        data_list = new ArrayList<String>();
+        this.context = context;
+    }
+
+    public void settingData(String data){
+            if(!data_list.contains(data)) data_list.add(data);
+            notifyDataSetChanged();
+    }
+    public void settingDataList(ArrayList<String> data){
+        Iterator<String> ier = data.iterator();
+        String str;
+        while(ier.hasNext()){
+            str = ier.next();
+            settingData(str);
         }
+    }
 
     public String getDataOnIndex(int position){
         return data_list.get(position);

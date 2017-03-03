@@ -1,4 +1,4 @@
-package com.wosplayer.command.kernal;
+package com.wosplayer.command.operation.interfaces;
 
 /**
  * Created by user on 2016/6/22.

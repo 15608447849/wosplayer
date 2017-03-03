@@ -14,11 +14,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
-import android.widget.ImageButton;
+import android.widget.FrameLayout;
 
 import com.wosTools.AppToolsFragment;
 import com.wosplayer.R;
@@ -27,6 +26,7 @@ import com.wosplayer.Ui.element.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.command.kernal.CommandCenter;
 import com.wosplayer.command.operation.schedules.ScheduleReader;
+import com.wosplayer.service.CommunicationService;
 
 
 import static com.wosplayer.app.PlayApplication.appContext;
@@ -43,38 +43,34 @@ public class DisplayActivity extends Activity {
            if (msg.what == HandleEvent.outtext.ordinal()){
               AppTools.Toals(appContext,msg.obj.toString());
            }
-
             if (msg.what == HandleEvent.success.ordinal()){
                 if (frgAct!=null){
                     frgAct.sendMessage(msg.obj);
                 }
-        }
+            }
             if (msg.what == HandleEvent.close.ordinal()){
                 //关闭 配置服务信息的fragment
                 closeWosTools();
                 //开始工作
-                StartWork();
+                start();
             }
         }
     };
 
-    public static AbsoluteLayout baselayout = null;
     public  static AbsoluteLayout main = null; //存放所有排期视图的主容器
+    public static boolean isPlay = false;//是否可以执行显示ui
     public static DisplayActivity activityContext = null;
-    private ImageButton closebtn ;//左上角 隐藏的 按钮
+    private FrameLayout closebtn ;//左上角 隐藏的 关闭视图
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Logs.i(TAG,"onCreate");
         super.onCreate(savedInstanceState);
-        activityContext = this;
-        ((PlayApplication)getApplication()).startAppInit(mHandler);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//保持屏幕常亮
         setContentView(R.layout.activity_main);//设置布局文件
-        baselayout = (AbsoluteLayout) LayoutInflater.from(this).inflate(R.layout.activity_main,null);
-        main = (AbsoluteLayout) this.findViewById(R.id.main);
-        closebtn =  (ImageButton)findViewById(R.id.closeappbtn);
-        Logs.i(TAG,"onCreate() 正在执行的所有线程数:"+ Thread.getAllStackTraces().size());
-
+        activityContext = this;
+        main = (AbsoluteLayout) this.findViewById(R.id.uilayer);
+        closebtn =  (FrameLayout) findViewById(R.id.close_layer);
         //弹出密码输入框
         closebtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,7 +90,7 @@ public class DisplayActivity extends Activity {
                 }else{
                     AppTools.settingServerInfo(activityContext,false);
                     //停止工作
-                    StopWork(false);
+                    stop(false);
                     AppTools.Toals(appContext,"2秒后进入配置界面");
                     //打开配置界面
                     mHandler.postDelayed(new Runnable() {
@@ -108,17 +104,17 @@ public class DisplayActivity extends Activity {
                 return true;
             }
         });
-
-        Logs.i("activity --------create over-------------");
     }
     @Override
     public void onStart() {
         Logs.i(TAG,"onStart");
         super.onStart();
+        //注册指令广播
+        registCommand();
         //是否已经设置了服务器信息?
         if (AppTools.isSettingServerInfo(activityContext)){
             //开始工作
-            StartWork();
+            start();
         }else{
             //设置服务器信息
             openWosTools();
@@ -128,14 +124,12 @@ public class DisplayActivity extends Activity {
     public void onResume() {
        super.onResume();
         Logs.i(TAG,"onResume");
-
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         Logs.i(TAG,"onPause");
-
     }
 
     @Override
@@ -144,8 +138,10 @@ public class DisplayActivity extends Activity {
         Logs.i(TAG,"onStop");
         //结束工作
         if (AppTools.isSettingServerInfo(appContext)){
-            StopWork(true);
+            stop(true);
         }
+        //注销指令广播
+         unregistCommand();
       }
 
     @Override
@@ -153,81 +149,45 @@ public class DisplayActivity extends Activity {
         super.onDestroy();
         Logs.i(TAG,"onDestroy");
     }
-
+    //键盘监听返回事件
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK ) {
-//                        log.e(TAG,"click back key");
-//                      DisplayActivity.this.finish();
                         return true;
                     }
         return super.onKeyDown(keyCode, event);
     }
 
-    //-----------------------------------------------------------------------
     //开始工作
-    private void StartWork(){
+    private void start(){
         if (activityContext!=null){
             //初始化数据
-           ((PlayApplication)this.getApplication()).initConfig();
-            //注册指令广播
-            registCommand();
-            //开启通讯服务
-            PlayApplication.startCommunicationService(this);
-            PlayTypeStart();
+            PlayApplication.initConfig();
+            playTypeStart();
+            //执行监听通讯服务是否存活
+            mHandler.post(keepAlive);
         }
     }
-
-    /**
-     * 接受命令的广播
-     */
-    private BroadcastReceiver commandCenter = null;
-    private void registCommand() {
-        if (commandCenter!=null) return;
-        commandCenter = new CommandCenter();
-        IntentFilter ifl = new IntentFilter();
-        ifl.addAction(CommandCenter.action);
-        this.registerReceiver(commandCenter,ifl);
-    }
-    private void unregistCommand() {
-    if (commandCenter!=null){
-        try {
-            this.unregisterReceiver(commandCenter);
-        } catch (Exception e) {
-        }finally {
-            commandCenter = null;
-        }
-    }
-    }
-
     //结束工作 - true,关闭 activity
-    private void StopWork(boolean isclose){
-            //注销指令广播
-            unregistCommand();
-            PlayApplication.stopCommunicationService(this); //关闭服务
-            PlayTypeStop();
+    private void stop(boolean isclose){
+            //关闭通讯服务检测
+            mHandler.removeCallbacks(tryCommu);
+            mHandler.removeCallbacks(keepAlive);
+            playTypeStop();
             if (isclose) finish();
     }
-
-
-
-    private void PlayTypeStart() {
+    private void playTypeStart() {
         try {
-            BackRunner.runBackground(new Runnable() {
-                @Override
-                public void run() {
-                    ScheduleReader.clear();
-                    ScheduleReader.Start(false);
-                }
-            });
+            isPlay = true;
+           ScheduleReader.clear();
+           ScheduleReader.Start(false);
         } catch (Exception e) {
             Logs.e(TAG,"activity 开始执行读取排期失败");
         }
-
     }
-    private void PlayTypeStop() {
-
+    private void playTypeStop() {
         try {
+            isPlay = false;
             ScheduleReader.clear();
             UiExcuter.getInstancs().StopExcuter();
             ImageStore.getInstants().clearCache();
@@ -236,6 +196,49 @@ public class DisplayActivity extends Activity {
         }
     }
 
+
+    /**
+     * 接受命令的广播
+     */
+    private BroadcastReceiver commandCenter = null;
+    private void registCommand() {
+        if (commandCenter!=null) return;
+        commandCenter = new CommandCenter(this);
+        IntentFilter ifl = new IntentFilter();
+        ifl.addAction(CommandCenter.action);
+        this.registerReceiver(commandCenter,ifl);
+    }
+    private void unregistCommand() {
+        if (commandCenter!=null){
+            try {
+                this.unregisterReceiver(commandCenter);
+            } catch (Exception e) {
+            }finally {
+                commandCenter = null;
+            }
+        }
+    }
+    private final Runnable tryCommu = new Runnable() {
+        @Override
+        public void run() {
+            Logs.e(TAG,"尝试打开通讯服务进程.");
+            PlayApplication.startCommunicationService();
+        }
+    };
+
+    //尝试连接通讯服务
+    private final Runnable keepAlive = new Runnable() {
+        @Override
+        public void run() {
+            mHandler.postDelayed(tryCommu,10*1000);
+            PlayApplication.sendMsgToServer(CommunicationService.ALIVE);
+            mHandler.postDelayed(keepAlive,45*1000);
+        }
+    };
+    public void communicationLives(){
+        //移出 启动通讯服务广播
+        mHandler.removeCallbacks(tryCommu);
+    }
 
     //设置 main 视图 背景
     public void setMainBg(final String var){

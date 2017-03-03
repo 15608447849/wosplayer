@@ -11,7 +11,7 @@ import com.lidroid.xutils.http.client.HttpRequest;
 import com.wosplayer.app.AppTools;
 import com.wosplayer.app.PlayApplication;
 import com.wosplayer.app.Logs;
-import com.wosplayer.command.kernal.iCommand;
+import com.wosplayer.command.operation.interfaces.iCommand;
 import com.wosplayer.download.kernal.DownloadManager;
 
 

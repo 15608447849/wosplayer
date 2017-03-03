@@ -1,7 +1,11 @@
 package com.wosplayer.command.operation.other;
 
+import com.wosplayer.app.AdbCommand;
+import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
-import com.wosplayer.command.kernal.iCommand;
+import com.wosplayer.app.OverAppDialog;
+import com.wosplayer.app.PlayApplication;
+import com.wosplayer.command.operation.interfaces.iCommand;
 
 import cn.trinea.android.common.util.ShellUtils;
 
@@ -12,23 +16,17 @@ public class Command_SHDO implements iCommand {
 
     @Override
     public void Execute(String param) {
-
         try {
-            Logs.e("SHDO:" + param);
-
+            Logs.e("关闭终端","SHDO:" + param);
             if (param.equals("false")){
                 return;
             }
-
-            //关机
-            String [] commands = {
-                    "adb shell\n",
-                    "sleep 10 && reboot -p\n"
-            };
-            ShellUtils.CommandResult cr = ShellUtils.execCommand(commands,true,true);
-
-            String strs = "即将关机: "+cr.result;
-            Logs.e(strs);
+            int time = 15;
+            PlayApplication.stopCommunicationService();
+            if(DisplayActivity.activityContext != null){
+                OverAppDialog.popWind(DisplayActivity.activityContext,"系统将在"+time+"秒后关机",time);
+            }
+           ShellUtils.execCommand(AdbCommand.closeTelOnTime(time),true);
         } catch (Exception e) {
             e.printStackTrace();
         }

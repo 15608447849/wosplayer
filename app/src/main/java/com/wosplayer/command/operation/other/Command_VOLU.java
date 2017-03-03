@@ -5,7 +5,7 @@ import android.media.AudioManager;
 
 import com.wosplayer.app.Logs;
 import com.wosplayer.app.PlayApplication;
-import com.wosplayer.command.kernal.iCommand;
+import com.wosplayer.command.operation.interfaces.iCommand;
 
 /**
  * Created by user on 2016/7/30.

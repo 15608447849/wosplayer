@@ -14,7 +14,7 @@ import com.wosplayer.app.Logs;
 import com.wosplayer.command.operation.schedules.correlation.XmlHelper;
 import com.wosplayer.command.operation.schedules.correlation.XmlNodeEntity;
 import com.wosplayer.command.operation.schedules.correlation.Xmlparse;
-import com.wosplayer.command.kernal.iCommand;
+import com.wosplayer.command.operation.interfaces.iCommand;
 import com.wosplayer.download.kernal.DownloadManager;
 
 import org.w3c.dom.Element;
@@ -190,11 +190,12 @@ public class ScheduleSaver implements iCommand {
         if (root == null) return;
         rootNode.Level="root";//设置等级
             String preUrl = XmlHelper.getFirstChildNodeValue(root, "url");
-            if (preUrl.equals("")) new IllegalStateException("不可执行的排期,获取'节目数据'的前缀url空值");
+            if (preUrl.equals("")) throw new IllegalStateException("不可执行的排期,获取'节目数据'的前缀url空值");
             String cuuks = SystemConfig.get().read().GetStringDefualt("uuks","");//当前执行中的uuks
             String ruuks = XmlHelper.getFirstChildNodeValue(root, "uuks");
-            if (StringUtils.isEmpty(ruuks)) new IllegalStateException("不可识别的排期标识uuks空值");
-            if(cuuks != null  && cuuks.equals(ruuks)) new IllegalStateException("正在执行中的排期,uuks相同 - "+ruuks);
+            Logs.i(TAG,"当前播放的数据标号:"+cuuks+" - 最新数据标号:"+ruuks);
+            if (StringUtils.isEmpty(ruuks)) throw new IllegalStateException("不可识别的排期标识uuks空值");
+            if(cuuks.equals(ruuks)) throw  new IllegalStateException("正在执行中的排期,uuks相同 - "+ruuks);
             clear(); //清理保存的排期
 
         //排期节点列表
@@ -321,8 +322,10 @@ public class ScheduleSaver implements iCommand {
                 } else if (contentType.equals(ContentTypeEnum.interactive)) {//互动
                     String url = XmlHelper.getFirstChildNodeValue(content_Element, "getcontents").trim(); //资源地址 或者 xml数据
                     //再解析 继续解析
-                    Logs.i(TAG,"互动xml文件 url :"+ url);
-                    getXMLdata(url, ACTION_PARSE, layout_content_Node.NewSettingNodeEntity());//进入互动
+                    Logs.i(TAG,"互动文件链接url : "+ url);
+                    XmlNodeEntity interaction = layout_content_Node.NewSettingNodeEntity();
+                    interaction.AddProperty("homeurl",url);
+                    getXMLdata(url, ACTION_PARSE,interaction );//进入互动
                     Logs.i(TAG,"interactive类型解析完成");
                 } else if (contentType.needsDown()){
                     String resourceUrl = XmlHelper.getFirstChildNodeValue(content_Element, "getcontents").trim(); //资源地址 或者 xml数据
@@ -374,23 +377,20 @@ public class ScheduleSaver implements iCommand {
         if (adElement != null) {
             String ad_myXmlData = XmlHelper.getNodeToString(adElement);
             HashMap<String, String> ad_xmldataList = Xmlparse.ParseXml("/ad", ad_myXmlData, Xmlparse.parseType.OnlyLeaf).get(0);
-            XmlNodeEntity interaction_layout_ad_node = interaction_layout_node.NewSettingNodeEntity();
-            interaction_layout_ad_node.Level = "interaction_layout_ad";
+            XmlNodeEntity interaction_layout_ad_node = interaction_layout_node;
             interaction_layout_ad_node.AddPropertyList(ad_xmldataList);
-
+            //收集广告文件夹信息
+            String bindid = ad_xmldataList.get("bindid");
+            String adUrl = folderurl+bindid;
+            getXMLdata(adUrl, I_FILE_PARSE, interaction_layout_ad_node.NewSettingNodeEntity());
         }
         //items 包含了 布局的东西
         Element layout_ItemsElement = (Element) action_layoutElement.getElementsByTagName("items").item(0);
         if (layout_ItemsElement == null) return;
         String layout_Items_XmlData = XmlHelper.getNodeToString(layout_ItemsElement);
         HashMap<String, String> layout_items_xmldatamap = Xmlparse.ParseXml("/items", layout_Items_XmlData, Xmlparse.parseType.OnlyLeaf).get(0);
-               /*XmlNodeEntity interaction_layout_items_node = interaction_layout_node.NewSettingNodeEntity();
-                interaction_layout_items_node.Level = "interaction_layout_items";
-                interaction_layout_items_node.AddPropertyList(layout_items_xmldatamap);
-                interaction_layout_items_node.AddProperty("uuks", uuks);*/
-
-        interaction_layout_node.getXmldata().putAll(layout_items_xmldatamap);
-        XmlNodeEntity interaction_layout_items_node = interaction_layout_node;
+        interaction_layout_node.AddPropertyList(layout_items_xmldatamap);
+        XmlNodeEntity interaction_layout_items_node = interaction_layout_node;//.NewSettingNodeEntity();//###
         String bgmode = XmlHelper.getFirstChildNodeValue(layout_ItemsElement, "bgmode");//布局背景图
 
         if (bgmode.equals("2")) {
@@ -418,7 +418,6 @@ public class ScheduleSaver implements iCommand {
             interaction_layout_items_item_node.AddPropertyList(item_xmldataMap);
 
             //再次访问网络获取xml文件
-
             String uri_Id = XmlHelper.getFirstChildNodeValue(item_Element, "bindid");
             if (uri_Id.equals("")) continue;
 
@@ -427,6 +426,7 @@ public class ScheduleSaver implements iCommand {
             try {
                 bindtype_id = Integer.parseInt(bindtype);
             } catch (Exception e) {
+                continue;
             }
             String item_uri = null;
             if (bindtype_id == 0 || bindtype_id == 2) {  //布局类型 0 2
@@ -460,7 +460,7 @@ public class ScheduleSaver implements iCommand {
         //创建ftp对象
         String thumbnailpath = XmlHelper.getFirstChildNodeValue(folderElement, "thumbnailpath");//封面图
         if (thumbnailpath != null && !thumbnailpath.equals("")) {
-            rootNode.addUriTast(thumbnailpath);//创建一个ftp任务 绑定他 的 按钮的背景图片
+            rootNode.addUriTast(thumbnailpath);//创建一个ftp任务 绑定他 的 按钮的封面图片
         }else{
             Logs.i(TAG,"点击进入这个互动文件夹的按钮不存在缩略图");
             //String layoutBgerr = "http://cdn.duitang.com/uploads/item/201205/07/20120507220903_VR22y.thumb.600_0.jpeg";

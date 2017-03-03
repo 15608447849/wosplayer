@@ -12,6 +12,7 @@ import com.wosplayer.app.SystemConfig;
 import com.wosplayer.command.kernal.CommandCenter;
 import com.wosplayer.command.operation.other.Command_SYTI;
 import com.wosplayer.command.operation.schedules.correlation.XmlNodeEntity;
+import com.wosuis.newperf.UiDataTanslation;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -252,6 +253,12 @@ public class ScheduleReader {
                 sendTSLT();
                 return;
             }
+
+//            if (true){
+//                UiDataTanslation.tanslation(currentEntity);
+//                return;
+//            }
+
 
             Logs.i(TAG,"今天要播放的排期 type:"+currentEntity.getXmldata().get("type")+";name:"+currentEntity.getXmldata().get("summary"));
             Logs.i(TAG,"当前排期最后修改时间:"+currentEntity.getXmldata().get("modifydt"));
@@ -641,12 +648,12 @@ public class ScheduleReader {
             }
         });
 
-        Logs.i(TAG,"-----------------------start-------------------------------");
+//        Logs.i(TAG,"-----------------------start-------------------------------");
         for (int i = 0;i<current.size();i++){
             Logs.i(TAG,"name: {"+current.get(i).getXmldata().get("summary")+"}最后修改时间:["+current.get(i).getXmldata().get("modifydt")+"]");
         }
 
-        Logs.i(TAG,"-----------------------end-------------------------------");
+//        Logs.i(TAG,"-----------------------end-------------------------------");
         entity = current.get(0);
         return entity;
     }
@@ -767,11 +774,11 @@ public class ScheduleReader {
         Logs.i(TAG," - 确定时间 - determineTime() start ");
 
         if ( currentData.getTime()-startTime.getTime()==0 || currentData.after(startTime) && currentData.before(endTime)){
-            Logs.i(TAG,"在当前时间存在有效排期 √\n" +
-                    "id == " + current.getXmldata().get("id") + "\n"+
-                    "type == "+ current.getXmldata().get("type") +"\n"+
-                    "termtype == "+ current.getXmldata().get("termtype") +"\n"+
-                    "summary == " + current.getXmldata().get("summary"));
+            Logs.i(TAG,"在当前时间存在有效排期 :" +
+                    "id == " + current.getXmldata().get("id") +
+                    ",type == "+ current.getXmldata().get("type") +
+                    ",termtype == "+ current.getXmldata().get("termtype")+
+                    ",summary == " + current.getXmldata().get("summary"));
             return true;
         }
 

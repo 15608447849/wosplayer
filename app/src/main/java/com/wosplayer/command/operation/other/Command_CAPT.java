@@ -12,7 +12,7 @@ import com.wosplayer.Ui.element.definedView.MyVideoView;
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
 import com.wosplayer.app.PlayApplication;
-import com.wosplayer.command.kernal.iCommand;
+import com.wosplayer.command.operation.interfaces.iCommand;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
