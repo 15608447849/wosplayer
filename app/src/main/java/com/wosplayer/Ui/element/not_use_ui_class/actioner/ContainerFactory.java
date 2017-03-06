@@ -162,13 +162,13 @@ public class ContainerFactory {
      * @return
      */
     private static Container createContent(DataList dl) {
-        ContentContainer content = new ContentContainer(DisplayActivity.activityContext,dl);
+        ContentContainer content = new ContentContainer(null,dl);
 
         return content;
     }
 
     private static Container createList(DataList dl) {
-        ListViewContainer listContainer = new ListViewContainer(DisplayActivity.activityContext,dl);
+        ListViewContainer listContainer = new ListViewContainer(null,dl);
         return listContainer;
     }
 
@@ -180,7 +180,7 @@ public class ContainerFactory {
      */
     private static Container currentButtonContainer(DataList dl) {
 
-        ButtonContainer buttonContainer = new ButtonContainer(DisplayActivity.activityContext,dl);
+        ButtonContainer buttonContainer = new ButtonContainer(null,dl);
         if(param!=null){
             //设置按钮的宽高比例
             float wscale = (float) (param.GetdoubleDefualt("wscale", 1));
@@ -196,7 +196,7 @@ public class ContainerFactory {
      */
     private static Container createLayout(DataList dl,boolean isFirst) {
         //创建布局容器
-        LayoutContainer layoutContainer = new LayoutContainer(DisplayActivity.activityContext,dl);
+        LayoutContainer layoutContainer = new LayoutContainer(null,dl);
 
         if(param!=null && isFirst){
             //设置 布局背景的宽高比例

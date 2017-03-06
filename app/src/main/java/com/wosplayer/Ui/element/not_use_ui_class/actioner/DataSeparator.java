@@ -3,6 +3,7 @@ package com.wosplayer.Ui.element.not_use_ui_class.actioner;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.Logs;
 import com.wosplayer.app.PlayApplication;
+import com.wosplayer.app.SystemConfig;
 import com.wosplayer.command.operation.schedules.correlation.XmlNodeEntity;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ public class DataSeparator {
     public static final String layoutItemLevel = "interaction_layout_items_item";
     public static final String folderLevel = "interaction_layout_items_item_folder";
     public static final String folderItemLevel = "interaction_layout_items_item_floder_item";
-    private static String sd_path  = PlayApplication.config.GetStringDefualt("basepath","");
+    private static String sd_path  = SystemConfig.get().GetStringDefualt("basepath","");
 
     public  static  String errImageName = "9345d688d43f8794f8bb0d5bd61b0ef41bd53a7a.jpg";//http://e.hiphotos.baidu.com/zhidao/pic/item/9345d688d43f8794f8bb0d5bd61b0ef41bd53a7a.jpg
     public  static  String videoNotFount = "LOM_Promo~2.flv";//http://static.zqgame.com/html/playvideo.html?name=http://lom.zqgame.com/v1/video/LOM_Promo~2.flv

@@ -100,6 +100,10 @@ public class AdbCommand{
     //系统初始化提权
     public static void initSystem(Context context) {
         try {
+            //捕获异常
+            CrashHandler.getInstance().init(context);
+            //系统配置监听值
+            SystemConfig.get().putOr("watchValue","0").save();
             if (ShellUtils.checkRootPermission()) {
                 //放入system
                  excuteAppMoveSystem(context);

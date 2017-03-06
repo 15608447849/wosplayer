@@ -11,10 +11,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
 import android.widget.FrameLayout;
@@ -25,94 +24,52 @@ import com.wosplayer.Ui.element.uitools.ImageStore;
 import com.wosplayer.Ui.element.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.command.kernal.CommandCenter;
+import com.wosplayer.command.kernal.CommandStore;
 import com.wosplayer.command.operation.schedules.ScheduleReader;
 import com.wosplayer.service.CommunicationService;
 
-
 import static com.wosplayer.app.PlayApplication.appContext;
 
-
 public class DisplayActivity extends Activity {
-    private static final java.lang.String TAG = "播放器UI界面控制";
-    public enum HandleEvent{
-        success,outtext,close,
-    }
-    public final  Handler mHandler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-           if (msg.what == HandleEvent.outtext.ordinal()){
-              AppTools.Toals(appContext,msg.obj.toString());
-           }
-            if (msg.what == HandleEvent.success.ordinal()){
-                if (frgAct!=null){
-                    frgAct.sendMessage(msg.obj);
-                }
-            }
-            if (msg.what == HandleEvent.close.ordinal()){
-                //关闭 配置服务信息的fragment
-                closeWosTools();
-                //开始工作
-                start();
-            }
-        }
-    };
-
-    public  static AbsoluteLayout main = null; //存放所有排期视图的主容器
-    public static boolean isPlay = false;//是否可以执行显示ui
+    private static final String TAG = "播放器UI界面控制";
+    public  AbsoluteLayout main = null; //存放所有排期视图的主容器
     public static DisplayActivity activityContext = null;
     private FrameLayout closebtn ;//左上角 隐藏的 关闭视图
-
+    public PlayHandler mHandler;
+    private FrameLayout fragmentLayer;
+    //fragment消息接口
+    public DisPlayInterface.onFragAction mFragmentImp;
+    /**
+     * 接受命令的广播
+     */
+    private BroadcastReceiver commandCenter = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Logs.i(TAG,"onCreate");
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//保持屏幕常亮
         setContentView(R.layout.activity_main);//设置布局文件
-        activityContext = this;
-        main = (AbsoluteLayout) this.findViewById(R.id.uilayer);
-        closebtn =  (FrameLayout) findViewById(R.id.close_layer);
-        //弹出密码输入框
-        closebtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-               OverAppDialog.ShowDialog(DisplayActivity.this);
-            }
-        });
-        //长按 显示/隐藏 信息输出
-        /*setOnLongClickListener中return的值决定是否在长按后再加一个短按动作
-                true为不加短按,false为加入短按*/
-        closebtn.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-
-                if (frgAct!=null){
-                    AppTools.Toals(appContext,"请设置播放器参数");
-                }else{
-                    AppTools.settingServerInfo(activityContext,false);
-                    //停止工作
-                    stop(false);
-                    AppTools.Toals(appContext,"2秒后进入配置界面");
-                    //打开配置界面
-                    mHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            openWosTools();
-                        }
-                    },2*1000);
-                }
-
-                return true;
-            }
-        });
-    }
-    @Override
-    public void onStart() {
-        Logs.i(TAG,"onStart");
-        super.onStart();
         //注册指令广播
         registCommand();
+        initActivity();
+    }
+//    @Override
+//    public void onStart() {
+//        Logs.i(TAG,"onStart");
+//        super.onStart();
+//    }
+//    @Override
+//    public void onStop() {
+//        super.onStop();
+//        Logs.i(TAG,"onStop");
+//    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Logs.i(TAG,"onResume");
         //是否已经设置了服务器信息?
-        if (AppTools.isSettingServerInfo(activityContext)){
+        if (AppTools.isSettingServerInfo(this)){
             //开始工作
             start();
         }else{
@@ -121,33 +78,21 @@ public class DisplayActivity extends Activity {
         }
     }
     @Override
-    public void onResume() {
-       super.onResume();
-        Logs.i(TAG,"onResume");
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
         Logs.i(TAG,"onPause");
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Logs.i(TAG,"onStop");
         //结束工作
         if (AppTools.isSettingServerInfo(appContext)){
             stop(true);
         }
-        //注销指令广播
-         unregistCommand();
-      }
+    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Logs.i(TAG,"onDestroy");
+        //注销指令广播
+        unregistCommand();
     }
     //键盘监听返回事件
     @Override
@@ -157,53 +102,68 @@ public class DisplayActivity extends Activity {
                     }
         return super.onKeyDown(keyCode, event);
     }
+    //初始化 activity
+    private void initActivity() {
+        mHandler = new PlayHandler(this);
+        CommandStore.getInstands().init(this);
+        main = (AbsoluteLayout) this.findViewById(R.id.uilayer);
+        fragmentLayer = (FrameLayout)this.findViewById(R.id.frgment_layout);
+        closebtn =  (FrameLayout) findViewById(R.id.close_layer);
+        //弹出密码输入框
+        closebtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                OverAppDialog.ShowDialog(DisplayActivity.this);
+            }
+        });
+        //长按 显示/隐藏 信息输出
+        /*setOnLongClickListener中return的值决定是否在长按后再加一个短按动作
+                true为不加短按,false为加入短按*/
+        closebtn.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                mHandler.sendEmptyMessage(PlayHandler.HandleEvent.open.ordinal());
+                return true;
+            }
+        });
+    }
+
 
     //开始工作
-    private void start(){
-        if (activityContext!=null){
-            //初始化数据
-            PlayApplication.initConfig();
+    public void start(){
             playTypeStart();
             //执行监听通讯服务是否存活
             mHandler.post(keepAlive);
-        }
     }
     //结束工作 - true,关闭 activity
-    private void stop(boolean isclose){
+    public void stop(boolean isclose){
             //关闭通讯服务检测
             mHandler.removeCallbacks(tryCommu);
             mHandler.removeCallbacks(keepAlive);
+            PlayApplication.stopCommunicationService();
+            closeWosTools();
             playTypeStop();
             if (isclose) finish();
     }
     private void playTypeStart() {
         try {
-            isPlay = true;
-           ScheduleReader.clear();
-           ScheduleReader.Start(false);
+            UiExcuter.getInstancs().init(this);//初始化ui
+
         } catch (Exception e) {
             Logs.e(TAG,"activity 开始执行读取排期失败");
         }
     }
     private void playTypeStop() {
         try {
-            isPlay = false;
-            ScheduleReader.clear();
-            UiExcuter.getInstancs().StopExcuter();
-            ImageStore.getInstants().clearCache();
+            UiExcuter.getInstancs().unInit();
         } catch (Exception e) {
             Logs.e(TAG,"activity 停止执行播放排期 时 err:"+ e.getMessage());
         }
     }
 
-
-    /**
-     * 接受命令的广播
-     */
-    private BroadcastReceiver commandCenter = null;
     private void registCommand() {
         if (commandCenter!=null) return;
-        commandCenter = new CommandCenter(this);
+        commandCenter = new CommandCenter();
         IntentFilter ifl = new IntentFilter();
         ifl.addAction(CommandCenter.action);
         this.registerReceiver(commandCenter,ifl);
@@ -240,69 +200,13 @@ public class DisplayActivity extends Activity {
         mHandler.removeCallbacks(tryCommu);
     }
 
-    //设置 main 视图 背景
-    public void setMainBg(final String var){
-        if (var==null || var.equals("null")){
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        main.setBackgroundDrawable(null);
-                        main.setBackgroundColor(Color.WHITE);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        }else
-        if (var.startsWith("#")){
-            //颜色
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        main.setBackgroundColor(Color.parseColor(var));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        }else{
-            //图片
-            Bitmap bitmap = ImageViewPicassocLoader.getBitmap(var,null);
-            if (bitmap==null){
-                //获取错误图片bitmap
-                final String errorTag = "errorimage";
-                bitmap = ImageStore.getInstants().getBitmapCache(errorTag);
-                if (bitmap==null || bitmap.isRecycled()){
-                    bitmap = BitmapFactory.decodeResource(this.getResources(),R.drawable.error);
-                    ImageStore.getInstants().addBitmapCache(errorTag,bitmap);
-                }
-            }
-            final BitmapDrawable drawable = new BitmapDrawable(bitmap);
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        main.setBackgroundDrawable(drawable);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        }
-    }
+
 
     //-------------------------------------------------wosTools -----------------------------------//
 
-    //通讯接口
-    public interface onFragAction{
-        void sendMessage(Object obj);
-    }
-    private onFragAction frgAct;
     //打开配置界面
-    private void openWosTools() {
-            findViewById(R.id.frgment_layout).setVisibility(View.VISIBLE);
+    public void openWosTools() {
+        if (fragmentLayer.getVisibility() == View.GONE) fragmentLayer.setVisibility(View.VISIBLE);
             FragmentManager fm = getFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
             Fragment wostools= fm.findFragmentByTag(AppToolsFragment.FLAG);
@@ -312,10 +216,11 @@ public class DisplayActivity extends Activity {
             }
             ft.show(wostools);
             ft.commitAllowingStateLoss();
-            frgAct = (onFragAction)wostools;
+            mFragmentImp = (DisPlayInterface.onFragAction) wostools;
     }
     //关闭配置界面
-    private void closeWosTools() {
+    public void closeWosTools() {
+        mFragmentImp = null;
         FragmentManager fm = getFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
         Fragment wostools= fm.findFragmentByTag(AppToolsFragment.FLAG);
@@ -323,7 +228,7 @@ public class DisplayActivity extends Activity {
             ft.hide(wostools);
             ft.commitAllowingStateLoss();
         }
-        frgAct = null;
-        findViewById(R.id.frgment_layout).setVisibility(View.GONE);
+        if (fragmentLayer.getVisibility() == View.VISIBLE) fragmentLayer.setVisibility(View.GONE);
     }
+
 }

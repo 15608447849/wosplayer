@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
+import com.wosplayer.app.AppTools;
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
 import com.wosplayer.app.SystemConfig;
@@ -116,28 +117,20 @@ public class CommunicationService extends Service{
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        if (intent == null || intent.getExtras()==null){
-            Logs.e(TAG,"連接服務时 未傳遞 intent,启动失败,尝试读取本地配置文件信息启动服务");
+            Logs.e(TAG,"尝试读取本地配置文件信息启动通讯服务");
             SystemConfig config = SystemConfig.get().read();
             ip = config.GetStringDefualt("serverip","127.0.0.1");
-            port = config.GetIntDefualt("serverport",6666);
+            port = config.GetIntDefualt("socketport",6666);
             terminalNo = config.GetStringDefualt("terminalNo","");
             HeartBeatTime = config.GetIntDefualt("HeartBeatInterval",30) * 1000;
-        }else{
-            Bundle b = intent.getExtras();
-            ip =  b.getString("ip");
-            port = b.getInt("port");
-            terminalNo = b.getString("terminalNo");
-            HeartBeatTime = b.getLong("HeartBeatTime") * 1000;
-        }
-        Logs.i(TAG,"onStartCommand() >>> ip: "+ip+";端口: "+port+";终端号: "+terminalNo+";心跳时间 :"+ HeartBeatTime);
+
+            Logs.i(TAG,"onStartCommand() >>> ip: "+ip+";端口: "+port+";终端号: "+terminalNo+";心跳时间 :"+ HeartBeatTime);
         if (StringUtils.isEmpty(ip) || StringUtils.isEmpty(terminalNo)){
             Logs.e(TAG,"連接服務 參數不正確 服务不启动socket连接.");
         }else{
             if (socket!=null){
                 //连接中
-                if (isConnected && !socket.isConnected()){
+                if (isConnected){
                     if (justConnectAddress(ip,port)){
                         //连接中的地址相同
                         Logs.e(TAG,"連接服務 socket 正在连接中...");
@@ -232,11 +225,11 @@ public class CommunicationService extends Service{
                     msg = null;
                     //获取一个消息
                     msg =  getMsg();
-                    if (msg != null){
+                    if (msg != null && !msg.equals("")){
+                         Logs.e(TAG," 发送一条信息到服务器 :" + msg);
                         dataOutputStream.writeUTF(msg);
                         dataOutputStream.flush();
-//                        log.w(TAG," 发送一条信息到服务器 :" + msg);
-//                        Thread.sleep(10);
+                        Thread.sleep(5);
                     }
                 }catch (Exception e){
                     Logs.e(TAG,"发送消息到服务器 错误 :\n"+ e.getMessage());//尝试重新链接
@@ -325,7 +318,7 @@ public class CommunicationService extends Service{
         //发送上线指令
         String msg = "ONLI:" + terminalNo;//
         sendMsgToService(msg);
-        msg = "GVAY:" + terminalNo+"#"+ Command_UPDC.getLocalVersionCode();//通知获取版本号信息
+        msg = "GVAY:" + terminalNo+"#"+ AppTools.getAppVersion(getApplicationContext() );//通知获取版本号信息
         sendMsgToService(msg);
     }
     /**

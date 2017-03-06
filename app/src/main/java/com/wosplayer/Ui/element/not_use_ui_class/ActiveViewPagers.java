@@ -109,14 +109,14 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
     };
 
 
-
+    private Context context;
     /**
      * 构造
      * @param context
      */
     public ActiveViewPagers(Context context) {
         super(context);
-
+        this.context = context;
         AbsoluteLayout.LayoutParams lp = new AbsoluteLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,0,0);
         this.setLayoutParams(lp);
         this.setBackgroundColor(Color.WHITE);
@@ -161,7 +161,7 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
         this.vpAnimo = ViewpagerAttrAnimotion.getInstands();
 
         //创建左右滑动按钮
-        left = new Button(DisplayActivity.activityContext);
+        left = new Button(context);
         Bitmap bitmap = BitmapFactory.decodeResource(this.getResources(), R.drawable.left);
         BitmapDrawable bd = new BitmapDrawable(this.getResources(), bitmap);
         left.setBackgroundDrawable(bd);
@@ -174,7 +174,7 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
             }
         });
 
-        right = new Button(DisplayActivity.activityContext);
+        right = new Button(context);
         Bitmap bitmap2 = BitmapFactory.decodeResource(this.getResources(), R.drawable.right);
         BitmapDrawable bd2 = new BitmapDrawable(this.getResources(), bitmap2);
         right.setBackgroundDrawable(bd2);
@@ -363,7 +363,7 @@ public class ActiveViewPagers extends ViewPager implements IviewPlayer {
          */
         public void addMeSubView(IviewPlayer iview){
 
-            AbsoluteLayout loadLayout = new AbsoluteLayout(DisplayActivity.activityContext);
+            AbsoluteLayout loadLayout = new AbsoluteLayout(context);
             loadLayout.setLayoutParams(
                     new AbsoluteLayout.LayoutParams(
                             AbsoluteLayout.LayoutParams.MATCH_PARENT,

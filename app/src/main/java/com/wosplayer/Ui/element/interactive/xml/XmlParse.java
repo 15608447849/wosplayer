@@ -1,6 +1,8 @@
 package com.wosplayer.Ui.element.interactive.xml;
 
 
+import android.content.Context;
+
 import com.wosplayer.Ui.element.interactive.beads.ButtonActive;
 import com.wosplayer.Ui.element.interactive.beads.FileActive;
 import com.wosplayer.Ui.element.interactive.beads.LayoutActive;
@@ -30,7 +32,7 @@ public class XmlParse {
      *  第一次
      *
      */
-    public static LayoutActive interactionParse_one(String inter_Xml)throws Exception {
+    public static LayoutActive interactionParse_one(Context context, String inter_Xml)throws Exception {
         InputStream inStream = new ByteArrayInputStream(inter_Xml.getBytes());
         // 创建saxReader对象
         SAXReader reader = new SAXReader();
@@ -66,7 +68,7 @@ public class XmlParse {
             String bindId = button.element(XML_NOTE.interactive_layout_items_item_bindid).getText();
 
             Logs.i(TAG," 获取 到一个 按钮  bindtype=>"+bindType+"绑定的 id"+ bindId );
-            ButtonActive buttonActive = new ButtonActive(DisplayActivity.activityContext,
+            ButtonActive buttonActive = new ButtonActive(context,
                     bx,
                     by,
                     bw,
@@ -80,7 +82,7 @@ public class XmlParse {
         }
 
         //创建 层布局对象
-        LayoutActive inter_layout  = new LayoutActive(DisplayActivity.activityContext,
+        LayoutActive inter_layout  = new LayoutActive(context,
                 thumbnailurl,
                 layoutId,
                 layout_w,

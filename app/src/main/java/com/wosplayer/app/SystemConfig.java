@@ -63,6 +63,8 @@ public class SystemConfig extends DataList{
         map.put("terminalNo","");
         //通信模式
         map.put("connectionType","socket");
+        //socket端口
+        map.put("socketport","6666");
         //通信端口
         map.put("keyText","10000");
         //服务端地址

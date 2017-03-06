@@ -8,6 +8,7 @@ import android.widget.AbsoluteLayout;
 import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.element.definedView.MyVideoView;
 import com.wosplayer.Ui.element.interfaces.TimeCalls;
+import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.PlayApplication;
 import com.wosplayer.app.Logs;
@@ -86,7 +87,7 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
                         Logs.e(TAG, "视频资源 不存在 - " + localPath);
                         callTo();
 //                        //播放默认视频
-                        String del = PlayApplication.getConfigValue("defaultVideo");
+                        String del = UiExcuter.getInstancs().defVideoPath;
                         if (!del.equals("")){
                             playVideo(del);
                         }

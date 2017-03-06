@@ -9,6 +9,7 @@ import com.wosplayer.app.AppTools;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
+import com.wosplayer.app.PlayHandler;
 
 import org.dom4j.Element;
 
@@ -78,7 +79,7 @@ public class RequstTerminal extends Thread{
         // 设置线程名字
         this.setName("RequstTerminal");
         // 发送消息个handler
-        NotityActivty(DisplayActivity.HandleEvent.outtext.ordinal(), "开始申请终端ID");
+        NotityActivty(PlayHandler.HandleEvent.outtext.ordinal(), "开始申请终端ID");
         if (isrunning) {
             try {
                 // 网络请求获取数据
@@ -99,12 +100,12 @@ public class RequstTerminal extends Thread{
                     // 记录连接模式
                     dataList.put("connectionType", connectionType);
                     // 携带后台组识别码发送消息
-                    NotityActivty(DisplayActivity.HandleEvent.success.ordinal(),terminalNo);
+                    NotityActivty(PlayHandler.HandleEvent.success.ordinal(),terminalNo);
 
                 }
             } catch (Exception e) {
                 Logs.e("","RequstTreminal () error : "+e.getMessage());
-                NotityActivty(DisplayActivity.HandleEvent.outtext.ordinal(), "申请终端ID失败");
+                NotityActivty(PlayHandler.HandleEvent.outtext.ordinal(), "申请终端ID失败");
             }finally {
                 EndRequst();
             }

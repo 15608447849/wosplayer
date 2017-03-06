@@ -1,5 +1,6 @@
 package com.wosplayer.command.operation.other;
 
+import android.app.Activity;
 import android.content.Context;
 import android.media.AudioManager;
 
@@ -13,13 +14,17 @@ import com.wosplayer.command.operation.interfaces.iCommand;
  */
 public class Command_VOLU implements iCommand {
 
-    private static final java.lang.String TAG = "_Command_VOLU";
+    private static final java.lang.String TAG = "设置音量";
 
     @Override
-    public void Execute(String param) {
-        Logs.i(TAG,"音量设置 param :"+ param +"ThreadName:"+Thread.currentThread().getName()+" ");
-        int percent = Integer.valueOf(param);
-        SetSystemVolume(percent);
+    public void execute(Activity activity, String param) {
+        Logs.i(TAG,"大小:"+ param);
+        int percent = 0;
+        try {
+            percent = Integer.valueOf(param);
+            SetSystemVolume(percent);
+        } catch (NumberFormatException e) {
+        }
     }
     public void SetSystemVolume(int percent)
     {

@@ -61,8 +61,7 @@
                 android:layout_height="wrap_content"
                 android:text="服务器地址:"
                 android:textStyle="bold"
-                >
-            </TextView>
+                />
             <EditText
                 android:id="@+id/serverip"
                 android:layout_width="wrap_content"
@@ -80,8 +79,7 @@
                 android:layout_height="wrap_content"
                 android:text="服务器端口:"
                 android:textStyle="bold"
-                >
-            </TextView>
+                />
             <EditText
                 android:id="@+id/serverport"
                 android:layout_width="wrap_content"
@@ -99,8 +97,7 @@
                 android:layout_height="wrap_content"
                 android:text="公司ID:"
                 android:textStyle="bold"
-                >
-            </TextView>
+                />
             <EditText
                 android:id="@+id/companyid"
                 android:layout_width="wrap_content"
@@ -118,8 +115,7 @@
                 android:layout_height="wrap_content"
                 android:text="终端ID:"
                 android:textStyle="bold"
-                >
-            </TextView>
+                />
             <EditText
                 android:id="@+id/terminalNo"
                 android:layout_width="wrap_content"
@@ -137,8 +133,7 @@
                 android:layout_height="wrap_content"
                 android:text="资源文件名:"
                 android:textStyle="bold"
-                >
-            </TextView>
+                />
             <EditText
                 android:id="@+id/BasePath"
                 android:layout_width="wrap_content"
@@ -156,8 +151,7 @@
                 android:layout_height="wrap_content"
                 android:text="心跳时间:"
                 android:textStyle="bold"
-                >
-            </TextView>
+                />
             <EditText
                 android:id="@+id/HeartBeatInterval"
                 android:layout_width="wrap_content"
@@ -175,8 +169,7 @@
                 android:layout_height="wrap_content"
                 android:text="存储上限值:"
                 android:textStyle="bold"
-                >
-            </TextView>
+                />
             <EditText
                 android:id="@+id/StorageLimits"
                 android:layout_width="wrap_content"
@@ -197,8 +190,7 @@
                 android:layout_height="wrap_content"
                 android:text="重启时间:"
                 android:textStyle="bold"
-                >
-            </TextView>
+                />
             <EditText
                 android:id="@+id/RestartBeatInterval"
                 android:layout_width="wrap_content"

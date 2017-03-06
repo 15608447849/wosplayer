@@ -1,5 +1,6 @@
 package com.wosplayer.command.operation.other;
 
+import android.app.Activity;
 import android.util.Log;
 
 import com.wosplayer.app.AdbCommand;
@@ -16,15 +17,13 @@ import cn.trinea.android.common.util.ShellUtils;
  */
 public class Command_Reboot_Sys implements iCommand {
     @Override
-    public void Execute(String param) {
+    public void execute(Activity activity, String param) {
 
         try {
             Logs.e("重启终端","-----------------------------------重启终端-----------------------------------------");
             int time = 5;
             PlayApplication.stopCommunicationService();
-            if(DisplayActivity.activityContext != null){
-                OverAppDialog.popWind(DisplayActivity.activityContext,"系统将在"+time+"秒后重启",time);
-            }
+            OverAppDialog.popWind(activity,"警告:系统将在"+time+"秒后重启",time);
             ShellUtils.execCommand(AdbCommand.rebootTelOnTime(time),true);
         } catch (Exception e) {
             e.printStackTrace();

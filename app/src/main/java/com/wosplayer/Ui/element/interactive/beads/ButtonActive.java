@@ -32,6 +32,7 @@ import cn.trinea.android.common.util.FileUtils;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import com.wosTools.ToolsUtils;
+import com.wosplayer.app.SystemConfig;
 
 /**
  * Created by Administrator on 2016/6/28.
@@ -407,10 +408,10 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
      */
     private void loadMeBackImage() {
 
-        Logs.i(TAG, "互动 - 按钮 -背景图片 bg image uri " + myBgUri);
+//        Logs.i(TAG, "互动 - 按钮 -背景图片 bg image uri " + myBgUri);
         if (myBgUri != null) {
             String filename = myBgUri.substring(myBgUri.lastIndexOf("/") + 1);
-            filename = PlayApplication.config.GetStringDefualt("basepath", "") + filename;
+            filename = UiExcuter.getInstancs().basepath + filename;
             Logs.i(TAG, "bg image local path - " + filename);
             if (FileUtils.isFileExist(filename)) {
                 //存在直接设置
@@ -437,7 +438,7 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
                         @Override
                         public void call() {
                             try {
-                                myBindLayoutView = XmlParse.interactionParse_one(xml); //1 先解析
+                                myBindLayoutView = XmlParse.interactionParse_one(mcontext,xml); //1 先解析
                                 //在 需要显示的时候 去加载他的 子资源
                                 ButtonActive.this.setEnabled(true);
                                 Logs.i(TAG, bindid + "可以点击了");
@@ -460,9 +461,10 @@ public class ButtonActive extends ImageButton implements View.OnClickListener, I
                         @Override
                         public void call() {
 
+
                             IviewPlayer view = null;
                             for (int i = 0; i < arr.size(); i++) {
-                                view = arr.get(i).TanslateInfoToView();//转化视图 (创建...)
+                                view = arr.get(i).TanslateInfoToView(mcontext,UiExcuter.getInstancs().basepath);//转化视图 (创建...)
                                 if (view != null) {
                                     myBindFileViews.add(view);//把视图 保存
                                 }

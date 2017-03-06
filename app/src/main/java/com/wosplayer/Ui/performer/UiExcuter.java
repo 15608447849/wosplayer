@@ -1,7 +1,23 @@
 package com.wosplayer.Ui.performer;
 
+import android.app.Activity;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.view.ViewGroup;
+import android.widget.AbsoluteLayout;
+
+import com.wosplayer.R;
+import com.wosplayer.Ui.element.uitools.ImageStore;
+import com.wosplayer.Ui.element.uitools.ImageViewPicassocLoader;
+import com.wosplayer.app.AppTools;
+import com.wosplayer.app.BackRunner;
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
+import com.wosplayer.app.SystemConfig;
+import com.wosplayer.command.operation.schedules.ScheduleReader;
 import com.wosplayer.command.operation.schedules.correlation.XmlNodeEntity;
 
 import java.util.ArrayList;
@@ -21,7 +37,6 @@ public class UiExcuter {
     private static UiExcuter uiExcuter = null;
 
     private UiExcuter() {
-        Logs.i(TAG, "ui excuter create");
     }
 
     public static UiExcuter getInstancs() {
@@ -30,18 +45,62 @@ public class UiExcuter {
         }
         return uiExcuter;
     }
+
+    private DisplayActivity mActivity;
+    private boolean isInit = false;
+    public String defImagePath="";
+    public String defVideoPath="";
+    public String basepath ="";
+    public String defaultPath = "";
+    public String ffbkPath="";
+    public void init(DisplayActivity activity){
+        this.mActivity = activity;
+        SystemConfig config = SystemConfig.get();
+        config.printData();
+        defVideoPath = config.GetStringDefualt("defaultVideo","");
+        basepath = config.GetStringDefualt("basepath","");
+        ffbkPath = config.GetStringDefualt("fudianpath","");
+        defaultPath = config.GetStringDefualt("default","");
+        isInit = true;
+        BackRunner.runBackground(new Runnable() {
+            @Override
+            public void run() {
+                if (defaultPath.isEmpty() || ffbkPath.isEmpty()) return;
+                //将默认排期放入指定文件夹下
+                AppTools.defaultProgram(mActivity,defaultPath);
+                Logs.i("后台任务","默认排期解压缩完成");
+                //将默认图片或者视频放入指定 文件夹下
+                // Logs.i("后台任务","默认资源放入指定目录下 - "+resourcePath+"default.mp4 成功");
+                AppTools.fudianBankSource(mActivity,ffbkPath);
+                Logs.i("后台任务","富颠金融网页模板解压缩完成");
+                ScheduleReader.clear();
+                ScheduleReader.Start(false);
+            }
+        });
+    }
+    public void unInit(){
+        isInit = false;
+        this.mActivity = null;
+        ScheduleReader.clear();
+        UiExcuter.getInstancs().StopExcuter();
+        ImageStore.getInstants().clearCache();
+    }
+
+
+
     private static ReentrantLock lock = new ReentrantLock();
     public static boolean isStoping = false;
     public void StartExcuter(XmlNodeEntity schedule) {
+
         Logs.i(TAG, "线程名:" + Thread.currentThread().getName());
-            if (schedule == null) {
-                Logs.e(TAG, "不执行空排期");
-                return;
-            }
-            if (!DisplayActivity.isPlay) {
-                Logs.e(TAG, "不执行绘制UI界面");
-                return;
-            }
+        if (schedule == null) {
+            Logs.e(TAG, "不执行空排期");
+            return;
+        }
+        if (!isInit) {
+            Logs.e(TAG, "不执行绘制UI界面");
+            return;
+        }
         try {
             lock.lock();
             StopExcuter();
@@ -198,6 +257,76 @@ public class UiExcuter {
             currentPlayProgram.stop();
             currentPlayProgram = null;
         }
+    }
+
+
+
+    //设置 main 视图 背景
+    public void setMainBg(final String var){
+        if (!isInit) return;
+        if (var==null || var.equals("null")){
+            mActivity.mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mActivity.main.setBackgroundDrawable(null);
+                        mActivity.main.setBackgroundColor(Color.WHITE);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }else
+        if (var.startsWith("#")){
+            //颜色
+            mActivity.mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mActivity.main.setBackgroundColor(Color.parseColor(var));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }else{
+            //图片
+            Bitmap bitmap = ImageViewPicassocLoader.getBitmap(var,null);
+            if (bitmap==null){
+                //获取错误图片bitmap
+                final String errorTag = "errorimage";
+                bitmap = ImageStore.getInstants().getBitmapCache(errorTag);
+                if (bitmap==null || bitmap.isRecycled()){
+                    bitmap = BitmapFactory.decodeResource(mActivity.getResources(), R.drawable.error);
+                    ImageStore.getInstants().addBitmapCache(errorTag,bitmap);
+                }
+            }
+            final BitmapDrawable drawable = new BitmapDrawable(bitmap);
+            mActivity.mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mActivity.main.setBackgroundDrawable(drawable);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+    }
+
+    public ViewGroup getMainLayout(){
+        if (isInit) {
+            return mActivity.main;
+        }
+        return null;
+    }
+
+    public Context getContext(){
+        if (isInit) {
+            return mActivity;
+        }
+        return null;
     }
 
 }

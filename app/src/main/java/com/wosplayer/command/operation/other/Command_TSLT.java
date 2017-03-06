@@ -1,8 +1,11 @@
 package com.wosplayer.command.operation.other;
 
+import android.app.Activity;
+
 import com.wosplayer.app.AppTools;
 import com.wosplayer.app.Logs;
 import com.wosplayer.app.PlayApplication;
+import com.wosplayer.app.SystemConfig;
 import com.wosplayer.command.operation.schedules.ScheduleSaver;
 import com.wosplayer.command.operation.interfaces.iCommand;
 
@@ -31,23 +34,23 @@ public class Command_TSLT implements iCommand {
     }
 
     @Override
-    public void Execute(String param) {
+    public void execute(Activity activity, String param) {
         if (param.equals("default_")) {
             //执行默认节目
-            getDefaultProg();
+            getDefaultProg(activity);
         }
     }
 
 
     //本地默认排期
-    public void getDefaultProg() {
+    public void getDefaultProg(Activity activity) {
         try {
-            String defaultPath = PlayApplication.config.GetStringDefualt("default","");
+            String defaultPath = SystemConfig.get().read().GetStringDefualt("default","");
             if (defaultPath.isEmpty()) return;
 
             if (!cn.trinea.android.common.util.FileUtils.isFileExist(defaultPath+"default_sche.xml")) {
                 ///文件不存在 - 解压缩
-                AppTools.defaultProgram(PlayApplication.appContext,defaultPath);
+                AppTools.defaultProgram(activity,defaultPath);
                 Logs.i(TAG,"解压缩默认排期完成");
             }
             defaultPath = "file://"+defaultPath+"default_sche.xml";
@@ -55,7 +58,7 @@ public class Command_TSLT implements iCommand {
             if (saver == null) {
                 saver = new ScheduleSaver();
             }
-            saver.Execute(defaultPath);
+            saver.execute(null,defaultPath);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -69,7 +72,7 @@ public class Command_TSLT implements iCommand {
             //xml    1.ScheduleNode.txt  2.ProgramNode.txt
             //资源  source  -> /mnt/external_sd/wosplayer/construction_bank/source/
             // xml -> /mnt/external_sd/wosplayer/construction_bank/xml/
-            String str = "file://" + PlayApplication.config.GetStringDefualt("bankPathXml", "") + "ScheduleNode.txt";
+            String str = "file://" + SystemConfig.get().read().GetStringDefualt("bankPathXml", "") + "ScheduleNode.txt";
 //        str =  ScheduleSaver.uriTranslationXml(str);
 //        log.i(TAG," 排期 : \n" + str);
 //
@@ -81,7 +84,7 @@ public class Command_TSLT implements iCommand {
                 saver = new ScheduleSaver();
             }
 
-            saver.Execute(str);
+            saver.execute(null,str);
         } catch (Exception e) {
             e.printStackTrace();
         }

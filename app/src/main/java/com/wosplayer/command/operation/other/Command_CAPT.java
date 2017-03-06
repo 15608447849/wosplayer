@@ -1,9 +1,12 @@
 package com.wosplayer.command.operation.other;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.media.MediaMetadataRetriever;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +15,7 @@ import com.wosplayer.Ui.element.definedView.MyVideoView;
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
 import com.wosplayer.app.PlayApplication;
+import com.wosplayer.app.SystemConfig;
 import com.wosplayer.command.operation.interfaces.iCommand;
 
 import org.apache.http.client.HttpClient;
@@ -25,7 +29,10 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,67 +45,90 @@ import cn.trinea.android.common.util.ShellUtils;
 public class Command_CAPT implements iCommand {
     private static final String TAG = "截全屏";
     @Override
-    public void Execute(String param) {
+    public void execute(Activity activity, String param) {
 //        String command = "screencap -p "+ basepath;
-        String capturePath = PlayApplication.config.GetStringDefualt("CapturePath","");
-        String uploadUrl = PlayApplication.config.GetStringDefualt("CaptureURL","");
-        String terminalNo = PlayApplication.config.GetStringDefualt("terminalNo","");
-        liunxCommadScreen(terminalNo,capturePath,uploadUrl);
+        SystemConfig config = SystemConfig.get().read();
+        String capturePath = config.GetStringDefualt("CapturePath","");
+        String uploadUrl = config.GetStringDefualt("CaptureURL","");
+        String terminalNo = config.GetStringDefualt("terminalNo","");
+        liunxCommadScreen(activity,terminalNo,capturePath,uploadUrl);
     }
 
-
-    private synchronized void liunxCommadScreen(String terminalNo, String savePath, String url) {
-        Logs.d(TAG,"开始截屏 - 保存:"+terminalNo+"\n 上传地址: "+url);
+    private synchronized void liunxCommadScreen(Activity activity,String terminalNo, String savePath, String url) {
+        Logs.d(TAG,"开始截屏 - 保存:"+terminalNo+" - 本地截图:"+savePath+" - 上传地址: "+url);
         String cmd = "screencap -p "+savePath;
         ShellUtils.CommandResult result = ShellUtils.execCommand(cmd,true,true);
         if (result.result == 0){
-            Logs.d(TAG,"liunx 命令(screencap -p)截屏成功");
-        }else{
-            catchScreen(terminalNo,savePath,url);
+            Logs.d(TAG,"liunx 命令(screencap -p) 截屏成功 - "+savePath);
         }
+        catchScreen(activity,terminalNo,savePath,url);
         //上传
         uploadImage(terminalNo,savePath,url);
     }
 
-    private void catchScreen(String terminalNo,String savePath,String url){
+    private void catchScreen(Activity activity,String terminalNo,String savePath,String url){
+
+
         try {
+            File image = new File(savePath);
+            if (image.exists()){
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds=true;
+                FileInputStream fis = new FileInputStream(image);
+                BitmapFactory.decodeStream(fis,null,options);
+                if (options.outWidth*options.outHeight > 10) return;
+            }
+
             if (cn.trinea.android.common.util.FileUtils.isFileExist(savePath)){
                 cn.trinea.android.common.util.FileUtils.deleteFile(savePath);
             }
-            Bitmap bgbmp = null;
+        } catch (FileNotFoundException e) {
+            Logs.e(TAG, "命令行截屏文件无效 : "+e.getMessage() );
+        }
+        Bitmap bgbmp = null;
+            FileOutputStream fos = null;
+        try {
             // 设置主屏界面，作为一个控件
-            View view = DisplayActivity.activityContext.getWindow().getDecorView();
+            View view = activity.getWindow().getDecorView();
             // 获去屏幕的宽高
-            Display display = DisplayActivity.activityContext.getWindowManager().getDefaultDisplay();
+            Display display = activity.getWindowManager().getDefaultDisplay();
             view.layout(0, 0, display.getWidth(), display.getHeight());
             view.destroyDrawingCache();//or setDrawingCacheEnabled(false)
             view.setDrawingCacheEnabled(true);//提高绘图速度
             bgbmp = Bitmap.createBitmap(view.getDrawingCache());
 
-            List<View> vList = getAllChildViews(DisplayActivity.main);
+            List<View> vList = getAllChildViews(view);
             // 视频截图
+            Bitmap videoImage = null;
             for (View z : vList) {
                 if (z instanceof MyVideoView) {
-                    Bitmap videoImage = null;
+
                     MyVideoView cvv = (MyVideoView) z;
                     videoImage = getVideoImage(cvv);
-
                     if (videoImage != null) {
                         bgbmp = composeImage(z.getLeft(), z.getTop(), bgbmp, videoImage);
                     }
                 }
             }
-            //縮放
-            bgbmp = resizeImage(bgbmp);
-            // 保存新的位图到本地路径
-            FileOutputStream fos = new FileOutputStream(savePath);
-            if (null != fos) {
-                bgbmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                fos.flush();
-                fos.close();
+            if (bgbmp!=null){
+                //縮放
+                bgbmp = resizeImage(bgbmp,display.getWidth(), display.getHeight());
+                // 保存新的位图到本地路径
+                fos = new FileOutputStream(savePath);
+                if (fos != null) {
+                    bgbmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                    fos.flush();
+                }
             }
         }catch(Exception e){
+            cn.trinea.android.common.util.FileUtils.deleteFile(savePath);
             e.printStackTrace();
+        }finally {
+            try {
+                if (bgbmp!=null) bgbmp.recycle();
+                if (fos!=null) fos.close();
+            } catch (IOException e) {
+            }
         }
   }
 
@@ -111,20 +141,20 @@ public class Command_CAPT implements iCommand {
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
         try {
             // 设置媒体文件
-            Logs.d(" * :"+cvv.getFileName());
+            Logs.d(TAG," 媒体文件路径 : "+cvv.getFileName());
             mmr.setDataSource(cvv.getFileName());
 
             // 获取播放点
             long pos = cvv.getCurrentPosition();
-
+            Logs.d(TAG," 媒体文件当前播放帧数 : "+pos);
             // 获取播放点的缩略图
-            Bitmap bmp = mmr.getFrameAtTime(pos * 1000,
-                    MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
+            Bitmap bmp = mmr.getFrameAtTime(pos * 1000,MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
             if (bmp != null) {
-
                 // 根据播放器大小返回图
-                return Bitmap.createScaledBitmap(bmp, cvv.getViewHeight(),
-                        cvv.getViewWidth(), true);
+                return Bitmap.createScaledBitmap(bmp,
+                        cvv.getViewHeight(),
+                        cvv.getViewWidth(),
+                        true);
             }
 
         } catch (Exception e) {
@@ -133,7 +163,6 @@ public class Command_CAPT implements iCommand {
             try {
                 mmr.release();
             } catch (Exception e) {
-                e.printStackTrace();
             }
         }
         return null;
@@ -147,45 +176,37 @@ public class Command_CAPT implements iCommand {
      * @return
      */
     private Bitmap composeImage(int left, int top, Bitmap bgbmp, Bitmap videoImage) {
-        try {
-            if (bgbmp == null)
-                return null;
-            if (videoImage == null)
-                return null;
+            if (bgbmp != null && videoImage != null ){
+                // 获取原图宽高
+                int sw = bgbmp.getWidth();
+                int sh = bgbmp.getHeight();
 
-            // 获取原图宽高
-            int sw = bgbmp.getWidth();
-            int sh = bgbmp.getHeight();
+                // 根据原图宽高创建新位图对象
+                Bitmap newb = Bitmap.createBitmap(sw, sh, Bitmap.Config.ARGB_8888);
+                // 根据新位图创建一个等大小的画布
+                Canvas cv = new Canvas(newb);
 
-            // 根据原图宽高创建新位图对象
-            Bitmap newb = Bitmap.createBitmap(sw, sh, Bitmap.Config.ARGB_8888);
-            // 根据新位图创建一个等大小的画布
-            Canvas cv = new Canvas(newb);
-
-            // 在画布上做新图
-            cv.drawBitmap(bgbmp, 0, 0, null);
-            cv.drawBitmap(videoImage, left, top, null);
-            cv.save(Canvas.ALL_SAVE_FLAG);
-            cv.restore();
-
-            return newb;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+                // 在画布上做新图
+                cv.drawBitmap(bgbmp, 0, 0, null);
+                cv.drawBitmap(videoImage, left, top, null);
+                cv.save(Canvas.ALL_SAVE_FLAG);
+                cv.restore();
+                return newb;
+            }
         return null;
     }
 
     /**
      * 缩放图片
      */
-    private Bitmap resizeImage(Bitmap image) {
+    private Bitmap resizeImage(Bitmap image,float actualX,float actualY) {
         int imgWidth = image.getWidth();
         int imgHeight = image.getHeight();
 
         float scaleFactor = 1f;
 
-        float scaleX = 360f / (float) imgWidth;
-        float scaleY = 480f / (float) imgHeight;
+        float scaleX = actualX / (float) imgWidth;
+        float scaleY = actualY / (float) imgHeight;
 
 
         if (scaleX >= scaleY && scaleX < 1) {

@@ -1,5 +1,6 @@
 package com.wosplayer.command.operation.other;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -11,6 +12,7 @@ import com.lidroid.xutils.http.client.HttpRequest;
 import com.wosplayer.app.AppTools;
 import com.wosplayer.app.PlayApplication;
 import com.wosplayer.app.Logs;
+import com.wosplayer.app.SystemConfig;
 import com.wosplayer.command.operation.interfaces.iCommand;
 import com.wosplayer.download.kernal.DownloadManager;
 
@@ -31,17 +33,16 @@ import cn.trinea.android.common.util.ShellUtils;
 public class Command_UPDC implements iCommand {
 
     private  static final String TAG = "终端升级";
-
     @Override
-    public void Execute(String param) {
+    public void execute(Activity activity, String param) {
         Logs.i(TAG,"更新app: "+param);
-        getRemoteVersionCode(param);
+        getRemoteVersionCode(activity,param);
     }
 
     /**
      * 获取远程版本号
      */
-    private void getRemoteVersionCode(String uri) {
+    private void getRemoteVersionCode(final Activity activity,String uri) {
         String apkVersionUri = uri;
 
         HttpUtils http = new HttpUtils();
@@ -55,7 +56,7 @@ public class Command_UPDC implements iCommand {
                     @Override
                     public void onSuccess(ResponseInfo<String> responseInfo) {
                         Logs.i(TAG,"版本升级文本信息:"+responseInfo.result);
-                        parseRemoteInfo(responseInfo.result);
+                        parseRemoteInfo(activity,responseInfo.result);
                     }
 
                     @Override
@@ -73,7 +74,7 @@ public class Command_UPDC implements iCommand {
     /**
      * 解析远程版本信息
      */
-    private void parseRemoteInfo(String info){
+    private void parseRemoteInfo(Activity activity,String info){
 
         InputStream inStream = new ByteArrayInputStream(info.getBytes());
         // 创建saxReader对象
@@ -86,37 +87,44 @@ public class Command_UPDC implements iCommand {
         }
         //获取根节点元素对象
         Element antivirus = document.getRootElement();
-        String code = antivirus.element("code").getText();
-        String url = antivirus.element("path").getText();
 
-        compareVersion(Integer.parseInt(code),url);//比较版本
+        try {
+            int code =Integer.parseInt(antivirus.element("code").getText());
+            String url = antivirus.element("path").getText();
+            compareVersion(activity,code,url);//比较版本
+        } catch (NumberFormatException e) {
+            PlayApplication.sendMsgToServer("UPDC:升级终端标识码错误,请输入数字(1-99)");
+        }
     }
 
     /**
      * 比较版本号
      */
-    private void compareVersion(int remoteVersion, String uri) {
-        int local = getLocalVersionCode();
+    private void compareVersion(Activity activity,int remoteVersion, String uri) {
+        int local = getLocalVersionCode(activity);
         int remote = remoteVersion;
         Logs.i(TAG,"本地版本号:"+ local+" ,升级包版本号:"+remote);
-        if (local<remote){
-            String tepPath = PlayApplication.config.GetStringDefualt("updatepath", "");
-            ShellUtils.CommandResult result = ShellUtils.execCommand("chmod 777 "+tepPath,true);
-            if (result.result == 0) {
-                //下载升级包
-                Intent intent = new Intent(PlayApplication.appContext, DownloadManager.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                Bundle bundle = new Bundle();
-                bundle.putInt(DownloadManager.KEY_TYPE, DownloadManager.KEY_TYPE_UPDATE_APK);
-                bundle.putString(DownloadManager.KEY_TERMINAL_NUM, PlayApplication.config.GetStringDefualt("terminalNo", ""));
-                bundle.putString(DownloadManager.KEY_SAVE_PATH, tepPath);
-                bundle.putString(DownloadManager.KEY_TASK_SINGLE, uri);
-                intent.putExtras(bundle);
-                PlayApplication.appContext.startService(intent);
-            }
-            else{
-                Logs.e(TAG,"无法发送文件到下载服务,路径:"+tepPath+"无法执行权限设置.");
-            }
+        if (local>=remote){
+           return;
+        }
+        SystemConfig config = SystemConfig.get().read();
+        String tepPath = config.GetStringDefualt("updatepath", "");
+        String terminalNo = config.GetStringDefualt("terminalNo", "");
+        ShellUtils.CommandResult result = ShellUtils.execCommand("chmod 777 "+tepPath,true);
+        if (result.result == 0) {
+            //下载升级包
+            Intent intent = new Intent(PlayApplication.appContext, DownloadManager.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            Bundle bundle = new Bundle();
+            bundle.putInt(DownloadManager.KEY_TYPE, DownloadManager.KEY_TYPE_UPDATE_APK);
+            bundle.putString(DownloadManager.KEY_TERMINAL_NUM,terminalNo );
+            bundle.putString(DownloadManager.KEY_SAVE_PATH, tepPath);
+            bundle.putString(DownloadManager.KEY_TASK_SINGLE, uri);
+            intent.putExtras(bundle);
+            activity.startService(intent);
+        }
+        else{
+            Logs.e(TAG,"无法发送文件到下载服务,路径:"+tepPath+"无法执行权限设置.");
         }
     }
     /**
@@ -124,9 +132,9 @@ public class Command_UPDC implements iCommand {
      *
      * @return
      */
-    public static int getLocalVersionCode() {
+    public static int getLocalVersionCode(Activity activity) {
          // 获取软件版本号
-        return AppTools.getAppVersion(PlayApplication.appContext);
+        return AppTools.getAppVersion(activity);
     }
 }
 

@@ -1,5 +1,7 @@
 package com.wosplayer.command.operation.other;
 
+import android.app.Activity;
+
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
 import com.wosplayer.command.operation.interfaces.iCommand;
@@ -9,14 +11,10 @@ import com.wosplayer.command.operation.interfaces.iCommand;
  */
 public class Command_Reboot_App implements iCommand {
     @Override
-    public void Execute(String param) {
+    public void execute(Activity activity, String param) {
         try {
-
-            if ( DisplayActivity.activityContext!=null){
-                DisplayActivity.activityContext.finish();
-            }
+            activity.finish();
         } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

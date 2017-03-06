@@ -139,7 +139,7 @@ public class layoutExcuter implements TimeCalls {
         String height = layout.getXmldata().get("height");
         String fileproterty = content.getXmldata().get("fileproterty");//类型
         String getcontents = content.getXmldata().get("getcontents");//uri
-        String localpath = PlayApplication.config.GetStringDefualt("basepath","")+content.getXmldata().get("contentsnewname");//本地路径
+        String localpath = UiExcuter.getInstancs().basepath+content.getXmldata().get("contentsnewname");//本地路径
         String timelength = content.getXmldata().get("timelength");
         String UUKS = content.getXmldata().get("uuks");
         String contentsname = content.getXmldata().get("contentsname");
@@ -207,7 +207,7 @@ public class layoutExcuter implements TimeCalls {
             }
         }
         if (fileproterty.equals("fudianbank")){
-            datalist.put("fudianpath", PlayApplication.config.GetStringDefualt("fudianpath",""));
+            datalist.put("fudianpath", UiExcuter.getInstancs().ffbkPath);
         }
         return  new Object[]{datalist,ob};
     }

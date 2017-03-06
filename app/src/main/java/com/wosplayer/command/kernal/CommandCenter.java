@@ -38,105 +38,17 @@ public class CommandCenter extends BroadcastReceiver {
     public static final String action = "com.post.cmd.broad";
     public static final String cmd = "toCmd";
     public static final String param = "toParam";
-    private static final java.lang.String TAG = "命令分发中心" ;
-    private static final Scheduler.Worker helper1 =  Schedulers.newThread().createWorker();
-    private static final Scheduler.Worker helper2 =  Schedulers.newThread().createWorker();
-    public static final String COMMONICATION_LIVE = "commonicationkey";
-    private DisplayActivity activity;
 
-    public CommandCenter(DisplayActivity activity) {
-        this.activity = activity;
-//        Logs.i(TAG," 创建完成 ");
-    }
+    public static final String COMMONICATION_LIVE = "commonicationkey";
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        String msgCmd = intent.getExtras().getString(cmd);
-        String msgParam =  intent.getExtras().getString(param);
-        if (!StringUtils.isEmpty(msgCmd)) postCmd(msgCmd,msgParam);
-    }
-
-
-    private static HashMap<String, iCommand> commandList = new HashMap<String, iCommand>();
-    static {
-        // 更新排期
-        commandList.put(CommandType.UPSC, new ScheduleSaver());
-        //syncTime
-        commandList.put(CommandType.SYTI,new Command_SYTI());
-        // 抓图
-        commandList.put(CommandType.SCRN, new Command_CAPT());
-        // 抓图
-        commandList.put(CommandType.CAPT, new Command_CAPT());
-        // 音量控制
-        commandList.put(CommandType.VOLU, new Command_VOLU());
-//        // 更新apk
-        commandList.put(CommandType.UPDC, new Command_UPDC());
-//        // 上传日志
-        commandList.put(CommandType.UPLG, new Command_UPLG());
-        // 重启程序
-        commandList.put(CommandType.UIRE, new Command_Reboot_App());
-        // 重启终端
-        commandList.put(CommandType.REBO, new Command_Reboot_Sys());
-        // 关闭播放器
-        commandList.put(CommandType.SHDP, new Command_Close_App());
-        //关闭终端
-        commandList.put(CommandType.SHDO, new Command_SHDO());
-        //设置密码
-        commandList.put(CommandType.PASD,new Command_PASD());
-        //建行对接接口
-        commandList.put(CommandType.TSLT,new Command_TSLT(commandList.get(CommandType.UPSC)));
-        //富滇银行
-        commandList.put(CommandType.FFBK,new Command_FdRer());
-    }
-
-    private void postCmd(final String cmd, final String param){
-       // Logs.i(TAG,"[ "+cmd+ " - "+ param+" ]");
         //发送通讯服务 收到消息
         PlayApplication.sendMsgToServer(CommunicationService.OK);
-        if (cmd.equals(COMMONICATION_LIVE)){
-            if (activity!=null) activity.communicationLives();
-        }else if (commandList.containsKey(cmd)) {
-            //Logs.i("准备 执行指令:"+cmd +" 所在线程:"+Thread.currentThread().getName()+"- 当前线程数:"+Thread.getAllStackTraces().size());
-            if (cmd.equals(CommandType.REBO) || cmd.equals(CommandType.UIRE) || cmd.equals(CommandType.UPDC)
-                    || cmd.equals(CommandType.SHDO) || cmd.equals(CommandType.SHDP) || cmd.equals(CommandType.UPLG)
-                    || cmd.equals(CommandType.SCRN) || cmd.equals(CommandType.CAPT) || cmd.equals(CommandType.TSLT)
-                    ){
-
-                helper1.schedule(new Action0() {
-                    @Override
-                    public void call() {
-                        commandList.get(cmd).Execute(param);
-                    }
-                });
-            }else{
-                helper2.schedule(new Action0() {
-                    @Override
-                    public void call() {
-                        commandList.get(cmd).Execute(param);
-                    }
-                });
-            }
-        }
-
+        String msgCmd = intent.getExtras().getString(cmd);
+        String msgParam =  intent.getExtras().getString(param);
+        if (!StringUtils.isEmpty(msgCmd)) CommandStore.getInstands().opration(msgCmd,msgParam);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
 

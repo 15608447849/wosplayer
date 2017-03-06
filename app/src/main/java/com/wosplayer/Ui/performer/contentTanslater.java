@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 import android.util.LruCache;
 import android.view.ViewGroup;
+import android.widget.AbsoluteLayout;
 
 import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.element.interfaces.TimeCalls;
@@ -85,6 +86,13 @@ public final class contentTanslater {
      * @return
      */
     public static IPlayer tanslationAndStart(DataList list, Object ob, boolean isStart, ViewGroup vp, TimeCalls timrmanager){
+        Context context = UiExcuter.getInstancs().getContext();
+        ViewGroup mainLayout = UiExcuter.getInstancs().getMainLayout();
+        if (context==null){
+            Logs.e(TAG,"无法创建 iplayer ,环境不正确,请初始化 Activity");
+            return null;
+        }
+
         if (mLruCache==null){
             mLruCache =  new LruCache<String,IPlayer>((int) (Runtime.getRuntime().maxMemory() / 8));//最大内存的1/3
         }
@@ -112,14 +120,11 @@ public final class contentTanslater {
                 Class cls = Class.forName(className);//得到类
                 Constructor constructor = cls.getConstructor(Context.class, //得到构造
                         ViewGroup.class);
-                if (DisplayActivity.activityContext == null || DisplayActivity.main ==null){
-                    Logs.e(TAG,"无法创建 iplayer ,环境不正确,请初始化 Activity");
-                    return iplay;
-                }
+
                 if (vp==null){
-                    vp = (ViewGroup) DisplayActivity.main;
+                    vp = mainLayout;
                 }
-                iplay = (IPlayer) constructor.newInstance(DisplayActivity.activityContext,vp); //得到具体实例
+                iplay = (IPlayer) constructor.newInstance(context,vp); //得到具体实例
 
                 //添加到 缓存中
                 putIplayerToCache(key,iplay);

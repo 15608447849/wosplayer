@@ -1,5 +1,7 @@
 package com.wosplayer.command.operation.other;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.wosplayer.app.Logs;
@@ -15,44 +17,35 @@ public class Command_PASD implements iCommand {
     private static final  String TAG = "PASD";
 
     private static final String defpassword= "88888888";
-    private static final String sharedPreferences_txt = Command_PASD.class.getName();
+    private static final String sharedPreferences_txt = "本地密码";
     private static final String PASSWORD_KEY = "unlock_pass";
     @Override
-    public void Execute(String param) {
+    public void execute(Activity activity, String param) {
 
-        if (param==null || param.equals("")){
-
+        if (param==null || param.equals("") || param.equals("null")){
             return;
         }
-        Logs.v(TAG,"param: " + param);
-
-        boolean glag = savaUnlockPassword(param);
-
+        Logs.i(TAG,"param: " + param);
+        boolean glag = savaUnlockPassword(activity,param);
         PlayApplication.sendMsgToServer("PASD:"+glag);
     }
 
     //保存密码
-    private boolean savaUnlockPassword(String password) {
-
+    private boolean savaUnlockPassword(Context context,String password) {
         int ret = 0;
-        SharedPreferences sp = PlayApplication.appContext.getSharedPreferences(sharedPreferences_txt, PlayApplication.appContext.MODE_PRIVATE);
+        SharedPreferences sp = context.getSharedPreferences(sharedPreferences_txt, PlayApplication.appContext.MODE_PRIVATE);
         SharedPreferences.Editor mEditor = sp.edit();
         mEditor.putString(PASSWORD_KEY,password);
         return mEditor.commit();
-
     }
 
 
     //获取本地密码
-public static String getUnlockPassword(){
-    SharedPreferences sp = PlayApplication.appContext.getSharedPreferences(sharedPreferences_txt, PlayApplication.appContext.MODE_PRIVATE);
-    SharedPreferences.Editor mEditor = sp.edit();
-    String psd = sp.getString(PASSWORD_KEY,defpassword);
-
-    if (psd==null || psd.equals("")){
-        psd = defpassword;
+    public static String getUnlockPassword(Context context){
+        SharedPreferences sp = context.getSharedPreferences(sharedPreferences_txt, PlayApplication.appContext.MODE_PRIVATE);
+        SharedPreferences.Editor mEditor = sp.edit();
+        String psd = sp.getString(PASSWORD_KEY,defpassword);
+        return psd==null?defpassword:psd;
     }
-    return psd;
-}
 
 }

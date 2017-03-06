@@ -214,15 +214,15 @@ private void releasedResource() {
      * @return
      */
     private void ParseResultXml(String xml,int source) {
-        Logs.d(TAG," 互动执行者 解析 信息中...\n xml来源:"+(source==1?"本地缓存":"网络") );
+        //Logs.d(TAG," 互动执行者 解析 信息中...\n xml来源:"+(source==1?"本地缓存":"网络") );
         try {
-            myBindView = XmlParse.interactionParse_one(xml);
+            myBindView = XmlParse.interactionParse_one(context,xml);
         } catch (Exception e) {
             Logs.e(TAG,"err "+ e.getMessage());
             return;
         }
         if (myBindView != null) {
-            Logs.i(TAG," 互动执行者 获取绑定的视图 - \n"+myBindView.toString());
+           // Logs.i(TAG," 互动执行者 获取绑定的视图 - \n"+myBindView.toString());
             myBindView.addMeToFather(this);
             setmCurrentView(myBindView);//设置当前视图
         }

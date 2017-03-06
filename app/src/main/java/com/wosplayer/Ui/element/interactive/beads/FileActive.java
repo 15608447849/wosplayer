@@ -1,6 +1,8 @@
 package com.wosplayer.Ui.element.interactive.beads;
 
 
+import android.content.Context;
+
 import com.wosplayer.Ui.element.interfaces.IviewPlayer;
 import com.wosplayer.Ui.element.interactive.viewbeans.ActiveImagePlayer;
 import com.wosplayer.Ui.element.interactive.viewbeans.ActiveVideoPlayer;
@@ -37,28 +39,25 @@ public class FileActive {
      * file -> 具体的view
      * @return
      */
-    public IviewPlayer TanslateInfoToView() {
+    public IviewPlayer TanslateInfoToView(Context context,String basepath) {
 
         try {
             //先判断资源文件 本地是否存在
             String filename = filepath.substring(filepath.lastIndexOf("/") + 1);
-            String localPath = PlayApplication.config.GetStringDefualt("basepath", "") + filename;
-
-            Logs.i(TAG, "这个类型:" + type + "资源:" + filepath + "本地资源路径:" + localPath);
-
+            String localPath = basepath + filename;
+           // Logs.i(TAG, "这个类型:" + type + "资源:" + filepath + "本地资源路径:" + localPath);
             if (type == 3) { //网页 //|| filetype == 1006
                 Logs.i(TAG, Thread.currentThread().getName());
-              return new ActiveWebPlayer(DisplayActivity.activityContext,filepath);
+              return new ActiveWebPlayer(context,filepath);
 
             } else if (filetype == 1007) { //图片
-               return new ActiveImagePlayer(DisplayActivity.activityContext, filepath, localPath);
+               return new ActiveImagePlayer(context, filepath, localPath);
             } else if (filetype == 1002) {//video 1002
-                return new ActiveVideoPlayer(DisplayActivity.activityContext,filepath,localPath);
+                return new ActiveVideoPlayer(context,filepath,localPath);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
-
     }
 }

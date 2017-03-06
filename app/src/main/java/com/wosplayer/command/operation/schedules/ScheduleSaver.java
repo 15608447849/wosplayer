@@ -1,5 +1,6 @@
 package com.wosplayer.command.operation.schedules;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -64,7 +65,7 @@ public class ScheduleSaver implements iCommand {
      * @param param
      */
     @Override
-    public void Execute(String param) {
+    public void execute(Activity activity, String param) {
         Logs.i(TAG,"解析 排期 信息, 当前线程名:"+Thread.currentThread().getName());
         parseData(param);
     }
@@ -93,23 +94,24 @@ public class ScheduleSaver implements iCommand {
         }
         Long endTime = System.currentTimeMillis();
         Logs.e(TAG,"解析用时 : "+(endTime - startTime)+" 毫秒");
-        startTime = System.currentTimeMillis();
+
+        SystemConfig config = SystemConfig.get();
+        String saveDir = config.GetStringDefualt("basepath","");
+        String limits = config.GetStringDefualt("storageLimits","50");
+        String telminalNo = config.GetStringDefualt("terminalNo","");
         //判断是否清理数据
-        if(SdCardTools.justFileBlockVolume(PlayApplication.config.GetStringDefualt("basepath",""),
-                PlayApplication.config.GetStringDefualt("storageLimits","50"))){
-
-            SdCardTools.clearTargetDir(PlayApplication.config.GetStringDefualt("basepath",""),rootNode.getFtplist());
+        if( SdCardTools.justFileBlockVolume(saveDir,limits) ){
+            startTime = System.currentTimeMillis();
+            SdCardTools.clearTargetDir(saveDir,rootNode.getFtplist());
+            endTime = System.currentTimeMillis();
+            Logs.e(TAG,"清理数据用时 : "+(endTime - startTime)+" 毫秒");
         }
-        endTime = System.currentTimeMillis();
-        Logs.e(TAG,"清理数据用时 : "+(endTime - startTime)+" 毫秒 \n" +
-                "------------------------------------------------------");
-
-            //开启后台下载线程
+        sendCompleteNotify();
+        //开启后台下载线程
+        if (rootNode.getFtplist().size()>0){
             Logs.i(TAG,"当前的任务数:"+rootNode.getFtplist().size()+"\n "+rootNode.getFtplist().toString());
-            if (rootNode.getFtplist().size()>0){
-                sendloadTask();
-            }
-            sendCompleteNotify();
+            sendloadTask(saveDir,telminalNo);
+        }
     }
     //排期接受完毕
     private void sendCompleteNotify() {
@@ -143,18 +145,19 @@ public class ScheduleSaver implements iCommand {
     /**
      * 通知资源开始下载
      */
-    private void sendloadTask() {
+    private void sendloadTask(String sourceSavePath,String telminalNo) {
         ArrayList<CharSequence> tasklist = new ArrayList<CharSequence>();
         for (int i = 0; i<rootNode.getFtplist().size();i++){
             tasklist.add(rootNode.getFtplist().get(i));
         }
+
         Intent intent = new Intent(PlayApplication.appContext, DownloadManager.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         Bundle bundle = new Bundle();
         bundle.putInt(DownloadManager.KEY_TYPE, DownloadManager.KEY_TYPE_SCHDULE);
         bundle.putCharSequenceArrayList(DownloadManager.KEY_TASK_LIST,tasklist);
-        bundle.putString(DownloadManager.KEY_TERMINAL_NUM, PlayApplication.config.GetStringDefualt("terminalNo",""));
-        bundle.putString(DownloadManager.KEY_SAVE_PATH, PlayApplication.config.GetStringDefualt("basepath", ""));
+        bundle.putString(DownloadManager.KEY_TERMINAL_NUM, telminalNo);
+        bundle.putString(DownloadManager.KEY_SAVE_PATH, sourceSavePath);
         intent.putExtras(bundle);
         PlayApplication.appContext.startService(intent);
     }

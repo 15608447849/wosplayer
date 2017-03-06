@@ -20,8 +20,10 @@ import com.wosplayer.R;
 import com.wosplayer.app.AdbCommand;
 import com.wosplayer.app.AppTools;
 import com.wosplayer.app.BackRunner;
+import com.wosplayer.app.DisPlayInterface;
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
+import com.wosplayer.app.PlayHandler;
 import com.wosplayer.app.SystemConfig;
 import com.wosplayer.tool.SdCardTools;
 
@@ -34,7 +36,8 @@ import cn.trinea.android.common.util.ShellUtils;
  * Created by 79306 on 2017/2/20.
  */
 
-public class AppToolsFragment extends Fragment implements DisplayActivity.onFragAction,View.OnClickListener,AdapterView.OnItemSelectedListener{
+public class AppToolsFragment extends Fragment implements DisPlayInterface.onFragAction,
+        View.OnClickListener,AdapterView.OnItemSelectedListener{
     private static final String TAG = "APP配置页面";
     public static final String FLAG ="wostools";
     private DisplayActivity activity;
@@ -251,7 +254,7 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
 
         if (!"".equals(terminalNo.getText().toString())){
             AppTools.settingServerInfo(activity,true);
-            activity.mHandler.sendEmptyMessage(DisplayActivity.HandleEvent.close.ordinal());
+            activity.mHandler.sendEmptyMessage(PlayHandler.HandleEvent.close.ordinal());
         }else{
             AppTools.Toals(activity,"配置信息不可用，请联系客服");
         }
@@ -308,7 +311,7 @@ public class AppToolsFragment extends Fragment implements DisplayActivity.onFrag
     {
         if(activity!=null)
         {
-            AppTools.NotifyHandle(activity.mHandler, DisplayActivity.HandleEvent.outtext.ordinal(),msg);
+            AppTools.NotifyHandle(activity.mHandler, PlayHandler.HandleEvent.outtext.ordinal(),msg);
         }
     }
     private void excute(String cmd) {

@@ -27,65 +27,14 @@ public class PlayApplication extends Application {
     public void onCreate() {
         super.onCreate();
         appContext = this.getApplicationContext();
-        //捕获异常
-        CrashHandler.getInstance().init(appContext);
-        InitSystem();
+        AdbCommand.initSystem(appContext);//初始化系统,放入系统目录
     }
 
-    private void InitSystem(){
-         AdbCommand.initSystem(appContext);//初始化系统,放入系统目录
-    }
-
-    //本机信息
-    public static DataList config = null;
-    /**
-     *
-     */
-    public static void initConfig() {
-        SystemConfig scg  = SystemConfig.get().read();
-        //系统配置监听值
-        scg.putOr("watchValue","0").save();
-        config = scg;
-        config.printData();
-      BackRunner.runBackground(new Runnable() {
-          @Override
-          public void run() {
-              String defaultPath = config.GetStringDefualt("default","");
-              String fudianpath = config.GetStringDefualt("fudianpath","");
-              if (defaultPath.isEmpty() || fudianpath.isEmpty()) return;
-              //将默认排期放入指定文件夹下
-              AppTools.defaultProgram(appContext,defaultPath);
-              Logs.i("后台任务","默认排期解压缩完成");
-              //将默认图片或者视频放入指定 文件夹下
-             // Logs.i("后台任务","默认资源放入指定目录下 - "+resourcePath+"default.mp4 成功");
-               AppTools.fudianBankSource(appContext,fudianpath);
-              Logs.i("后台任务","富颠金融网页模板解压缩完成");
-          }
-      });
-    }
-    //获取配置信息值
-    public static String getConfigValue(String key){
-        if (config!=null){
-            return config.GetStringDefualt(key,"");
-        }
-        return "";
-    }
     /**
      * 开启通讯服务
-     *ip =  intent.getExtras().getString("ip");
-     port = intent.getExtras().getInt("port");
-     terminalNo = intent.getExtras().getString("terminalNo");
-     HeartBeatTime = intent.getExtras().getLong("HeartBeatTime");
      */
     public static void startCommunicationService() {
             Intent intent = new Intent(appContext, CommunicationService.class);
-            //传递参数
-            Bundle b = new Bundle();
-            b.putString("ip",config.GetStringDefualt("serverip","127.0.0.1"));
-            b.putInt("port",6666);
-            b.putString("terminalNo",config.GetStringDefualt("terminalNo","127.0.0.1"));
-            b.putLong("HeartBeatTime",(config.GetIntDefualt("HeartBeatInterval",10)));
-            intent.putExtras(b);
             appContext.startService(intent);
     }
     /**

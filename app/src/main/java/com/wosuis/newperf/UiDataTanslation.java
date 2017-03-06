@@ -3,6 +3,7 @@ package com.wosuis.newperf;
 
 import android.graphics.Typeface;
 
+import com.wosplayer.app.SystemConfig;
 import com.wosuis.beans.ViewData;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.Logs;
@@ -33,8 +34,8 @@ public class UiDataTanslation {
     private static String ffbkPath;
     private static boolean isInit = false;
     public static void initParam(){
-        sourcePath = PlayApplication.config.GetStringDefualt("basepath","");
-        ffbkPath = PlayApplication.config.GetStringDefualt("fudianpath","");
+        sourcePath = SystemConfig.get().GetStringDefualt("basepath","");
+        ffbkPath = SystemConfig.get().GetStringDefualt("fudianpath","");
         isInit = true;
     }
     private static void add(ViewData data){

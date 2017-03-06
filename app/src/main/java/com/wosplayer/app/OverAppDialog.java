@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.wosplayer.command.kernal.CommandCenter;
+import com.wosplayer.command.kernal.CommandStore;
 import com.wosplayer.command.operation.interfaces.CommandType;
 import com.wosplayer.command.operation.other.Command_Close_App;
 import com.wosplayer.command.operation.other.Command_PASD;
@@ -37,23 +38,15 @@ public class OverAppDialog {
                     .setView(passwordInput).setPositiveButton("确定", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            //获取密码
-                            String localPassword = Command_PASD.getUnlockPassword();
-                            if (localPassword==null || localPassword.equals("")){
-                                return;
-                            }
                             //输入的密码
                             String inputPassword = passwordInput.getText().toString();
-                            if (inputPassword.equals(localPassword)){
+                            //获取密码
+                            String localPassword = Command_PASD.getUnlockPassword(m);
+                            if (localPassword.equals(inputPassword)){
                                 //关闭
-                                //发送广播
-                                Intent i = new Intent();
-                                Bundle b = new Bundle();
-                                i.setAction(CommandCenter.action);
-                                b.putString(CommandCenter.cmd, CommandType.SHDP);
-                                b.putString(CommandCenter.param,"nostop");
-                                i.putExtras(b);
-                                m.sendBroadcast(i);
+                                CommandStore.getInstands().opration(CommandType.SHDP,"");
+                            }else{
+                                AppTools.LongToals(m,"密码错误,请联系客服或登陆后台(终端管理-电子屏-修改)查看");
                             }
                         }
                     })
@@ -69,6 +62,7 @@ public class OverAppDialog {
 
 
     public static void popWind(final Activity context,final String s,final int time) {
+        if (context==null) return;
        context.runOnUiThread(new Runnable() {
            @Override
            public void run() {

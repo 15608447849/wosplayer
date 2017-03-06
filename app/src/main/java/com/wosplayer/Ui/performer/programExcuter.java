@@ -35,7 +35,7 @@ public class programExcuter {
             //如果是颜色
             bgInfo = program.getXmldata().get("bgcolor");
         }else{
-            bgInfo = PlayApplication.config.GetStringDefualt("basepath","")+bgInfo;
+            bgInfo = UiExcuter.getInstancs().basepath+bgInfo;
         }
         //Logs.e(TAG,"节目背景 - "+bgInfo);
     }
@@ -43,7 +43,7 @@ public class programExcuter {
     public void start(){
 
         //设置背景给 main acticvity
-        DisplayActivity.activityContext.setMainBg(bgInfo);
+        UiExcuter.getInstancs().setMainBg(bgInfo);
 
         //获取 布局信息 ,创建布局 执行所有的节目
         ArrayList<XmlNodeEntity> layoutArr = program.getChildren();
