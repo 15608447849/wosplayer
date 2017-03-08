@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Process;
 
 import com.wos.play.rootdir.model_monitor.soexcute.RunJniHelper;
+import com.wos.play.rootdir.model_monitor.soexcute.WatchServerHelp;
 import com.wosplayer.tool.SdCardTools;
 import com.wosplayer.service.CommunicationService;
 
@@ -26,9 +27,14 @@ public class PlayApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
         appContext = this.getApplicationContext();
+        //打开监听程序
+        WatchServerHelp.openDeams(appContext);
         AdbCommand.initSystem(appContext);//初始化系统,放入系统目录
     }
+
+
 
     /**
      * 开启通讯服务

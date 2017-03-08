@@ -137,8 +137,6 @@ public class AdbCommand{
             if ( (appinfo.flags & ApplicationInfo.FLAG_SYSTEM) > 0 || FileUtils.isFileExist("/system/app/"+alias) ) {
                 return;
             }
-                //第一次执行
-                RunJniHelper.startWatch(context);//打开监听服务
                 Log.e(TAG,"源apk路径:" + packagepath + " - 移动路径 :/sysytem/app/" + alias);
                 String cmd = getAppChangerPath(packagepath,packageName, alias);
                 Log.e(TAG,cmd);
