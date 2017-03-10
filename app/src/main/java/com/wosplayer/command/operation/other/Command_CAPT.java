@@ -6,15 +6,12 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.media.MediaMetadataRetriever;
-import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.wosplayer.Ui.element.definedView.MyVideoView;
-import com.wosplayer.app.DisplayActivity;
+import com.wosplayer.Ui.element.definedView.Mvideo;
 import com.wosplayer.app.Logs;
-import com.wosplayer.app.PlayApplication;
 import com.wosplayer.app.SystemConfig;
 import com.wosplayer.command.operation.interfaces.iCommand;
 
@@ -101,9 +98,9 @@ public class Command_CAPT implements iCommand {
             // 视频截图
             Bitmap videoImage = null;
             for (View z : vList) {
-                if (z instanceof MyVideoView) {
+                if (z instanceof Mvideo) {
 
-                    MyVideoView cvv = (MyVideoView) z;
+                    Mvideo cvv = (Mvideo) z;
                     videoImage = getVideoImage(cvv);
                     if (videoImage != null) {
                         bgbmp = composeImage(z.getLeft(), z.getTop(), bgbmp, videoImage);
@@ -136,7 +133,7 @@ public class Command_CAPT implements iCommand {
     /**
      * get video image
      */
-    private Bitmap getVideoImage(MyVideoView cvv){
+    private Bitmap getVideoImage(Mvideo cvv){
         // 获得媒体信息的类
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
         try {

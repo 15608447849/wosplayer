@@ -6,11 +6,10 @@ import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
 
 import com.wosplayer.Ui.element.interfaces.IPlayer;
-import com.wosplayer.Ui.element.definedView.MyVideoView;
+import com.wosplayer.Ui.element.definedView.Mvideo;
 import com.wosplayer.Ui.element.interfaces.TimeCalls;
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.app.DataList;
-import com.wosplayer.app.PlayApplication;
 import com.wosplayer.app.Logs;
 import com.wosplayer.download.util.DownloadFileUtil;
 
@@ -28,7 +27,7 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
     private boolean isLayout = false;//是否已经布局
 
     //播放器
-    private MyVideoView video = null;
+    private Mvideo video = null;
     public IVideoPlayer(Context context,ViewGroup vp) {
         super(context);
         this.superView = vp;
@@ -43,7 +42,7 @@ public class IVideoPlayer extends AbsoluteLayout implements IPlayer{
     public void loadData(DataList mp, Object ob) {
         try {
 
-            video = new MyVideoView(context,this);
+            video = new Mvideo(context,this);
             int x,y,h,w;
         x = mp.GetIntDefualt("x", 0);
         y = mp.GetIntDefualt("y", 0);

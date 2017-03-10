@@ -20,15 +20,10 @@ import com.wosplayer.download.util.DownloadFileUtil;
  */
 
 public class IImagePlayer extends ImageView implements IPlayer{
-
-
     private static final java.lang.String TAG = "图片显示器 ";//IImagePlayer.class.getName();
     private Context context;
     private ViewGroup superView = null;
-
-
     private boolean isLayout = false;
-
     public IImagePlayer(Context context, ViewGroup superView) {
         super(context);
         this.context =context;
@@ -47,7 +42,6 @@ public class IImagePlayer extends ImageView implements IPlayer{
             h = mp.GetIntDefualt("height", 0);
             //Logs.d(TAG,"设置布局:"+x+"-"+y+"-"+w+"-"+h);
             this.setLayoutParams(new AbsoluteLayout.LayoutParams(w,h,x,y));
-
             this.localpath = mp.GetStringDefualt("localpath", "");
             this.uri = mp.GetStringDefualt("getcontents", "");//网络路径
         }catch (Exception e){

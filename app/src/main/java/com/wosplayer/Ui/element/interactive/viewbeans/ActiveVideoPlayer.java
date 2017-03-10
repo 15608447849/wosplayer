@@ -7,10 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
 
-import com.wosplayer.Ui.element.definedView.MyVideoView;
+import com.wosplayer.Ui.element.definedView.Mvideo;
 import com.wosplayer.Ui.element.interfaces.IviewPlayer;
 import com.wosplayer.Ui.performer.UiExcuter;
-import com.wosplayer.app.PlayApplication;
 import com.wosplayer.app.Logs;
 
 import com.wosplayer.download.util.DownloadFileUtil;
@@ -20,7 +19,7 @@ import com.wosplayer.download.util.DownloadFileUtil;
  */
 public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer {
     private static final java.lang.String TAG = "ActiveVideoPlayer";//ActiveVideoPlayer.class.getName();
-    private MyVideoView video;
+    private Mvideo video;
     private long mCurrentSeek;
 
     //构造
@@ -28,7 +27,7 @@ public class ActiveVideoPlayer extends AbsoluteLayout implements IviewPlayer {
         super(context);
         Logs.e(TAG, "互动 视频播放者 创建");
         InitSettting(uri, localpath);
-        video = new MyVideoView(context, this);
+        video = new Mvideo(context, this);
 }
 
     //互动接口对象  回调对象 附加功能

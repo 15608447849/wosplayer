@@ -11,6 +11,7 @@ import cn.trinea.android.common.util.FileUtils;
 import cn.trinea.android.common.util.ShellUtils;
 
 import com.wos.play.rootdir.model_monitor.soexcute.RunJniHelper;
+import com.wos.play.rootdir.model_monitor.soexcute.WatchServerHelp;
 import com.wosplayer.command.kernal.CommandCenter;
 import com.wosplayer.command.operation.interfaces.CommandType;
 
@@ -42,8 +43,11 @@ public class AdbCommand{
     //卸载播放器
     public static String uninstallTelminal(){
         String alias = "WosOldTerminal.apk";
+
         String cmd = "mount -o remount,rw /system\n"
-        +"rm -rf /system/app/"+alias+"\n"
+                +"rm -rf /system/app/"+alias+"\n"//删除system app
+                +"rm -rf /system/lib/libserverHelper.so\n"//删除system so文件
+                +"rm -rf /data/local/tem/*\n"//tem下面的临时文件或者apk
                 +"rm -rf /data/data/com.wosplayer*\n"
                 +"rm -rf /data/dalvik-cache/system@app@WosOldTerminal*\n"
                 +"rm -rf /data/dalvik-cache/data@app@com.wosplayer*\n"
@@ -104,16 +108,23 @@ public class AdbCommand{
             CrashHandler.getInstance().init(context);
             //系统配置监听值
             SystemConfig.get().putOr("watchValue","0").save();
+            //打开监听程序
+            WatchServerHelp.openDeams(context);
+
             if (ShellUtils.checkRootPermission()) {
                 //放入system
                  excuteAppMoveSystem(context);
             } else {
-                Logs.d(TAG,"没有root权限");
+                Logs.e(TAG,"-----------------------------------没有root权限------------------------------------------");
             }
         } catch (Exception e) {
             Logs.e(TAG,e.getMessage());
         }
     }
+
+
+
+
 
     //放进system cmd
     public static String  getAppChangerPath(String _packagePath, String _packageName, String alias) {

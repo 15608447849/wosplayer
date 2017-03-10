@@ -27,11 +27,8 @@ public class PlayApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
         appContext = this.getApplicationContext();
-        //打开监听程序
-        WatchServerHelp.openDeams(appContext);
-        AdbCommand.initSystem(appContext);//初始化系统,放入系统目录
+        //AdbCommand.initSystem(appContext);//初始化系统,放入系统目录
     }
 
 

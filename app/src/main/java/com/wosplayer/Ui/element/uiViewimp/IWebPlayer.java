@@ -3,9 +3,13 @@ package com.wosplayer.Ui.element.uiViewimp;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AbsoluteLayout;
 
@@ -19,15 +23,15 @@ import com.wosplayer.command.kernal.CommandCenter;
  * Created by Administrator on 2016/7/24.
  *
  */
-public class IWebPlayer extends android.webkit.WebView implements IPlayer {
-    private static final java.lang.String TAG = IWebPlayer.class.getName();
+public class IWebPlayer implements IPlayer {
+    private static final java.lang.String TAG = "网页显示器";
+    private android.webkit.WebView webView;
     private Context context;
     private ViewGroup superView = null;
-
+    AbsoluteLayout.LayoutParams layoutParams;
     private boolean isLayout = false;
 
     public IWebPlayer(Context context, ViewGroup mfatherView) {
-        super(context);
         this.context = context;
         this.superView = mfatherView;
     }
@@ -40,7 +44,8 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
             y = mp.GetIntDefualt("y", 0);
             w = mp.GetIntDefualt("width", 0);
             h = mp.GetIntDefualt("height", 0);
-            this.setLayoutParams(new AbsoluteLayout.LayoutParams(w,h,x,y));
+            layoutParams= new AbsoluteLayout.LayoutParams(w,h,x,y);
+//            this.setLayoutParams();
             this.uri = mp.GetStringDefualt("fudianpath","");
             if (this.uri.isEmpty()){
                 //http链接
@@ -53,7 +58,7 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
                 //发送指令
                 sendFFBK(remoteResourcePath);
             }
-            initParam();
+
         } catch (Exception e) {
             Logs.e(TAG, "loaddata() " + e.getMessage());
         }
@@ -70,10 +75,23 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
         intent.putExtras(b);
         context.sendBroadcast(intent);
     }
+    private void undestory(){
+        if (webView!=null){
+            webView.clearHistory();
+            webView.clearCache(true);
+            webView.loadUrl("about:blank");
+            webView.clearView();
+            webView.freeMemory();
+            webView.pauseTimers();
+            webView.destroy();
+            webView = null;
+            Log.i(TAG, "销毁WebView.");
+        }
+    }
     //初始化webview参数
     private void initParam() {
-        WebSettings webSettings = this.getSettings();
-
+        webView = new WebView(context);
+        WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);//js
         webSettings.setAllowFileAccess(true); //设置可以访问文件
         webSettings.setAllowFileAccessFromFileURLs(true);// js读取本地文件内容
@@ -94,16 +112,14 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
         //LOAD_CACHE_ELSE_NETWORK，只要本地有，无论是否过期，或者no-cache，都使用缓存中的数据
         //不使用缓存:
         webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-
         webSettings.setLoadsImagesAutomatically(true); //支持自动加载图片
- //       this.getSettings().setPluginState(WebSettings.PluginState.ON);//flash 有关系
+ //       webView.getSettings().setPluginState(WebSettings.PluginState.ON);//flash 有关系
         webSettings.setDefaultTextEncodingName("UTF-8");//设置编码格式
-        this.setWebChromeClient(new WebChromeClient());
-        this.setWebViewClient(new WebViewClient());
-        this.getSettings().setLoadWithOverviewMode(true);
+        webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebViewClient(new WebViewClient());
+        webView.getSettings().setLoadWithOverviewMode(true);
+        Log.i(TAG, "创建WebView.");
     }
-
-
 
     //时间回调
     private TimeCalls timeCalls = null;
@@ -122,11 +138,12 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
     public void start() {//主线程执行
         try {
             if (!isLayout) {
-                superView.addView(this);
+                initParam();
+                webView.setLayoutParams(layoutParams);
+                superView.addView(webView);
                 isLayout = true;
             }
-            this.onResume();
-            this.loadUrl(this.uri);
+            webView.loadUrl(this.uri);
         } catch (Exception e) {
             Logs.e(TAG, "web start():" + e.getMessage());
         }
@@ -135,13 +152,11 @@ public class IWebPlayer extends android.webkit.WebView implements IPlayer {
     @Override
     public void stop() {//主线程执行
         try {
-            this.loadUrl("about:blank");
-            this.onPause();
             if (isLayout){
-                superView.removeView(IWebPlayer.this);
+                superView.removeView(webView);
+                undestory();
                 isLayout = false;
             }
-//            this.destroy();
         } catch (Exception e) {
             Logs.e(TAG, "web stop():" + e.getMessage());
         }
