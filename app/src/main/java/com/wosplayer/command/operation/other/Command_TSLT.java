@@ -50,15 +50,18 @@ public class Command_TSLT implements iCommand {
 
             if (!cn.trinea.android.common.util.FileUtils.isFileExist(defaultPath+"default_sche.xml")) {
                 ///文件不存在 - 解压缩
-                AppTools.defaultProgram(activity,defaultPath);
-                Logs.i(TAG,"解压缩默认排期完成");
+//                AppTools.defaultProgram(activity,defaultPath);
+                Logs.e(TAG,"默认排期不存在.");
+                Thread.sleep(100);
+                getDefaultProg(activity);
+            }else{
+                defaultPath = "file://"+defaultPath+"default_sche.xml";
+                //发送广播 -> 排期
+                if (saver == null) {
+                    saver = new ScheduleSaver();
+                }
+                saver.execute(null,defaultPath);
             }
-            defaultPath = "file://"+defaultPath+"default_sche.xml";
-            //发送广播 -> 排期
-            if (saver == null) {
-                saver = new ScheduleSaver();
-            }
-            saver.execute(null,defaultPath);
         } catch (Exception e) {
             e.printStackTrace();
         }

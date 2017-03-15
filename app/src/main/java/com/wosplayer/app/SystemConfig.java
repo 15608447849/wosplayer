@@ -96,7 +96,8 @@ public class SystemConfig extends DataList{
 
         //默认的本地资源路径
         map.put("default","/mnt/sdcard/wosplayer/default/");//默认资源路径
-        map.put("defaultVideo", "/mnt/sdcard/wosplayer/default/def.mp4");//默认视频本地位置
+        map.put("defaultVideo", "/mnt/sdcard/wosplayer/default/dvideo.mp4");//默认视频本地位置
+        map.put("defaultImage","/mnt/sdcard/wosplayer/default/dimage.png");//默认图片
         map.put("fudianpath","/mnt/sdcard/wosplayer/ffbk/");//富颠银行本地web资源
         map.put("CapturePath", "/mnt/sdcard/wosplayer/screen.png");//截图本地位置
 
@@ -114,7 +115,7 @@ public class SystemConfig extends DataList{
     public SystemConfig read(){
         try {
             String content =  FileUtils.readFile(PATH,"utf-8").toString();
-            Logs.d(TAG,"读取配置文件:\n"+content);
+            //Logs.d(TAG,"读取配置文件:\n"+content);
             if (!content.isEmpty()) {
                 Map map = AppTools.jsonTxtToMap(content);
                 this.setMap((HashMap<String, String>) map);
@@ -133,7 +134,7 @@ public class SystemConfig extends DataList{
         String content = AppTools.mapToJson(map);
 //        Logs.d(TAG,"保存配置文件："+content);
         boolean flag =  FileUtils.writeFile(PATH,content);
-        Logs.d(TAG,"存储系统配置文件["+PATH+"]结果:"+(flag?" 成功":" 失败"));
+        //Logs.d(TAG,"存储系统配置文件["+PATH+"]结果:"+(flag?" 成功":" 失败"));
     }
 
 }

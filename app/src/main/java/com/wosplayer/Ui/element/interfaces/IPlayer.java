@@ -10,8 +10,5 @@ public interface IPlayer{
      void loadData(DataList mp,Object ob);
      void start();
      void stop();
-//     void setlayout ();
-//     DataList getDatalist();
     void setTimerCall(TimeCalls timer);
-    void unTimerCall();
 }

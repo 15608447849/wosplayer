@@ -96,7 +96,7 @@ public final class contentTanslater {
         if (mLruCache==null){
             mLruCache =  new LruCache<String,IPlayer>((int) (Runtime.getRuntime().maxMemory() / 8));//最大内存的1/3
         }
-        //Logs.i(TAG,"准备转换视图控件,所在线程:"+Thread.currentThread().getName());
+
         IPlayer iplay = null;
 
         try {

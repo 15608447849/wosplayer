@@ -78,8 +78,19 @@ public class ImageViewPicassocLoader {
         }
         return bitmap;
     }
+    /**
+     *getMeasuredHeight()返回的是原始测量高度，与屏幕无关，
+     * getHeight()返回的是在屏幕上显示的高度。实际上在当屏幕可以包裹内容的时候，
+     * 他们的值是相等的，只有当view超出屏幕后，才能看出他们的区别。
+     *
+     * 当超出屏幕后，getMeasuredHeight()等于getHeight()加上屏幕之外没有显示的高度。
+     */
     public static Bitmap getBitmap(String filePath, final ImageView iv) {
         return getBitmap(null,filePath,iv);
+    }
+
+    public static Bitmap getBitmap(String filePath) {
+        return getBitmap(null,filePath,null);
     }
 
     /**

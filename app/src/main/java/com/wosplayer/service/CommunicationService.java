@@ -286,7 +286,7 @@ public class CommunicationService extends Service{
         i.putExtras(b);
         getApplicationContext().sendBroadcast(i);
         //开启一个runing 多久后没收到消息回执  开启activity
-        openCheckApp();
+//        openCheckApp();
     }
 /////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -421,7 +421,7 @@ public class CommunicationService extends Service{
             }else
             if (msg.equals(OK)){
                 //关闭打开activity的任务
-                closeCheckApp();
+//                closeCheckApp();
             }
              else {
                 addMsgToSend(msg);//添加消息到消息队列;
@@ -551,35 +551,35 @@ public class CommunicationService extends Service{
     }
 
 
-    private Handler handle = new Handler();
-    private final Runnable CHECK_APP = new Runnable(){
-        @Override
-        public void run() {
-            openActivity();
-        }
-    };
+//    private Handler handle = new Handler();
+//    private final Runnable CHECK_APP = new Runnable(){
+//        @Override
+//        public void run() {
+//            openActivity();
+//        }
+//    };
 
     //打开 延时任务 - 检测 activity
-    private void openCheckApp(){
-        closeCheckApp();
-        if (handle!=null){
+//    private void openCheckApp(){
+//        closeCheckApp();
+//        if (handle!=null){
 //            Logs.i(TAG,"添加监察任务");
-            handle.postDelayed(CHECK_APP,10 * 1000);
-        }
-    }
+//            handle.postDelayed(CHECK_APP,10 * 1000);
+//        }
+//    }
     //关闭 延时任务 - 检测activity
-    private void closeCheckApp(){
-        if (handle!=null){
-//            Logs.i(TAG,"移出监察任务");
-            handle.removeCallbacks(CHECK_APP);
-        }
-    }
+//    private void closeCheckApp(){
+//        if (handle!=null){
+////            Logs.i(TAG,"移出监察任务");
+//            handle.removeCallbacks(CHECK_APP);
+//        }
+//    }
     //打开activity
-    private void openActivity(){
-                    Logs.i(TAG,"== 尝试开打Activity ==");
-                    Intent intent = new Intent();
-                    intent.setClass(getApplicationContext(), DisplayActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    getApplicationContext().startActivity(intent);
-    }
+//    private void openActivity(){
+//                    Logs.i(TAG,"== 尝试开打Activity ==");
+//                    Intent intent = new Intent();
+//                    intent.setClass(getApplicationContext(), DisplayActivity.class);
+//                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    getApplicationContext().startActivity(intent);
+//    }
 }

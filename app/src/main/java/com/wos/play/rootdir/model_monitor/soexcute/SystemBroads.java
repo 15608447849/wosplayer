@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
 
 /**
@@ -15,12 +16,15 @@ public class SystemBroads extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        Logs.d(TAG,"接受到系统广播action : "+action);
-        WatchServerHelp.openDeams(context);
+        Logs.e(TAG,"接受到系统广播action: "+action);
+//        WatchServerHelp.openDeams(context);
         if (action.equals("android.intent.action.BOOT_COMPLETED")){
             //开机广播
-            Logs.i(TAG,"开机广播 - 即将打开 -监听服务");
-
+//            intent.setClass(context, DisplayActivity.class);
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            context.startActivity(intent);
+            Logs.e(TAG,"======================================================================================================================\n==================================================开机自启动====================================================================\n======================================================================================================================");
+            WatchServerHelp.openDeams(context);
         }
         if(action.equals("android.intent.action.MEDIA_EJECT")){
          //sdcard等媒体介质弹出

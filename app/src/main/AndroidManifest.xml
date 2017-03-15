@@ -49,6 +49,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
 
+    <!-- android:hardwareAccelerated="false" 硬件加速关闭 -->
     <application
         android:name=".app.PlayApplication"
         android:allowBackup="true"
@@ -57,34 +58,45 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:sharedUserId="android.uid.system"
-        android:hardwareAccelerated="true">
+        android:largeHeap="true"
+        android:hardwareAccelerated="false">
 
-        <!-- 启动activity-->
+        <!-- 启动activity android:process="com.wosplayer.ui"-->
         <activity
             android:name=".app.DisplayActivity"
             android:launchMode="singleInstance"
-            android:process="com.wosplayer.ui">
+            android:hardwareAccelerated="true"
+            android:process="com.wosplayer.ui"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <!-- 通讯服务 android:process=":remote_communication" -->
-        <service android:name=".service.CommunicationService" android:process="com.wosplayer.communication"/>
+        <service android:name=".service.CommunicationService"
+            android:process="com.wosplayer.communication"/>
         <!-- 接受下载 队列 android:process=":remote_loader" -->
-        <service android:name=".download.kernal.DownloadManager" android:process="com.wosplayer.download"/>
+        <service android:name=".download.kernal.DownloadManager"
+            android:process="com.wosplayer.download"/>
         <!-- 更新apk-->
-        <service android:name=".service.UpdateApkServer" android:process="com.wosplayer.updateapp"/>
+        <service android:name=".service.UpdateApkServer"
+            android:process="com.wosplayer.updateapp"/>
         <!-- 记录日志sever  android:process=":remote_log_upload"-->
-        <service android:name=".service.serviceLog"  android:process="com.wosplayer.writelogs"/>
+        <service android:name=".service.serviceLog"
+            android:process="com.wosplayer.writelogs"/>
         <!-- 日志上传  android:process=":remote_log_upload"-->
-        <service android:name=".service.logUploadService"  android:process="com.wosplayer.uplogs"/>
-        <!-- 守护进程启动服务 -->
-        <service android:name="com.wos.play.rootdir.model_monitor.soexcute.WatchServerHelp" android:process="com.wosplayer.watchhelp" />
+        <service android:name=".service.logUploadService"
+            android:process="com.wosplayer.uplogs"/>
+
         <!--监听服务  android:enabled="true"  android:process=".MonitorService"  android:process=":remote_monitorService"-->
         <service android:name="com.wos.play.rootdir.model_monitor.soexcute.WatchServer" />
+        <!-- 守护进程启动服务 -->
+        <service android:name="com.wos.play.rootdir.model_monitor.soexcute.WatchServerHelp"
+            android:process="com.wosplayer.watchhelp" />
         <!-- 系统广播  android:process=":remote_monitorService" -->
-        <receiver android:name="com.wos.play.rootdir.model_monitor.soexcute.SystemBroads">
+        <receiver android:name="com.wos.play.rootdir.model_monitor.soexcute.SystemBroads"
+            android:process="com.wosplayer.watchhelp">
                 <!-- 开机启动 -->
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

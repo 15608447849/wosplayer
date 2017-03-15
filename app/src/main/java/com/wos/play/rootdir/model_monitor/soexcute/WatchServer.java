@@ -8,6 +8,8 @@ import android.support.annotation.Nullable;
 
 
 import com.wosplayer.app.AdbCommand;
+import com.wosplayer.app.DisplayActivity;
+import com.wosplayer.app.Logs;
 import com.wosplayer.app.SystemConfig;
 
 import java.util.ArrayList;
@@ -51,15 +53,28 @@ public class WatchServer extends Service {
         if (isWatch==0){
             if (!serverUtils.isRunningForeground(getApplicationContext(), activityList)) {
                 //尝试打开
-                android.util.Log.e(TAG, "APP不在栈顶端-尝试打开");
-                    /*Intent intent = new Intent();
-                    intent.setClass(getApplicationContext(), DisplayActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    getApplicationContext().startActivity(intent);*/
-                ShellUtils.execCommand(AdbCommand.commands_startApp,true);
+                openApps();
             }
         }
         return START_NOT_STICKY;
+    }
+
+    private void openApps() {
+        try {
+            android.util.Log.e(TAG, "APP不在栈顶端-尝试打开");
+            ShellUtils.CommandResult r = ShellUtils.execCommand(AdbCommand.commands_startApp,true);
+            if (r.result == 0){
+                Logs.e(TAG,"成功执行打开app!");
+            }else{
+                Logs.e(TAG,"再次尝试执行打开app!");
+                Intent it = new Intent();
+                it.setClass(getApplicationContext(), DisplayActivity.class);
+                it.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getApplicationContext().startActivity(it);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

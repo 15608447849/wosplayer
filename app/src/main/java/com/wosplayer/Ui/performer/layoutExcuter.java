@@ -24,39 +24,20 @@ import rx.functions.Action0;
  * 执行布局
  */
 public class layoutExcuter implements TimeCalls {
-    private static final java.lang.String TAG = "layout Excuter";
-    private XmlNodeEntity layout ;
+    private static final java.lang.String TAG = "布局执行器";
+    private XmlNodeEntity data ;
     private IPlayer currentIplayer=null ;
     private ArrayList<XmlNodeEntity> contentArr = null;
-    private List<String> videoNameList = null;
-    public layoutExcuter(XmlNodeEntity layout) {
-        this.layout = layout;
-       // Logs.i(TAG,"创建成功");
-        //收集 有效 视频 数量
-        takeVideoVaildCount();
-    }
-    //收集有效 视频 数量
-    private void takeVideoVaildCount() {
-        contentArr = layout.getChildren();
-        for (XmlNodeEntity content : contentArr){
-            if (content.getXmldata().get("fileproterty").equals("video")){
-                if (videoNameList==null){
-                    videoNameList = new ArrayList<>();
-                }
-                videoNameList.add(content.getXmldata().get("getcontents"));
-            }
-        }
-
+    public layoutExcuter(XmlNodeEntity layoutData) {
+        this.data = layoutData;
+        contentArr = data.getChildren();
     }
 
     public void start(){
-
         if (contentArr==null || contentArr.size()==0){
-            Logs.e(TAG," 布局下 无内容列表" + layout.getChildren());
             return;
         }
-
-        //判断当前节目 是不是互动类型并且只存在一个 如果是  不开启定时任务
+        //判断当前节目是不是互动类型并且只存在一个如果是不开启定时任务
         if (contentArr.size()==1 && contentArr.get(0).getXmldata().get("fileproterty").equals("interactive")){
             //互动
             //直接创建
@@ -86,8 +67,7 @@ public class layoutExcuter implements TimeCalls {
 
         //获取内容播放时长
         long second = Long.parseLong(contentArr.get(_index).getXmldata().get("timelength"));
-       // Logs.i(TAG,"执行具体内容的播放: ["+contentArr.get(_index).getXmldata().get("contentsnewname") + "]当前时间毫秒数:"+System.currentTimeMillis());
-        //Logs.i(TAG,"在"+(second*1000)+"后执行下一个内容");
+
         startContent(contentArr.get(_index));
         //创建定时器任务
         //创建定时器
@@ -115,7 +95,6 @@ public class layoutExcuter implements TimeCalls {
     private void startContent(XmlNodeEntity content) {
         //重新组合数据 -> 生成 datalist
         if(content==null){
-            Logs.e(TAG,"布局 开始 生成 内容 err："+content);
             return;
         }
         Object[] dataArr = ReorganizationData(content);
@@ -127,16 +106,16 @@ public class layoutExcuter implements TimeCalls {
 
     //组装数据
     private Object[] ReorganizationData(XmlNodeEntity content) {
-        if (layout==null || content ==null ) {
+        if (data==null || content ==null ) {
             return null;
         }
         DataList datalist =new DataList();
         Object ob = null;
         //1 x,y,w,h  2.本地文件路径,<contentsnewname><![CDATA[1469177181932.mp4]]></contentsnewname> 3.<fileproterty>video</fileproterty>类型 4.资源uri    <getcontents><![CDATA[ftp://ftp:FTPmedia@172.16.0.19/uploads/1469177181932.mp4]]></getcontents>
-        String x = layout.getXmldata().get("x");
-        String y = layout.getXmldata().get("y");
-        String width = layout.getXmldata().get("width");
-        String height = layout.getXmldata().get("height");
+        String x = data.getXmldata().get("x");
+        String y = data.getXmldata().get("y");
+        String width = data.getXmldata().get("width");
+        String height = data.getXmldata().get("height");
         String fileproterty = content.getXmldata().get("fileproterty");//类型
         String getcontents = content.getXmldata().get("getcontents");//uri
         String localpath = UiExcuter.getInstancs().basepath+content.getXmldata().get("contentsnewname");//本地路径
@@ -154,7 +133,7 @@ public class layoutExcuter implements TimeCalls {
         datalist.put("timelength",timelength);
         datalist.put("uuks",UUKS);
         datalist.put("contentsname",contentsname);
-        String key = layout.getXmldata().get("id")+content.getXmldata().get("id")+content.getXmldata().get("materialid")+fileproterty+contentsname+UUKS;//生成一个唯一标识
+        String key = data.getXmldata().get("id")+content.getXmldata().get("id")+content.getXmldata().get("materialid")+fileproterty+contentsname+UUKS;//生成一个唯一标识
         datalist.setKey(key);//唯一标识
 
         if (fileproterty.equals("text")){
@@ -222,7 +201,7 @@ public class layoutExcuter implements TimeCalls {
         clearTimer();
         //清除数据
 //        Logs.i(TAG,"----"+layout.getChildren());
-        layout = null;
+        data = null;
         contentArr=null;
         //清理 内容 放在 主线程
         AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
@@ -231,7 +210,7 @@ public class layoutExcuter implements TimeCalls {
            clearContent();
             }
         });
-        Logs.i(TAG,"布局 停止了 "+this.toString());
+       // Logs.i(TAG,"布局 停止了 "+this.toString());
     }
 
     /**
@@ -246,7 +225,6 @@ public class layoutExcuter implements TimeCalls {
                 clearContent();
                 //生成iplayer
                 currentIplayer = contentTanslater.tanslationAndStart(datalist,ob,true,null,layoutExcuter.this);//创建必须放入主线程执行
-
             }
         });
     }
@@ -264,34 +242,9 @@ public class layoutExcuter implements TimeCalls {
 
     @Override
     public void playOvers(IPlayer play) {
-        if (play instanceof IVideoPlayer){
-          if(!checkValidVideo((IVideoPlayer)play)){
-              Logs.e(TAG,"无有效视频 播放默认视频资源");
-              return;
-          }
-        }
         start();
     }
 
 
 
-    //判断有效视频数量
-    private boolean checkValidVideo(IVideoPlayer video){
-        if (videoNameList!=null){
-            if(videoNameList.contains(video.singleFileUri)){
-             videoNameList.remove(video.singleFileUri);
-            }
-            if (FileUtils.isFileExist(video.singleFileUri) && !videoNameList.contains(video.singleFileUri)){
-                videoNameList.add(video.singleFileUri);
-            }
-            Logs.e(TAG," 有效 视频数:"+videoNameList.size());
-            if (videoNameList.size()==0){
-                //没有一个有效视频 -> 播放默认视频
-                    return false;
-            }
-            return true;
-        }
-
-      return true;
-    }
 }

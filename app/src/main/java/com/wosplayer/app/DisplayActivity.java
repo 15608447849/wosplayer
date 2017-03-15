@@ -5,6 +5,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -45,13 +46,14 @@ public class DisplayActivity extends Activity {
     private BroadcastReceiver commandCenter = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Logs.i(TAG,"onCreate");
         super.onCreate(savedInstanceState);
+        Logs.i(TAG,"onCreate");
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//保持屏幕常亮
         setContentView(R.layout.activity_main);//设置布局文件
         //注册指令广播
         registCommand();
         initActivity();
+        AppTools.LongToals(this,"欢迎使用,技术热线:4008-166-128");
     }
 //    @Override
 //    public void onStart() {
@@ -63,6 +65,13 @@ public class DisplayActivity extends Activity {
 //        super.onStop();
 //        Logs.i(TAG,"onStop");
 //    }
+
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        AppTools.LongToals(this,"[欢迎使用,技术热线:4008-166-128]");
+    }
 
     @Override
     public void onResume() {
@@ -89,10 +98,11 @@ public class DisplayActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-        Logs.i(TAG,"onDestroy");
         //注销指令广播
         unregistCommand();
+        super.onDestroy();
+        Logs.i(TAG,"onDestroy");
+        System.exit(0);
     }
     //键盘监听返回事件
     @Override
@@ -190,9 +200,9 @@ public class DisplayActivity extends Activity {
     private final Runnable keepAlive = new Runnable() {
         @Override
         public void run() {
-            mHandler.postDelayed(tryCommu,10*1000);
-            PlayApplication.sendMsgToServer(CommunicationService.ALIVE);
-            mHandler.postDelayed(keepAlive,45*1000);
+            mHandler.postDelayed(tryCommu,5*1000);
+            PlayApplication.sendMsgToServer(CommunicationService.ALIVE);//发送存活广播
+            mHandler.postDelayed(keepAlive,30*1000);
         }
     };
     public void communicationLives(){

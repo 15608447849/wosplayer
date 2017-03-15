@@ -13,7 +13,7 @@ import java.util.ArrayList;
  */
 public class programExcuter {
 
-    private static final java.lang.String TAG = "program Excuter";
+    private static final java.lang.String TAG = "节目执行";
     private XmlNodeEntity program = null;
     private ArrayList<layoutExcuter> layoutList = null;
     private String bgInfo;

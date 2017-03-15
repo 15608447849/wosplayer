@@ -185,46 +185,63 @@ public class AppTools {
     }
 
 
-    //默认排期
-    public static void defaultProgram(Context context,String dirpath) {
-        try {
-            // /mnt/sdcard/wosplayer/default/
-            if (!FileUtils.isFileExist(dirpath+"def.mp4")
-                    ||!FileUtils.isFileExist(dirpath+"default_sche.xml")
-                    ||!FileUtils.isFileExist(dirpath+"default_prog.xml")
-                    ){
-                //如果一个 - 不存在 - 删除目录
-                org.apache.commons.io.FileUtils.deleteDirectory(new File(dirpath));
-                //放入zip包
-                if(ToolsUtils.ReadAssectsDataToSdCard(context,dirpath,"default.zip")){
-                    //解压缩
-                    Logs.i("unzip","解压缩路径 : "+dirpath+"default.zip");
-                    ToolsUtils.UnZip(dirpath+"default.zip",dirpath);
-                    FileUtils.deleteFile(dirpath+"default.zip");
-                }
-
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void fudianBankSource(Context context,String dirpath){
+    public static boolean unzipFiles(Context context,String unzipPath,String unzipFialeName){
         try {
             //创建目录
-            SdCardTools.MkDir(dirpath);
+            SdCardTools.MkDir(unzipPath);
             //放入zip包
-            if(ToolsUtils.ReadAssectsDataToSdCard(context,dirpath,"bank.zip")){
+            if(ToolsUtils.ReadAssectsDataToSdCard(context,unzipPath,unzipFialeName)){
                 //解压缩
-                Logs.i("unzip","解压缩路径 : "+dirpath+"bank.zip");
-                ToolsUtils.UnZip(dirpath+"bank.zip",dirpath);
-                FileUtils.deleteFile(dirpath+"bank.zip");
+                Logs.i("解压缩文件","路径:"+unzipPath+unzipFialeName+" >> "+unzipPath+unzipFialeName.substring(0,unzipFialeName.lastIndexOf(".")));
+                ToolsUtils.UnZip(unzipPath+unzipFialeName,unzipPath);
+                FileUtils.deleteFile(unzipPath+unzipFialeName);
+                return true;
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return false;
     }
+//    //默认排期
+//    public static void defaultProgram(Context context,String dirpath) {
+//        try {
+//            // /mnt/sdcard/wosplayer/default/
+//            if (!FileUtils.isFileExist(dirpath+"def.mp4")
+//                    ||!FileUtils.isFileExist(dirpath+"default_sche.xml")
+//                    ||!FileUtils.isFileExist(dirpath+"default_prog.xml")
+//                    ){
+//                //如果一个 - 不存在 - 删除目录
+//                org.apache.commons.io.FileUtils.deleteDirectory(new File(dirpath));
+//                //放入zip包
+//                if(ToolsUtils.ReadAssectsDataToSdCard(context,dirpath,"default.zip")){
+//                    //解压缩
+//                    Logs.i("unzip","解压缩路径 : "+dirpath+"default.zip");
+//                    ToolsUtils.UnZip(dirpath+"default.zip",dirpath);
+//                    FileUtils.deleteFile(dirpath+"default.zip");
+//                }
+//
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+//    public static void fudianBankSource(Context context,String dirpath){
+//        try {
+//            //创建目录
+//            SdCardTools.MkDir(dirpath);
+//            //放入zip包
+//            if(ToolsUtils.ReadAssectsDataToSdCard(context,dirpath,"bank.zip")){
+//                //解压缩
+//                Logs.i("unzip","解压缩路径 : "+dirpath+"bank.zip");
+//                ToolsUtils.UnZip(dirpath+"bank.zip",dirpath);
+//                FileUtils.deleteFile(dirpath+"bank.zip");
+//            }
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     /**
      * 设置服务器信息成功 true
@@ -329,5 +346,32 @@ public class AppTools {
             e.printStackTrace();
         }
         return 1;
+    }
+    public static String subLastString(String var,String ff){
+        return var.substring(var.lastIndexOf(ff)+1);
+    }
+    /**
+     * 转换背景颜色代码
+     *
+     * @param colorValue
+     * @return
+     */
+    public static String TanslateColor(String colorValue) {
+        String color = null;
+        try {
+            String tem = Integer.toHexString(Integer.parseInt(colorValue));
+            if (tem.length() == 6) {
+                color = tem;
+            } else {
+                StringBuffer addZeor = new StringBuffer();
+                for (int i = 0; i < 6 - tem.length(); i++) {
+                    addZeor.append("0");
+                }
+                color = addZeor + tem;
+            }
+            return "#" + color;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

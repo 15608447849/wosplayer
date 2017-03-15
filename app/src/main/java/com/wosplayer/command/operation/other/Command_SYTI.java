@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
  *
  */
 public class Command_SYTI implements iCommand {
-	private static final String TAG = Command_SYTI.class.getName();
+	private static final String TAG ="终端时间同步";
 
 	//显示系统时间
 	public  void disableSystemSyncTime()
@@ -63,7 +63,7 @@ public class Command_SYTI implements iCommand {
 	}
 	@Override
 	public void execute(Activity activity, String param) {
-		Logs.i(TAG,"终端时间同步 parama:"+param +";当前线程:"+Thread.currentThread().getName());
+		Logs.i(TAG,"服务器时间:"+param);
 
 		if (!RegexMatches(param)){
 			Logs.e(TAG,"服务器参数不正确:" + param);
@@ -77,10 +77,9 @@ public class Command_SYTI implements iCommand {
 		//Logs.i(TAG,"准备设置时间参数 >date>> "+settingTime);
 		liunx_SU_syncTimeCmd(settingTime,"Asia/Shanghai");
 		//Logs.i(TAG,"当前设置时区 Asia/Shanghai >>> 时间 - "+getSystemTime());
-
+		Logs.i(TAG,"校队时间完毕.");
 		//再次执行排期读取
-		ScheduleReader.clear();
-		ScheduleReader.Start(false);
+		ScheduleReader.notifySchedule();
 	}
 
 	private boolean justTime(String androidTime,String serviceTime) {

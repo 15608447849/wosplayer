@@ -7,12 +7,12 @@ import com.wosplayer.app.PlayApplication;
  * Created by user on 2016/7/12.
  */
 public class InteractionCache {
-    private static final java.lang.String TAG = "互动缓存 : ";//InteractionCache.class.getName();
-    public static String uid;
+    private static final java.lang.String TAG = "互动缓存";//InteractionCache.class.getName();
+
 
     //存
     public static void push(String key, String value){
-        String k = key +"#"+uid+"#";
+        String k = key +"#";
         XmlSharedSave.SaveXmlData(PlayApplication.appContext,k,value);
         XMLCache.GetOb().saveCache(k,value);
 //        log.i(TAG,"本地存入:["+k+"],value:["+value+"]");
@@ -20,7 +20,7 @@ public class InteractionCache {
 
     //取
     public static String pull(String key){
-        String k = key +"#"+uid+"#";
+        String k = key +"#";
 //        log.i(TAG,"->  key:["+k+"]");
         String v = "";
        v = XMLCache.GetOb().getCache(k) ==null ? XmlSharedSave.readXmlData(PlayApplication.appContext,k) : XMLCache.GetOb().getCache(k) ;

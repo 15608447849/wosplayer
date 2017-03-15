@@ -38,7 +38,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class ScheduleSaver implements iCommand {
     private static ReentrantLock lock = new ReentrantLock();
-    private static final String TAG = ScheduleSaver.class.getName();
+    private static final String TAG = "[排期解析保存]";
 
     private final int ROOT_PARSE = 11;
     private final int SCHEDU_PROG_PARSE = 12;
@@ -66,8 +66,14 @@ public class ScheduleSaver implements iCommand {
      */
     @Override
     public void execute(Activity activity, String param) {
-        Logs.i(TAG,"解析 排期 信息, 当前线程名:"+Thread.currentThread().getName());
-        parseData(param);
+
+        if (param.equals("_notify")){
+            //通知更新排期 刷新界面
+            ScheduleReader.notifySchedule();
+        }else {
+            //Logs.i(TAG,"解析 排期 信息, 当前线程名:"+Thread.currentThread().getName());
+            parseData(param);
+        }
     }
     /**
      * 存储数据
@@ -120,8 +126,7 @@ public class ScheduleSaver implements iCommand {
         Logs.i(TAG,"执行排期数据解析序列化保存完成");
         //执行 数据读取者
         try {
-            ScheduleReader.clear();
-            ScheduleReader.Start(false);
+            ScheduleReader.notifySchedule();
         } catch (Exception e) {
             Logs.e(TAG," 开始读取本地排期数据时异常:" + e.getMessage());
         }

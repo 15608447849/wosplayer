@@ -7,6 +7,7 @@ import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.wosplayer.app.SystemConfig;
 
@@ -20,8 +21,9 @@ import cn.trinea.android.common.util.FileUtils;
  */
 
 public class WatchServerHelp extends IntentService{
+    private static final String TAG = "守护进程助手";
     public WatchServerHelp() {
-        super("守护进程助手");
+        super(TAG);
     }
     public static final String DEAMS_KEY = "keys";
     public static final int OPEN_DEAMS = 666;
@@ -50,7 +52,7 @@ public class WatchServerHelp extends IntentService{
         //获取包名
         String packageName = this.getPackageName();
         String temPath = createRootPath(this);
-        String watchServerPath = packageName+"/com.wos.play.rootdir.model_monitor.soexcute.WatchServer";
+        String watchServerPath = "am startservice --user 0 "+packageName+"/com.wos.play.rootdir.model_monitor.soexcute.WatchServer";
         String infopath = temPath+"/console";
         File f = new File(infopath);
         if (!f.exists()){
@@ -100,8 +102,10 @@ public class WatchServerHelp extends IntentService{
     }
 
     public static void openDeams(Context content) {
+        Log.e(TAG,"准备发送打开守护进程服务!");
         Intent intent = new Intent(content, WatchServerHelp.class);
         intent.putExtra(WatchServerHelp.DEAMS_KEY,WatchServerHelp.OPEN_DEAMS);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         content.startService(intent);
     }
 }

@@ -109,7 +109,7 @@ public class AdbCommand{
             //系统配置监听值
             SystemConfig.get().putOr("watchValue","0").save();
             //打开监听程序
-            WatchServerHelp.openDeams(context);
+            //WatchServerHelp.openDeams(context);
 
             if (ShellUtils.checkRootPermission()) {
                 //放入system

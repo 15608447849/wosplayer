@@ -25,11 +25,11 @@ import cn.trinea.android.common.util.StringUtils;
  */
 
 public class UiDataTanslation {
-    private static final String TAG = "数据->ui对象";
+    private static final String TAG = "xml数据->ui数据对象";
     //数据保存 - 存放节目
-    private static ArrayList<String> proglist = new ArrayList<>();
-    private static HashMap<String,ViewData> map = new HashMap<>();
-    //初始化参数
+    public static ArrayList<String> proglist = new ArrayList<>();
+    public static HashMap<String,ViewData> map = new HashMap<>();
+    //资源文件目录
     private static String sourcePath;
     private static String ffbkPath;
     private static boolean isInit = false;
@@ -38,6 +38,7 @@ public class UiDataTanslation {
         ffbkPath = SystemConfig.get().GetStringDefualt("fudianpath","");
         isInit = true;
     }
+    //添加数据
     private static void add(ViewData data){
         map.put(data.getTags(),data);
     };
@@ -46,6 +47,7 @@ public class UiDataTanslation {
         proglist.clear();
     }
 
+    //入口
     public static void tanslation(XmlNodeEntity schedule) {
         Logs.i(TAG, "线程名:" + Thread.currentThread().getName());
         try {

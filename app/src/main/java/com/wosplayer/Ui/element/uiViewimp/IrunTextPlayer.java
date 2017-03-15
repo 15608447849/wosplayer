@@ -98,17 +98,11 @@ public class IrunTextPlayer implements IPlayer{
             Logs.e(TAG, "stop :"+ e.getMessage());
         }
     }
-    //时间回调
-    private TimeCalls timeCalls = null;
 
     @Override
     public void setTimerCall(TimeCalls timer) {
-        timeCalls = timer;
+
     }
 
-    @Override
-    public void unTimerCall() {
-        timeCalls = null;
-    }
 
 }

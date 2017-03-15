@@ -9,10 +9,6 @@ import java.util.HashMap;
  * Created by 79306 on 2017/3/1.
  */
 public class ViewData {
-
-
-
-
     public enum  Widget {
         none,program,layout,interactive,abutton,alayout,afiles, fudianbank,webpage, url, rss, text, video, image;
     }
@@ -24,7 +20,6 @@ public class ViewData {
         }
         return type;
     }
-
     public static final int COLOR_NONE = -1;
     public static final int COLOR_IMAGE = 1;
     public static final int COLOR_COLOR = 0;

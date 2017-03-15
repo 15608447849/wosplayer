@@ -1,8 +1,10 @@
 package com.wosplayer.Ui.element.definedView;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
@@ -61,17 +63,6 @@ public class Mtextscroll extends SurfaceView implements SurfaceHolder.Callback, 
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-       // Log.i(TAG, "suface created (): [" + this.getHeight()+","+this.getWidth()+"]");
-//
-//        if (isMove) {//滚动效果
-//            if (orientation == MOVE_LEFT) {//向左
-//                x = getWidth();
-//            } else if (orientation == MOVE_RIGHT){//向右
-//                x = -(content.length() * 10);
-//            }
-//        } else {//不滚动只画一次
-//            draw();
-//        }
         start();
     }
     @Override
@@ -80,7 +71,6 @@ public class Mtextscroll extends SurfaceView implements SurfaceHolder.Callback, 
     }
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-//        loop = false;//停止线程
         stop();
     }
 
@@ -90,7 +80,7 @@ public class Mtextscroll extends SurfaceView implements SurfaceHolder.Callback, 
             try {
                 draw();
                 Thread.sleep(speed);
-            } catch (InterruptedException ex) {
+            } catch (Exception e) {
             }
         }
     }
@@ -105,6 +95,7 @@ public class Mtextscroll extends SurfaceView implements SurfaceHolder.Callback, 
        // log.i(TAG, "draw: start");
         //锁定画布
         Canvas canvas = getHolder().lockCanvas();
+        if(canvas == null) return;
         Paint paint = new Paint();
         float conlen = paint.measureText(content);
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);   //清屏
@@ -113,9 +104,10 @@ public class Mtextscroll extends SurfaceView implements SurfaceHolder.Callback, 
         paint.setTextSize(fontSize);//字体大小
         paint.setColor(Color.parseColor(fontColor));//字体颜色
         paint.setAlpha(fontAlpha);//字体透明度
-        canvas.drawText(content, x, (getHeight() / 2 + 5), paint);//画文字
+        canvas.drawText(content, x, (getHeight() - getFontHeight(paint))/2+getFontLeading(paint), paint);//画文字
         getHolder().unlockCanvasAndPost(canvas);//解锁显示
        // log.i(TAG, "draw: end");
+
         scroll(conlen);
     }
     //  内容所占像素
@@ -140,7 +132,20 @@ public class Mtextscroll extends SurfaceView implements SurfaceHolder.Callback, 
             }
         }
     }
-
+    /**
+     * @return 返回指定笔的文字高度
+     */
+    public float getFontHeight(Paint paint)  {
+        Paint.FontMetrics fm = paint.getFontMetrics();
+        return fm.descent - fm.ascent;
+    }
+    /**
+     * @return 返回指定笔离文字顶部的基准距离
+     */
+    public float getFontLeading(Paint paint)  {
+        Paint.FontMetrics fm = paint.getFontMetrics();
+        return fm.leading- fm.ascent;
+    }
     /**
      * 是否滚动
      */
@@ -259,4 +264,20 @@ public class Mtextscroll extends SurfaceView implements SurfaceHolder.Callback, 
             fontType = Typeface.SERIF;
         }
     }
+
+    public Bitmap getBitmap(){
+        Bitmap bitmap = null;
+        try {
+//            Canvas canvas = getHolder().lockCanvas();
+//            Logs.e(TAG,"截图 文字滚动 大小 ( "+getWidth()+" , "+getHeight()+" )");
+//            bitmap=Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+//            Paint p = new Paint();
+//            canvas.drawBitmap(bitmap,new Matrix(),p);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return bitmap;
+    }
+
+
 }

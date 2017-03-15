@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Handler;
 import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
 
@@ -18,6 +19,7 @@ import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
 import com.wosplayer.app.SystemConfig;
 import com.wosplayer.command.operation.schedules.ScheduleReader;
+import com.wosplayer.command.operation.schedules.correlation.StringUtils;
 import com.wosplayer.command.operation.schedules.correlation.XmlNodeEntity;
 
 import java.util.ArrayList;
@@ -26,6 +28,8 @@ import java.util.Comparator;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.ReentrantLock;
+
+import cn.trinea.android.common.util.FileUtils;
 
 /**
  * Created by Administrator on 2016/7/24.
@@ -56,8 +60,9 @@ public class UiExcuter {
     public void init(DisplayActivity activity){
         this.mActivity = activity;
         SystemConfig config = SystemConfig.get();
-        config.printData();
+//        config.printData();
         defVideoPath = config.GetStringDefualt("defaultVideo","");
+        defImagePath =  config.GetStringDefualt("defaultImage","");
         basepath = config.GetStringDefualt("basepath","");
         ffbkPath = config.GetStringDefualt("fudianpath","");
         defaultPath = config.GetStringDefualt("default","");
@@ -65,16 +70,16 @@ public class UiExcuter {
         BackRunner.runBackground(new Runnable() {
             @Override
             public void run() {
-                if (defaultPath.isEmpty() || ffbkPath.isEmpty()) return;
+                if (defaultPath.isEmpty() || ffbkPath.isEmpty() || mActivity==null ) return;
                 //将默认排期放入指定文件夹下
-                AppTools.defaultProgram(mActivity,defaultPath);
+                AppTools.unzipFiles(mActivity,defaultPath,"default.zip");
                 Logs.i("后台任务","默认排期解压缩完成");
                 //将默认图片或者视频放入指定 文件夹下
                 // Logs.i("后台任务","默认资源放入指定目录下 - "+resourcePath+"default.mp4 成功");
-                AppTools.fudianBankSource(mActivity,ffbkPath);
+                AppTools.unzipFiles(mActivity,ffbkPath,"bank.zip");
                 Logs.i("后台任务","富颠金融网页模板解压缩完成");
-                ScheduleReader.clear();
-                ScheduleReader.Start(false);
+                ScheduleReader.notifySchedule();
+
             }
         });
     }
@@ -91,20 +96,19 @@ public class UiExcuter {
     private static ReentrantLock lock = new ReentrantLock();
     public static boolean isStoping = false;
     public void StartExcuter(XmlNodeEntity schedule) {
-
-        Logs.i(TAG, "线程名:" + Thread.currentThread().getName());
+//        Logs.i(TAG, "线程名:" + Thread.currentThread().getName());
         if (schedule == null) {
             Logs.e(TAG, "不执行空排期");
             return;
         }
         if (!isInit) {
-            Logs.e(TAG, "不执行绘制UI界面");
+            Logs.e(TAG, "不执行绘制UI界面,尚未初始化Ui");
             return;
         }
         try {
             lock.lock();
             StopExcuter();
-            Logs.i(TAG, "开始关联数据");
+            Logs.i(TAG, "------------------------- 开始关联数据UI -------------");
             uiExcuter.settingSchedule(schedule);
         } catch (Exception e) {
             Logs.e(TAG, "ui 执行者 开始异常 " + e.getMessage());
@@ -114,7 +118,7 @@ public class UiExcuter {
     }
 
     public void StopExcuter() {
-                Logs.i(TAG, "清理界面中");
+                Logs.i(TAG, "UI清理界面中");
                 isStoping = true;
                 //清理 : 1 存在的定时器 2.初始化_index 3.清理节目执行者
                 clearTimer();
@@ -122,7 +126,7 @@ public class UiExcuter {
                 contentTanslater.clearCache();
                 clearProgramExcuter();
                 isStoping = false;
-                Logs.i(TAG, "清理完毕");
+                Logs.i(TAG, "------------清理完毕-------------");
     }
 
 
@@ -163,9 +167,10 @@ public class UiExcuter {
         //取消存在的定时器
         clearTimer();
         //执行 节目执行者
-        Logs.i(TAG, "执行节目执行者: " + programTimerlist.get(_index).getXmldata().get("title") + "当前时间毫秒数:" + System.currentTimeMillis());
+
         long second = Long.parseLong(programTimerlist.get(_index).getXmldata().get("programTime"));
-        Logs.i(TAG, "在" + (second * 1000) + "后执行下一个节目");
+
+        Logs.i(TAG, "节目名: " + programTimerlist.get(_index).getXmldata().get("title")+"; 持续时长: "+ second+"秒" );
         createProgramExcuter(programTimerlist.get(_index));
 
         //创建定时器
@@ -259,50 +264,29 @@ public class UiExcuter {
         }
     }
 
-
-
     //设置 main 视图 背景
     public void setMainBg(final String var){
         if (!isInit) return;
-        if (var==null || var.equals("null")){
-            mActivity.mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        mActivity.main.setBackgroundDrawable(null);
-                        mActivity.main.setBackgroundColor(Color.WHITE);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        }else
+        if (StringUtils.isEmpty(var))return;
         if (var.startsWith("#")){
             //颜色
-            mActivity.mHandler.post(new Runnable() {
+            runingMain(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         mActivity.main.setBackgroundColor(Color.parseColor(var));
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        mActivity.main.setBackgroundColor(Color.WHITE);
                     }
                 }
             });
         }else{
             //图片
-            Bitmap bitmap = ImageViewPicassocLoader.getBitmap(var,null);
-            if (bitmap==null){
-                //获取错误图片bitmap
-                final String errorTag = "errorimage";
-                bitmap = ImageStore.getInstants().getBitmapCache(errorTag);
-                if (bitmap==null || bitmap.isRecycled()){
-                    bitmap = BitmapFactory.decodeResource(mActivity.getResources(), R.drawable.error);
-                    ImageStore.getInstants().addBitmapCache(errorTag,bitmap);
-                }
+            if (!FileUtils.isFileExist(var)){
+                return;
             }
-            final BitmapDrawable drawable = new BitmapDrawable(bitmap);
-            mActivity.mHandler.post(new Runnable() {
+            final BitmapDrawable drawable = new BitmapDrawable(ImageViewPicassocLoader.getBitmap(var));
+            runingMain(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -328,5 +312,23 @@ public class UiExcuter {
         }
         return null;
     }
+    public Handler getHandle(){
+        if (isInit) {
+            return mActivity.mHandler;
+        }
+        return null;
+    }
+
+    public void runingMain(Runnable run){
+        if (isInit){
+            mActivity.mHandler.post(run);
+        }
+    }
+    public void runingMainDelayed(Runnable run,long delayMillis){
+        if (isInit){
+            mActivity.mHandler.postDelayed(run,delayMillis);
+        }
+    }
+
 
 }

@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.wosplayer.app.Logs;
+import com.wosplayer.command.kernal.CommandCenter;
+import com.wosplayer.command.operation.interfaces.CommandType;
 import com.wosplayer.download.operation.Task;
 import com.wosplayer.download.operation.TaskQueue;
 import com.wosplayer.service.UpdateApkServer;
@@ -116,6 +118,21 @@ public class DownloadManager extends IntentService
 
             Task task = Task.TaskFactory.createMutTask(terminalNo,savepath,(String)taskList.get(i));
             if (task!=null){
+                if (i == taskList.size()-1){
+                    task.setResult(new Task.TaskResult() {
+                        @Override
+                        public void onComplete(Task task) {
+                            //发送广播通知下Ui 下载素材完毕
+                            Intent intent = new Intent();
+                            intent.setAction(CommandCenter.action);
+                            Bundle bundle = new Bundle();
+                            bundle.putString(CommandCenter.cmd, CommandType.UPSC);
+                            bundle.putString(CommandCenter.param,"_notify");
+                            intent.putExtras(bundle);
+                            getApplicationContext().sendBroadcast(intent);
+                        }
+                    });
+                }
                 TaskQueue.getInstants().addTask(task);
             }
         }

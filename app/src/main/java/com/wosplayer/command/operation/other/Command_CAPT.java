@@ -10,7 +10,9 @@ import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.wosplayer.Ui.element.definedView.Mtextscroll;
 import com.wosplayer.Ui.element.definedView.Mvideo;
+import com.wosplayer.app.AppTools;
 import com.wosplayer.app.Logs;
 import com.wosplayer.app.SystemConfig;
 import com.wosplayer.command.operation.interfaces.iCommand;
@@ -40,7 +42,7 @@ import cn.trinea.android.common.util.ShellUtils;
  * catch screen
  */
 public class Command_CAPT implements iCommand {
-    private static final String TAG = "截全屏";
+    private static final String TAG = "截屏";
     @Override
     public void execute(Activity activity, String param) {
 //        String command = "screencap -p "+ basepath;
@@ -52,7 +54,7 @@ public class Command_CAPT implements iCommand {
     }
 
     private synchronized void liunxCommadScreen(Activity activity,String terminalNo, String savePath, String url) {
-        Logs.d(TAG,"开始截屏 - 保存:"+terminalNo+" - 本地截图:"+savePath+" - 上传地址: "+url);
+        Logs.d(TAG,"开始>> 保存:"+terminalNo+" - 本地截图:"+savePath+" - 上传地址: "+url);
         String cmd = "screencap -p "+savePath;
         ShellUtils.CommandResult result = ShellUtils.execCommand(cmd,true,true);
         if (result.result == 0){
@@ -60,11 +62,10 @@ public class Command_CAPT implements iCommand {
         }
         catchScreen(activity,terminalNo,savePath,url);
         //上传
-        uploadImage(terminalNo,savePath,url);
+        uploadImage(activity,terminalNo,savePath,url,false);
     }
 
     private void catchScreen(Activity activity,String terminalNo,String savePath,String url){
-
 
         try {
             File image = new File(savePath);
@@ -89,7 +90,7 @@ public class Command_CAPT implements iCommand {
             View view = activity.getWindow().getDecorView();
             // 获去屏幕的宽高
             Display display = activity.getWindowManager().getDefaultDisplay();
-            view.layout(0, 0, display.getWidth(), display.getHeight());
+//            view.layout(0, 0, display.getWidth(), display.getHeight());
             view.destroyDrawingCache();//or setDrawingCacheEnabled(false)
             view.setDrawingCacheEnabled(true);//提高绘图速度
             bgbmp = Bitmap.createBitmap(view.getDrawingCache());
@@ -101,15 +102,22 @@ public class Command_CAPT implements iCommand {
                 if (z instanceof Mvideo) {
 
                     Mvideo cvv = (Mvideo) z;
-                    videoImage = getVideoImage(cvv);
+                    videoImage =  cvv.getCurrentFrame();
+                    if (videoImage != null) {
+                        bgbmp = composeImage(z.getLeft(), z.getTop(), bgbmp, videoImage);
+                    }
+                }else if(z instanceof Mtextscroll){
+                    Mtextscroll cvv = (Mtextscroll) z;
+                    videoImage = cvv.getBitmap();
                     if (videoImage != null) {
                         bgbmp = composeImage(z.getLeft(), z.getTop(), bgbmp, videoImage);
                     }
                 }
             }
+
             if (bgbmp!=null){
                 //縮放
-                bgbmp = resizeImage(bgbmp,display.getWidth(), display.getHeight());
+                //bgbmp = resizeImage(bgbmp,360, 360);
                 // 保存新的位图到本地路径
                 fos = new FileOutputStream(savePath);
                 if (fos != null) {
@@ -130,40 +138,7 @@ public class Command_CAPT implements iCommand {
   }
 
 
-    /**
-     * get video image
-     */
-    private Bitmap getVideoImage(Mvideo cvv){
-        // 获得媒体信息的类
-        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-        try {
-            // 设置媒体文件
-            Logs.d(TAG," 媒体文件路径 : "+cvv.getFileName());
-            mmr.setDataSource(cvv.getFileName());
 
-            // 获取播放点
-            long pos = cvv.getCurrentPosition();
-            Logs.d(TAG," 媒体文件当前播放帧数 : "+pos);
-            // 获取播放点的缩略图
-            Bitmap bmp = mmr.getFrameAtTime(pos * 1000,MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
-            if (bmp != null) {
-                // 根据播放器大小返回图
-                return Bitmap.createScaledBitmap(bmp,
-                        cvv.getViewHeight(),
-                        cvv.getViewWidth(),
-                        true);
-            }
-
-        } catch (Exception e) {
-            e.getMessage();
-        } finally {
-            try {
-                mmr.release();
-            } catch (Exception e) {
-            }
-        }
-        return null;
-    }
     /**
      * 根据旧图的宽高做一个画布，把子图画到原图上，返回新图。
      * @param left
@@ -246,10 +221,8 @@ public class Command_CAPT implements iCommand {
     private void getSubView(View vg,List<View> list){
         if (vg instanceof ViewGroup) {
             ViewGroup vp = (ViewGroup) vg;
-            Logs.d("#& f: "+vp.toString());
             for (int i = 0; i < vp.getChildCount(); i++) {
                 View viewchild = vp.getChildAt(i);
-                Logs.d("#& :"+viewchild.toString());
                 if (viewchild instanceof ViewGroup){
                     getSubView(viewchild,list);
                 }else {//视图 添加
@@ -265,7 +238,7 @@ public class Command_CAPT implements iCommand {
      * upload
      *后台执行
      */
-    private void uploadImage(String terminalNo,String filePath,String url){
+    private void uploadImage(final Activity activity, String terminalNo, String filePath, String url, boolean isDelete){
         File image = new File(filePath);
         try {
             if (!image.exists()){
@@ -286,10 +259,16 @@ public class Command_CAPT implements iCommand {
             if (!result.equals("1")) {
                 new IllegalStateException("服务器返回值"+result);
             }
+//            activity.runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    AppTools.Toals(activity,"上传截图完成");
+//                }
+//            });
         } catch (Exception e) {
             Logs.e("上传截图失败:"+e.getMessage());
         }finally{
-           image.delete();
+           if (isDelete) image.delete();
         }
     }
 
