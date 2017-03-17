@@ -26,7 +26,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:text="none"
+                android:text=""
                 android:textStyle="bold"
                 android:layout_weight="1"/>
         </LinearLayout>
@@ -214,6 +214,66 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content">
             </Spinner>
+        <!-- 单选框  截屏保存 通知 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+            <TextView
+                android:layout_width="88dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="截屏保存:"
+                android:textStyle="bold" />
+            <RadioGroup
+                android:id="@+id/cap_save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:orientation="horizontal" >
+                <RadioButton
+                    android:id="@+id/cap_save_y"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="是" />
+                <RadioButton
+                    android:id="@+id/cap_save_n"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="否" />
+            </RadioGroup>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+            <TextView
+                android:layout_width="88dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="截屏通知:"
+                android:textStyle="bold" />
+            <RadioGroup
+                android:id="@+id/cap_notify"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:orientation="horizontal" >
+                <RadioButton
+                    android:id="@+id/cap_notify_y"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="是" />
+                <RadioButton
+                    android:id="@+id/cap_notify_n"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="否" />
+            </RadioGroup>
+        </LinearLayout>
         <!-- button -->
         <LinearLayout
             android:layout_width="match_parent"

@@ -49,6 +49,7 @@ public class CommandStore {
     public void init(DisplayActivity activity){
         mActivity = new WeakReference<DisplayActivity>(activity);
         createOp();
+        Logs.i(TAG,"完成初始化");
     }
 
     private void createOp() {

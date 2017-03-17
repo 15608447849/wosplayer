@@ -232,7 +232,7 @@ public class CommunicationService extends Service{
                         Thread.sleep(5);
                     }
                 }catch (Exception e){
-                    Logs.e(TAG,"发送消息到服务器 错误 :\n"+ e.getMessage());//尝试重新链接
+                    //Logs.e(TAG,"发送消息到服务器 错误 :"+ e.getMessage());//尝试重新链接
                     e.printStackTrace();
                     //重连接
                     reConnection();

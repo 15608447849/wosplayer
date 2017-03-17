@@ -23,7 +23,7 @@ public class RunJniHelper {
             theInstance = new RunJniHelper();
         return theInstance;
     }
-    public native void startMservice(String srvName, String sdcard,String ctrl,String infos,int sleep);
+    public native void startMservice(String srvName, String acty,String path,String infos,int sleep);
     public native void stopMservice(String sdcard);
     public native void liveAll(String ctrl);
     public native void killAll(String ctrl);

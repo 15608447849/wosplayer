@@ -19,16 +19,16 @@ public class Command_Close_App implements iCommand {
             if (param.equals("false")){
                 return;
             }
-            //设置系统配置-是否监听的值
-            SystemConfig.get().putOr("watchValue","1").save();
-//            Logs.i("===== 强制停止播放器运行 =====");
-             PlayApplication.stopCommunicationService();
             if (activity!=null){
                 OverAppDialog.popWind(activity,"关闭播放器,期待您的下次使用.",5);
             }
+
+            //设置不监听activity启动
+            SystemConfig.get().putOr("watchValue","1").save();
             Thread.sleep(5 * 1000);
-            android.os.Process.killProcess(android.os.Process.myPid());
+            PlayApplication.stopCommunicationService();
             System.exit(0);
+            android.os.Process.killProcess(android.os.Process.myPid());
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.IdRes;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -13,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -37,7 +39,7 @@ import cn.trinea.android.common.util.ShellUtils;
  */
 
 public class AppToolsFragment extends Fragment implements DisPlayInterface.onFragAction,
-        View.OnClickListener,AdapterView.OnItemSelectedListener{
+        View.OnClickListener,AdapterView.OnItemSelectedListener,RadioGroup.OnCheckedChangeListener {
     private static final String TAG = "APP配置页面";
     public static final String FLAG ="wostools";
     private DisplayActivity activity;
@@ -74,6 +76,11 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
 
     private Spinner storeSwitch;
     private SpnnerAdpter adapter2;
+
+    //单选
+    private RadioGroup cap_save;
+    private RadioGroup cap_notify;
+
     //本机信息
     private TextView localip;
     private Button sure;
@@ -124,8 +131,14 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
         version = (TextView)vp.findViewById(R.id.version);
         sure = (Button) vp.findViewById(R.id.sure);
         sure.setOnClickListener(this);
+        //截屏设置
+        cap_save = (RadioGroup) vp.findViewById(R.id.cap_save);
+        cap_save.setOnCheckedChangeListener(this);
+        cap_notify = (RadioGroup) vp.findViewById(R.id.cap_notify);
+        cap_notify.setOnCheckedChangeListener(this);
         return vp;
     }
+
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -180,7 +193,8 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
             restartBeatInterval.setText(dataList.GetStringDefualt("RestartBeatInterval","30"));
             localip.setText(dataList.GetStringDefualt("tip","127.0.0.1"));
             version.setText(AppTools.getAppVersion(activity)+"");
-
+            cap_save.check((dataList.GetIntDefualt("CaptureSave",0)==0)?R.id.cap_save_y:R.id.cap_save_n);
+            cap_notify.check((dataList.GetIntDefualt("CaptureNoty",0)==0)?R.id.cap_notify_y:R.id.cap_notify_n);
         }catch(Exception e)
         {
             Log.e("ToolsActivity ", e.getMessage());
@@ -365,17 +379,24 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
     public void onNothingSelected(AdapterView<?> parent) {
     }
 
-//    new Spinner.OnItemSelectedListener() {
-//        @Override
-//        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//            //选择完成
-//            view.setBackgroundColor(Color.WHITE);
-//            dataList.put("playMode",adapter.getDataOnIndex(position));
-//        }
-//
-//        @Override
-//        public void onNothingSelected(AdapterView<?> parent) {
-//
-//        }
-//    }
+
+    //单选框使用
+    @Override
+    public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
+        if (group.getId() == cap_save.getId()){
+            if (checkedId == R.id.cap_save_y){
+                dataList.put("CaptureSave","0"); //截屏保存
+            }else if (checkedId == R.id.cap_save_n){
+                dataList.put("CaptureSave","1");
+            }
+        }
+        if (group.getId() == cap_notify.getId()){
+            if (checkedId == R.id.cap_notify_y){
+                dataList.put("CaptureNoty","0"); //截屏通知
+            }else if (checkedId == R.id.cap_notify_n){
+                dataList.put("CaptureNoty","1");
+            }
+        }
+    }
+
 }

@@ -28,7 +28,7 @@ public class PlayApplication extends Application {
     public void onCreate() {
         super.onCreate();
         appContext = this.getApplicationContext();
-        AdbCommand.initSystem(appContext);//初始化系统,放入系统目录
+        //AdbCommand.initSystem(appContext);//初始化系统,放入系统目录
     }
     /**
      * 开启通讯服务

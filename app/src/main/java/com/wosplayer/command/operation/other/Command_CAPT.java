@@ -50,10 +50,12 @@ public class Command_CAPT implements iCommand {
         String capturePath = config.GetStringDefualt("CapturePath","");
         String uploadUrl = config.GetStringDefualt("CaptureURL","");
         String terminalNo = config.GetStringDefualt("terminalNo","");
-        liunxCommadScreen(activity,terminalNo,capturePath,uploadUrl);
+        boolean isDelete = (config.GetIntDefualt("CaptureSave",0) == 0 ?true:false);
+        boolean isNotify = (config.GetIntDefualt("CaptureNoty",0) == 0 ?true:false);
+        liunxCommadScreen(activity,terminalNo,capturePath,uploadUrl,isDelete,isNotify);
     }
 
-    private synchronized void liunxCommadScreen(Activity activity,String terminalNo, String savePath, String url) {
+    private synchronized void liunxCommadScreen(Activity activity,String terminalNo, String savePath, String url,boolean isdelete,boolean isnoty) {
         Logs.d(TAG,"开始>> 保存:"+terminalNo+" - 本地截图:"+savePath+" - 上传地址: "+url);
         String cmd = "screencap -p "+savePath;
         ShellUtils.CommandResult result = ShellUtils.execCommand(cmd,true,true);
@@ -61,8 +63,9 @@ public class Command_CAPT implements iCommand {
             Logs.d(TAG,"liunx 命令(screencap -p) 截屏成功 - "+savePath);
         }
         catchScreen(activity,terminalNo,savePath,url);
+
         //上传
-        uploadImage(activity,terminalNo,savePath,url,false);
+        uploadImage(activity,terminalNo,savePath,url,isdelete,isnoty);
     }
 
     private void catchScreen(Activity activity,String terminalNo,String savePath,String url){
@@ -238,7 +241,7 @@ public class Command_CAPT implements iCommand {
      * upload
      *后台执行
      */
-    private void uploadImage(final Activity activity, String terminalNo, String filePath, String url, boolean isDelete){
+    private void uploadImage(final Activity activity, String terminalNo, String filePath, String url, boolean isDelete,boolean isNotify){
         File image = new File(filePath);
         try {
             if (!image.exists()){
@@ -259,12 +262,13 @@ public class Command_CAPT implements iCommand {
             if (!result.equals("1")) {
                 new IllegalStateException("服务器返回值"+result);
             }
-//            activity.runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    AppTools.Toals(activity,"上传截图完成");
-//                }
-//            });
+            if (!isNotify) return;
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    AppTools.Toals(activity,"上传截图完成");
+                }
+            });
         } catch (Exception e) {
             Logs.e("上传截图失败:"+e.getMessage());
         }finally{

@@ -53,17 +53,9 @@ public class WatchServerHelp extends IntentService{
         String packageName = this.getPackageName();
         String temPath = createRootPath(this);
         String watchServerPath = "am startservice --user 0 "+packageName+"/com.wos.play.rootdir.model_monitor.soexcute.WatchServer";
-        String infopath = temPath+"/console";
-        File f = new File(infopath);
-        if (!f.exists()){
-            try {
-                f.createNewFile();
-            } catch (IOException e) {
-                infopath = "/dev/null";
-            }
-        }
+        String activityComd = "am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n "+packageName+"/com.wosplayer.app.DisplayActivity";
         int sleep = SystemConfig.get().read().GetIntDefualt("RestartBeatInterval",5);
-        RunJniHelper.getInstance().startMservice(watchServerPath,temPath,temPath,infopath,sleep);
+        RunJniHelper.getInstance().startMservice(watchServerPath,activityComd,temPath,temPath+"/clogs",sleep);
     }
     private void close() {
         RunJniHelper.getInstance().stopMservice(createRootPath(this));
@@ -102,10 +94,15 @@ public class WatchServerHelp extends IntentService{
     }
 
     public static void openDeams(Context content) {
-        Log.e(TAG,"准备发送打开守护进程服务!");
+        Log.e(TAG,"准备打开守护进程服务!");
         Intent intent = new Intent(content, WatchServerHelp.class);
         intent.putExtra(WatchServerHelp.DEAMS_KEY,WatchServerHelp.OPEN_DEAMS);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        content.startService(intent);
+    }
+    public static void closeDeams(Context content) {
+        Log.e(TAG,"准备关闭守护进程服务!");
+        Intent intent = new Intent(content, WatchServerHelp.class);
+        intent.putExtra(WatchServerHelp.DEAMS_KEY,WatchServerHelp.CLOSE_DEAMS);
         content.startService(intent);
     }
 }

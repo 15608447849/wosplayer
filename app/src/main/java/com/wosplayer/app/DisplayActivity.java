@@ -53,30 +53,13 @@ public class DisplayActivity extends Activity {
         //注册指令广播
         registCommand();
         initActivity();
-        AppTools.LongToals(this,"欢迎使用,技术热线:4008-166-128");
+
     }
-//    @Override
-//    public void onStart() {
-//        Logs.i(TAG,"onStart");
-//        super.onStart();
-//    }
-//    @Override
-//    public void onStop() {
-//        super.onStop();
-//        Logs.i(TAG,"onStop");
-//    }
-
-
     @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        AppTools.LongToals(this,"[欢迎使用,技术热线:4008-166-128]");
-    }
+    public void onStart() {
+        super.onStart();
+        Logs.i(TAG,"onStart");
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        Logs.i(TAG,"onResume");
         //是否已经设置了服务器信息?
         if (AppTools.isSettingServerInfo(this)){
             //开始工作
@@ -86,36 +69,56 @@ public class DisplayActivity extends Activity {
             openWosTools();
         }
     }
+
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Logs.i(TAG,"onStop");
+        //结束工作
+        if (AppTools.isSettingServerInfo(this)){
+            stop(true);
+        }
+    }
+
+
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Logs.i(TAG,"onResume");
+    }
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Logs.i(TAG,"onNewIntent");
+    }
     @Override
     protected void onPause() {
         super.onPause();
         Logs.i(TAG,"onPause");
-        //结束工作
-        if (AppTools.isSettingServerInfo(appContext)){
-            stop(true);
-        }
     }
 
     @Override
     protected void onDestroy() {
         //注销指令广播
+        Logs.i(TAG,"onDestroy");
         unregistCommand();
         super.onDestroy();
-        Logs.i(TAG,"onDestroy");
         System.exit(0);
     }
     //键盘监听返回事件
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK ) {
-                        return true;
-                    }
+                        return true;}
         return super.onKeyDown(keyCode, event);
     }
     //初始化 activity
     private void initActivity() {
         mHandler = new PlayHandler(this);
-        CommandStore.getInstands().init(this);
+        CommandStore.getInstands().init(this);//命令集
         main = (AbsoluteLayout) this.findViewById(R.id.uilayer);
         fragmentLayer = (FrameLayout)this.findViewById(R.id.frgment_layout);
         closebtn =  (FrameLayout) findViewById(R.id.close_layer);
@@ -127,8 +130,7 @@ public class DisplayActivity extends Activity {
             }
         });
         //长按 显示/隐藏 信息输出
-        /*setOnLongClickListener中return的值决定是否在长按后再加一个短按动作
-                true为不加短按,false为加入短按*/
+        /*setOnLongClickListener中return的值决定是否在长按后再加一个短按动作true为不加短按,false为加入短按*/
         closebtn.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -141,16 +143,14 @@ public class DisplayActivity extends Activity {
 
     //开始工作
     public void start(){
+
             playTypeStart();
-            //执行监听通讯服务是否存活
-            mHandler.post(keepAlive);
+            openCommunication();
     }
+
     //结束工作 - true,关闭 activity
     public void stop(boolean isclose){
-            //关闭通讯服务检测
-            mHandler.removeCallbacks(tryCommu);
-            mHandler.removeCallbacks(keepAlive);
-            PlayApplication.stopCommunicationService();
+            closeCommunication();
             closeWosTools();
             playTypeStop();
             if (isclose) finish();
@@ -158,7 +158,6 @@ public class DisplayActivity extends Activity {
     private void playTypeStart() {
         try {
             UiExcuter.getInstancs().init(this);//初始化ui
-
         } catch (Exception e) {
             Logs.e(TAG,"activity 开始执行读取排期失败");
         }
@@ -171,6 +170,18 @@ public class DisplayActivity extends Activity {
         }
     }
 
+    private void openCommunication() {
+        PlayApplication.startCommunicationService();
+        //执行监听通讯服务是否存活
+        mHandler.post(keepAlive);
+    }
+    private void closeCommunication() {
+        PlayApplication.stopCommunicationService();
+        //关闭通讯服务检测
+        mHandler.removeCallbacks(tryCommu);
+        mHandler.removeCallbacks(keepAlive);
+    }
+    //注册广播
     private void registCommand() {
         if (commandCenter!=null) return;
         commandCenter = new CommandCenter();
@@ -178,6 +189,7 @@ public class DisplayActivity extends Activity {
         ifl.addAction(CommandCenter.action);
         this.registerReceiver(commandCenter,ifl);
     }
+    //注销广播
     private void unregistCommand() {
         if (commandCenter!=null){
             try {
@@ -188,6 +200,17 @@ public class DisplayActivity extends Activity {
             }
         }
     }
+
+
+    //尝试连接通讯服务
+    private final Runnable keepAlive = new Runnable() {
+        @Override
+        public void run() {
+            mHandler.postDelayed(tryCommu,10*1000);
+            PlayApplication.sendMsgToServer(CommunicationService.ALIVE);//发送存活检测信息
+            mHandler.postDelayed(keepAlive,60*1000);
+        }
+    };
     private final Runnable tryCommu = new Runnable() {
         @Override
         public void run() {
@@ -195,19 +218,12 @@ public class DisplayActivity extends Activity {
             PlayApplication.startCommunicationService();
         }
     };
-
-    //尝试连接通讯服务
-    private final Runnable keepAlive = new Runnable() {
-        @Override
-        public void run() {
-            mHandler.postDelayed(tryCommu,5*1000);
-            PlayApplication.sendMsgToServer(CommunicationService.ALIVE);//发送存活广播
-            mHandler.postDelayed(keepAlive,30*1000);
-        }
-    };
     public void communicationLives(){
-        //移出 启动通讯服务广播
-        mHandler.removeCallbacks(tryCommu);
+        //移出启动通讯服务广播
+        if (mHandler!=null){
+            Logs.d(TAG,"本地通讯正常.");
+            mHandler.removeCallbacks(tryCommu);
+        }
     }
 
 
