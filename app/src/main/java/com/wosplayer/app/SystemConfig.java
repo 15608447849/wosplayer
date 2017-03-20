@@ -107,6 +107,7 @@ public class SystemConfig extends DataList{
         //截屏参数
         map.put("CaptureSave","0");//截屏是否保存
         map.put("CaptureNoty","0");//截屏是否通知
+        map.put("CaptureMode","0");// ,命令截屏优先
         //保存数据
         boolean isWrite = FileUtils.writeFile(PATH,AppTools.mapToJson(map));
         if (isWrite){Logs.d(TAG, " ---播放器配置已还原默认设置 ---");}

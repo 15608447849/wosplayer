@@ -165,11 +165,11 @@ public class AdbCommand{
      */
     public static String inputCommand(String option,String param){
         if (option!=null && !option.equals("")){
-            if (option.equals("-p")){
+            if (option.equals("p")){
                 //打开远程连接端口号,默认9999
                 return openPoint(param);
             }
-            if (option.equals("-r")){
+            if (option.equals("r")){
                 //卸载
                 return uninstallTelminal();
             }

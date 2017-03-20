@@ -15,6 +15,7 @@ import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
 import com.wosplayer.app.SystemConfig;
 import com.wosplayer.command.kernal.CommandCenter;
+import com.wosplayer.command.operation.interfaces.CommandType;
 import com.wosplayer.command.operation.other.Command_UPDC;
 import com.wosplayer.command.operation.schedules.correlation.StringUtils;
 
@@ -47,7 +48,8 @@ public class CommunicationService extends Service{
     private int port;// 6666
     private String terminalNo;
     private long HeartBeatTime;
-    private boolean isConnected = false;
+    private boolean isConnected = false; // 连接完成标识
+    private boolean isDconnecting = false;//断开连接标识
     private boolean send_offline = true;//发送下线通知
     private ReentrantLock msgStoreLock = new ReentrantLock();//消息队列锁
     private List<String> msgSendingList = Collections.synchronizedList(new LinkedList<String>()); //消息待发送队列
@@ -104,8 +106,7 @@ public class CommunicationService extends Service{
     @Override
     public void onCreate() {
         super.onCreate();
-        Logs.i(TAG,"----------------------onCreate---------------------开启通讯服务-------------------------------------------------------------------------");
-
+        Logs.i(TAG,"开启后台通讯服务");
     }
     /**
      * 返回值
@@ -117,6 +118,7 @@ public class CommunicationService extends Service{
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
             Logs.e(TAG,"尝试读取本地配置文件信息启动通讯服务");
             SystemConfig config = SystemConfig.get().read();
             ip = config.GetStringDefualt("serverip","127.0.0.1");
@@ -124,24 +126,24 @@ public class CommunicationService extends Service{
             terminalNo = config.GetStringDefualt("terminalNo","");
             HeartBeatTime = config.GetIntDefualt("HeartBeatInterval",30) * 1000;
 
-            Logs.i(TAG,"onStartCommand() >>> ip: "+ip+";端口: "+port+";终端号: "+terminalNo+";心跳时间 :"+ HeartBeatTime);
+            Logs.i(TAG,"onStartCommand() >>> [ ip: "+ip+" ;端口: "+port+" ;终端号: "+terminalNo+" ;心跳时间 :"+ HeartBeatTime+" ]");
         if (StringUtils.isEmpty(ip) || StringUtils.isEmpty(terminalNo)){
             Logs.e(TAG,"連接服務 參數不正確 服务不启动socket连接.");
+        }else if (isDconnecting){
+            Logs.e(TAG,"連接服務 socket 正在断开连接中,将停止重新连接行为,等待下次连接行为的触发中...");
+            //停止 连接线程
+            closeConnServerThread();
+            //停止通讯
+            stopCommunication();
+
+        }else if (socket!=null && isConnected && justConnectAddress(ip,port)){
+            //连接中的地址相同
+            Logs.e(TAG,"連接服務 socket 正在连接中...");
         }else{
-            if (socket!=null){
-                //连接中
-                if (isConnected){
-                    if (justConnectAddress(ip,port)){
-                        //连接中的地址相同
-                        Logs.e(TAG,"連接服務 socket 正在连接中...");
-                        return super.onStartCommand(intent, flags, startId);
-                    }
-                }
-            }
-            //未连接 打开连接
-           openConnServerThread();
+            //未连接打开连接
+            openConnServerThread();
         }
-        return super.onStartCommand(intent, flags, startId);
+        return START_NOT_STICKY;
     }
 
     /**
@@ -150,7 +152,7 @@ public class CommunicationService extends Service{
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Logs.e(TAG,"--------------------------------------------------------------通讯服务 停止-------------------------------------------------------------------------");
+        Logs.e(TAG,"结束后台通讯服务");
         stopCommunication();
     }
 
@@ -158,9 +160,8 @@ public class CommunicationService extends Service{
     private boolean justConnectAddress(String ip,int port){
         String mhost = socket.getInetAddress().getHostAddress();
         int mport = socket.getPort();
-        Logs.e(TAG,"当前连接的远程地址: "+mhost+":"+mport);
-        if (ip.equals(mhost) && port == mport) return true;
-        return false;
+        Logs.e(TAG,"当前连接中的远程地址:[ "+mhost+":"+mport+" ]");
+        return ip.equals(mhost) && port == mport;
     }
 /////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -189,7 +190,7 @@ public class CommunicationService extends Service{
                 try {
                     if (dataInputStream!=null && dataInputStream.available() > 0) {
                         msg = dataInputStream.readUTF();
-                        Logs.i(TAG,"收到服务器信息: " + msg);
+                        Logs.w(TAG,"收到服务器信息: " + msg);
                        cmd = msg.substring(0, 5);
                         param = msg.substring(5);
                         postTask(cmd,param);
@@ -221,15 +222,13 @@ public class CommunicationService extends Service{
             while(isConnected && isStart){
                 //在连接中 并且 开始了
                 try{
-
                     msg = null;
                     //获取一个消息
                     msg =  getMsg();
-                    if (msg != null && !msg.equals("")){
-                         Logs.e(TAG," 发送一条信息到服务器 :" + msg);
+                    if (msg != null && !msg.equals("") && !isDconnecting){
                         dataOutputStream.writeUTF(msg);
                         dataOutputStream.flush();
-                        Thread.sleep(5);
+                        Logs.e(TAG," 发送一条信息到服务器 :" + msg);
                     }
                 }catch (Exception e){
                     //Logs.e(TAG,"发送消息到服务器 错误 :"+ e.getMessage());//尝试重新链接
@@ -308,57 +307,54 @@ public class CommunicationService extends Service{
      */
     private void startCommunication(){
         //Logs.i(TAG,"startCommunication() >>>\n当前所在线程:"+Thread.currentThread().getName()+"\n当前线程数量:"+Thread.getAllStackTraces().size());
-
-        //创建接受消息线程,发送消息线程
-        startReceiveThreadAndSendThread();
         //注册发送消息的广播
         registSendBroad();
+        //创建接受消息线程,发送消息线程
+        startReceiveThreadAndSendThread();
         //开始心跳
         startHeartbeat();
         //发送上线指令
-        String msg = "ONLI:" + terminalNo;//
+        String msg = CommandType.ONLI + terminalNo;//
         sendMsgToService(msg);
-        msg = "GVAY:" + terminalNo+"#"+ AppTools.getAppVersion(getApplicationContext() );//通知获取版本号信息
+        msg = CommandType.GVAY + terminalNo+"#"+ AppTools.getAppVersion(getApplicationContext() );//通知获取版本号信息
         sendMsgToService(msg);
+        Logs.i(TAG,"=========================== 开始和服务器("+ip+":"+port+")的通讯 ===========================");
     }
     /**
      * 结束通讯
      */
     private void stopCommunication(){
-        //结束心跳
-        stopHeartbeat();
         //是否发送下线通知
         if(send_offline){
-            String msg = "OFLI:" + terminalNo;
-            sendMsgToService(msg);
+            sendMsgToService(CommandType.OFLI + terminalNo);
         }
         //注销广播
         unregistSSendBroad();
+        //结束心跳
+        stopHeartbeat();
         //断开 接受消息 线程,断开发送消息线程
         stopReceiveThreadAndSendThread();
         //结束链接
         desConnection();
-        Logs.i(TAG,"---结束通讯---");
+        Logs.i(TAG,"=========================== 结束和服务器("+ip+":"+port+")的通讯 ===========================");
     }
     /////////////////////////////////////////////////////////////////////////////////////
     //创建链接
     private void createrSocketConnect() {
         //如果已连接 断开连接
-        if (isConnected){
-            desConnection();
-        }
+        if (isConnected) desConnection();
         try {
             if (socket==null){
-                Logs.i(TAG,"尝试创建socket 连接...");
+                Logs.i(TAG,"尝试创建socket连接中...");
                 socket = new Socket(ip , port);
                 dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
                 dataInputStream    = new DataInputStream(socket.getInputStream());
                 isConnected=true;
-                Logs.i(TAG,"连接服务器成功 > " +ip+":"+port);
+                Logs.i(TAG,"连接服务器成功,服务器地址 - [ " +ip+":"+port+" ]");
             }
         } catch (IOException e) {
             Logs.e(TAG,"socket connection err: "+ e.getMessage());
-            e.printStackTrace();
+//            e.printStackTrace();
             isConnected=false;//完成连接
         }
     }
@@ -381,32 +377,36 @@ public class CommunicationService extends Service{
      */
     private void desConnection(){
         Logs.i(TAG,"断开连接中....");
-
+        isDconnecting = true;
         if (dataOutputStream != null) {
             try {
                 dataOutputStream.close();
-                dataOutputStream=null;
             } catch (Exception e) {
                 Logs.e(TAG,"dataOutputStream断开连接错误: " + e.getMessage()+"; "+e.getCause());
+            }finally {
+                dataOutputStream=null;
             }
         }
         if (dataInputStream != null) {
             try {
                 dataInputStream.close();
-                dataInputStream=null;
             } catch (IOException e) {
                 Logs.e(TAG,"dataInputStream断开连接错误: " + e.getMessage()+"; "+e.getCause());
+            }finally {
+                dataInputStream=null;
             }
         }
         if (socket != null) {
             try {
                 socket.close();
-                socket=null;
             } catch (Exception e) {
                 Logs.e(TAG,"socket断开连接错误: " + e.getMessage()+"; "+e.getCause());
+            }finally {
+                socket=null;
             }
         }
         isConnected = false;//不在连接中
+        isDconnecting = false;
     }
     /**
      *  发送信息
@@ -522,17 +522,17 @@ public class CommunicationService extends Service{
             while(isStart){
                 if (isCreateConne){
                     //已经创建链接
-                    //打开通讯
-                    startCommunication();
                     stopMe();
                     Logs.i(TAG,"连接服务器线程,完成任务");
+                    //打开通讯
+                    startCommunication();
                 }else{
                     //创建链接
                     isCreateConne = createConnect();
                     try {
                         Thread.sleep(reCreateConnTime);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        stopMe();
                     }
                 }
             }
@@ -541,13 +541,17 @@ public class CommunicationService extends Service{
     private ConnectServerThread connHelper = null;
     //开启 链接服务器的 助手
     private void openConnServerThread(){
+        closeConnServerThread();
+        connHelper = new ConnectServerThread();
+        connHelper.startMe();
+        connHelper.start();
+    }
+
+    private void closeConnServerThread() {
         if (connHelper!=null){
             connHelper.stopMe();
             connHelper = null;
         }
-        connHelper = new ConnectServerThread();
-        connHelper.startMe();
-        connHelper.start();
     }
 
 

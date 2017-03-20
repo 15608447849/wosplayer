@@ -226,6 +226,10 @@ public final class CommandType {
      *更行apk
      */
     public static final String UPDC = "UPDC:";
+    /**
+     * 上传app 版本号
+     */
+    public static final String GVAY = "GVAY:";
 
     /**
      * 设置 关闭app 密码

@@ -108,7 +108,7 @@ public class CommandStore {
         BackRunner.runBackground(new Runnable() {
             @Override
             public void run() {
-                Logs.i(TAG,"执行 - "+cmd+" :"+ param);
+                Logs.i(TAG,"执行 - ["+cmd+"] - ["+ param+"]");
                 commandList.get(cmd).execute(mActivity.get(),param);
             }
         });

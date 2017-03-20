@@ -24,6 +24,7 @@ public class Command_Reboot_Sys implements iCommand {
             int time = 5;
             PlayApplication.stopCommunicationService();
             OverAppDialog.popWind(activity,"警告:系统将在"+time+"秒后重启",time);
+            PlayApplication.stopCommunicationService();
             ShellUtils.execCommand(AdbCommand.rebootTelOnTime(time),true);
         } catch (Exception e) {
             e.printStackTrace();

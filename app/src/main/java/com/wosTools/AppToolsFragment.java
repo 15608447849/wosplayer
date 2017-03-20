@@ -160,7 +160,6 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
     {
         //检测sd卡
         SdCardTools.checkSdCard(activity);
-
         Logs.i(TAG, "-------------------开始加载本机数据--------------------------------");
         dataList= SystemConfig.get().read();
         DisplayMetrics m_dm = new DisplayMetrics();
@@ -172,7 +171,6 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
         dataList.put("tip",AppTools.getLocalIpAddress());
         //获取本机机器码
         dataList.put("mac",AppTools.GetMac(activity));
-
     }
 
     /**
@@ -192,7 +190,7 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
             storageLimits.setText(dataList.GetStringDefualt("storageLimits","50"));
             restartBeatInterval.setText(dataList.GetStringDefualt("RestartBeatInterval","30"));
             localip.setText(dataList.GetStringDefualt("tip","127.0.0.1"));
-            version.setText(AppTools.getAppVersion(activity)+"");
+            version.setText("version-["+AppTools.getAppVersion(activity)+"]");
             cap_save.check((dataList.GetIntDefualt("CaptureSave",0)==0)?R.id.cap_save_y:R.id.cap_save_n);
             cap_notify.check((dataList.GetIntDefualt("CaptureNoty",0)==0)?R.id.cap_notify_y:R.id.cap_notify_n);
         }catch(Exception e)
@@ -213,7 +211,6 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
      */
     public void GetViewValue()
     {
-
         ArrayList<String> pathList = new ArrayList<>();
         String serverId = serverip.getText().toString();
         String serverPort = serverport.getText().toString();
@@ -331,35 +328,44 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
     private void excute(String cmd) {
         //分解字符串
         String[] cmds = cmd.split("\\s+");
-        if (cmds[0].equals("tcmd")){
+            String command = null;
             String option = null;
             String param = null;
             try {
+                command = cmds[0];
                 option = cmds[1];
+                if (!command.equals("wos")) throw new IllegalStateException("error command");
             } catch (Exception e) {
-                NotityActivty("无效选项");
+                NotityActivty("无效命令或无效选项");
+                return;
             }
-            try {
-                param = cmds[2];
-            } catch (Exception e) {
-            }
-
-            String result = AdbCommand.inputCommand(option,param);
-            if (result.equals("")) {
-                NotityActivty("不匹配命令或选项");
-            }
-            else{
-                //执行
-                ShellUtils.CommandResult rt = ShellUtils.execCommand(result,true);
-                if (rt.result == 0){
-                    NotityActivty("执行成功");
-                }else{
-                    NotityActivty("执行失败");
+            try{
+               param = cmds[2];
+            }catch (Exception e){}
+            if (option.equals("screen")){
+                    if (null != param && param.equals("draw")){
+                        //设置绘制方案截屏
+                        dataList.put("CaptureMode","1");
+                    }else{
+                        dataList.put("CaptureMode","0");
+                    }
+                NotityActivty("执行成功");
+                    return;
+            }else{
+                String result = AdbCommand.inputCommand(option,param);
+                if (result.equals("")) {
+                    NotityActivty("没有可行操作匹配命令或选项");
+                }
+                else{
+                    //执行
+                    ShellUtils.CommandResult rt = ShellUtils.execCommand(result,true);
+                    if (rt.result == 0){
+                        NotityActivty("执行成功");
+                    }else{
+                        NotityActivty("执行失败");
+                    }
                 }
             }
-        }else{
-            NotityActivty("无效命令");
-        }
     }
 
     @Override
