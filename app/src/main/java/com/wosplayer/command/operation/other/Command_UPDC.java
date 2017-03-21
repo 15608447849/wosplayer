@@ -15,6 +15,7 @@ import com.wosplayer.app.Logs;
 import com.wosplayer.app.SystemConfig;
 import com.wosplayer.command.operation.interfaces.iCommand;
 import com.wosplayer.download.kernal.DownloadManager;
+import com.wosplayer.tool.SdCardTools;
 
 
 import org.dom4j.Document;
@@ -24,6 +25,8 @@ import org.dom4j.io.SAXReader;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import cn.trinea.android.common.util.ShellUtils;
 
@@ -32,41 +35,44 @@ import cn.trinea.android.common.util.ShellUtils;
  */
 public class Command_UPDC implements iCommand {
 
-    private  static final String TAG = "终端升级";
+    private static final String TAG = "终端升级";
+    private HttpUtils http = null;
+
     @Override
     public void execute(Activity activity, String param) {
-        Logs.i(TAG,"更新app: "+param);
-        getRemoteVersionCode(activity,param);
+
+        SystemConfig config = SystemConfig.get().read();
+        String terminalNo = config.GetStringDefualt("terminalNo", "");
+        String tepPath = config.GetStringDefualt("updatepath", "");
+        getRemoteVersionCode(activity, param, terminalNo, tepPath);
     }
 
     /**
      * 获取远程版本号
      */
-    private void getRemoteVersionCode(final Activity activity,String uri) {
-        String apkVersionUri = uri;
-
-        HttpUtils http = new HttpUtils();
+    private void getRemoteVersionCode(final Activity activity, final String apkVersionInfoUri, final String terminalNo, final String tepPath) {
+        if (http == null) {
+            http = new HttpUtils();
+        }
         http.send(HttpRequest.HttpMethod.GET,
-                apkVersionUri,
-                new RequestCallBack<String>(){
+                apkVersionInfoUri,
+                new RequestCallBack<String>() {
+                    @Override
+                    public void onStart() {
+                    }
+
                     @Override
                     public void onLoading(long total, long current, boolean isUploading) {
                     }
 
                     @Override
                     public void onSuccess(ResponseInfo<String> responseInfo) {
-                        Logs.i(TAG,"版本升级文本信息:"+responseInfo.result);
-                        parseRemoteInfo(activity,responseInfo.result);
-                    }
-
-                    @Override
-                    public void onStart() {
-
+                        parseRemoteInfo(activity, responseInfo.result, terminalNo, tepPath);
                     }
 
                     @Override
                     public void onFailure(HttpException error, String msg) {
-                        Logs.i(TAG,"升级包下载失败:" + msg);
+                        PlayApplication.sendMsgToServer("UPDC:" + terminalNo + "#[获取版本信息失败:" + msg + "]#[URL:" + apkVersionInfoUri + "]");
                     }
                 });
     }
@@ -74,111 +80,50 @@ public class Command_UPDC implements iCommand {
     /**
      * 解析远程版本信息
      */
-    private void parseRemoteInfo(Activity activity,String info){
-
-        InputStream inStream = new ByteArrayInputStream(info.getBytes());
-        // 创建saxReader对象
-        SAXReader reader = new SAXReader();
-        Document document = null;
+    private void parseRemoteInfo(Activity activity, String info, String terminalNo, String tepPath) {
         try {
-            document = reader.read(inStream);
+            Logs.i(TAG, "版本升级文本信息:\n" + info + "\n");
+            InputStream inStream = new ByteArrayInputStream(info.getBytes());
+            // 创建saxReader对象
+            SAXReader reader = new SAXReader();
+            Document document = reader.read(inStream);
+            //获取根节点元素对象
+            Element antivirus = document.getRootElement();
+            String url = antivirus.element("path").getText();
+
+            ShellUtils.CommandResult result = ShellUtils.execCommand("chmod 777 " + tepPath, true);
+            if (result.result == 0) {
+                //去下载
+                settingLoadingApkParam(activity, url, terminalNo, tepPath);
+            } else {
+                PlayApplication.sendMsgToServer("UPDC:" + terminalNo + "#[本地路径:" + tepPath + ",权限不足]");
+            }
         } catch (DocumentException e) {
             e.printStackTrace();
         }
-        //获取根节点元素对象
-        Element antivirus = document.getRootElement();
+    }
 
+    private void settingLoadingApkParam(Activity activity, String url, String terminalNo, String tepPath) {
+        //下载升级包
+        Intent intent = new Intent(PlayApplication.appContext, DownloadManager.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Bundle bundle = new Bundle();
+        bundle.putInt(DownloadManager.KEY_TYPE, DownloadManager.KEY_TYPE_UPDATE_APK);
+        bundle.putString(DownloadManager.KEY_TERMINAL_NUM, terminalNo);//终端id
+        bundle.putString(DownloadManager.KEY_SAVE_PATH, tepPath);//临时路径
+        bundle.putString(DownloadManager.KEY_TASK_SINGLE, url);//url
+        bundle.putString(DownloadManager.KEY_ALIAS, geneLocalApkFialeNme());//文件名
+        intent.putExtras(bundle);
+        activity.startService(intent);
+    }
+
+    private String geneLocalApkFialeNme() {
+        String str = "Aiplay_u.apk";
         try {
-            int code =Integer.parseInt(antivirus.element("code").getText());
-            String url = antivirus.element("path").getText();
-            compareVersion(activity,code,url);//比较版本
-        } catch (NumberFormatException e) {
-            PlayApplication.sendMsgToServer("UPDC:升级终端标识码错误,请输入数字(1-99)");
+            String date = new SimpleDateFormat("yyyyMMdd_HHmmss_").format(new Date());
+            str = date + str;
+        } catch (Exception e) {
         }
-    }
-
-    /**
-     * 比较版本号
-     */
-    private void compareVersion(Activity activity,int remoteVersion, String uri) {
-        int local = getLocalVersionCode(activity);
-        int remote = remoteVersion;
-        Logs.i(TAG,"本地版本号:"+ local+" ,升级包版本号:"+remote);
-        if (local>=remote){
-           return;
-        }
-        SystemConfig config = SystemConfig.get().read();
-        String tepPath = config.GetStringDefualt("updatepath", "");
-        String terminalNo = config.GetStringDefualt("terminalNo", "");
-        ShellUtils.CommandResult result = ShellUtils.execCommand("chmod 777 "+tepPath,true);
-        if (result.result == 0) {
-            //下载升级包
-            Intent intent = new Intent(PlayApplication.appContext, DownloadManager.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            Bundle bundle = new Bundle();
-            bundle.putInt(DownloadManager.KEY_TYPE, DownloadManager.KEY_TYPE_UPDATE_APK);
-            bundle.putString(DownloadManager.KEY_TERMINAL_NUM,terminalNo );
-            bundle.putString(DownloadManager.KEY_SAVE_PATH, tepPath);
-            bundle.putString(DownloadManager.KEY_TASK_SINGLE, uri);
-            intent.putExtras(bundle);
-            activity.startService(intent);
-        }
-        else{
-            Logs.e(TAG,"无法发送文件到下载服务,路径:"+tepPath+"无法执行权限设置.");
-        }
-    }
-    /**
-     * 获取软件版本号
-     *
-     * @return
-     */
-    public static int getLocalVersionCode(Activity activity) {
-         // 获取软件版本号
-        return AppTools.getAppVersion(activity);
+        return str;
     }
 }
-
-
-
-
-
-
-
-
-
-
-//    Intent intent = new Intent();
-//                    intent.setAction(UPDCbroad.ACTION);
-//                    Bundle bundle = new Bundle();
-//                    bundle.putString(UPDCbroad.key,lpath);
-//                    intent.putExtras(bundle);
-//                    getApplicationContext().sendBroadcast(intent);
-
-
-
-//    private UPDCbroad broad;
-//try {
-//        String spackagename = antivirus.element("packagename").getText();
-//
-//        if (spackagename != null && !spackagename.equals("")) {
-//        packagename = spackagename;
-//        }
-//        }catch (Exception e){
-//        e.printStackTrace();
-//        }
-//    private String packagename = "com.wosplayer";
-
-//        DisplayerApplication.sendMsgToServer("terminalNo:"+ DisplayerApplication.config.GetStringDefualt("terminalNo","0000")+","+"localVersionNumber:"+local+",serverVersionNumber:"+remote);
-//            isUploading =false;
-//            if (broad!=null){
-//                try {
-//                    DisplayerApplication.appContext.unregisterReceiver(broad);
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//                broad=null;
-//            }
-//            broad = new UPDCbroad(this);
-//            IntentFilter filter=new IntentFilter();
-//            filter.addAction(UPDCbroad.ACTION);
-//            DisplayerApplication.appContext.registerReceiver(broad, filter); //只需要注册一次

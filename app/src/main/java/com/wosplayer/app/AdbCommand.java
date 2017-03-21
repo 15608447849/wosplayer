@@ -72,35 +72,19 @@ public class AdbCommand{
         return "am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n "+packageName+"/"+mainActivityClassPath;
     }
     //安装app
-    public static String getInstallAdb(String apkLocalPath, String fileNane) {
-        String param = "";
-        if (fileNane!=null && !fileNane.equals("")){
-            param =         "mount -o remount,rw /system\n"+
-                            "cp " + apkLocalPath + " /data/local/tmp/" + fileNane + "\n"+
-                            "chmod 777 /data/local/tmp/" + fileNane + "\n"+
-                            "pm install -r /data/local/tmp/" + fileNane ;
-        }else{
-            param = " chmod 777 "+apkLocalPath + "\n"+
-                    "pm install -r "+apkLocalPath ;
-        }
-        return param;
+    public static String getInstallAdb(String apkLocalPath) {
+
+        return " chmod 777 "+apkLocalPath + "\n"+
+                "pm install -r "+apkLocalPath ;
     }
     //运行时安装apk
-    public  static void runingInstallApk(String apkLocalPath, String fileNane){
-        String command = getInstallAdb(apkLocalPath,fileNane);
+    public static int runingInstallApk(String apkLocalPath){
+        String command = getInstallAdb(apkLocalPath);
         Log.e(TAG,command);
-       ShellUtils.CommandResult result = ShellUtils.execCommand(command,true,true);
-        if (result.result == 0){
-            //成功
-            Log.e(TAG,"执行成功");
-            command = "rm /data/local/tem/"+fileNane+"\n"+commands_startApp;
-            Log.e(TAG,command);
-            ShellUtils.execCommand(command,true);
-        }
-        else{
-            Log.e(TAG,"执行失败");
-        }
+        ShellUtils.CommandResult result = ShellUtils.execCommand(command,true,true);
+        return result.result;
     }
+
     //系统初始化提权
     public static void initSystem(Context context) {
         try {

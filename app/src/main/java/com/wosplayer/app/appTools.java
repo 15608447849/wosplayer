@@ -1,10 +1,14 @@
 package com.wosplayer.app;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -14,10 +18,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.wosTools.ToolsUtils;
+import com.wosplayer.service.serviceLog;
 import com.wosplayer.tool.SdCardTools;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Inet4Address;
@@ -29,6 +35,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import cn.trinea.android.common.util.FileUtils;
@@ -339,17 +346,68 @@ public class AppTools {
         }
     }
 
-    public static int getAppVersion(Context context){
+    //版本号
+    public static int getAppVersionCode(Context context){
         try {
             return context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionCode;
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
-        return 1;
+        return -1;
+    }
+    //获取apk版本代码
+    public static int getApkVersionCode(Context context,String apkPath){
+        int code = -1;
+        try {
+            code = context.getPackageManager().getPackageArchiveInfo(apkPath,PackageManager.GET_ACTIVITIES).versionCode;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return code;
+    }
+    //获取apk包名
+    public static String getApkPackageName(Context context,String apkPath){
+         String name = "";
+        try {
+            name = context.getPackageManager().getPackageArchiveInfo(apkPath,PackageManager.GET_ACTIVITIES).packageName;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return name;
     }
     public static String subLastString(String var,String ff){
         return var.substring(var.lastIndexOf(ff)+1);
     }
+
+    public static void saveLogs(String fileName,StringBuffer sb){
+        try {
+            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                String path = serviceLog.LOG_PATH_SDCARD_DIR;
+                File dir = new File(path);
+                if (!dir.exists()) {
+                    dir.mkdirs();
+                }
+                FileOutputStream fos = new FileOutputStream(path + fileName);
+                fos.write(sb.toString().getBytes());
+                fos.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public static String getTaragePackageLunchActivityName(Context context,String packagename){
+        String lunchActivity = null;
+        Intent mainIntent = new Intent();
+        mainIntent.setPackage(packagename);
+        mainIntent.setAction(Intent.ACTION_MAIN);
+        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        List<ResolveInfo> mApps = context.getPackageManager().queryIntentActivities(mainIntent,0);
+       if (mApps!=null && mApps.size()==1){
+           lunchActivity = mApps.get(0).activityInfo.name;
+       }
+       return lunchActivity;
+    }
+
     /**
      * 转换背景颜色代码
      *

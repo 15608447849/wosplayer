@@ -69,7 +69,7 @@ public class DownloadManager extends IntentService
         }else
         if (loadType == KEY_TYPE_UPDATE_APK){
             //更新apk
-            updateAPK(terminalNo,savepath,singUrl);
+            updateAPK(terminalNo,savepath,singUrl,alias);
         }else
         if (loadType == KEY_TYPE_FFBK){
             //富滇银行 资源文件下载
@@ -89,16 +89,15 @@ public class DownloadManager extends IntentService
     }
 
     //更新apk
-    private void updateAPK(String terminalNo, String savepath, String singUrl) {
-        Logs.i(TAG,"下载 apk - "+singUrl+"\n savepath - "+savepath+"\n terminalNo - "+terminalNo);
-        Task task =  Task.TaskFactory.createFtpTask(terminalNo,singUrl,savepath,"update.apk",true);
+    private void updateAPK(String terminalNo, String savepath, String singUrl,String alias) {
+        Logs.i(TAG,"下载APK文件链接地址: "+singUrl+";文件保存路径: "+savepath+";文件名: "+alias);
+        Task task =  Task.TaskFactory.createFtpTask(terminalNo,singUrl,savepath,alias,true);
         task.setResult(new Task.TaskResult() {
             @Override
             public void onComplete(Task task) {
                 try {
                     String lpath = task.getLocalPath()+task.getLocalName();
-                    Logs.i(TAG,"下载apk成功  - 路径- "+ task.getLocalPath()+task.getLocalName() );
-
+                    Logs.e(TAG,"apk下载成功,路径 >>> "+ lpath );
                     Bundle bundle = new Bundle();
                     bundle.putString(UpdateApkServer.APK_PATH,lpath);
                     Intent intent = new Intent(getApplicationContext(),UpdateApkServer.class);

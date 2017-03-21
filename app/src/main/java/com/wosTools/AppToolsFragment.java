@@ -190,7 +190,7 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
             storageLimits.setText(dataList.GetStringDefualt("storageLimits","50"));
             restartBeatInterval.setText(dataList.GetStringDefualt("RestartBeatInterval","30"));
             localip.setText(dataList.GetStringDefualt("tip","127.0.0.1"));
-            version.setText("version-["+AppTools.getAppVersion(activity)+"]");
+            version.setText("version:["+AppTools.getAppVersionCode(activity)+"]");
             cap_save.check((dataList.GetIntDefualt("CaptureSave",0)==0)?R.id.cap_save_y:R.id.cap_save_n);
             cap_notify.check((dataList.GetIntDefualt("CaptureNoty",0)==0)?R.id.cap_notify_y:R.id.cap_notify_n);
         }catch(Exception e)

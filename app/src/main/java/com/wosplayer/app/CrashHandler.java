@@ -180,17 +180,7 @@ public class CrashHandler implements UncaughtExceptionHandler {
 			long timestamp = System.currentTimeMillis();
 			String time = formatter.format(new Date());
 			String fileName = "crash-" + time + "-" + timestamp + ".log";
-			if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-				String path = serviceLog.LOG_PATH_SDCARD_DIR;//Environment.getExternalStorageDirectory()+"/wosplayer/crash/";
-				File dir = new File(path);
-				if (!dir.exists()) {
-					dir.mkdirs();
-				}
-//				Log.e(""," CrashHandler _ error file dir path: "+ dir.getAbsolutePath());
-				FileOutputStream fos = new FileOutputStream(path + fileName);
-				fos.write(sb.toString().getBytes());
-				fos.close();
-			}
+			AppTools.saveLogs(fileName,sb);
 			return fileName;
 		} catch (Exception e) {
 			e.printStackTrace();

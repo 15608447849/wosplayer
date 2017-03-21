@@ -6,17 +6,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 import com.wosplayer.app.AppTools;
-import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
 import com.wosplayer.app.SystemConfig;
 import com.wosplayer.command.kernal.CommandCenter;
 import com.wosplayer.command.operation.interfaces.CommandType;
-import com.wosplayer.command.operation.other.Command_UPDC;
 import com.wosplayer.command.operation.schedules.correlation.StringUtils;
 
 import java.io.BufferedOutputStream;
@@ -316,7 +313,7 @@ public class CommunicationService extends Service{
         //发送上线指令
         String msg = CommandType.ONLI + terminalNo;//
         sendMsgToService(msg);
-        msg = CommandType.GVAY + terminalNo+"#"+ AppTools.getAppVersion(getApplicationContext() );//通知获取版本号信息
+        msg = CommandType.GVAY + terminalNo+"#"+ AppTools.getAppVersionCode(getApplicationContext() );//通知获取版本号信息
         sendMsgToService(msg);
         Logs.i(TAG,"=========================== 开始和服务器("+ip+":"+port+")的通讯 ===========================");
     }
