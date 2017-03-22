@@ -1,11 +1,7 @@
 package com.wosplayer.app;
 
-import android.util.Log;
-
 import com.wosplayer.tool.SdCardTools;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -108,6 +104,9 @@ public class SystemConfig extends DataList{
         map.put("CaptureSave","0");//截屏是否保存
         map.put("CaptureNoty","0");//截屏是否通知
         map.put("CaptureMode","0");// ,命令截屏优先
+        //是否关闭本地监听播放器值
+        map.put("AccessClose","1");//默认不关闭
+
         //保存数据
         boolean isWrite = FileUtils.writeFile(PATH,AppTools.mapToJson(map));
         if (isWrite){Logs.d(TAG, " ---播放器配置已还原默认设置 ---");}

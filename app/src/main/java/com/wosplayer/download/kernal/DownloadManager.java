@@ -82,8 +82,6 @@ public class DownloadManager extends IntentService
     //下载富癫银行的资源文件
     private void loadResource(String terminalNo, String savepath, String singUrl, String alias) {
         Logs.i(TAG,"下载 web resouce - "+singUrl+"\n savepath - "+savepath+"\n terminalNo - "+terminalNo+"\n alias: "+alias);
-
-
        Task task =  Task.TaskFactory.createFtpTask(terminalNo,singUrl,savepath,alias,true);
         TaskQueue.getInstants().addTask(task);
     }

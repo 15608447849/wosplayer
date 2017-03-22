@@ -30,7 +30,7 @@ public class Command_UPLG implements iCommand {
         Intent logIntent = new Intent(PlayApplication.appContext,logUploadService.class);
         Bundle b = new Bundle();
         b.putString(logUploadService.uriKey,uri);
-        b.putString("terminalNo", SystemConfig.get().GetStringDefualt("terminalNo","0000"));
+        b.putString("terminalNo", SystemConfig.get().GetStringDefualt("terminalNo",""));
         logIntent.putExtras(b);
         activity.startService(logIntent);
 

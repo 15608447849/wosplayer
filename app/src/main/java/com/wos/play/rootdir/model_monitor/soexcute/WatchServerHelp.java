@@ -3,18 +3,11 @@ package com.wos.play.rootdir.model_monitor.soexcute;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentSender;
-import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.wosplayer.app.SystemConfig;
-
-import java.io.File;
-import java.io.IOException;
-
-import cn.trinea.android.common.util.FileUtils;
 
 /**
  * Created by 79306 on 2017/3/8.
@@ -33,7 +26,7 @@ public class WatchServerHelp extends IntentService{
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        int type = intent.getIntExtra(DEAMS_KEY,-1);
+            int type = intent.getIntExtra(DEAMS_KEY,-1);
             if (type == OPEN_DEAMS){
                 open();
             }

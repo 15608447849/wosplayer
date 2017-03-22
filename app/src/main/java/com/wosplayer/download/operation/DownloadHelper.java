@@ -9,6 +9,7 @@ import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.wosplayer.app.Logs;
 import com.wosplayer.download.ftp.FtpHelper;
 import com.wosplayer.download.util.DownloadFileUtil;
+import com.wosplayer.download.util.MD5Util;
 
 import org.apache.commons.io.FileUtils;
 
@@ -18,8 +19,6 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import com.wosplayer.download.util.MD5Util;
 
 /**
  * Created by user on 2016/11/25.
@@ -108,10 +107,10 @@ public class DownloadHelper implements Observer {//观察者
 
                             @Override
                             public void ftpConnectState(int stateCode,Task task) {
-                                Logs.i(TAG,"连接服务器 - "+task.getFtpUser().toString());
+                                Logs.i(TAG,"ftp 连接服务器 - "+task.getFtpUser().toString());
                                 if (stateCode==FtpHelper.FTP_CONNECT_SUCCESSS){
-                                    Logs.i(TAG,"连接成功");
-                                    caller.nitifyMsg(task.getTerminalNo(),task.getRemoteName(),1);
+                                    Logs.i(TAG,"ftp 连接成功");
+                                    //caller.nitifyMsg(task.getTerminalNo(),task.getRemoteName(),1);
                                     caller.nitifyMsg(task.getTerminalNo(),task.getRemoteName(),2);
                                 }
                                 if (stateCode==FtpHelper.FTP_CONNECT_FAIL){
@@ -133,7 +132,7 @@ public class DownloadHelper implements Observer {//观察者
                             }
                             @Override
                             public void downLoadFailt(Task task) {
-                                Logs.e(TAG,"FTP 下载失败 : "+task.toString());
+                                Logs.e(TAG,"ftp 下载失败 : "+task.toString());
                                 caller.nitifyMsg(task.getTerminalNo(),task.getRemoteName(),4);
                                 caller.downloadResult(task,1,task.getRemoteName(),".md5");
                             }
@@ -143,7 +142,7 @@ public class DownloadHelper implements Observer {//观察者
                             }
                             @Override
                             public void downLoadSuccess(Task task) {
-                                Logs.i(TAG, "FTP 成功下载 -"+ task.toString() +" - 当前线程 - "+ Thread.currentThread().getName());
+                                Logs.i(TAG, "["+Thread.currentThread().getName()+"] - ftp 成功下载 -"+ task.toString());
                                 caller.nitifyMsg(task.getTerminalNo(),task.getRemoteName(),3);
                                 if (caller.downloadResult(task,0,task.getRemoteName(),".png")
                                         || caller.downloadResult(task,0,task.getRemoteName(),".jpg")
@@ -156,7 +155,6 @@ public class DownloadHelper implements Observer {//观察者
                                 }else if (caller.downloadResult(task,0,task.getRemoteName(),".md5")){
                                     //md5文件
                                     //获取源文件code
-
                                     String md5Path = task.getLocalPath()+task.getLocalName();
                                     String sPath = task.getLocalPath()+task.getLocalName().substring(0,task.getLocalName().lastIndexOf("."));
 
@@ -164,7 +162,7 @@ public class DownloadHelper implements Observer {//观察者
                                     if (sCode!=null){
                                         //比较md5
                                         if(MD5Util.FTPMD5(sCode, md5Path) == 1){
-                                            //md5 效验失败 删除文件
+                                            //md5效验失败 删除文件
                                             cn.trinea.android.common.util.FileUtils.deleteFile(sPath);
                                             Logs.e(TAG,"文件 - "+sPath +" 比较 MD5值 失败 已删除");
                                         }else{
@@ -195,7 +193,7 @@ public class DownloadHelper implements Observer {//观察者
                   @Override
                   public void onStart() {
                       Logs.i(TAG,"启动http下载:"+ url+" on Thread : "+Thread.currentThread().getName());
-                      caller.nitifyMsg(task.getTerminalNo(),url.substring(url.lastIndexOf("/")+1),1);
+                      //caller.nitifyMsg(task.getTerminalNo(),url.substring(url.lastIndexOf("/")+1),1);
                       caller.nitifyMsg(task.getTerminalNo(),url.substring(url.lastIndexOf("/")+1),2);
                       currentTime = System.currentTimeMillis();
                   }

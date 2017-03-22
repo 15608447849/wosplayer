@@ -3,7 +3,6 @@ package com.wosplayer.command.operation.other;
 import android.app.Activity;
 
 import com.wosplayer.app.AdbCommand;
-import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
 import com.wosplayer.app.OverAppDialog;
 import com.wosplayer.app.PlayApplication;
@@ -23,7 +22,7 @@ public class Command_SHDO implements iCommand {
             if (param.equals("false")){
                 return;
             }
-            int time = 15;
+            int time = 5;
             PlayApplication.stopCommunicationService();
             OverAppDialog.popWind(activity,"系统将在"+time+"秒后关机",time);
             ShellUtils.execCommand(AdbCommand.closeTelOnTime(time),true);

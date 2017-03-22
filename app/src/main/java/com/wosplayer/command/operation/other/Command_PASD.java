@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.wosplayer.app.Logs;
 import com.wosplayer.app.PlayApplication;
 import com.wosplayer.command.operation.interfaces.iCommand;
 
@@ -25,7 +24,7 @@ public class Command_PASD implements iCommand {
         if (param==null || param.equals("") || param.equals("null")){
             return;
         }
-        Logs.i(TAG,"param: " + param);
+//        Logs.i(TAG,"param: " + param);
         boolean glag = savaUnlockPassword(activity,param);
         PlayApplication.sendMsgToServer("PASD:"+glag);
     }

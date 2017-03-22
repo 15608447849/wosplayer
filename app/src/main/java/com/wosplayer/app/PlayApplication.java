@@ -3,19 +3,8 @@ package com.wosplayer.app;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Process;
 
-import com.wos.play.rootdir.model_monitor.soexcute.RunJniHelper;
-import com.wos.play.rootdir.model_monitor.soexcute.WatchServerHelp;
-import com.wosplayer.tool.SdCardTools;
 import com.wosplayer.service.CommunicationService;
-
-import com.wosTools.ToolsUtils;
-
-import java.util.concurrent.ForkJoinWorkerThread;
-import java.util.concurrent.ThreadFactory;
 
 /**
  * Created by Administrator on 2016/7/19.
@@ -28,7 +17,7 @@ public class PlayApplication extends Application {
     public void onCreate() {
         super.onCreate();
         appContext = this.getApplicationContext();
-        AdbCommand.initSystem(appContext);//初始化系统,放入系统目录
+        //AdbCommand.initSystem(appContext);//初始化系统,放入系统目录
     }
     /**
      * 开启通讯服务

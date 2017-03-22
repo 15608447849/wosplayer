@@ -5,20 +5,12 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.os.Bundle;
 import android.text.method.PasswordTransformationMethod;
 import android.widget.EditText;
-import android.widget.Toast;
 
-import com.wosplayer.command.kernal.CommandCenter;
 import com.wosplayer.command.kernal.CommandStore;
 import com.wosplayer.command.operation.interfaces.CommandType;
-import com.wosplayer.command.operation.other.Command_Close_App;
 import com.wosplayer.command.operation.other.Command_PASD;
-
-import rx.android.plugins.RxAndroidPlugins;
-import rx.android.schedulers.AndroidSchedulers;
 
 /**
  * Created by user on 2016/10/8.
@@ -44,19 +36,19 @@ public class OverAppDialog {
                             String localPassword = Command_PASD.getUnlockPassword(m);
                             if (localPassword.equals(inputPassword)){
                                 //关闭
-                                CommandStore.getInstands().opration(CommandType.SHDP,"");
+                                CommandStore.getInstands().opration(CommandType.SHDP,"local");
                             }else{
                                 AppTools.LongToals(m,"密码错误,请联系客服或登陆后台(终端管理-电子屏-修改)查看");
                             }
                         }
                     })
-                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    /*.setNegativeButton("取消", new DialogInterface.OnClickListener() {
 
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.cancel();
                         }
-                    }).show();
+                    })*/.show();
 
     }
 

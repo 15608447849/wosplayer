@@ -342,6 +342,7 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
             try{
                param = cmds[2];
             }catch (Exception e){}
+
             if (option.equals("screen")){
                     if (null != param && param.equals("draw")){
                         //设置绘制方案截屏
@@ -350,8 +351,17 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
                         dataList.put("CaptureMode","0");
                     }
                 NotityActivty("执行成功");
-                    return;
-            }else{
+            }else
+            if(option.equals("close")){
+                if (null != param && param.equals("1")){
+                    //设置绘制方案截屏
+                    dataList.put("AccessClose","1");//1 打开监听
+                }else{
+                    dataList.put("AccessClose","0");//0 关闭监听
+                }
+                NotityActivty("执行成功");
+            }else
+            {
                 String result = AdbCommand.inputCommand(option,param);
                 if (result.equals("")) {
                     NotityActivty("没有可行操作匹配命令或选项");
