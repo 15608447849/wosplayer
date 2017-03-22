@@ -35,6 +35,7 @@ public class DownloadManager extends IntentService
     public static final String KEY_ALIAS="alias";
     public static final String KEY_TASK_LIST="loaderTaskArr";
     public static final String KEY_TASK_SINGLE="loaderTasksingle";
+    public static final String KEY_TASK_NOTYFY_SCHEDULE="notyfSchudeuRead";
 
     private static final String TAG = "_loaderManager";
     public DownloadManager() {
@@ -61,11 +62,11 @@ public class DownloadManager extends IntentService
         String alias = bundle.getString(KEY_ALIAS,"");//别名
         ArrayList<CharSequence> taskList = bundle.getCharSequenceArrayList(KEY_TASK_LIST);//任务列表
         String singUrl = bundle.getString(KEY_TASK_SINGLE,"");//单一任务
-
+        boolean isNotify = bundle.getBoolean(KEY_TASK_NOTYFY_SCHEDULE,false);
 
         if (loadType == KEY_TYPE_SCHDULE){
             //排期发来的资源下载列表
-            scheduleSourceLoad(terminalNo,savepath,taskList);
+            scheduleSourceLoad(terminalNo,savepath,taskList,isNotify);
         }else
         if (loadType == KEY_TYPE_UPDATE_APK){
             //更新apk
@@ -109,13 +110,13 @@ public class DownloadManager extends IntentService
         TaskQueue.getInstants().addTask(task);
     }
 
-    private void scheduleSourceLoad(String terminalNo,String savepath,ArrayList<CharSequence> taskList) {
+    private void scheduleSourceLoad(String terminalNo,String savepath,ArrayList<CharSequence> taskList,boolean isNotify) {
         Log.i(TAG,"收到一个 排期资源下载队列, 队列大小:"+taskList.size()+" ;terminalNo="+terminalNo+"\n savepath = "+savepath);
         for (int i = 0;i<taskList.size();i++){
 
             Task task = Task.TaskFactory.createMutTask(terminalNo,savepath,(String)taskList.get(i));
             if (task!=null){
-                if (i == taskList.size()-1){
+                if (i == taskList.size()-1 && isNotify){
                     task.setResult(new Task.TaskResult() {
                         @Override
                         public void onComplete(Task task) {

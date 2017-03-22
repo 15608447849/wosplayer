@@ -438,7 +438,9 @@ public class CommunicationService extends Service{
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        sendMsgToService(intent.getExtras().getString(key));
+        String msg = intent.getExtras().getString(key);
+//        Logs.e("测试","服务广播收到消息 - "+msg);
+        sendMsgToService(msg);
     }
 }
     /**

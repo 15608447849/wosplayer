@@ -37,7 +37,7 @@ import java.util.concurrent.locks.ReentrantLock;
  //rootNode.addUriTast(errVideo); //创建一个ftp任务*/
 
 public class ScheduleSaver implements iCommand {
-    private static ReentrantLock lock = new ReentrantLock();
+
     private static final String TAG = "[排期解析保存]";
 
     private final int ROOT_PARSE = 11;
@@ -46,7 +46,9 @@ public class ScheduleSaver implements iCommand {
     private final int I_LAYOUT_PARSE = 14;
     private final int I_FILE_PARSE = 15;
 
+    private static ReentrantLock lock = new ReentrantLock();
     private static XmlNodeEntity rootNode = new XmlNodeEntity();//只存在一个
+    private boolean isNotify;
     /**
      * 序列化排期
      */
@@ -91,47 +93,38 @@ public class ScheduleSaver implements iCommand {
     }
 
     private void startWork(final String uri){
-        Long startTime = System.currentTimeMillis();
+
         try {
-        getXMLdata(uri,ROOT_PARSE,null); //解析数据
+            isNotify = true;
+            getXMLdata(uri,ROOT_PARSE,null); //解析数据
+            //序列化数据
+            Serialize();
+            Logs.i(TAG,"执行排期数据解析,序列化保存完成");
         } catch (Exception e) {
             Logs.e(TAG,"解析排期失败: "+e.getMessage());
             return;
         }
-        Long endTime = System.currentTimeMillis();
-        Logs.e(TAG,"解析用时 : "+(endTime - startTime)+" 毫秒");
-
         SystemConfig config = SystemConfig.get();
         String saveDir = config.GetStringDefualt("basepath","");
         String limits = config.GetStringDefualt("storageLimits","50");
         String telminalNo = config.GetStringDefualt("terminalNo","");
         //判断是否清理数据
         if( SdCardTools.justFileBlockVolume(saveDir,limits) ){
-            startTime = System.currentTimeMillis();
             SdCardTools.clearTargetDir(saveDir,rootNode.getFtplist());
-            endTime = System.currentTimeMillis();
-            Logs.e(TAG,"清理数据用时 : "+(endTime - startTime)+" 毫秒");
         }
-        sendCompleteNotify();
+
+        if (isNotify){
+            Logs.i(TAG,"执行排期读取,界面刷新.");
+            //执行 数据读取者 界面刷新
+            ScheduleReader.notifySchedule();
+        }
         //开启后台下载线程
         if (rootNode.getFtplist().size()>0){
             Logs.i(TAG,"当前的任务数:"+rootNode.getFtplist().size()+"\n "+rootNode.getFtplist().toString());
-            sendloadTask(saveDir,telminalNo);
+            sendloadTask(saveDir,telminalNo,isNotify);
         }
     }
-    //排期接受完毕
-    private void sendCompleteNotify() {
-        //序列化数据
-        Serialize();
-        Logs.i(TAG,"执行排期数据解析序列化保存完成");
-        //执行 数据读取者
-        try {
-            ScheduleReader.notifySchedule();
-        } catch (Exception e) {
-            Logs.e(TAG," 开始读取本地排期数据时异常:" + e.getMessage());
-        }
 
-    }
 
     /**
      * 获取xml 数据
@@ -150,7 +143,7 @@ public class ScheduleSaver implements iCommand {
     /**
      * 通知资源开始下载
      */
-    private void sendloadTask(String sourceSavePath,String telminalNo) {
+    private void sendloadTask(String sourceSavePath,String telminalNo,boolean isNotify) {
         ArrayList<CharSequence> tasklist = new ArrayList<CharSequence>();
         for (int i = 0; i<rootNode.getFtplist().size();i++){
             tasklist.add(rootNode.getFtplist().get(i));
@@ -163,6 +156,7 @@ public class ScheduleSaver implements iCommand {
         bundle.putCharSequenceArrayList(DownloadManager.KEY_TASK_LIST,tasklist);
         bundle.putString(DownloadManager.KEY_TERMINAL_NUM, telminalNo);
         bundle.putString(DownloadManager.KEY_SAVE_PATH, sourceSavePath);
+        bundle.putBoolean(DownloadManager.KEY_TASK_NOTYFY_SCHEDULE,isNotify);
         intent.putExtras(bundle);
         PlayApplication.appContext.startService(intent);
     }
@@ -203,7 +197,10 @@ public class ScheduleSaver implements iCommand {
             String ruuks = XmlHelper.getFirstChildNodeValue(root, "uuks");
             Logs.i(TAG,"当前播放的数据标号:"+cuuks+" - 最新数据标号:"+ruuks);
             if (StringUtils.isEmpty(ruuks)) throw new IllegalStateException("不可识别的排期标识uuks空值");
-            if(cuuks.equals(ruuks)) throw  new IllegalStateException("正在执行中的排期,uuks相同 - "+ruuks);
+           if(cuuks.equals(ruuks)) {
+               //设置保存排期xml,读取排期 的标识 - false;
+               isNotify = false;
+           }
             clear(); //清理保存的排期
 
         //排期节点列表

@@ -104,4 +104,21 @@ public class DownloadFileUtil {
         return true;
     }
 
+    /**
+     * 判断指定类型 是不是 数组中的某个类型
+     * @param contentType
+     * @param allowTypes
+     * @return
+     */
+    public static boolean isValidSuffix(String contentType, String... allowTypes) {
+        if (null == contentType || "".equals(contentType)) {
+            return false;
+        }
+        for (String type : allowTypes) {
+            if (contentType.endsWith(type)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

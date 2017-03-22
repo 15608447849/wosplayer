@@ -104,26 +104,24 @@ public class DownloadHelper implements Observer {//观察者
                         task,
                         3,
                         new FtpHelper.onListener() {
-
                             @Override
                             public void ftpConnectState(int stateCode,Task task) {
                                 Logs.i(TAG,"ftp 连接服务器 - "+task.getFtpUser().toString());
                                 if (stateCode==FtpHelper.FTP_CONNECT_SUCCESSS){
                                     Logs.i(TAG,"ftp 连接成功");
-                                    //caller.nitifyMsg(task.getTerminalNo(),task.getRemoteName(),1);
-                                    caller.nitifyMsg(task.getTerminalNo(),task.getRemoteName(),2);
+                                    caller.downloadResult(task,-1);
+
                                 }
                                 if (stateCode==FtpHelper.FTP_CONNECT_FAIL){
                                     Logs.e(TAG,"ftp 连接失败");
-                                    caller.nitifyMsg(task.getTerminalNo(),task.getRemoteName(),4);
-                                    caller.downloadResult(task,1,task.getRemoteName(),".md5");
+
+                                    caller.downloadResult(task,1);
                                 }
                             }
                             @Override
                             public void ftpNotFountFile(Task task) {
                                 Logs.e(TAG,"ftp 服务器未发现文件 : "+ task.getRemoteName());
                                 caller.downloadResult(task,1);
-                                caller.nitifyMsg(task.getTerminalNo(),task.getRemoteName(),4);
                             }
 
                             @Override
@@ -133,8 +131,7 @@ public class DownloadHelper implements Observer {//观察者
                             @Override
                             public void downLoadFailt(Task task) {
                                 Logs.e(TAG,"ftp 下载失败 : "+task.toString());
-                                caller.nitifyMsg(task.getTerminalNo(),task.getRemoteName(),4);
-                                caller.downloadResult(task,1,task.getRemoteName(),".md5");
+                                caller.downloadResult(task,1);
                             }
                             @Override
                             public void error(Exception e) {
@@ -142,17 +139,14 @@ public class DownloadHelper implements Observer {//观察者
                             }
                             @Override
                             public void downLoadSuccess(Task task) {
-                                Logs.i(TAG, "["+Thread.currentThread().getName()+"] - ftp 成功下载 -"+ task.toString());
-                                caller.nitifyMsg(task.getTerminalNo(),task.getRemoteName(),3);
-                                if (caller.downloadResult(task,0,task.getRemoteName(),".png")
-                                        || caller.downloadResult(task,0,task.getRemoteName(),".jpg")
-                                        || caller.downloadResult(task,0,task.getRemoteName(),".mp4")
-                                        ){
+                                Logs.i(TAG, "["+Thread.currentThread().getName()+"] - ftp 成功下载 : "+ task.toString());
+                                caller.downloadResult(task,0);
+                                if (DownloadFileUtil.isValidSuffix(task.getRemoteName(),".png",".jpg",".mp4")){
                                     Task ntask = Task.TaskFactory.createFtpTask(task,task.getRemoteName()+".md5");
                                     //下载MD5值
                                     TaskQueue.getInstants().addTask(ntask);
 
-                                }else if (caller.downloadResult(task,0,task.getRemoteName(),".md5")){
+                                }else if (DownloadFileUtil.isValidSuffix(task.getRemoteName(),".md5")){
                                     //md5文件
                                     //获取源文件code
                                     String md5Path = task.getLocalPath()+task.getLocalName();
@@ -170,7 +164,6 @@ public class DownloadHelper implements Observer {//观察者
                                         }
                                     }
                                 }
-
                             }
                         }
                 );
@@ -193,8 +186,7 @@ public class DownloadHelper implements Observer {//观察者
                   @Override
                   public void onStart() {
                       Logs.i(TAG,"启动http下载:"+ url+" on Thread : "+Thread.currentThread().getName());
-                      //caller.nitifyMsg(task.getTerminalNo(),url.substring(url.lastIndexOf("/")+1),1);
-                      caller.nitifyMsg(task.getTerminalNo(),url.substring(url.lastIndexOf("/")+1),2);
+                      caller.downloadResult(task,-1);
                       currentTime = System.currentTimeMillis();
                   }
                   @Override
@@ -209,14 +201,11 @@ public class DownloadHelper implements Observer {//观察者
                   }
                   @Override
                   public void onSuccess(ResponseInfo<File> responseInfo) {
-                      final String path  =responseInfo.result.getPath();
                       caller.downloadResult(task,0);
-                      caller.nitifyMsg(task.getTerminalNo(),task.getLocalName(),3);
                   }
                   @Override
                   public void onFailure(HttpException e, String s) {
                       caller.downloadResult(task,1);
-                      caller.nitifyMsg(task.getTerminalNo(),task.getLocalName(),4);
                   }
               });
     }
