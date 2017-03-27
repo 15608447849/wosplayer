@@ -3,7 +3,6 @@ package com.wosplayer.Ui.element.uitools;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
 import android.util.LruCache;
 
 import com.wosplayer.R;
@@ -126,17 +125,7 @@ public class ImageStore {
         return bitmap;
     }
 
-    /**
-     * 获取错误图片
-     */
-    public Bitmap getButton_err(Context context){
-        Bitmap bitmap = ImageStore.getInstants().getBitmapCache("errors");
-        if (bitmap==null || bitmap.isRecycled()){
-            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.error);
-            ImageStore.getInstants().addBitmapCache("errors",bitmap);
-        }
-        return bitmap;
-    }
+
 
     /**
      * 获取左键
