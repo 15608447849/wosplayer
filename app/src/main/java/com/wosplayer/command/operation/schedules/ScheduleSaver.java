@@ -58,7 +58,7 @@ public class ScheduleSaver implements iCommand {
     //清理
     private static void clear(){
         rootNode.Clear();
-        Logs.e(TAG,"-------清理排期存储-------");
+        Logs.e(TAG,"清理排期存储中");
     }
 
     /**
@@ -195,7 +195,7 @@ public class ScheduleSaver implements iCommand {
             if (preUrl.equals("")) throw new IllegalStateException("不可执行的排期,获取'节目数据'的前缀url空值");
             String cuuks = SystemConfig.get().read().GetStringDefualt("uuks","");//当前执行中的uuks
             String ruuks = XmlHelper.getFirstChildNodeValue(root, "uuks");
-            Logs.i(TAG,"当前播放的数据标号:"+cuuks+" - 最新数据标号:"+ruuks);
+            Logs.i(TAG,"[  当前播放的数据标号:"+cuuks+" - 最新数据标号:"+ruuks+"  ]");
             if (StringUtils.isEmpty(ruuks)) throw new IllegalStateException("不可识别的排期标识uuks空值");
            if(cuuks.equals(ruuks)) {
                //设置保存排期xml,读取排期 的标识 - false;
@@ -207,7 +207,7 @@ public class ScheduleSaver implements iCommand {
         NodeList scheduleList = root.getElementsByTagName("schedule");
         if (scheduleList==null || scheduleList.getLength() == 0) return;
         parseSchdulerOnProgram(preUrl,ruuks, scheduleList);
-        Logs.i(TAG,"=========解析完成========");
+        Logs.i(TAG,"===========================解析完成===========================");
     }
 
     private void parseSchdulerOnProgram(String preUrl,String uuks, NodeList scheduleList) {
@@ -225,7 +225,7 @@ public class ScheduleSaver implements iCommand {
             if(programsList==null || programsList.getLength()==0) continue;
 
             Logs.i(TAG,"排期id: "+schedule_xmldata_map.get("id")+";排期类型: " + schedule_xmldata_map.get("type")+";排期名: "+schedule_xmldata_map.get("summary")+
-                    "\n这个排期下面的 节目总数: "+programsList.getLength());
+                    "这个排期下面的 节目总数: "+programsList.getLength());
             String progUri = null;
             for (int i1 = 0; i1 < programsList.getLength(); i1++) {
                 Element program_Element = (Element) programsList.item(i1);
@@ -233,12 +233,12 @@ public class ScheduleSaver implements iCommand {
                 if (pId.equals("")) continue;
 
                 progUri = preUrl.trim() + pId.trim();
-                Log.i(TAG, "节目连接地址 :" + progUri);
+                Log.i(TAG, "节目连接地址 : " + progUri);
                 //转换节目url->xml
                 getXMLdata(progUri, SCHEDU_PROG_PARSE, schedule_node.NewSettingNodeEntity());// 下一节点 实体
-                Logs.i(TAG,"解析完一个节目\n\r");
+              //  Logs.i(TAG,"解析完一个节目\n\r");
             }
-            Logs.i(TAG,"解析完一个排期\n\r");
+          //  Logs.i(TAG,"解析完一个排期\n\r");
         }
     }
 
@@ -246,7 +246,7 @@ public class ScheduleSaver implements iCommand {
      * 解析节目
      */
     private void parseProgram(String program_root_XmlData, XmlNodeEntity obj) {
-        Logs.i(TAG,"开始解析一个节目");
+  //      Logs.i(TAG,"开始解析一个节目");
 //                Logs.i(TAG,program_root_XmlData);
         Element program_root = XmlHelper.getDomXml(new ByteArrayInputStream(program_root_XmlData.getBytes()));
         if (program_root == null) return;
@@ -254,7 +254,7 @@ public class ScheduleSaver implements iCommand {
         if (programElement == null) return;
         try {
             String progBgImageUrl = programElement.getElementsByTagName("bgimage").item(0).getAttributes().getNamedItem("src").getNodeValue();
-            Logs.i(TAG,"存在背景图片 - url : "+ progBgImageUrl);
+            //Logs.i(TAG,"存在背景图片 - url : "+ progBgImageUrl);
             rootNode.addUriTast(progBgImageUrl);
         } catch (Exception e) {
         }
@@ -295,7 +295,7 @@ public class ScheduleSaver implements iCommand {
 
                 //内容类型
                 String content_type = XmlHelper.getFirstChildNodeValue(content_Element, "fileproterty");
-                Logs.i(TAG,"内容类型 : "+content_type);
+                Logs.i(TAG,"当前解析的 内容类型 : "+content_type);
                 ContentTypeEnum contentType;
                 try {
                     contentType = ContentTypeEnum.valueOf(content_type);
@@ -303,8 +303,16 @@ public class ScheduleSaver implements iCommand {
                     Logs.e(TAG, "内容类型错误,未知类型:" + e.getMessage());
                     continue;
                 }
-
-                if (contentType.equals(ContentTypeEnum.text))//文本
+                if (contentType.equals(ContentTypeEnum.time)){
+                    String text_xml=  XmlHelper.getFirstChildToString(content_Element, "getcontents");
+                    HashMap<String, String> text_xmlDataMap = Xmlparse.ParseXml("/getcontents", text_xml, Xmlparse.parseType.OnlyLeaf).get(0);
+                    if(text_xmlDataMap==null || text_xmlDataMap.size()==0) continue;
+                    XmlNodeEntity layout_content_text_Node = layout_content_Node.NewSettingNodeEntity();
+                    layout_content_text_Node.Level = "root_schedule_programs_layout_content_time";
+                    layout_content_text_Node.AddPropertyList(text_xmlDataMap);
+                    Logs.i(TAG,"time类型解析完成");
+                }
+                else if (contentType.equals(ContentTypeEnum.text))//文本
                 {
                     String text_xml=  XmlHelper.getFirstChildToString(content_Element, "getcontents");
                     HashMap<String, String> text_xmlDataMap = Xmlparse.ParseXml("/getcontents", text_xml, Xmlparse.parseType.OnlyLeaf).get(0);

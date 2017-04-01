@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.wosplayer"
-    android:versionCode="3"
-    android:versionName="3.0"
+    android:versionCode="18"
+    android:versionName="18.0"
     android:screenOrientation="portrait">
 
     <!-- Not granting 需要系统签名 -->
@@ -20,12 +20,9 @@
     <!-- 允许修改话机状态，如电源，人机接口等 -->
     <uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
     <!-- 权限 -->
-
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> <!-- 开机启动权限-->
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" /> <!-- 允许程序禁用键盘锁 -->
     <uses-permission android:name="android.permission.WAKE_LOCK" /><!-- 允许程序在手机屏幕关闭后后台进程仍然运行 -->
-
-
     <!-- 允许设置时区-->
     <uses-permission android:name="android.permission.SET_TIME_ZONE" /> <!-- 设置时区 -->
 

@@ -5,13 +5,12 @@ import android.media.MediaPlayer;
 import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
 
-import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.element.definedView.Mvideo;
+import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.element.interfaces.TimeCalls;
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.Logs;
-import com.wosplayer.download.util.DownloadFileUtil;
 
 import cn.trinea.android.common.util.FileUtils;
 
@@ -37,14 +36,14 @@ public class IVideoPlayer implements IPlayer{
     private String localPath = null;
 
     @Override
-    public void loadData(DataList mp, Object ob) {
+    public void loadData(DataList mp) {
         try {
         int x,y,h,w;
         x = mp.GetIntDefualt("x", 0);
         y = mp.GetIntDefualt("y", 0);
         w = mp.GetIntDefualt("width", 0);
         h = mp.GetIntDefualt("height", 0);
-         layoutParams = new AbsoluteLayout.LayoutParams(w,h,x,y);
+        layoutParams = new AbsoluteLayout.LayoutParams(w,h,x,y);
 
         localPath = mp.GetStringDefualt("localpath", "");
         //Logs.d(TAG,"加载视频 : x="+x+";y="+y+";width="+w+";height="+h+"\nfile:"+localPath);

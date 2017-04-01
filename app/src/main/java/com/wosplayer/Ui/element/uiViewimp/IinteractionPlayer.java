@@ -14,11 +14,11 @@ import com.wosplayer.Ui.element.interactive.databeads.Abutton;
 import com.wosplayer.Ui.element.interactive.databeads.Acontent;
 import com.wosplayer.Ui.element.interactive.databeads.Afile;
 import com.wosplayer.Ui.element.interactive.databeads.Alayout;
+import com.wosplayer.Ui.element.interactive.iCache.InteractionCache;
 import com.wosplayer.Ui.element.interactive.uibeans.AFileShow;
 import com.wosplayer.Ui.element.interactive.uibeans.AImageButton;
-import com.wosplayer.Ui.element.interfaces.IPlayer;
-import com.wosplayer.Ui.element.interactive.iCache.InteractionCache;
 import com.wosplayer.Ui.element.interactive.xml.XmlParse;
+import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.element.interfaces.TimeCalls;
 import com.wosplayer.Ui.element.uitools.ImageAttabuteAnimation;
 import com.wosplayer.Ui.element.uitools.ImageViewPicassocLoader;
@@ -29,10 +29,8 @@ import com.wosplayer.app.DataList;
 import com.wosplayer.app.Logs;
 import com.wosplayer.command.operation.schedules.correlation.StringUtils;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import cn.trinea.android.common.util.FileUtils;
 
@@ -50,7 +48,7 @@ public class IinteractionPlayer extends AbsoluteLayout implements IPlayer,View.O
 
     }
     @Override
-    public void loadData(DataList mp, Object ob) {
+    public void loadData(DataList mp) {
         try {
             int w = mp.GetIntDefualt("width", 0);
             int h = mp.GetIntDefualt("height", 0);
@@ -62,8 +60,8 @@ public class IinteractionPlayer extends AbsoluteLayout implements IPlayer,View.O
             if (back==null){
                 createBack(x,y,w,h);
             }
-            final String mUri = mp.GetStringDefualt("getcontents", "");//互动xml的布局文件
-            final String name = mp.GetStringDefualt("contentsname","null");//内容名字
+            final String mUri = mp.GetStringDefualt("xmlurl", "");//互动xml的布局文件
+            final String name = mp.GetStringDefualt("tag","null");//内容名字
             //后台生成数据
             if(!StringUtils.isEmpty(mUri)){
                 BackRunner.runBackground(new Runnable() {

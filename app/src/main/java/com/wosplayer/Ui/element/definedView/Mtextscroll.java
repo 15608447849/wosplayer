@@ -27,7 +27,9 @@ import com.wosplayer.app.Logs;
 
 public class Mtextscroll extends SurfaceView implements SurfaceHolder.Callback, Runnable {
     private static final String TAG = "滚动字幕";
-
+    /**
+     *上下文
+     */
     private Context context;
 
     /**
@@ -43,26 +45,39 @@ public class Mtextscroll extends SurfaceView implements SurfaceHolder.Callback, 
     }
 
     /**
-     * 线程控制 循环绘制
+     * 线程控制 循环 绘制
      */
     private boolean loop = false;
 
+    /**
+     * 执行线程
+     */
     private Thread thread;
     private void start(){
+        //设置画笔属性
+        settingPaint();
+        //设置背景参数
+        setBg();
         loop = true;
         thread = new Thread(this);
         thread.start();
     }
+
+
+
     private void stop(){
         loop = false;
         thread.interrupt();
         thread = null;
+        //移除画笔
+        paint = null;
+        //移除背景
+        this.setBackgroundColor(Color.TRANSPARENT);
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         start();
-
     }
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
@@ -77,54 +92,49 @@ public class Mtextscroll extends SurfaceView implements SurfaceHolder.Callback, 
     public void run() {
         while (loop) {
             try {
-                draw();
+                drawText();
                 Thread.sleep(speed);
             } catch (Exception e) {
             }
         }
     }
 
+    /**
+     * 画笔
+     */
+    private Paint paint;
 
+    private void settingPaint(){
+        if (paint==null){
+//            Log.e(TAG,"设置画笔 - 字体大小:"+fontSize+",字体颜色:"+fontColor+"字体透明度:"+fontAlpha);
+            paint = new Paint();
+            paint.setAntiAlias(true);//锯齿
+            paint.setTypeface(fontType);//字体Typeface.SANS_SERIF
+            paint.setTextSize(fontSize);//字体大小
+            paint.setColor(fontColor);//字体颜色
+            paint.setAlpha(fontAlpha);//字体透明度
+        }
+    }
+    private void setBg() {
+//        Log.e(TAG,"设置背景:"+bgalpha+" 颜色值:"+bgColor);
+        this.setAlpha(bgalpha);
+        this.setBackgroundColor(bgColor);
+    }
 
     /**
-     * -----------------------------------------------------------overriee-----------------------------------------------------------------------------------------------------
-     * <p/>
-     * /* *
      * 绘制
-     *  if (barr == null){
-     Bitmap a =  BitmapFactory.decodeResource(getResources(), R.mipmap.drpl_1);
-     Bitmap b =  BitmapFactory.decodeResource(getResources(), R.mipmap.drpl_2);
-     Bitmap c =  BitmapFactory.decodeResource(getResources(), R.mipmap.drpl_3);
-     barr.add(a);
-     barr.add(b);
-     barr.add(c);
-     cii = 0;
-     Logs.e(TAG,"呵呵");
-     }
      */
-    private synchronized void draw() {
+    private synchronized void drawText() {
         //锁定画布
         Canvas canvas = getHolder().lockCanvas();
         if(canvas == null) return;
-        drawText(canvas);
-        getHolder().unlockCanvasAndPost(canvas);//解锁显示
-    }
-
-    private void drawText(Canvas canvas) {
-        Paint paint = new Paint();
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);   //清屏
-        paint.setAntiAlias(true);//锯齿
-        paint.setTypeface(fontType);//字体Typeface.SANS_SERIF
-        paint.setTextSize(fontSize);//字体大小
-        paint.setColor(Color.parseColor(fontColor));//字体颜色
-        paint.setAlpha(fontAlpha<0?0:fontAlpha>255?255:fontAlpha);//字体透明度
         float conlen = paint.measureText(content);
         float distance = fontSize * 0.5f;
         scroll(conlen,distance);
-        canvas.drawText(content, x, (getHeight() - getFontHeight(paint))/2+getFontLeading(paint), paint);//画文字*/
+        canvas.drawText(content, x, (getHeight() - MTools.getFontHeight(paint))/2 + MTools.getFontLeading(paint), paint);//画文字*/
+        getHolder().unlockCanvasAndPost(canvas);//解锁显示
     }
-
-
 
     //  内容所占像素
     private synchronized void scroll(float conlen,float distance){
@@ -150,20 +160,7 @@ public class Mtextscroll extends SurfaceView implements SurfaceHolder.Callback, 
         }
         //Logs.e(TAG,"当前x:"+x+" 移动距离:"+ distance);
     }
-    /**
-     * @return 返回指定笔的文字高度
-     */
-    public float getFontHeight(Paint paint)  {
-        Paint.FontMetrics fm = paint.getFontMetrics();
-        return fm.descent - fm.ascent;
-    }
-    /**
-     * @return 返回指定笔离文字顶部的基准距离
-     */
-    public float getFontLeading(Paint paint)  {
-        Paint.FontMetrics fm = paint.getFontMetrics();
-        return fm.leading- fm.ascent;
-    }
+
     /**
      * 是否滚动
      */
@@ -191,15 +188,15 @@ public class Mtextscroll extends SurfaceView implements SurfaceHolder.Callback, 
     /**
      * 字幕背景色
      */
-    private String bgColor = "#E7E7E7";
+    private int bgColor = 0;
     /**
      * 背景透明度
      */
-    private int bgalpha = 60;
+    private float bgalpha = 0;
     /**
      * 字体颜色
      */
-    private String fontColor = "#000000";//"#FFFFFF";
+    private int fontColor = 0;//"#FFFFFF";
     /**
      * 字体透明度
      * 0-255 透明->不透明
@@ -240,32 +237,38 @@ public class Mtextscroll extends SurfaceView implements SurfaceHolder.Callback, 
         //Logs.e(TAG,"长度:"+content.length());
         this.content = content;
     }
+
     /**
-     * #ffffff 白色
-     * #000000 黑色
-     * @param bgColor
+     *背景颜色设置
      */
-    public void setBgColor(String bgColor) {
-        this.bgColor = bgColor;
-        //背景颜色
-        setBackgroundColor(Color.parseColor(bgColor));
+    public void setBgColor(String bgColors) {
+        try {
+            this.bgColor = Color.parseColor(bgColors);
+        } catch (Exception e) {
+            this.bgColor = Color.parseColor("#000000");
+        }
     }
     //数值
-    public void setBgalpha(int bgalpha) {
-        this.bgalpha = bgalpha;
-        //背景透明度
-        getBackground().setAlpha(bgalpha);
+    public void setBgalpha(double bgalpha) {
+//        Logs.e(TAG,"背景参数:"+bgalpha);
+        this.bgalpha = (float)(bgalpha<0?0:bgalpha>1?1:bgalpha);
     }
     public void setFontColor(String fontColor) {
-        this.fontColor = fontColor;
+        try {
+            this.fontColor = Color.parseColor(fontColor);
+        }
+        catch (Exception e) {
+            this.fontColor = Color.parseColor("#FFFFFF");
+        }
     }
-    public void setFontAlpha(int fontAlpha) {
-        this.fontAlpha = fontAlpha;
+    public void setFontAlpha(double fontAlpha) {  //  0- 1 => 0-255
+        this.fontAlpha =  (int)( (float)(fontAlpha<0?0:fontAlpha>1?1:fontAlpha) ) * 255;
     }
     public void setFontSize(float fontSize) {
         this.fontSize = fontSize;
     }
     public void setOrientation(int orientation) {
+//        Logs.e(TAG,"移动方向:"+orientation);
         this.orientation = orientation;
     }
     public void setSpeed(long speed) {
@@ -276,27 +279,15 @@ public class Mtextscroll extends SurfaceView implements SurfaceHolder.Callback, 
     }
     public void setTypeFace(String fonttype) {
         try {
-            String fontname = fonttype == null ? "华文行楷.ttf" : fonttype+".ttf";
-            fontType = Typeface.createFromAsset(context.getAssets(), "fonts/" + fontname);//Typeface.MONOSPACE;
-            fontType = Typeface.create(fontType, fontStyle);
+            fontType = Typeface.create(Typeface.createFromAsset(context.getAssets(), "fonts/" + (fonttype == null ? "幼圆.ttf" : fonttype+".ttf") ), fontStyle);
         } catch (Exception e) {
-            Logs.e(TAG,"["+fonttype+"] type face err, setting defult typeface .");
-            fontType = Typeface.SERIF;
+            fontType = Typeface.create(Typeface.createFromAsset(context.getAssets(), "fonts/黑体.ttf" ), fontStyle);
+            Logs.e(TAG,"["+fonttype+"] type face err, setting defult typeface :\n"+e.getMessage());
         }
     }
 
     public Bitmap getBitmap(){
-        Bitmap bitmap = null;
-        try {
-//            Canvas canvas = getHolder().lockCanvas();
-//            Logs.e(TAG,"截图 文字滚动 大小 ( "+getWidth()+" , "+getHeight()+" )");
-//            bitmap=Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
-//            Paint p = new Paint();
-//            canvas.drawBitmap(bitmap,new Matrix(),p);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return bitmap;
+        return null;
     }
 
 

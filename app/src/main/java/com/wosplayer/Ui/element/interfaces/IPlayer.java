@@ -7,7 +7,7 @@ import com.wosplayer.app.DataList;
  */
 
 public interface IPlayer{
-     void loadData(DataList mp,Object ob);
+     void loadData(DataList mp);
      void start();
      void stop();
     void setTimerCall(TimeCalls timer);

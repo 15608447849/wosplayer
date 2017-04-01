@@ -4,16 +4,13 @@ import android.content.Context;
 import android.util.Log;
 import android.util.LruCache;
 import android.view.ViewGroup;
-import android.widget.AbsoluteLayout;
 
 import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.element.interfaces.TimeCalls;
-import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.Logs;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +25,7 @@ public final class contentTanslater {
      * 节目类型
      */
     public static enum  ContentTypeEnum {
-        interactive, fudianbank,webpage, url, rss, text, video, image;
+        interactive, fudianbank,webpage, url, rss,time, text, video, image;
         public boolean needsDown() {
             return this.compareTo(video) >= 0;
         }
@@ -48,9 +45,10 @@ public final class contentTanslater {
         String packageName = "com.wosplayer.Ui.element.uiViewimp.";
         referenceViewMap.put(getType(ContentTypeEnum.image),packageName+"IImagePlayer");
         referenceViewMap.put(getType(ContentTypeEnum.webpage),packageName+"IWebPlayer");
-        referenceViewMap.put(getType(ContentTypeEnum.fudianbank),packageName+"IWebPlayer");//富癫银行项目
+        referenceViewMap.put(getType(ContentTypeEnum.fudianbank),packageName+"IWebPlayer");//网页和富癫银行项目
         referenceViewMap.put(getType(ContentTypeEnum.video),packageName+"IVideoPlayer");
-        referenceViewMap.put(getType(ContentTypeEnum.text),packageName+"IrunTextPlayer");
+        referenceViewMap.put(getType(ContentTypeEnum.text),packageName+"ITextPlayer");//走马灯
+        referenceViewMap.put(getType(ContentTypeEnum.time),packageName+"ITimePlayer");//时间
         referenceViewMap.put(getType(ContentTypeEnum.interactive),packageName+"IinteractionPlayer");
 
       /*  referenceViewMap.put("interactive","com.wosplayer.Ui.element.iviewelementImpl.actioner."+"Actioner");
@@ -85,7 +83,7 @@ public final class contentTanslater {
      * @param list
      * @return
      */
-    public static IPlayer tanslationAndStart(DataList list, Object ob, boolean isStart, ViewGroup vp, TimeCalls timrmanager){
+    public static IPlayer tanslationAndStart(DataList list, boolean isStart, ViewGroup vp, TimeCalls timrmanager){
         Context context = UiExcuter.getInstancs().getContext();
         ViewGroup mainLayout = UiExcuter.getInstancs().getMainLayout();
         if (context==null){
@@ -110,7 +108,7 @@ public final class contentTanslater {
                 String fileproterty = list.GetStringDefualt("fileproterty","");
                 //Logs.i(TAG,"类型 :"+fileproterty);
                 if (!referenceViewMap.containsKey(fileproterty)){
-                    Log.e(TAG,"无法执行的类型" + fileproterty);
+                    Log.e(TAG,"无法执行转换的数据的类型:[" + fileproterty+"]");
                     return iplay;
                 }
                 //创建iplayer
@@ -130,23 +128,19 @@ public final class contentTanslater {
                 putIplayerToCache(key,iplay);
             }
             //执行它
-            iplay.loadData(list,ob);
+            iplay.loadData(list);
             iplay.setTimerCall(timrmanager);
             if (isStart){
                 iplay.start();//主线程执行
             }
 
         } catch (ClassNotFoundException e) {
-            Logs.e(TAG,"无法找到这个类");
+            Logs.e(TAG,"无法找到这个类:"+e.getMessage());
         }catch(NoSuchMethodException e){
-            Logs.e(TAG,"不匹配类构造 ");
+            Logs.e(TAG,"不匹配类构造 : "+e.getMessage());
         }
-        catch (InstantiationException e) {
+        catch (Exception e) {
            Logs.e(TAG," err:" + e.getMessage());
-        } catch (IllegalAccessException e) {
-            Logs.e(TAG," err:" + e.getMessage());
-        } catch (InvocationTargetException e) {
-            Logs.e(TAG," err:" + e.getMessage());
         }
         return iplay;
     }

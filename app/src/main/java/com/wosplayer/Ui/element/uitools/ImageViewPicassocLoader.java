@@ -97,7 +97,6 @@ public class ImageViewPicassocLoader {
      * 获取一个 bitmap 成功返回turn
      */
     public static Bitmap getBitmap(File file) {
-        boolean f = false;
         FileInputStream is = null;
         Bitmap bitmap = null;
         try {
@@ -107,7 +106,7 @@ public class ImageViewPicassocLoader {
                 //Log.d("image utils ", "获取完毕 bitmap _success -\nfile -" + file.getAbsolutePath() + "\n");
             }
         } catch (Exception e) {
-            Log.e("", "loading image err: " + e.getMessage());
+            e.printStackTrace();
         } finally {
             if (is != null) {
                 try {
@@ -124,7 +123,7 @@ public class ImageViewPicassocLoader {
         Bitmap bitmap = null;
         try {
             BitmapFactory.Options opts = new BitmapFactory.Options();
-            opts.inJustDecodeBounds = true;
+            opts.inJustDecodeBounds = true;//设置压缩比例
             bitmap = BitmapFactory.decodeFileDescriptor(is.getFD(),
                     null, opts);
 
@@ -140,7 +139,6 @@ public class ImageViewPicassocLoader {
             bitmap = BitmapFactory.decodeFileDescriptor(is.getFD(),
                     null, opts);
         } catch (Exception e) {
-            // TODO: handle exception
             Log.e("", " create bitmap err:" + e.getMessage());
         }
         return bitmap;

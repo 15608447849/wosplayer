@@ -1,21 +1,17 @@
 package com.wosplayer.Ui.element.uiViewimp;
 
 import android.content.Context;
-import android.graphics.Canvas;
 import android.view.ViewGroup;
 import android.widget.AbsoluteLayout;
-import android.widget.ImageView;
 
-import com.wosplayer.R;
 import com.wosplayer.Ui.element.definedView.Mimage;
 import com.wosplayer.Ui.element.interfaces.IPlayer;
+import com.wosplayer.Ui.element.interfaces.TimeCalls;
 import com.wosplayer.Ui.element.uitools.ImageAttabuteAnimation;
 import com.wosplayer.Ui.element.uitools.ImageViewPicassocLoader;
-import com.wosplayer.Ui.element.interfaces.TimeCalls;
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.Logs;
-import com.wosplayer.download.util.DownloadFileUtil;
 
 import cn.trinea.android.common.util.FileUtils;
 
@@ -35,7 +31,7 @@ public class IImagePlayer implements IPlayer{
         image = new Mimage(context);
     }
     @Override
-    public void loadData(DataList mp, Object ob) {
+    public void loadData(DataList mp) {
         try {
             int x = mp.GetIntDefualt("x", 0);
             int y = mp.GetIntDefualt("y", 0);

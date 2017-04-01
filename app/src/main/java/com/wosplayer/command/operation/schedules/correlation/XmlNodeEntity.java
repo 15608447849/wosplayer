@@ -22,7 +22,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class XmlNodeEntity implements Parcelable {
 
 
-    private static final String TAG = XmlNodeEntity.class.getName();
+    private static final String TAG = "排期存贮序列化对象";
     public String Level;
 
     public static ReentrantLock lock = new ReentrantLock();//同步锁
@@ -60,7 +60,7 @@ public class XmlNodeEntity implements Parcelable {
     public void addUriTast(String uri){
         if (uri.equals("") || uri.equals("null") || uri==null) return;
         if (!ftplist.contains(uri)){
-            Logs.i(TAG,"添加一个uri"+uri);
+            Logs.w(TAG,"add item : "+uri);
             ftplist.add(uri);
         }
     }
@@ -125,7 +125,7 @@ public class XmlNodeEntity implements Parcelable {
 
             this.AddProperty("md5", md5);
             String savedata = binder.toJson(this);
-            Logs.i(TAG,"序列化数据:"+savedata);
+            Logs.i(TAG,"序列化数据中...\n"+savedata);
             writeShareDataSelf("settingNodeEntity", savedata);//保存的排期信息
         }catch(Exception e)
         {

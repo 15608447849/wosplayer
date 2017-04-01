@@ -3,7 +3,6 @@ package com.wosplayer.app;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.wifi.WifiInfo;
@@ -209,46 +208,6 @@ public class AppTools {
         }
         return false;
     }
-//    //默认排期
-//    public static void defaultProgram(Context context,String dirpath) {
-//        try {
-//            // /mnt/sdcard/wosplayer/default/
-//            if (!FileUtils.isFileExist(dirpath+"def.mp4")
-//                    ||!FileUtils.isFileExist(dirpath+"default_sche.xml")
-//                    ||!FileUtils.isFileExist(dirpath+"default_prog.xml")
-//                    ){
-//                //如果一个 - 不存在 - 删除目录
-//                org.apache.commons.io.FileUtils.deleteDirectory(new File(dirpath));
-//                //放入zip包
-//                if(ToolsUtils.ReadAssectsDataToSdCard(context,dirpath,"default.zip")){
-//                    //解压缩
-//                    Logs.i("unzip","解压缩路径 : "+dirpath+"default.zip");
-//                    ToolsUtils.UnZip(dirpath+"default.zip",dirpath);
-//                    FileUtils.deleteFile(dirpath+"default.zip");
-//                }
-//
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-//    public static void fudianBankSource(Context context,String dirpath){
-//        try {
-//            //创建目录
-//            SdCardTools.MkDir(dirpath);
-//            //放入zip包
-//            if(ToolsUtils.ReadAssectsDataToSdCard(context,dirpath,"bank.zip")){
-//                //解压缩
-//                Logs.i("unzip","解压缩路径 : "+dirpath+"bank.zip");
-//                ToolsUtils.UnZip(dirpath+"bank.zip",dirpath);
-//                FileUtils.deleteFile(dirpath+"bank.zip");
-//            }
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     /**
      * 设置服务器信息成功 true
