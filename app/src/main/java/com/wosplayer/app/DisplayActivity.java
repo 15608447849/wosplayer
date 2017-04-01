@@ -7,29 +7,19 @@ import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
 import android.widget.FrameLayout;
 
 import com.wosTools.AppToolsFragment;
 import com.wosplayer.R;
-import com.wosplayer.Ui.element.uitools.ImageStore;
-import com.wosplayer.Ui.element.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.command.kernal.CommandCenter;
 import com.wosplayer.command.kernal.CommandStore;
-import com.wosplayer.command.operation.schedules.ScheduleReader;
 import com.wosplayer.service.CommunicationService;
-
-import static com.wosplayer.app.PlayApplication.appContext;
 
 public class DisplayActivity extends Activity {
     private static final String TAG = "播放器UI界面控制";
@@ -157,14 +147,14 @@ public class DisplayActivity extends Activity {
     }
     private void playTypeStart() {
         try {
-            UiExcuter.getInstancs().init(this);//初始化ui
+            UiExcuter.getInstancs().onInite(this);//初始化ui
         } catch (Exception e) {
             Logs.e(TAG,"activity 开始执行读取排期失败");
         }
     }
     private void playTypeStop() {
         try {
-            UiExcuter.getInstancs().unInit();
+            UiExcuter.getInstancs().onUnInit();
         } catch (Exception e) {
             Logs.e(TAG,"activity 停止执行播放排期 时 err:"+ e.getMessage());
         }

@@ -1,7 +1,5 @@
 package com.wosplayer.Ui.performer;
 
-import com.wosplayer.app.DisplayActivity;
-import com.wosplayer.app.PlayApplication;
 import com.wosplayer.app.Logs;
 import com.wosplayer.command.operation.schedules.correlation.XmlNodeEntity;
 
@@ -17,9 +15,10 @@ public class programExcuter {
     private XmlNodeEntity program = null;
     private ArrayList<layoutExcuter> layoutList = null;
     private String bgInfo;
+    //传递一个节目 数据进来
     public programExcuter(XmlNodeEntity program) {
         this.program = program;
-        layoutList = new ArrayList<layoutExcuter>();
+        layoutList = new ArrayList<>();
        // Logs.i(TAG,"节目:"+program.getXmldata().get("title")+"创建了");
         //获取背景信息
         getBgInfos();
@@ -40,7 +39,7 @@ public class programExcuter {
         //Logs.e(TAG,"节目背景 - "+bgInfo);
     }
 
-    public void start(){
+    public void onStart(){
 
         //设置背景给 main acticvity
         UiExcuter.getInstancs().setMainBg(bgInfo);
@@ -67,7 +66,7 @@ public class programExcuter {
         layoutexcuter.start();
     }
 
-    public void stop(){
+    public void onStop(){
         //停止所有 布局
        // Logs.i(TAG,"节目:"+program.getXmldata().get("title")+"准备停止了");
 

@@ -1,16 +1,11 @@
 package com.wosplayer.Ui.performer;
 
-import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.view.ViewGroup;
-import android.widget.AbsoluteLayout;
 
-import com.wosplayer.R;
 import com.wosplayer.Ui.element.uitools.ImageStore;
 import com.wosplayer.Ui.element.uitools.ImageViewPicassocLoader;
 import com.wosplayer.app.AppTools;
@@ -57,7 +52,7 @@ public class UiExcuter {
     public String basepath ="";
     public String defaultPath = "";
     public String ffbkPath="";
-    public void init(DisplayActivity activity){
+    public void onInite(DisplayActivity activity){
         this.mActivity = activity;
         SystemConfig config = SystemConfig.get();
 //        config.printData();
@@ -79,11 +74,10 @@ public class UiExcuter {
                 AppTools.unzipFiles(mActivity,ffbkPath,"bank.zip");
                 Logs.i("后台任务","富颠金融网页模板解压缩完成");
                 ScheduleReader.notifySchedule();
-
             }
         });
     }
-    public void unInit(){
+    public void onUnInit(){
         isInit = false;
         this.mActivity = null;
         ScheduleReader.clear();
@@ -108,8 +102,8 @@ public class UiExcuter {
         try {
             lock.lock();
             StopExcuter();
-            Logs.i(TAG, "------------------------- 开始关联数据UI -------------");
-            uiExcuter.settingSchedule(schedule);
+            Logs.i(TAG, "------------------------- 开始关联数据UI -----------------");
+            uiExcuter.excuteSchedule(schedule);
         } catch (Exception e) {
             Logs.e(TAG, "ui 执行者 开始异常 " + e.getMessage());
         } finally {
@@ -118,65 +112,84 @@ public class UiExcuter {
     }
 
     public void StopExcuter() {
-                Logs.i(TAG, "UI清理界面中");
+                Logs.i(TAG, "=====================UI清理界面中=====================");
                 isStoping = true;
                 //清理 : 1 存在的定时器 2.初始化_index 3.清理节目执行者
                 clearTimer();
                 _index = 0;
                 contentTanslater.clearCache();
-                clearProgramExcuter();
+                clearCurentProgram();
                 isStoping = false;
                 Logs.i(TAG, "------------清理完毕-------------");
     }
 
 
     /**
+     *
      * @param schedule
      */
-    private void settingSchedule(XmlNodeEntity schedule) {
-        //得到排期的类型创建定时器 时长计算: 1.布局下的内容的总时长得到布局的时长 2.布局时长最长的就是节目的时长
+    private void excuteSchedule(XmlNodeEntity schedule) {
+        //得到排期的类型创建定时器 时长计算: 1.布局下的内容的总时长>>得到布局的时长 2.布局时长最长的就是节目的时长
         ArrayList<XmlNodeEntity> ProgramTimerList = new ArrayList<XmlNodeEntity>();
         //得到节目数组
         ArrayList<XmlNodeEntity> programArr = schedule.getChildren();
         if (programArr == null || programArr.size() == 0) {
-            Logs.e(TAG, "当前排期无节目列表");
+            Logs.e(TAG, "当前排期无节目");
             return;
         }
         for (XmlNodeEntity program : programArr) {
            // Logs.i(TAG, "计算当前节目 << " + program.getXmldata().get("title") + " >> 的时长中");
-            long programTime = getProgramTimeLength(program);
+            long programTime = getProgramTimeLength(program);//获取时长
             program.getXmldata().put("programTime", String.valueOf(programTime));
             ProgramTimerList.add(program);
         }
 
-        if (ProgramTimerList.size() == 1) {
-            //只有一个节目 直接执行 节目执行者
-            createProgramExcuter(ProgramTimerList.get(0));
-        } else {
-
-            //创建定时器去执行节目执行者
+//        if (ProgramTimerList.size() == 1) {
+//            //只有一个节目 直接执行 节目执行者
+//            createProgramExcuter(ProgramTimerList.get(0));
+//        } else {
+//            //创建定时器去执行节目执行者
             startProgramTimerExcuter(ProgramTimerList);
-        }
+//        }
     }
+
+
+
+
+
+
+
+
+
+
+
 
     private int _index = 0; //在每次开始执行ui时 请初始化一次
     Timer timer = null;//定时器
     TimerTask timerTask = null;
+    //取消定时器
+    private void clearTimer() {
+        if (timerTask != null) {
+            timerTask.cancel();
+            timerTask = null;
+        }
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+    }
 
     private void startProgramTimerExcuter(final ArrayList<XmlNodeEntity> programTimerlist) {
         //取消存在的定时器
         clearTimer();
         //执行 节目执行者
-
         long second = Long.parseLong(programTimerlist.get(_index).getXmldata().get("programTime"));
-
-        Logs.i(TAG, "节目名: " + programTimerlist.get(_index).getXmldata().get("title")+"; 持续时长: "+ second+"秒" );
-        createProgramExcuter(programTimerlist.get(_index));
+        createCurrentProgram(programTimerlist.get(_index));
+//        Logs.i(TAG, "节目名: [" + programTimerlist.get(_index).getXmldata().get("title")+"]; 持续时长: "+ second+" 秒" );
 
         //创建定时器
         timer = new Timer();
         timerTask = new TimerTask() {
-
             @Override
             public void run() {
                 startProgramTimerExcuter(programTimerlist);
@@ -190,17 +203,7 @@ public class UiExcuter {
         }
     }
 
-    //取消定时器
-    private void clearTimer() {
-        if (timerTask != null) {
-            timerTask.cancel();
-            timerTask = null;
-        }
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
-    }
+
 
     /**
      * 得到时长
@@ -208,7 +211,6 @@ public class UiExcuter {
      * @param program
      */
     private long getProgramTimeLength(XmlNodeEntity program) {
-        long programTime = -1;
         ArrayList<Long> layoutTimeArr = new ArrayList<Long>();
         //得到布局的数组
         ArrayList<XmlNodeEntity> layoutArr = program.getChildren();
@@ -225,7 +227,6 @@ public class UiExcuter {
                     layoutTime += contentTime;
                 } catch (Exception e) {
                     Logs.e(TAG, "获取节目-布局-内容 下的时长 解析错误:" + contentTimeText);
-                    continue;
                 }
             }
            // Logs.i(TAG, "得到一个布局的时长:" + layoutTime);
@@ -233,33 +234,27 @@ public class UiExcuter {
         }
         //排序
         Collections.sort(layoutTimeArr, new Comparator<Long>() {
-
             @Override
             public int compare(Long lhs, Long rhs) {
                 return lhs - rhs > 0 ? -1 : lhs - rhs == 0 ? 0 : 1;  //-1代表前者小，0代表两者相等，1代表前者大。
             }
         });
-        programTime = layoutTimeArr.get(0);
-        return programTime;
+        return layoutTimeArr.get(0);
     }
-
 
     /**
-     * 创建 节目
+     * 创建 当前正在执行的节目
      */
     private programExcuter currentPlayProgram = null;
-
-    private void createProgramExcuter(XmlNodeEntity program) {
-        clearProgramExcuter();
+    private void createCurrentProgram(XmlNodeEntity program) {
+        clearCurentProgram();
         currentPlayProgram = new programExcuter(program);
-        currentPlayProgram.start();
+        currentPlayProgram.onStart();
     }
-
-    //清理节目执行者
-    private void clearProgramExcuter() {
+    //清理当前正在执行的节目
+    private void clearCurentProgram() {
         if (currentPlayProgram != null) {
-            Logs.i(TAG, "开始清理节目中...");
-            currentPlayProgram.stop();
+            currentPlayProgram.onStop();
             currentPlayProgram = null;
         }
     }

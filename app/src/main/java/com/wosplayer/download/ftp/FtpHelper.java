@@ -1,6 +1,8 @@
 package com.wosplayer.download.ftp;
 
 
+import android.util.Log;
+
 import com.wosplayer.app.Logs;
 import com.wosplayer.download.operation.Task;
 import com.wosplayer.download.util.DownloadFileUtil;
@@ -117,7 +119,7 @@ public class FtpHelper {
                 ftpClient.logout();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(TAG,"退出 FTP:失败:"+e.getMessage()+"\n["+ftpClient+"]");
         } finally {
             try {
                 if (ftpClient != null) {
