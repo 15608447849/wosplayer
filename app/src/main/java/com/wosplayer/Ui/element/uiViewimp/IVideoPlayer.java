@@ -34,7 +34,7 @@ public class IVideoPlayer implements IPlayer{
     }
 
     private String localPath = null;
-
+    private Runnable callTo ;
     @Override
     public void loadData(DataList mp) {
         try {
@@ -54,7 +54,7 @@ public class IVideoPlayer implements IPlayer{
                 @Override
                 public void onCompletion(MediaPlayer mp) {
                     //播放完毕 通知上一级
-                    callTo();
+                    UiExcuter.getInstancs().runingMain(callTo);
                 }
             });
 
@@ -63,18 +63,13 @@ public class IVideoPlayer implements IPlayer{
         }
     }
 
-    private void callTo() {
-        if (timeCalls!=null){
-            timeCalls.playOvers(this);
-        }
-    }
+
 
  
 
     @Override
     public void start() {
         try{
-
             if (FileUtils.isFileExist(localPath)){
                 video.setMedioFilePath(localPath);
             }else{
@@ -84,7 +79,6 @@ public class IVideoPlayer implements IPlayer{
                 superView.addView(video);
                 isLayout = true;
             }
-
         }catch (Exception e){
             Logs.e(TAG,"开始:"+e.getMessage());
         }
@@ -103,11 +97,18 @@ public class IVideoPlayer implements IPlayer{
             Logs.e(TAG,"停止:"+e.getMessage());
         }
     }
-    //时间回调
-    private TimeCalls timeCalls = null;
+
     @Override
     public void setTimerCall(TimeCalls timer) {
-        timeCalls = timer;
+        final TimeCalls timeCalls = timer;
+       callTo =  new Runnable() {
+            @Override
+            public void run() {
+                if (timeCalls!=null){
+                    timeCalls.playOvers(IVideoPlayer.this);
+                }
+            }
+        };
     }
 
 

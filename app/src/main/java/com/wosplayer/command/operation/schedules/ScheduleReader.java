@@ -1,9 +1,7 @@
 package com.wosplayer.command.operation.schedules;
 
 import android.content.Intent;
-import android.content.IntentSender;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.app.PlayApplication;
@@ -12,7 +10,6 @@ import com.wosplayer.app.SystemConfig;
 import com.wosplayer.command.kernal.CommandCenter;
 import com.wosplayer.command.operation.other.Command_SYTI;
 import com.wosplayer.command.operation.schedules.correlation.XmlNodeEntity;
-import com.wosuis.newperf.UiDataTanslation;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -257,7 +254,7 @@ public class ScheduleReader {
         if (makeTimerTask(currentEntity)){
             //更新ui
             //发送广播 通知视图更新
-            UiExcuter.getInstancs().StartExcuter(currentEntity);
+            UiExcuter.getInstancs().onStart(currentEntity);
         }else{
             Logs.e(TAG,"不更新ui 获取低优先级的任务");
             deleteOnlySchedule(currentEntity);

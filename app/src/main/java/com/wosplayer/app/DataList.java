@@ -26,7 +26,9 @@ public class DataList implements Parcelable {
     public HashMap<String, String> getMap(){
         return map;
     }
-
+    public DataList(HashMap<String, String> map){
+        this.map = map;
+    }
 
     public String GetStringDefualt(String key, String defualtValue) {
         try {
@@ -87,6 +89,7 @@ public class DataList implements Parcelable {
     }
     public DataList() {
     }
+
     protected DataList(Parcel in) {
         this.key = in.readString();
         this.map = (HashMap<String, String>) in.readSerializable();

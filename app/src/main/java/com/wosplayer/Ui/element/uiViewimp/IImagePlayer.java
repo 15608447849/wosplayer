@@ -26,6 +26,10 @@ public class IImagePlayer implements IPlayer{
     private Mimage image;
     private int[] sizearr;
     private String imageFile = null;//文件本地路径
+    private int timeLength = 0;//时长
+    private Runnable callTo;
+
+
     public IImagePlayer(Context context, ViewGroup superView) {
         this.superView = superView;
         image = new Mimage(context);
@@ -33,6 +37,7 @@ public class IImagePlayer implements IPlayer{
     @Override
     public void loadData(DataList mp) {
         try {
+
             int x = mp.GetIntDefualt("x", 0);
             int y = mp.GetIntDefualt("y", 0);
             int w = mp.GetIntDefualt("width",0 );
@@ -40,6 +45,7 @@ public class IImagePlayer implements IPlayer{
             sizearr = new int[]{x,y,w,h};
             image.setLayoutParams(new AbsoluteLayout.LayoutParams(w,h,x,y));
             imageFile = mp.GetStringDefualt("localpath", "");
+            timeLength = mp.GetIntDefualt("timelength",0);
         }catch (Exception e){
             Logs.e(TAG, "loaddata() " + e.getMessage());
         }
@@ -47,6 +53,15 @@ public class IImagePlayer implements IPlayer{
 
     @Override
     public void setTimerCall(TimeCalls timer) {
+        final TimeCalls timeCalls = timer;
+        callTo =  new Runnable() {
+            @Override
+            public void run() {
+                if (timeCalls!=null){
+                    timeCalls.playOvers(IImagePlayer.this);
+                }
+            }
+        };
     }
 
     //主线程中执行
@@ -65,6 +80,11 @@ public class IImagePlayer implements IPlayer{
                 ImageViewPicassocLoader.getBitmap(UiExcuter.getInstancs().defImagePath,image);
             }
             ImageAttabuteAnimation.SttingAnimation(null,image,sizearr);//属性动画
+
+//            Logs.i(TAG,"持续时长:"+timeLength);
+            //开始一个计时器
+            UiExcuter.getInstancs().runingMainDelayed(callTo, timeLength * 1000);
+
         }catch (Exception e){
             Logs.e(TAG,"开始:"+e.getMessage());
         }
@@ -78,6 +98,7 @@ public class IImagePlayer implements IPlayer{
                 superView.removeView(image);
                 isLayout = false;
             }
+            UiExcuter.getInstancs().removeMain(callTo);
         }catch (Exception e){
             Logs.e(TAG,"停止:"+e.getMessage());
         }

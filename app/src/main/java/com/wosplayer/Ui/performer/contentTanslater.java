@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 
 import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.element.interfaces.TimeCalls;
+import com.wosplayer.app.AppTools;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.Logs;
 
@@ -18,7 +19,7 @@ import java.util.Map;
  * Created by user on 2016/7/25.
  */
 public final class contentTanslater {
-    private static final String TAG = "content Tanslater";
+    private static final String TAG = "contentTanslater";
 
 
     /**
@@ -86,17 +87,18 @@ public final class contentTanslater {
     public static IPlayer tanslationAndStart(DataList list, boolean isStart, ViewGroup vp, TimeCalls timrmanager){
         Context context = UiExcuter.getInstancs().getContext();
         ViewGroup mainLayout = UiExcuter.getInstancs().getMainLayout();
+        if (mLruCache==null){
+            mLruCache =  new LruCache<>((int) (Runtime.getRuntime().maxMemory() / 8));//最大内存的1/3
+        }
         if (context==null){
             Logs.e(TAG,"无法创建 iplayer ,环境不正确,请初始化 Activity");
             return null;
         }
-
-        if (mLruCache==null){
-            mLruCache =  new LruCache<String,IPlayer>((int) (Runtime.getRuntime().maxMemory() / 8));//最大内存的1/3
+        if (!AppTools.checkUiThread()){
+            Logs.e(TAG,"无法创建 iplayer ,请在U线程中使用");
         }
 
         IPlayer iplay = null;
-
         try {
             //查看缓存是否存在
             String key = list.getKey();
@@ -127,13 +129,15 @@ public final class contentTanslater {
                 //添加到 缓存中
                 putIplayerToCache(key,iplay);
             }
+
+
+            Log.e(TAG,"执行标识:"+isStart+"对象:[" + iplay+"]");
             //执行它
             iplay.loadData(list);
             iplay.setTimerCall(timrmanager);
             if (isStart){
                 iplay.start();//主线程执行
             }
-
         } catch (ClassNotFoundException e) {
             Logs.e(TAG,"无法找到这个类:"+e.getMessage());
         }catch(NoSuchMethodException e){

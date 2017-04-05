@@ -9,6 +9,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
@@ -48,7 +49,14 @@ public class AppTools {
     private static final String TAG = AppTools.class.getName();
 
 
-
+    //检查是不是ui线程
+    public static boolean checkUiThread(){
+        if (Looper.myLooper() == Looper.getMainLooper()) { // UI主线程
+            return true;
+        } else { // 非UI主线程
+            return false;
+        }
+    }
     /**
      * 生成机器码
      *

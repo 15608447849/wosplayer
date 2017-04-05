@@ -13,6 +13,7 @@ import com.wosplayer.R;
 import com.wosplayer.Ui.element.definedView.MWeb;
 import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.element.interfaces.TimeCalls;
+import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.Logs;
 import com.wosplayer.command.kernal.CommandCenter;
@@ -30,6 +31,8 @@ public class IWebPlayer implements IPlayer {
     private boolean isLayout = false;
     private ProgressBar progress;
     private FrameLayout flayout;
+    private int timeLength = 0;//时长
+    private Runnable callTo;
     public IWebPlayer(Context context, ViewGroup mfatherView) {
         this.context = context;
         this.superView = mfatherView;
@@ -59,8 +62,7 @@ public class IWebPlayer implements IPlayer {
                 //发送指令
                 sendFFBK(mp.GetStringDefualt("resource",""));
             }
-
-            Logs.e(TAG,"url = "+uri);
+            timeLength = mp.GetIntDefualt("timelength",0);
         } catch (Exception e) {
             Logs.e(TAG, "loaddata() " + e.getMessage());
         }
@@ -82,6 +84,15 @@ public class IWebPlayer implements IPlayer {
 
     @Override
     public void setTimerCall(TimeCalls timer) {
+        final TimeCalls timeCalls = timer;
+        callTo =  new Runnable() {
+            @Override
+            public void run() {
+                if (timeCalls!=null){
+                    timeCalls.playOvers(IWebPlayer.this);
+                }
+            }
+        };
     }
 
 
@@ -98,6 +109,7 @@ public class IWebPlayer implements IPlayer {
                 web.loadUrl(this.uri);
                 isLayout = true;
             }
+            UiExcuter.getInstancs().runingMainDelayed(callTo, timeLength * 1000);
         } catch (Exception e) {
             Logs.e(TAG, "web start():" + e.getMessage());
         }
