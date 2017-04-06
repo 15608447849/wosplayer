@@ -13,13 +13,13 @@ import java.util.HashMap;
  * Created by user on 2016/7/25.
  * 执行布局
  */
-public class LayoutExcuter implements TimeCalls {
+public class LayoutsExcuter implements TimeCalls {
     private static final java.lang.String TAG = "布局执行器";
     //当前内容对象
     private IPlayer currentIplayer=null ;
     private ArrayList<XmlNodeEntity> contentArr = null;
     private int _index = 0;//当前下标的选中内容
-    public LayoutExcuter(XmlNodeEntity layoutData) {
+    public LayoutsExcuter(XmlNodeEntity layoutData) {
         contentArr = layoutData.getChildren();
     }
     //开始执行 - 请在主进程中
