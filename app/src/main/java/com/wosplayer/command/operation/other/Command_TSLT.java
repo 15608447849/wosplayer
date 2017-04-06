@@ -2,9 +2,7 @@ package com.wosplayer.command.operation.other;
 
 import android.app.Activity;
 
-import com.wosplayer.app.AppTools;
 import com.wosplayer.app.Logs;
-import com.wosplayer.app.PlayApplication;
 import com.wosplayer.app.SystemConfig;
 import com.wosplayer.command.operation.schedules.ScheduleSaver;
 import com.wosplayer.command.operation.interfaces.iCommand;

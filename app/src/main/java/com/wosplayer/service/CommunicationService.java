@@ -9,7 +9,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
-import com.wosplayer.app.AppTools;
+import com.wosplayer.app.AppUtils;
 import com.wosplayer.app.Logs;
 import com.wosplayer.app.SystemConfig;
 import com.wosplayer.command.kernal.CommandCenter;
@@ -313,7 +313,7 @@ public class CommunicationService extends Service{
         //发送上线指令
         String msg = CommandType.ONLI + terminalNo;//
         sendMsgToService(msg);
-        msg = CommandType.GVAY + terminalNo+"#"+ AppTools.getAppVersionCode(getApplicationContext() );//通知获取版本号信息
+        msg = CommandType.GVAY + terminalNo+"#"+ AppUtils.getAppVersionCode(getApplicationContext() );//通知获取版本号信息
         sendMsgToService(msg);
         Logs.i(TAG,"=========================== 开始和服务器("+ip+":"+port+")的通讯 ===========================");
     }

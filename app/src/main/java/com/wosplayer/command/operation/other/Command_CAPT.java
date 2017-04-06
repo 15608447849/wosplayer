@@ -5,16 +5,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.media.MediaMetadataRetriever;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.wosplayer.Ui.element.definedView.Mtextscroll;
 import com.wosplayer.Ui.element.definedView.Mvideo;
-import com.wosplayer.app.AppTools;
-import com.wosplayer.app.BackRunner;
-import com.wosplayer.app.DisplayActivity;
+import com.wosplayer.app.AppUtils;
 import com.wosplayer.app.Logs;
 import com.wosplayer.app.SystemConfig;
 import com.wosplayer.command.operation.interfaces.iCommand;
@@ -298,7 +295,7 @@ public class Command_CAPT  extends Thread implements iCommand {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        AppTools.Toals(activity,"上传截图完成");
+                        AppUtils.Toals(activity,"上传截图完成");
                     }
                 });
             }

@@ -20,7 +20,7 @@ import android.widget.TextView;
 
 import com.wosplayer.R;
 import com.wosplayer.app.AdbCommand;
-import com.wosplayer.app.AppTools;
+import com.wosplayer.app.AppUtils;
 import com.wosplayer.app.BackRunner;
 import com.wosplayer.app.DisPlayInterface;
 import com.wosplayer.app.DisplayActivity;
@@ -168,9 +168,9 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
         dataList.put("width",Integer.toString(m_dm.widthPixels));
         dataList.put("height",Integer.toString(m_dm.heightPixels));
         //获取本机地址
-        dataList.put("tip",AppTools.getLocalIpAddress());
+        dataList.put("tip", AppUtils.getLocalIpAddress());
         //获取本机机器码
-        dataList.put("mac",AppTools.GetMac(activity));
+        dataList.put("mac", AppUtils.GetMac(activity));
     }
 
     /**
@@ -190,7 +190,7 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
             storageLimits.setText(dataList.GetStringDefualt("storageLimits","50"));
             restartBeatInterval.setText(dataList.GetStringDefualt("RestartBeatInterval","30"));
             localip.setText(dataList.GetStringDefualt("tip","127.0.0.1"));
-            version.setText("version:["+AppTools.getAppVersionCode(activity)+"]");
+            version.setText("version:["+ AppUtils.getAppVersionCode(activity)+"]");
             cap_save.check((dataList.GetIntDefualt("CaptureSave",0)==0)?R.id.cap_save_y:R.id.cap_save_n);
             cap_notify.check((dataList.GetIntDefualt("CaptureNoty",0)==0)?R.id.cap_notify_y:R.id.cap_notify_n);
         }catch(Exception e)
@@ -264,10 +264,10 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
         dataList.save();
 
         if (!"".equals(terminalNo.getText().toString())){
-            AppTools.settingServerInfo(activity,true);
+            AppUtils.settingServerInfo(activity,true);
             activity.mHandler.sendEmptyMessage(PlayHandler.HandleEvent.close.ordinal());
         }else{
-            AppTools.Toals(activity,"配置信息不可用，请联系客服");
+            AppUtils.Toals(activity,"配置信息不可用，请联系客服");
         }
     }
     public void setcompanyid(String value)
@@ -276,7 +276,7 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
         {
             terminalNo.setText(value);
             terminalNo.setFocusable(true);
-            AppTools.Toals(activity,"申请终端ID成功");
+            AppUtils.Toals(activity,"申请终端ID成功");
         }catch(Exception e)
         {
             Log.e(TAG, e.getMessage());
@@ -307,7 +307,7 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
         if (vid == R.id.sure){
             final String cmd = command.getText().toString();
             if (cmd == null || cmd.equals("")) {
-                AppTools.Toals(activity,"请输入终端命令");
+                AppUtils.Toals(activity,"请输入终端命令");
             }
             BackRunner.runBackground(new Runnable() {
                 @Override
@@ -322,7 +322,7 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
     {
         if(activity!=null)
         {
-            AppTools.NotifyHandle(activity.mHandler, PlayHandler.HandleEvent.outtext.ordinal(),msg);
+            AppUtils.NotifyHandle(activity.mHandler, PlayHandler.HandleEvent.outtext.ordinal(),msg);
         }
     }
     private void excute(String cmd) {

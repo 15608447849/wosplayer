@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.wosplayer.app.AppTools;
+import com.wosplayer.app.AppUtils;
 import com.wosplayer.app.Logs;
 
 /**
@@ -32,7 +32,7 @@ public class SystemBroads extends BroadcastReceiver {
                     +"\n\n" +
                     "========================================================================================================================\n" +
                     "========================================================================================================================\n");
-            AppTools.LongToals(context,"[欢迎使用多媒体播放器,技术热线:4008-166-128]");
+            AppUtils.LongToals(context,"[欢迎使用多媒体播放器,技术热线:4008-166-128]");
             WatchServerHelp.openDeams(context);
         }
         if(action.equals("android.intent.action.MEDIA_MOUNTED")){

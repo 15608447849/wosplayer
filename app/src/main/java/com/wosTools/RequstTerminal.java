@@ -1,13 +1,9 @@
 package com.wosTools;
 
 import android.os.Handler;
-import android.os.Message;
-import android.util.DisplayMetrics;
-import android.util.Log;
 
-import com.wosplayer.app.AppTools;
+import com.wosplayer.app.AppUtils;
 import com.wosplayer.app.DataList;
-import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
 import com.wosplayer.app.PlayHandler;
 
@@ -124,7 +120,7 @@ public class RequstTerminal extends Thread{
     {
             if(woshandler!=null)
             {
-                AppTools.NotifyHandle(woshandler,what,Msg);
+                AppUtils.NotifyHandle(woshandler,what,Msg);
             }
     }
 }

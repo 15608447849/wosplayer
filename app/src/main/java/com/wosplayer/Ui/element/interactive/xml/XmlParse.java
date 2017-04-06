@@ -1,15 +1,12 @@
 package com.wosplayer.Ui.element.interactive.xml;
 
 
-import android.content.Context;
-
 import com.wosplayer.Ui.element.interactive.databeads.Abutton;
 import com.wosplayer.Ui.element.interactive.databeads.Acontent;
 import com.wosplayer.Ui.element.interactive.databeads.Afile;
 import com.wosplayer.Ui.element.interactive.databeads.Alayout;
 
-import com.wosplayer.app.AppTools;
-import com.wosplayer.app.Logs;
+import com.wosplayer.app.AppUtils;
 
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -17,8 +14,6 @@ import org.dom4j.io.SAXReader;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -109,7 +104,7 @@ public class XmlParse {
         Element folder  = interaction.element(XML_NOTE.interactive_folder);//节点
         afile.tag = folder.elementText(XML_NOTE.interactive_folder_id);//id
         afile.thumbnailpath = folder.elementText(XML_NOTE.interactive_folder_thumbnailpath);//封面图
-        afile.thumbnailpath = AppTools.subLastString(afile.thumbnailpath,"/");
+        afile.thumbnailpath = AppUtils.subLastString(afile.thumbnailpath,"/");
         //得到所有的item节点
         List items = folder.elements(XML_NOTE.interactive_folder_item);
         for (Iterator its = items.iterator(); its.hasNext(); ) {

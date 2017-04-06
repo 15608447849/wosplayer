@@ -6,12 +6,10 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.wosplayer.app.AdbCommand;
-import com.wosplayer.app.AppTools;
+import com.wosplayer.app.AppUtils;
 import com.wosplayer.app.Logs;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -66,11 +64,11 @@ public class UpdateApkServer extends IntentService {
         }else{
             //判断apk 版本号
             // 1 获取软件版本号 apk版本号
-            int localVersion = AppTools.getAppVersionCode(getApplicationContext());
-            int apkVersion = AppTools.getApkVersionCode(getApplication(),apkLocalPath);
+            int localVersion = AppUtils.getAppVersionCode(getApplicationContext());
+            int apkVersion = AppUtils.getApkVersionCode(getApplication(),apkLocalPath);
             //2 获取软件包名 apk包名
             String localPackageName = getApplication().getApplicationInfo().packageName;
-            String apkPackageName = AppTools.getApkPackageName(getApplication(),apkLocalPath);
+            String apkPackageName = AppUtils.getApkPackageName(getApplication(),apkLocalPath);
             sb.append("local package:"+localPackageName+";version:"+localVersion+".\n");
             sb.append("apk package:"+apkPackageName+";version:"+apkVersion+".\n");
             if (localPackageName.equals(apkPackageName)){
@@ -85,7 +83,7 @@ public class UpdateApkServer extends IntentService {
                 flag = 2;
             }
         }
-        AppTools.saveLogs(logFile, sb); //升级信息记录
+        AppUtils.saveLogs(logFile, sb); //升级信息记录
         if (flag>0){
             installApk(apkLocalPath,flag);
         }
@@ -116,11 +114,11 @@ public class UpdateApkServer extends IntentService {
                 flag = 3;
                 sb.append("package util install apk success.\n");
             }
-           AppTools.saveLogs(logFile, sb);
+           AppUtils.saveLogs(logFile, sb);
         }
         if (flag == 3){
-            String packageName = AppTools.getApkPackageName(getApplicationContext(),apkLocalPath);
-            String activityName = AppTools.getTaragePackageLunchActivityName(getApplicationContext(),packageName);
+            String packageName = AppUtils.getApkPackageName(getApplicationContext(),apkLocalPath);
+            String activityName = AppUtils.getTaragePackageLunchActivityName(getApplicationContext(),packageName);
             String command = "rm -rf "+apkLocalPath+"\n"+AdbCommand.adbStartActivity(packageName,activityName);
             Log.e(TAG,command);
             //成功 - 打开 app

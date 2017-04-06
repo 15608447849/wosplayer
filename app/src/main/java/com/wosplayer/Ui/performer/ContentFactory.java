@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.element.interfaces.TimeCalls;
 import com.wosplayer.Ui.element.uitools.IplayerStore;
-import com.wosplayer.app.AppTools;
+import com.wosplayer.app.AppUtils;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.Logs;
 
@@ -63,7 +63,7 @@ public final class ContentFactory {
             Logs.e(TAG,"无法创建 iplayer ,环境不正确,请初始化 Activity");
             return null;
         }
-        if (!AppTools.checkUiThread()){
+        if (!AppUtils.checkUiThread()){
             Logs.e(TAG,"无法创建 iplayer ,请在U线程中使用");
             return null;
         }

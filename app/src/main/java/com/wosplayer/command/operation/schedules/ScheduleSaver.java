@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.wosplayer.Ui.performer.ContentFactory.ContentTypeEnum;
-import com.wosplayer.app.AppTools;
+import com.wosplayer.app.AppUtils;
 import com.wosplayer.app.SystemConfig;
 import com.wosplayer.command.operation.schedules.correlation.StringUtils;
 import com.wosplayer.tool.SdCardTools;
@@ -135,7 +135,7 @@ public class ScheduleSaver implements iCommand {
      * @param Obj
      */
     private void getXMLdata(String uri, int callType,Object Obj) {
-        String result = AppTools.uriTranslationXml(uri);
+        String result = AppUtils.uriTranslationXml(uri);
         if (result==null){
             Logs.e(TAG,"getXMLdata() 返回值不存在");
             return;

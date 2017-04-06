@@ -9,13 +9,11 @@ import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest;
-import com.wosplayer.app.AppTools;
 import com.wosplayer.app.PlayApplication;
 import com.wosplayer.app.Logs;
 import com.wosplayer.app.SystemConfig;
 import com.wosplayer.command.operation.interfaces.iCommand;
 import com.wosplayer.download.kernal.DownloadManager;
-import com.wosplayer.tool.SdCardTools;
 
 
 import org.dom4j.Document;

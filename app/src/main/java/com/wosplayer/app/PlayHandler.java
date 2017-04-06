@@ -31,7 +31,7 @@ public class PlayHandler extends Handler{
        };
        final DisplayActivity activity = mActivity.get();
         if (msg.what == HandleEvent.outtext.ordinal()){
-            AppTools.Toals(activity,msg.obj.toString());
+            AppUtils.Toals(activity,msg.obj.toString());
         }
         //配置页面消息显示获取终端id成功
         if (msg.what == HandleEvent.success.ordinal()){
@@ -49,12 +49,12 @@ public class PlayHandler extends Handler{
         //打开配置页面
         if (msg.what == HandleEvent.open.ordinal()){
             if (activity.mFragmentImp !=null){
-                AppTools.Toals(appContext,"请设置播放器参数");
+                AppUtils.Toals(appContext,"请设置播放器参数");
             }else{
-                AppTools.settingServerInfo(activity,false);
+                AppUtils.settingServerInfo(activity,false);
                 //停止工作
                 activity.stop(false);
-                AppTools.Toals(activity,"2秒后进入配置界面");
+                AppUtils.Toals(activity,"2秒后进入配置界面");
                 //打开配置界面
                 this.postDelayed(new Runnable() {
                     @Override

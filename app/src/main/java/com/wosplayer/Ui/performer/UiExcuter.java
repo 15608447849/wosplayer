@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import com.wosplayer.Ui.element.uitools.ImageStore;
 import com.wosplayer.Ui.element.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.element.uitools.IplayerStore;
-import com.wosplayer.app.AppTools;
+import com.wosplayer.app.AppUtils;
 import com.wosplayer.app.BackRunner;
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
@@ -78,11 +78,11 @@ public class UiExcuter {
             public void run() {
                 if (defaultPath.isEmpty() || ffbkPath.isEmpty() || mActivity==null ) return;
                 //将默认排期放入指定文件夹下
-                AppTools.unzipFiles(mActivity,defaultPath,"default.zip");
+                AppUtils.unzipFiles(mActivity,defaultPath,"default.zip");
                 Logs.i("后台任务","默认排期解压缩完成");
                 //将默认图片或者视频放入指定 文件夹下
                 // Logs.i("后台任务","默认资源放入指定目录下 - "+resourcePath+"default.mp4 成功");
-                AppTools.unzipFiles(mActivity,ffbkPath,"bank.zip");
+                AppUtils.unzipFiles(mActivity,ffbkPath,"bank.zip");
                 Logs.i("后台任务","富颠金融网页模板解压缩完成");
                 ScheduleReader.notifySchedule();//通知排期读取
             }
@@ -391,7 +391,7 @@ public class UiExcuter {
                 map.put("fudianpath", "file://"+UiExcuter.getInstancs().ffbkPath+"index.html");
             }
             if (contentType.equals(ContentFactory.ContentTypeEnum.image) || contentType.equals(ContentFactory.ContentTypeEnum.video)){
-                map.put("localpath", UiExcuter.getInstancs().basepath+ AppTools.subLastString(getcontents,"/"));//本地路径
+                map.put("localpath", UiExcuter.getInstancs().basepath+ AppUtils.subLastString(getcontents,"/"));//本地路径
             }
             if (contentType.equals(ContentFactory.ContentTypeEnum.text)){
                 //滚动字幕

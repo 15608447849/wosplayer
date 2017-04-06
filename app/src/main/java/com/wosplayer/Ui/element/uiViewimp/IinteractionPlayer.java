@@ -23,7 +23,7 @@ import com.wosplayer.Ui.element.interfaces.TimeCalls;
 import com.wosplayer.Ui.element.uitools.ImageAttabuteAnimation;
 import com.wosplayer.Ui.element.uitools.ImageViewPicassocLoader;
 import com.wosplayer.Ui.performer.UiExcuter;
-import com.wosplayer.app.AppTools;
+import com.wosplayer.app.AppUtils;
 import com.wosplayer.app.BackRunner;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.Logs;
@@ -162,7 +162,7 @@ public class IinteractionPlayer extends AbsoluteLayout implements IPlayer,View.O
     private String getXml(String tag, String mUri) {
        Logs.e(TAG,"标识: "+tag+" ;地址: "+mUri);
         //从网络获取数据
-        String xml = AppTools.uriTranslationXml(mUri);
+        String xml = AppUtils.uriTranslationXml(mUri);
         if (xml == null) {
             //从缓存获取数据
             xml = InteractionCache.pull(tag+mUri);
@@ -210,7 +210,7 @@ public class IinteractionPlayer extends AbsoluteLayout implements IPlayer,View.O
         btn.image = UiExcuter.getInstancs().basepath + afile.thumbnailpath;
         for (Acontent content : afile.contentList){
             if (content.type.equals("1007") || content.type.equals("1002")){
-                content.sourcePath = UiExcuter.getInstancs().basepath+AppTools.subLastString(content.sourcePath,"/");
+                content.sourcePath = UiExcuter.getInstancs().basepath+ AppUtils.subLastString(content.sourcePath,"/");
             }
             //Logs.e(TAG,content.type+"; " +content.sourcePath+ "; "+ content.web_url);
         }
@@ -282,7 +282,7 @@ public class IinteractionPlayer extends AbsoluteLayout implements IPlayer,View.O
     //设置背景
     public void settingBg(Alayout data) {
        if (data.bgType == 1){//纯色
-           String colorValue = AppTools.TanslateColor(data.bgValue);
+           String colorValue = AppUtils.TanslateColor(data.bgValue);
            try {
                this.setBackgroundColor(Color.parseColor(colorValue));
            } catch (Exception e) {

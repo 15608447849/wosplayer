@@ -25,7 +25,7 @@ public class OverAppDialog {
         final EditText passwordInput = new EditText(m);
         passwordInput.setTransformationMethod(PasswordTransformationMethod.getInstance());
              new AlertDialog.Builder(m)
-                    .setTitle(AppTools.getLocalIpAddress()+" 输入管理密码将结束应用")
+                    .setTitle(AppUtils.getLocalIpAddress()+" 输入管理密码将结束应用")
                     .setIcon(android.R.drawable.ic_dialog_info)
                     .setView(passwordInput).setPositiveButton("确定", new DialogInterface.OnClickListener() {
                         @Override
@@ -38,7 +38,7 @@ public class OverAppDialog {
                                 //关闭
                                 CommandStore.getInstands().opration(CommandType.SHDP,"local");
                             }else{
-                                AppTools.LongToals(m,"密码错误,请联系客服或登陆后台(终端管理-电子屏-修改)查看");
+                                AppUtils.LongToals(m,"密码错误,请联系客服或登陆后台(终端管理-电子屏-修改)查看");
                             }
                         }
                     })

@@ -108,7 +108,7 @@ public class SystemConfig extends DataList{
         map.put("AccessClose","1");//默认不关闭
 
         //保存数据
-        boolean isWrite = FileUtils.writeFile(PATH,AppTools.mapToJson(map));
+        boolean isWrite = FileUtils.writeFile(PATH, AppUtils.mapToJson(map));
         if (isWrite){Logs.d(TAG, " ---播放器配置已还原默认设置 ---");}
     }
 
@@ -119,7 +119,7 @@ public class SystemConfig extends DataList{
             String content =  FileUtils.readFile(PATH,"utf-8").toString();
             //Logs.d(TAG,"读取配置文件:\n"+content);
             if (!content.isEmpty()) {
-                Map map = AppTools.jsonTxtToMap(content);
+                Map map = AppUtils.jsonTxtToMap(content);
                 this.setMap((HashMap<String, String>) map);
 //                Logs.i(TAG,"系统配置文件读取成功" );
             }
@@ -133,7 +133,7 @@ public class SystemConfig extends DataList{
     //保存数据 list->file
     public void save(){
         if (map.isEmpty()) return;
-        String content = AppTools.mapToJson(map);
+        String content = AppUtils.mapToJson(map);
 //        Logs.d(TAG,"保存配置文件："+content);
         boolean flag =  FileUtils.writeFile(PATH,content);
         //Logs.d(TAG,"存储系统配置文件["+PATH+"]结果:"+(flag?" 成功":" 失败"));

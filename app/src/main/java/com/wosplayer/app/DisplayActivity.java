@@ -51,7 +51,7 @@ public class DisplayActivity extends Activity {
         Logs.i(TAG,"onStart");
 
         //是否已经设置了服务器信息?
-        if (AppTools.isSettingServerInfo(this)){
+        if (AppUtils.isSettingServerInfo(this)){
             //开始工作
             start();
         }else{
@@ -66,7 +66,7 @@ public class DisplayActivity extends Activity {
         super.onStop();
         Logs.i(TAG,"onStop");
         //结束工作
-        if (AppTools.isSettingServerInfo(this)){
+        if (AppUtils.isSettingServerInfo(this)){
             stop(true);
         }
     }

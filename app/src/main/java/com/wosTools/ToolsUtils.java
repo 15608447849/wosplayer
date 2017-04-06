@@ -11,7 +11,7 @@ import android.widget.Toast;
 
 import com.wosplayer.tool.SdCardTools;
 import com.wosplayer.app.PlayApplication;
-import com.wosplayer.app.AppTools;
+import com.wosplayer.app.AppUtils;
 import com.wosplayer.app.Logs;
 
 import org.dom4j.Document;
@@ -73,13 +73,13 @@ public class ToolsUtils {
      * @return
      */
     public static String GetMac(){
-        return AppTools.GetMac(PlayApplication.appContext);
+        return AppUtils.GetMac(PlayApplication.appContext);
     }
     /**
      * 生成ip
      */
     public static String getLocalIpAddress(){
-        return AppTools.getLocalIpAddress();
+        return AppUtils.getLocalIpAddress();
     }
 
     public static String getAppVersionName() {
