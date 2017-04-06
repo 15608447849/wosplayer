@@ -81,7 +81,6 @@ public class IImagePlayer implements IPlayer{
             }
             ImageAttabuteAnimation.SttingAnimation(null,image,sizearr);//属性动画
 
-//            Logs.i(TAG,"持续时长:"+timeLength);
             //开始一个计时器
             UiExcuter.getInstancs().runingMainDelayed(callTo, timeLength * 1000);
 

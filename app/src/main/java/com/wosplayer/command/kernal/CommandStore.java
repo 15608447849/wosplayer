@@ -1,7 +1,5 @@
 package com.wosplayer.command.kernal;
 
-import android.app.Activity;
-
 import com.wosplayer.app.BackRunner;
 import com.wosplayer.app.DisplayActivity;
 import com.wosplayer.app.Logs;
@@ -108,7 +106,7 @@ public class CommandStore {
         BackRunner.runBackground(new Runnable() {
             @Override
             public void run() {
-                Logs.i(TAG,"执行 - ["+cmd+"] - ["+ param+"]");
+                Logs.d(TAG,"执行 - ["+cmd+"] - ["+ param+"]");
                 commandList.get(cmd).execute(mActivity.get(),param);
             }
         });

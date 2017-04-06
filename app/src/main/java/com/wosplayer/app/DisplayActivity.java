@@ -133,7 +133,6 @@ public class DisplayActivity extends Activity {
 
     //开始工作
     public void start(){
-
             playTypeStart();
             openCommunication();
     }

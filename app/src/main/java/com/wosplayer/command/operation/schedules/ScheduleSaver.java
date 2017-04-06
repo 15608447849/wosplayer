@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.wosplayer.Ui.performer.contentTanslater.ContentTypeEnum;
+import com.wosplayer.Ui.performer.ContentFactory.ContentTypeEnum;
 import com.wosplayer.app.AppTools;
 import com.wosplayer.app.SystemConfig;
 import com.wosplayer.command.operation.schedules.correlation.StringUtils;
@@ -96,7 +96,9 @@ public class ScheduleSaver implements iCommand {
 
         try {
             isNotify = true;
+
             getXMLdata(uri,ROOT_PARSE,null); //解析数据
+
             //序列化数据
             Serialize();
             Logs.i(TAG,"执行排期数据解析,序列化保存完成");

@@ -12,7 +12,7 @@ import com.wosplayer.R;
  */
 
 public class ImageStore {
-    private static final String TAG = "image_cache";
+    private static final String TAG = "图片缓存";
     private static ImageStore instant;
     private boolean isInit = false;
     private ImageStore(){

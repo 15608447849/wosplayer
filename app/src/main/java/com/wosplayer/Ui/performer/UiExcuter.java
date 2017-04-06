@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 
 import com.wosplayer.Ui.element.uitools.ImageStore;
 import com.wosplayer.Ui.element.uitools.ImageViewPicassocLoader;
+import com.wosplayer.Ui.element.uitools.IplayerStore;
 import com.wosplayer.app.AppTools;
 import com.wosplayer.app.BackRunner;
 import com.wosplayer.app.DisplayActivity;
@@ -117,19 +118,20 @@ public class UiExcuter {
             lock.lock();
             onStop();
             onSchedule(schedule);
-            runingMain(EXCUTE);//跳转到主线程
+            runingMain(PLAYS);//跳转到主线程
         } catch (Exception e) {
           e.printStackTrace();
         } finally {
             lock.unlock();
         }
     }
+
     public void onStop() {
                 Logs.i(TAG, "UI清理界面开始");
                 programList.clear(); //清理现在的节目列表
-                runingMain(EXCUTE);
                 _index = 0;
-                contentTanslater.clearCache();
+                IplayerStore.getInstants().clearCache();
+                runingMain(PLAYS);
                 Logs.i(TAG, "UI清理界面结束");
     }
     /**
@@ -158,9 +160,9 @@ public class UiExcuter {
                 //获取 布局信息 ,创建布局 执行所有的节目
                 ArrayList<XmlNodeEntity> layoutArr = program.getChildren();
                 if ( layoutArr==null || layoutArr.size()==0){
-                    Logs.e(TAG,"当前节目无布局列表,节目信息: id = "+program.getXmldata().get("id")+" ; title = "+program.getXmldata().get("title"));
-                    continue;
-                }
+                Logs.e(TAG,"当前节目无布局列表,节目信息: id = "+program.getXmldata().get("id")+" ; title = "+program.getXmldata().get("title"));
+                continue;
+            }
                 //第二层循环 - 关于布局
                 for (XmlNodeEntity layout : layoutArr){
                     ArrayList<XmlNodeEntity> contentArr = layout.getChildren();
@@ -196,7 +198,7 @@ public class UiExcuter {
     }
 
     //执行节目执行
-    private final Runnable EXCUTE = new Runnable() {
+    private final Runnable PLAYS = new Runnable() {
         @Override
         public void run() {
 //            Logs.i(TAG, "节目数量:"+programList.size());
@@ -213,11 +215,13 @@ public class UiExcuter {
                 if (_index == programList.size()) {
                     _index = 0;
                 }
-                Logs.i(TAG,"开始一个节目 时长:"+second+" 秒");
+                Logs.d(TAG,"开始一个节目 时长:"+ ++second +" 秒");
                 runingMainDelayed(this,second * 1000);
             }else{
-                Logs.i(TAG,"结束节目播放");
-                ProExcuter.getInstants().onStop();// 解析
+                Logs.d(TAG,"结束节目播放");
+                //设置黑色背景
+                setMainBg("#000000");
+                ProExcuter.getInstants().onStop();
             }
         }
     };
@@ -346,9 +350,9 @@ public class UiExcuter {
         for (XmlNodeEntity content : contentArr){
             HashMap<String,String> map = new HashMap<>();
             String fileproterty = content.getXmldata().get("fileproterty");//内容类型
-            contentTanslater.ContentTypeEnum contentType = null;
+            ContentFactory.ContentTypeEnum contentType = null;
             try {
-                contentType = contentTanslater.ContentTypeEnum.valueOf(fileproterty);
+                contentType = ContentFactory.ContentTypeEnum.valueOf(fileproterty);
             } catch (IllegalArgumentException e) {
                 Logs.e(TAG,"布局数据 内容类型错误,未知类型:" + e.getMessage());
                 map.put("error","true");
@@ -377,19 +381,19 @@ public class UiExcuter {
             map.put("y",y);
             map.put("width",width);
             map.put("height",height);
-            if (contentType.equals(contentTanslater.ContentTypeEnum.webpage)){
+            if (contentType.equals(ContentFactory.ContentTypeEnum.webpage)){
                 map.put("type","1"); //  0 - 本地网页  1 -远程网页   2 -富滇项目
                 map.put("url",getcontents.startsWith("http")?getcontents:"http://" +getcontents);//网页链接
             }
-            if (contentType.equals(contentTanslater.ContentTypeEnum.fudianbank)){
+            if (contentType.equals(ContentFactory.ContentTypeEnum.fudianbank)){
                 map.put("type","2");
                 map.put("resource",getcontents);
                 map.put("fudianpath", "file://"+UiExcuter.getInstancs().ffbkPath+"index.html");
             }
-            if (contentType.equals(contentTanslater.ContentTypeEnum.image) || contentType.equals(contentTanslater.ContentTypeEnum.video)){
+            if (contentType.equals(ContentFactory.ContentTypeEnum.image) || contentType.equals(ContentFactory.ContentTypeEnum.video)){
                 map.put("localpath", UiExcuter.getInstancs().basepath+ AppTools.subLastString(getcontents,"/"));//本地路径
             }
-            if (contentType.equals(contentTanslater.ContentTypeEnum.text)){
+            if (contentType.equals(ContentFactory.ContentTypeEnum.text)){
                 //滚动字幕
                 ArrayList<XmlNodeEntity> data = content.getChildren();
                 if (data==null || data.size()== 0 ){
@@ -398,7 +402,7 @@ public class UiExcuter {
                     content.setXmldata(map);
                     continue;
                 }
-                XmlNodeEntity textcontent = contentArr.get(0);
+                XmlNodeEntity textcontent = data.get(0);
                 String boldstr = textcontent.getXmldata().get("fontweight");//字体类型
                 String speed = textcontent.getXmldata().get("txtspeed");//速度
                 String fontcolor = textcontent.getXmldata().get("fontcolor");//字体颜色
@@ -421,7 +425,7 @@ public class UiExcuter {
                 map.put("fontalpha",fontalpha==null?bgalpha:fontalpha);//文本透明度 如果没有文本透明度 - 背景透明度设置文本透明度
                 map.put("bgalpha",fontalpha==null?"0":bgalpha);//背景透明度 如果文本透明度不存在-背景透明度设置为透明
             }
-            if (contentType.equals(contentTanslater.ContentTypeEnum.time)){
+            if (contentType.equals(ContentFactory.ContentTypeEnum.time)){
                 //滚动字幕
                 ArrayList<XmlNodeEntity> data = content.getChildren();
                 if (data==null || data.size()== 0 ){
@@ -430,7 +434,7 @@ public class UiExcuter {
                     content.setXmldata(map);
                     continue;
                 }
-                XmlNodeEntity textcontent = contentArr.get(0);
+                XmlNodeEntity textcontent = data.get(0);
                 String fontcolor = textcontent.getXmldata().get("fontcolor");//字体颜色
                 String bgcolor = textcontent.getXmldata().get("backgroundcolor");//背景颜色
                 String fontsize = textcontent.getXmldata().get("fontsize");//字体大小
@@ -442,7 +446,7 @@ public class UiExcuter {
                 map.put("fontalpha",fontalpha==null?bgalpha:fontalpha);//文本透明度 如果没有文本透明度 - 背景透明度设置文本透明度
                 map.put("bgalpha",fontalpha==null?"0":bgalpha);//背景透明度 如果文本透明度不存在-背景透明度设置为透明
             }
-            if (contentType.equals(contentTanslater.ContentTypeEnum.interactive)){
+            if (contentType.equals(ContentFactory.ContentTypeEnum.interactive)){
                 map.put("xmlurl",getcontents);
                 map.put("tag",contentsnewname+contentsname);
             }

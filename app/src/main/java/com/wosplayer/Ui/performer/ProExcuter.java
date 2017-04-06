@@ -25,7 +25,7 @@ public class ProExcuter {
     }
 
     //布局列表
-    private ArrayList<layoutExcuter> layoutList = null;
+    private ArrayList<LayoutExcuter> layoutList = null;
     private ProExcuter(){
         layoutList = new ArrayList<>();
 
@@ -38,7 +38,7 @@ public class ProExcuter {
     public void onParse(XmlNodeEntity program){
         for (XmlNodeEntity layout:program.getChildren()){
             //Logs.i(TAG,"准备创建一个布局执行者:"+layout.getXmldata().get("id"));
-            layoutList.add(new layoutExcuter(layout));// 可以根据ID写一个布局缓存
+            layoutList.add(new LayoutExcuter(layout));// 可以根据ID写一个布局缓存
         }
     }
 
@@ -47,7 +47,7 @@ public class ProExcuter {
 
         if (layoutList!=null && layoutList.size()>0){
             //执行布局
-            Iterator<layoutExcuter> itr = layoutList.iterator();
+            Iterator<LayoutExcuter> itr = layoutList.iterator();
             while (itr.hasNext()){
                 itr.next().start();
             }
@@ -59,7 +59,7 @@ public class ProExcuter {
         //停止布局的执行
         if (layoutList!=null && layoutList.size()>0){
             //执行布局
-            Iterator<layoutExcuter> itr = layoutList.iterator();
+            Iterator<LayoutExcuter> itr = layoutList.iterator();
             while (itr.hasNext()){
                 itr.next().stop();
                 itr.remove();
