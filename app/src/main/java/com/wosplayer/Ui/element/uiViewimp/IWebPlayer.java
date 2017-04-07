@@ -55,7 +55,6 @@ public class IWebPlayer implements IPlayer {
             int type = mp.GetIntDefualt("type",-1);
             if (type == 1){
                 uri = mp.GetStringDefualt("url","http://www.winonetech.com/");
-
             }
             if (type == 2){
                 uri = mp.GetStringDefualt("fudianpath","");
@@ -63,6 +62,7 @@ public class IWebPlayer implements IPlayer {
                 sendFFBK(mp.GetStringDefualt("resource",""));
             }
             timeLength = mp.GetIntDefualt("timelength",0);
+//            Logs.e(TAG," 连接地址 : " + uri);
         } catch (Exception e) {
             Logs.e(TAG, "loaddata() " + e.getMessage());
         }
@@ -79,9 +79,6 @@ public class IWebPlayer implements IPlayer {
         intent.putExtras(b);
         context.sendBroadcast(intent);
     }
-
-
-
     @Override
     public void setTimerCall(TimeCalls timer) {
         final TimeCalls timeCalls = timer;
@@ -94,30 +91,32 @@ public class IWebPlayer implements IPlayer {
             }
         };
     }
-
-
     @Override
     public void start() {//主线程执行
         try {
+            if (callTo!=null){
+                UiExcuter.getInstancs().runingMainDelayed(callTo, timeLength * 1000);
+            }
             if (!isLayout) {
                 web = new MWeb(context,
                         new MWeb.MwebChrome(progress),
                         null);
                 web.setLayoutParams(layoutParams);
-                superView.addView(web);
                 superView.addView(flayout);
+                superView.addView(web);
                 web.loadUrl(this.uri);
                 isLayout = true;
             }
-            UiExcuter.getInstancs().runingMainDelayed(callTo, timeLength * 1000);
         } catch (Exception e) {
             Logs.e(TAG, "web start():" + e.getMessage());
         }
     }
-
     @Override
     public void stop() {//主线程执行
         try {
+            if (callTo!=null){
+                UiExcuter.getInstancs().removeMain(callTo);
+            }
             if (isLayout){
                 web.killSelf();
                 superView.removeView(flayout);

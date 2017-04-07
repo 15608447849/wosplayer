@@ -70,7 +70,6 @@ public class MWeb extends android.webkit.WebView{
         webSettings.setUseWideViewPort(true); //将图片调整到适合webview的大小
         webSettings.setLoadWithOverviewMode(true); // 缩放至屏幕的大小
 
-
         webSettings.setAppCacheEnabled(true); //启用应用缓存
         webSettings.setDomStorageEnabled(true); //启用或禁用DOM缓存。
         webSettings.setDatabaseEnabled(true); //启用或禁用DOM缓存。
@@ -86,8 +85,7 @@ public class MWeb extends android.webkit.WebView{
         webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN); //支持内容重新布局
         webSettings.supportMultipleWindows();  //多窗口
         //webSettings.setPluginsEnabled(true);  //支持插件
-        webSettings.setPluginState(WebSettings.PluginState.ON);//flash 有关系
-
+//        webSettings.setPluginState(WebSettings.PluginState.ON);//flash 有关系
         this.setWebChromeClient(wCclient==null?new WebChromeClient():wCclient);
         this.setWebViewClient(wVclient==null?new WebViewClient():wVclient);
 
@@ -95,8 +93,8 @@ public class MWeb extends android.webkit.WebView{
 
     public void killSelf(){
 //        Log.e(TAG,"销毁中"+this);
-        this.stopLoading();
 //        this.loadUrl("about:blank");
+        this.stopLoading();
         this.loadDataWithBaseURL(null, "", "text/html", "utf-8", null);
         this.clearHistory();//清除当前webview访问的历史记录
         this.clearCache(true);//由于内核缓存是全局的因此这个方法不仅仅针对webview而是针对整个应用程序.

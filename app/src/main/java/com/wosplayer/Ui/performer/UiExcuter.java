@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.concurrent.locks.ReentrantLock;
 
 import cn.trinea.android.common.util.FileUtils;
@@ -93,10 +94,10 @@ public class UiExcuter {
      *
      */
     public void onUnInit(){
-        ScheduleReader.clear();
-        UiExcuter.getInstancs().onStop();
-        ImageStore.getInstants().clearCache();
-        this.mActivity = null;
+        onStop();//清理界面
+        ScheduleReader.clear();//清理排期读取
+        ImageStore.getInstants().clearCache();//清理图片缓存
+        this.mActivity = null;//清理 上下文
         isInit = false;
     }
 
@@ -105,7 +106,7 @@ public class UiExcuter {
      * 开始执行
      */
     public void onStart(XmlNodeEntity schedule) { //在非UI线程
-        Logs.i(TAG, "=================================================\n执行任务所在线程: " + Thread.currentThread().getName());
+
         if (schedule == null) {
             Logs.e(TAG, "不执行空排期");
             return;
@@ -116,9 +117,12 @@ public class UiExcuter {
         }
         try {
             lock.lock();
+            Logs.e(TAG,"\n=================================================\n");
+            Logs.i(TAG, "执行任务所在线程: " + Thread.currentThread().getName());
             onStop();
             onSchedule(schedule);
             runingMain(PLAYS);//跳转到主线程
+            Logs.e(TAG,"\n=================================================\n");
         } catch (Exception e) {
           e.printStackTrace();
         } finally {
@@ -126,13 +130,21 @@ public class UiExcuter {
         }
     }
 
+    //activity结束时调用;读取到新排期时调用
     public void onStop() {
                 Logs.i(TAG, "UI清理界面开始");
-                programList.clear(); //清理现在的节目列表
-                _index = 0;
-                IplayerStore.getInstants().clearCache();
-                runingMain(PLAYS);
+                _index = -1;
+                removeMain(PLAYS);//移出一个任务
+                Iterator<XmlNodeEntity> itr = programList.iterator();
+                while (itr.hasNext()){
+                    itr.next();
+                    itr.remove();
+                }
+                Logs.i(TAG, "UI清理节目列表 - 节目数量:"+programList.size()); //清理现在的节目列表
                 Logs.i(TAG, "UI清理界面结束");
+                IplayerStore.getInstants().clearCache();
+                Logs.i(TAG,"UI清理清理组件缓存完成");
+                runingMain(PLAYS);
     }
     /**
      *
@@ -140,46 +152,37 @@ public class UiExcuter {
      */
     private void onSchedule(XmlNodeEntity schedule) {
         if (schedule==null) throw new IllegalStateException("UI无法关联空排期数据:"+schedule);
-        Logs.i(TAG, "开始关联UI数据 当前时间:"+ new SimpleDateFormat("HH:mm:ss").format(new Date()));
-        //得到排期的类型创建定时器 时长计算: 1.布局下的内容的总时长>>得到布局的时长 2.布局时长最长的就是节目的时长
-        //ArrayList<XmlNodeEntity> ProgramTimerList = new ArrayList<XmlNodeEntity>();
+        Long sumTime = System.nanoTime();
+        Logs.i(TAG, "开始关联UI数据 ");
+
         //得到节目数组ProgramList
         ArrayList<XmlNodeEntity> programArr = schedule.getChildren();
         if (programArr == null || programArr.size() == 0) {
-            Logs.e(TAG, "当前排期无节目,排期信息: id = "+schedule.getXmldata().get("id")+" ; summary = "+schedule.getXmldata().get("summary"));
-            return;
+            throw  new IllegalStateException("当前排期无节目,排期信息: id = "+schedule.getXmldata().get("id")+" ; summary = "+schedule.getXmldata().get("summary"));
         }
         //第一层循环 关于节目
         for (XmlNodeEntity program : programArr) {
-            //Logs.i(TAG, "计算当前节目 << " + program.getXmldata().get("title") + " >> 的时长中");
-            long programTime = getProgramTimeLength(program);//获取时长
-            program.getXmldata().put("programTime", String.valueOf(programTime));//
-            String backgroud = getBackgroud(program);//获取背景颜色
-            program.getXmldata().put("backgroud", backgroud);
-
-                //获取 布局信息 ,创建布局 执行所有的节目
-                ArrayList<XmlNodeEntity> layoutArr = program.getChildren();
-                if ( layoutArr==null || layoutArr.size()==0){
-                Logs.e(TAG,"当前节目无布局列表,节目信息: id = "+program.getXmldata().get("id")+" ; title = "+program.getXmldata().get("title"));
-                continue;
+           settingProgParam(program);
+            //获取 布局信息 ,创建布局 执行所有的节目
+            ArrayList<XmlNodeEntity> layoutArr = program.getChildren();
+            if ( layoutArr==null || layoutArr.size()==0){
+                throw  new IllegalStateException("当前节目无布局列表,节目信息: id = "+program.getXmldata().get("id")+" ; title = "+program.getXmldata().get("title"));
             }
-                //第二层循环 - 关于布局
-                for (XmlNodeEntity layout : layoutArr){
-                    ArrayList<XmlNodeEntity> contentArr = layout.getChildren();
-                    if ( contentArr==null || contentArr.size()==0){
-                        Logs.e(TAG,"当前布局无内容列表,内容信息: id = "+layout.getXmldata().get("id")+" ; title = "+layout.getXmldata().get("layoutname"));
-                        continue;
-                    }
-                    settingLayoutContents(layout,contentArr);
-                    programList.add(program);
-                }//第二层循环
+            //第二层循环 - 关于布局
+            for (XmlNodeEntity layout : layoutArr){
+                ArrayList<XmlNodeEntity> contentArr = layout.getChildren();
+                if ( contentArr==null || contentArr.size()==0){
+                    throw  new IllegalStateException("当前布局无内容列表,内容信息: id = "+layout.getXmldata().get("id")+" ; title = "+layout.getXmldata().get("layoutname"));
+                }
+                settingLayoutContents(layout,contentArr);
+            }//第二层循环
 
+            programList.add(program);
         } //第一层循环
 
-        Logs.i(TAG, "关联UI数据结束 当前时间:"+ new SimpleDateFormat("HH:mm:ss").format(new Date()));
+        sumTime = System.nanoTime() - sumTime;
+        Logs.i(TAG, "关联UI数据结束 - 总用时:" +  sumTime +" 纳秒");
     }
-
-
 
     /**
      *获取背景
@@ -201,27 +204,30 @@ public class UiExcuter {
     private final Runnable PLAYS = new Runnable() {
         @Override
         public void run() {
-//            Logs.i(TAG, "节目数量:"+programList.size());
-            if (programList.size()>0){
+            ProExcuter.getInstants().onStop();// 停止当前节目
+            Logs.i(TAG, "节目数量:"+ programList.size() +" - 当前下标:"+_index);
+            if (_index==-1){
+
+                Logs.i(TAG,"结束节目播放");
+                _index=0;
+                //设置黑色背景
+                setMainBg("#000000");
+            }
+            if (_index>=0 && programList.size()>0 ){//如果节目数量>0 并且 下标不为-1
                 XmlNodeEntity currentProgram = programList.get(_index);
                 //获取一个时长 - 在多久之后再次执行
                 long second = Long.parseLong(currentProgram.getXmldata().get("programTime"));
+                String name = currentProgram.getXmldata().get("title");
                 setMainBg(currentProgram.getXmldata().get("backgroud"));
-                ProExcuter.getInstants().onStop();// 解析
                 ProExcuter.getInstants().onParse(currentProgram);// 解析
                 ProExcuter.getInstants().onStart();//放在主线程
+                Logs.i(TAG,"开始一个节目 ["+ name +"] 时长:"+ ++second +" 秒");
+                runingMainDelayed(this,second * 1000);
                 //设置下标
                 _index++;
                 if (_index == programList.size()) {
                     _index = 0;
                 }
-                Logs.d(TAG,"开始一个节目 时长:"+ ++second +" 秒");
-                runingMainDelayed(this,second * 1000);
-            }else{
-                Logs.d(TAG,"结束节目播放");
-                //设置黑色背景
-                setMainBg("#000000");
-                ProExcuter.getInstants().onStop();
             }
         }
     };
@@ -230,7 +236,7 @@ public class UiExcuter {
 
     /**
      * 得到时长
-     *
+     * 得到排期的类型创建定时器 时长计算: 1.布局下的内容的总时长>>得到布局的时长 2.布局时长最长的就是节目的时长
      * @param program
      */
     private long getProgramTimeLength(XmlNodeEntity program) {
@@ -455,5 +461,11 @@ public class UiExcuter {
         }
     }
 
-
+    //设置节目 时长 和 背景参数
+    public void settingProgParam(XmlNodeEntity program) {
+        long programTime = getProgramTimeLength(program);//获取时长
+        program.getXmldata().put("programTime", String.valueOf(programTime));//
+        String backgroud = getBackgroud(program);//获取背景颜色
+        program.getXmldata().put("backgroud", backgroud);
+    }
 }

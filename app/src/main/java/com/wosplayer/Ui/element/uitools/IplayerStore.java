@@ -34,16 +34,14 @@ public class IplayerStore extends LruCache{
         }
     }
     public IPlayer getIplayerToCache(String key){
-        IPlayer iPlayer = null;
-            iPlayer = (IPlayer) this.get(key);
-        Logs.e(TAG,"缓存对象: "+iPlayer);
-        return iPlayer;
+        return (IPlayer) this.get(key);
     }
 
     //这里应该可以有别的办法清理 暂时没实现
     public void clearCache(){
+        if (this.size()>0){
             this.evictAll();
-            Logs.w(TAG,"清理缓存完成");
+        }
     }
 
 

@@ -25,6 +25,7 @@ public class LayoutsExcuter implements TimeCalls {
     //开始执行 - 请在主进程中
     public void start(){
         if (contentArr==null || contentArr.size()==0){
+            Logs.e(TAG,"错误的内容,不可播放 - 内容列表不存在");
             return;
         }
         //根据下标 获取 content

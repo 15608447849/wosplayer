@@ -44,13 +44,13 @@ public final class ContentFactory {
     private static Map<String,String> referenceViewMap = new HashMap<String,String>();
     static{
         String packageName = "com.wosplayer.Ui.element.uiViewimp.";
-        referenceViewMap.put(getType(ContentTypeEnum.image),packageName+"IImagePlayer");
-        referenceViewMap.put(getType(ContentTypeEnum.webpage),packageName+"IWebPlayer");
-        referenceViewMap.put(getType(ContentTypeEnum.fudianbank),packageName+"IWebPlayer");//网页和富癫银行项目
-        referenceViewMap.put(getType(ContentTypeEnum.video),packageName+"IVideoPlayer");
+        referenceViewMap.put(getType(ContentTypeEnum.image),packageName+"IImagePlayer");//图片
+        referenceViewMap.put(getType(ContentTypeEnum.webpage),packageName+"IWebPlayer");//网页
+        referenceViewMap.put(getType(ContentTypeEnum.fudianbank),packageName+"IWebPlayer");//富癫银行项目
+        referenceViewMap.put(getType(ContentTypeEnum.video),packageName+"IVideoPlayer");//视频
         referenceViewMap.put(getType(ContentTypeEnum.text),packageName+"ITextPlayer");//走马灯
         referenceViewMap.put(getType(ContentTypeEnum.time),packageName+"ITimePlayer");//时间
-        referenceViewMap.put(getType(ContentTypeEnum.interactive),packageName+"IinteractionPlayer");
+        referenceViewMap.put(getType(ContentTypeEnum.interactive),packageName+"IinteractionPlayer");//互动
     }
 
 
@@ -97,7 +97,7 @@ public final class ContentFactory {
                 IplayerStore.getInstants().putIplayerToCache(key,iplay);
             }
 
-            Logs.i(TAG,"执行对象:[" + iplay +"]");
+            //Logs.i(TAG,"执行对象:[" + iplay +"]");
             //执行它
             iplay.loadData(data);
             iplay.setTimerCall(timrmanager);
