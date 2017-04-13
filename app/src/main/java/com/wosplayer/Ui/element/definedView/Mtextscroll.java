@@ -92,6 +92,7 @@ public class Mtextscroll extends SurfaceView implements SurfaceHolder.Callback, 
     public void run() {
         while (loop) {
             try {
+
                 drawText();
                 Thread.sleep(speed);
             } catch (Exception e) {
@@ -125,6 +126,7 @@ public class Mtextscroll extends SurfaceView implements SurfaceHolder.Callback, 
      * 绘制
      */
     private synchronized void drawText() {
+
         //锁定画布
         Canvas canvas = getHolder().lockCanvas();
         if(canvas == null) return;

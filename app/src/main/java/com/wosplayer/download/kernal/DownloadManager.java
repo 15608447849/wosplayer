@@ -3,7 +3,6 @@ package com.wosplayer.download.kernal;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.wosplayer.app.Logs;
 import com.wosplayer.command.kernal.CommandCenter;
@@ -37,7 +36,7 @@ public class DownloadManager extends IntentService
     public static final String KEY_TASK_SINGLE="loaderTasksingle";
     public static final String KEY_TASK_NOTYFY_SCHEDULE="notyfSchudeuRead";
 
-    private static final String TAG = "_loaderManager";
+    private static final String TAG = "下载管理员";
     public DownloadManager() {
         super(TAG);
     }
@@ -45,12 +44,12 @@ public class DownloadManager extends IntentService
     @Override
     public void onCreate() {
         super.onCreate();
-        Logs.i("--------------------------------------------下载管理员 onCreate--------------------------------------------------------");
+        //Logs.i("--------------------------------------------下载管理员 onCreate--------------------------------------------------------");
     }
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Logs.i("-------------------------------------------下载管理员 onDestroy----------------------------------------------------------");
+        //Logs.i("-------------------------------------------下载管理员 onDestroy----------------------------------------------------------");
     }
 
     @Override
@@ -82,21 +81,21 @@ public class DownloadManager extends IntentService
 
     //下载富癫银行的资源文件
     private void loadResource(String terminalNo, String savepath, String singUrl, String alias) {
-        Logs.i(TAG,"下载 web resouce - "+singUrl+"\n savepath - "+savepath+"\n terminalNo - "+terminalNo+"\n alias: "+alias);
+        //Logs.i(TAG,"下载 web resouce - "+singUrl+"\n savepath - "+savepath+"\n terminalNo - "+terminalNo+"\n alias: "+alias);
        Task task =  Task.TaskFactory.createFtpTask(terminalNo,singUrl,savepath,alias,true);
         TaskQueue.getInstants().addTask(task);
     }
 
     //更新apk
     private void updateAPK(String terminalNo, String savepath, String singUrl,String alias) {
-        Logs.i(TAG,"下载APK文件链接地址: "+singUrl+";文件保存路径: "+savepath+";文件名: "+alias);
+        //Logs.i(TAG,"下载APK文件链接地址: "+singUrl+";文件保存路径: "+savepath+";文件名: "+alias);
         Task task =  Task.TaskFactory.createFtpTask(terminalNo,singUrl,savepath,alias,true);
         task.setResult(new Task.TaskResult() {
             @Override
             public void onComplete(Task task) {
                 try {
                     String lpath = task.getLocalPath()+task.getLocalName();
-                    Logs.e(TAG,"apk下载成功,路径 >>> "+ lpath );
+                    //Logs.e(TAG,"apk下载成功,路径 >>> "+ lpath );
                     Bundle bundle = new Bundle();
                     bundle.putString(UpdateApkServer.APK_PATH,lpath);
                     Intent intent = new Intent(getApplicationContext(),UpdateApkServer.class);
@@ -111,7 +110,7 @@ public class DownloadManager extends IntentService
     }
 
     private void scheduleSourceLoad(String terminalNo,String savepath,ArrayList<CharSequence> taskList,boolean isNotify) {
-        Log.i(TAG,"收到一个 排期资源下载队列, 队列大小:"+taskList.size()+" ;terminalNo="+terminalNo+"\n savepath = "+savepath);
+        //Log.i(TAG,"收到一个 排期资源下载队列, 队列大小:"+taskList.size()+" ;terminalNo="+terminalNo+"\n savepath = "+savepath);
         for (int i = 0;i<taskList.size();i++){
 
             Task task = Task.TaskFactory.createMutTask(terminalNo,savepath,(String)taskList.get(i));

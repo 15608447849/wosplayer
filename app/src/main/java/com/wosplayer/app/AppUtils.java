@@ -83,10 +83,10 @@ public class AppUtils {
             StringBuffer buffer = new StringBuffer();
             for (int i = 0; i < b.length; i++)
             {
-//                if (i != 0)
-//                {
-//                    buffer.append(':');
-//                }
+                if (i != 0 || i!=b.length-1)
+                {
+                    buffer.append('-');
+                }
                 String str = Integer.toHexString(b[i] & 0xFF);
                 buffer.append(str.length() == 1 ? 0 + str : str);
             }
@@ -96,8 +96,7 @@ public class AppUtils {
         {
             e.printStackTrace();
         }
-        Log.i(TAG, "--- DVB Mac Address : " + strMacAddr);
-
+//        Log.i(TAG, "--- DVB Mac Address : " + strMacAddr);
         return strMacAddr;
     }
 

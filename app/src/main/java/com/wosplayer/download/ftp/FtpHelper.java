@@ -52,7 +52,7 @@ public class FtpHelper {
      * FTP重新链接次数
      */
     private int reConnectCount = 0;
-    public FtpHelper(Task.FtpUser ftpUser) {
+    public FtpHelper(FtpUser ftpUser) {
         init(ftpUser.getHost(),ftpUser.getPort(),ftpUser.getUserName(),ftpUser.getPassword());
     }
     private void init(String hostName, int serverPort, String userName, String password){
@@ -98,7 +98,7 @@ public class FtpHelper {
             throw new IOException("FTP登陆失败,返回码: " + reply);
         } else {
             // 获取登录信息
-            FTPClientConfig config =new FTPClientConfig(ftpClient.getSystemType().split(" ")[0]);
+            FTPClientConfig config =new FTPClientConfig(ftpClient.getSystemType().split("\\s+")[0]);
             config.setServerLanguageCode("zh"); //设置配置类型
             ftpClient.configure(config);//配置
             // 使用被动模式设为默认
@@ -119,7 +119,7 @@ public class FtpHelper {
                 ftpClient.logout();
             }
         } catch (IOException e) {
-            Log.e(TAG,"退出 FTP:失败:"+e.getMessage()+"\n["+ftpClient+"]");
+            Log.e(TAG,"["+ftpClient+"]登出FTP失败,"+e.getMessage());
         } finally {
             try {
                 if (ftpClient != null) {
@@ -160,15 +160,13 @@ public class FtpHelper {
             boolean isExist = cn.trinea.android.common.util.FileUtils.isFileExist(localFilePath);
             if (isExist){
                 //存在 直接返回
-                listener.downLoadSuccess(task);
+                listener.downLoadSuccess(0,task);
                 return;
             }
         }
 
         //远程文件路径
         String remoteFilePath = remotePath+remoteName;
-
-
         String tmp_localPath = localFilePath+tem;//临时文件路径
         try {
             // 打开FTP服务
@@ -218,7 +216,7 @@ public class FtpHelper {
             if( localfile_Size == serverSize){
 //                log.i(TAG,"文件已存在"+localFile.getName());
                 if (!task.isCover()){//不覆盖
-                    listener.downLoadSuccess(task);
+                    listener.downLoadSuccess(0,task);
                     // 下载完成之后关闭连接
                     closeConnect();
                     return;
@@ -318,7 +316,7 @@ public class FtpHelper {
 
             } catch (IOException e) {
                 listener.error(e);
-                listener.downLoadFailt(task);
+                listener.downLoadFailt(task,e);
             }finally {
                 try {
                     if (out!=null){
@@ -344,7 +342,7 @@ public class FtpHelper {
 
         DownloadFileUtil.renamefile(tmp_localPath,localFilePath);//转换名字
 //                log.i(TAG,",转换前文件名["+tmp_localPath+"]\n新文件名: "+nNmae);
-        listener.downLoadSuccess(task);
+        listener.downLoadSuccess(1,task);
     }
 
 
@@ -401,12 +399,12 @@ public class FtpHelper {
         /**
          * 下载成功
          */
-        public void downLoadSuccess(Task task);
+        public void downLoadSuccess(int type,Task task);
 
         /**
          * 下载失败
          */
-        public void downLoadFailt(Task task);
+        public void downLoadFailt(Task task,Exception error);
 
         /**
          * 错误

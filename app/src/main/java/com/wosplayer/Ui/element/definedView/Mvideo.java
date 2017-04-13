@@ -76,16 +76,17 @@ public class Mvideo extends SurfaceView implements SurfaceHolder.Callback{
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        Logs.i(TAG, "视频大小: width = " + width +";height = "+height);
         try {
             createMedio();
         } catch (IOException e) {
             destoryMedio();
         }
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
     }
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {

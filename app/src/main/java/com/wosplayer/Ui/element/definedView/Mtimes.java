@@ -126,6 +126,7 @@ public class Mtimes extends SurfaceView implements SurfaceHolder.Callback {
 
     }
     private synchronized void drawTimes(String currentTimes){
+
         //锁定画布
         Canvas canvas = getHolder().lockCanvas(new Rect(0,0,getWidth(),(getHeight()/4)*3));
         if(canvas == null) return;
@@ -140,6 +141,7 @@ public class Mtimes extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     private synchronized void drawDates(String currentdata){
+
         //锁定画布
         Canvas canvas = getHolder().lockCanvas(new Rect(0,getHeight()-((getHeight()/4)*3),getWidth(),getHeight()));
         if(canvas == null) return;

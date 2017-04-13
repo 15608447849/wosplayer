@@ -1,7 +1,9 @@
 package com.wosplayer.download.operation;
 
-import com.wosplayer.app.Logs;
+import com.wosplayer.download.ftp.FtpUser;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -24,66 +26,8 @@ public class Task {
     public interface TaskResult{
         void onComplete(Task task);
     }
-    //ftp信息对象
-    public static class FtpUser{
-        private String host;
-        private int port;
-        private String userName;
-        private String password;
 
-        public FtpUser() {
-        }
-
-        public FtpUser(String host, int port, String userName, String password) {
-            this.host = host;
-            this.port = port;
-            this.userName = userName;
-            this.password = password;
-        }
-
-        public String getHost() {
-            return host;
-        }
-
-        public void setHost(String host) {
-            this.host = host;
-        }
-
-        public int getPort() {
-            return port;
-        }
-
-        public void setPort(int port) {
-            this.port = port;
-        }
-
-        public String getUserName() {
-            return userName;
-        }
-
-        public void setUserName(String userName) {
-            this.userName = userName;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
-
-        @Override
-        public String toString() {
-            StringBuffer sb = new StringBuffer();
-            sb.append("用户名: "+userName)
-                    .append(",密码: "+password)
-                    .append(",主机地址: "+host)
-                    .append(",端口号: "+port);
-            return sb.toString();
-        }
-    }
-
+    //-------
 
 
     //终端id
@@ -107,6 +51,37 @@ public class Task {
     private FtpUser ftpUser;
     //执行结果
     private TaskResult result;
+
+    //下载次数
+    private int downloadCount = 0;
+    //下载失败最后时间
+    private String downloadFailtTime;
+    //下载失败原因
+    private String downloadFailtCause="";
+
+    public int getDownloadCount() {
+        return downloadCount;
+    }
+
+    public void setDownloadCount(int downloadCount) {
+        this.downloadCount = downloadCount;
+    }
+
+    public String getDownloadFailtTime() {
+        return downloadFailtTime;
+    }
+
+    public void setDownloadFailtTime(Date date) {
+        this.downloadFailtTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+    }
+
+    public String getDownloadFailtCause() {
+        return downloadFailtCause;
+    }
+
+    public void setDownloadFailtCause(String downloadFailtCause) {
+        this.downloadFailtCause = downloadFailtCause;
+    }
 
     private Task(String terminalNo) {
         this.state = Task.State.NEW;
@@ -204,9 +179,18 @@ public class Task {
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append("url - " + url);
-        sb.append("; remote - " + remotePath+remoteName);
-        sb.append("; local - " + localPath+localName);
+        if (this.type == Type.FILE){
+            sb.append("本地源文件 - " + url);
+            sb.append("; 本地目标文件路径 - " + localPath+localName);
+        }
+        if (this.type == Type.FTP){
+            sb.append("服务器路径 - " + remotePath+remoteName);
+            sb.append("; 本地路径 - " + localPath+localName);
+        }
+        if (this.type == Type.HTTP){
+            sb.append("资源链接url - " + url);
+            sb.append("; 本地路径 - " + localPath+localName);
+        }
         return sb.toString();
     }
 

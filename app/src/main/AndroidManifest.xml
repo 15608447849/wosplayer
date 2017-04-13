@@ -58,12 +58,12 @@
         android:largeHeap="true"
         android:hardwareAccelerated="false">
 
-        <!-- 启动activity android:process="com.wosplayer.ui"-->
+        <!-- 启动activity android:process="com.wosplayer.ui"  android:process="com.wosplayer.ui"-->
         <activity
             android:name=".app.DisplayActivity"
             android:launchMode="singleInstance"
             android:hardwareAccelerated="true"
-            android:process="com.wosplayer.ui"
+
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
