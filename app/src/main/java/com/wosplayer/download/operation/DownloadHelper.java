@@ -35,7 +35,7 @@ public class DownloadHelper implements Observer {//观察者
     }
     public void initWord(){
 //        singleThreadExecutor = Executors.newSingleThreadExecutor();
-        fixedThreadPool = Executors.newFixedThreadPool(10);
+        fixedThreadPool = Executors.newFixedThreadPool(5);
         http = new HttpUtils();
         caller = new DownloadCaller();
 
@@ -96,24 +96,22 @@ public class DownloadHelper implements Observer {//观察者
 
     //Ftp 下载助手
     private void ftpDownloadImp(Task task) {
-        new FtpHelper(task.getFtpUser())
-                .downloadSingleFile(
+        FtpHelper.downloadSingleFile(
                         task,
-                        0,
                         new FtpHelper.onListener() {
                             @Override
-                            public void ftpConnectState(int stateCode,Task task) {
+                            public void ftpConnectState(int stateCode,Task task,String message) {
                                 if (stateCode==FtpHelper.FTP_CONNECT_SUCCESSS){
                                     caller.downloadResult(task,-1,"ftp 连接成功>>"+task.getFtpUser().toString());
 
                                 }
                                 if (stateCode==FtpHelper.FTP_CONNECT_FAIL){
-                                    caller.downloadResult(task,1,"ftp 连接失败>>"+task.getFtpUser().toString());
+                                    caller.downloadResult(task,1,"ftp 连接失败>>"+task.getFtpUser().toString()+" - "+message);
                                 }
                             }
                             @Override
                             public void ftpNotFountFile(Task task) {
-                                caller.downloadResult(task,1,"ftp 服务器未发现文件 : "+ task.getRemoteName());
+                                caller.downloadResult(task,1,"ftp 服务器未发现文件 : "+ task.getRemotePath()+task.getRemoteName());
                             }
 
                             @Override
@@ -126,13 +124,14 @@ public class DownloadHelper implements Observer {//观察者
                             }
                             @Override
                             public void error(Exception e) {
-                                //e.printStackTrace();
+                                e.printStackTrace();
+//                                Logs.w(TAG,"\n"+e.getMessage()+"\n");
                             }
                             @Override
                             public void downLoadSuccess(int type,Task task) {
                                 if (type == 0){
                                     //本地存在
-                                    caller.downloadResult(task,0,"["+task.toString()+"] - 未覆盖下载,本地已经存在文件 ");
+                                    caller.downloadResult(task,0,"["+task.toString()+"] - 本地已经存在 ");
                                 }
                                 if (type == 1){
                                     //网络下载成功
