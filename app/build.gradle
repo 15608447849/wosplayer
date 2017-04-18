@@ -49,5 +49,5 @@ dependencies {
     compile 'cn.trinea.android.common:trinea-android-common:4.2.15'
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.google.code.gson:gson:2.6.2'
-
+    compile files('libs/ftp4j-1.7.2.jar')
 }

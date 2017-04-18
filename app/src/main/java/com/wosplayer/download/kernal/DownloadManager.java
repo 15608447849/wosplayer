@@ -111,8 +111,8 @@ public class DownloadManager extends IntentService
 
     private void scheduleSourceLoad(String terminalNo,String savepath,ArrayList<CharSequence> taskList,boolean isNotify) {
         //Log.i(TAG,"收到一个 排期资源下载队列, 队列大小:"+taskList.size()+" ;terminalNo="+terminalNo+"\n savepath = "+savepath);
-        for (int i = 0;i<taskList.size();i++){
 
+        for (int i = 0;i<taskList.size();i++){
             Task task = Task.TaskFactory.createMutTask(terminalNo,savepath,(String)taskList.get(i));
             if (task!=null){
                 if (i == taskList.size()-1 && isNotify){
@@ -130,6 +130,7 @@ public class DownloadManager extends IntentService
                         }
                     });
                 }
+
                 TaskQueue.getInstants().addTask(task);
             }
         }

@@ -13,8 +13,10 @@ import java.util.HashMap;
 public class Task {
     public enum Type{
          HTTP,
-         FTP ,
+         FTP,
          FILE,
+         FTPLIST,//ftp 列表
+         FTPUP,// ftp 上传
          NONE;
     }
    public enum  State {

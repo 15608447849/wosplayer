@@ -27,9 +27,9 @@ public class DownloadHelper implements Observer {//观察者
 
     private static final java.lang.String TAG = "下载助手";
     private DownloadCaller caller = null;
-    //private ExecutorService singleThreadExecutor;
+//    private ExecutorService singleThreadExecutor;
     private HttpUtils http = null;
-    ExecutorService fixedThreadPool;
+  private ExecutorService fixedThreadPool;
     public DownloadHelper() {
 
     }

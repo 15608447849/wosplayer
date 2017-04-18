@@ -45,6 +45,7 @@ public class TaskQueue extends Observable { //被观察者
             excute();//通知->观察者
         }
     }
+
     // 完成任务后将它从任务队列中删除
     public synchronized void finishTask(Task task) {
         if (task != null) {
