@@ -1,9 +1,11 @@
 package com.wos.play.rootdir.model_monitor.soexcute;
 
-import android.app.IntentService;
+import android.app.Notification;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -13,19 +15,18 @@ import com.wosplayer.app.SystemConfig;
  * Created by 79306 on 2017/3/8.
  */
 
-public class WatchServerHelp extends IntentService{
-    private static final String TAG = "守护进程助手";
-    public WatchServerHelp() {
-        super(TAG);
-    }
+public class WatchServerHelp extends Service {
+    private static final String TAG = "Clibs";
     public static final String DEAMS_KEY = "keys";
     public static final int OPEN_DEAMS = 666;
     public static final int CLOSE_DEAMS = 777;
     public static final int CLOSE_DEAMS_ALL = 888;
     public static final int RESET_DEAMS = 999;
 
+
     @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent!=null){
             int type = intent.getIntExtra(DEAMS_KEY,-1);
             if (type == OPEN_DEAMS){
                 open();
@@ -39,7 +40,12 @@ public class WatchServerHelp extends IntentService{
             if (type == RESET_DEAMS){
                 openAll();
             }
+        }
+
+        return START_NOT_STICKY;//super.onStartCommand(intent, flags, startId);
     }
+
+
 
     private void open() {
         //获取包名
@@ -48,7 +54,7 @@ public class WatchServerHelp extends IntentService{
         String watchServerPath = "am startservice --user 0 "+packageName+"/com.wos.play.rootdir.model_monitor.soexcute.WatchServer";
         String activityComd = "am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n "+packageName+"/com.wosplayer.app.DisplayActivity";
         int sleep = SystemConfig.get().read().GetIntDefualt("RestartBeatInterval",5);
-        RunJniHelper.getInstance().startMservice(watchServerPath,activityComd,temPath,temPath+"/clogs",sleep);
+        RunJniHelper.getInstance().startMservice(watchServerPath,activityComd,temPath+"/cpid",temPath+"/clog",sleep);
     }
     private void close() {
         RunJniHelper.getInstance().stopMservice(createRootPath(this));
@@ -97,5 +103,18 @@ public class WatchServerHelp extends IntentService{
         Intent intent = new Intent(content, WatchServerHelp.class);
         intent.putExtra(WatchServerHelp.DEAMS_KEY,WatchServerHelp.CLOSE_DEAMS);
         content.startService(intent);
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Notification notification = new Notification();
+        startForeground(1, notification);
     }
 }

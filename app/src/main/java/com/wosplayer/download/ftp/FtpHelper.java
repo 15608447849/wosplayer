@@ -51,7 +51,7 @@ public class FtpHelper {
         String remoteFilePath = remotePath+remoteName;
         final String tmp_localPath = localFilePath+tem;//临时文件路径
         // 先判断服务器文件是否存在
-        long serverSize = ftpControl.getFileSize(remotePath,remoteName); // 获取远程文件的长度
+        long serverSize = ftpControl.getFileSize(remoteFilePath); // 获取远程文件的长度
         if (serverSize==0){
             //返回ftp客户端
             ftpManager.backClient(ftpControl);
@@ -106,7 +106,7 @@ public class FtpHelper {
         }
         if (isLoad) {
             final boolean flag = isDelete;
-            ftpControl.loadFile(tmp_localFile, remoteName, localSize, serverSize,new IWatched() {
+            ftpControl.loadFile(tmp_localFile, remoteFilePath, localSize, serverSize,new IWatched() {
 
                 @Override
                 public void onStart() {

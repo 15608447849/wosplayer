@@ -3,6 +3,7 @@ package com.wosplayer.download.kernal;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.wosplayer.app.Logs;
 import com.wosplayer.command.kernal.CommandCenter;
@@ -110,7 +111,8 @@ public class DownloadManager extends IntentService
     }
 
     private void scheduleSourceLoad(String terminalNo,String savepath,ArrayList<CharSequence> taskList,boolean isNotify) {
-        //Log.i(TAG,"收到一个 排期资源下载队列, 队列大小:"+taskList.size()+" ;terminalNo="+terminalNo+"\n savepath = "+savepath);
+//        Log.i(TAG,"\n收到一个 排期资源下载队列, 队列大小:"+taskList.size()+" ;terminalNo="+terminalNo+"\n savepath = "+savepath);
+        Log.i(TAG,"\n收到一个 排期资源下载队列:\n"+taskList+"\n队列大小:"+taskList.size()+"  \n savepath = "+savepath);
 
         for (int i = 0;i<taskList.size();i++){
             Task task = Task.TaskFactory.createMutTask(terminalNo,savepath,(String)taskList.get(i));

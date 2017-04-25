@@ -7,11 +7,11 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -69,7 +69,54 @@ public class AppUtils {
             mac = getMacAddress();
         if (mac==null || "".equals(mac))
             mac = getLocalMacAddressFromBusybox();
-        return mac;
+        if (mac==null || mac.equals("")) mac = getBuildInfo();
+        if(mac.length()>1) {
+            mac = mac.replaceAll("\\s+", "");
+            String[] tmp = mac.trim().split(":");
+            StringBuilder result = new StringBuilder();
+            for (int i = 0; i < tmp.length; ++i) {
+                result.append(tmp[i]);
+                if (i < tmp.length - 1) {
+                    result.append("-");
+                }
+            }
+            mac = result.toString();
+        }
+        return mac.toUpperCase();
+    }
+    public static String getBuildInfo() {
+        String devID = "35" + //we make this look like a valid IMEI
+                Build.BOARD.length()%10 +
+                Build.BRAND.length()%10 +
+                Build.CPU_ABI.length()%10 +
+                Build.DEVICE.length()%10 +
+                Build.DISPLAY.length()%10 +
+                Build.HOST.length()%10 +
+                Build.ID.length()%10 +
+                Build.MANUFACTURER.length()%10 +
+                Build.MODEL.length()%10 +
+                Build.PRODUCT.length()%10 +
+                Build.TAGS.length()%10 +
+                Build.TYPE.length()%10 +
+                Build.USER.length()%10 ;
+        if (devID.length()<12){
+            StringBuffer buff = new StringBuffer();
+            buff.append(devID);
+            for (int i=0;i<(12-devID.length());i++){
+                buff.append("0");
+            }
+            devID = buff.toString();
+        }else if (devID.length()>12){
+            devID = devID.substring(0,12);
+        }
+        StringBuffer buff = new StringBuffer();
+        for (int i=0;i<devID.length();i+=2){
+            buff.append(devID.charAt(i)).append(devID.charAt(i+1));
+            if (i != (devID.length()-2)){
+                buff.append("-");
+            }
+        }
+        return devID;
     }
     //本地以太网mac地址文件
     private static String getMacAddress()
@@ -111,53 +158,28 @@ public class AppUtils {
      * get mac
      */
     public static String getLocalMacAddressFromBusybox(){
-        String result = "";
-        String Mac = "";
-        result = callCmd("busybox ifconfig","HWaddr");
 
+        String result = callCmd("busybox ifconfig","HWaddr");
         //如果返回的result == null，则说明网络不可取
         if(result==null){
-            return "网络出错，请检查网络";
+            return null;
         }
-
-        //对该行数据进行解析
-        //例如：eth0      Link encap:Ethernet  HWaddr 00:16:E8:3E:DF:67
-        if(result.length()>0 && result.contains("HWaddr")==true){
-            Mac = result.substring(result.indexOf("HWaddr")+6, result.length()-1);
-            Log.i("test","Mac:"+Mac+" Mac.length: "+Mac.length());
-
-            if(Mac.length()>1){
-                Mac = Mac.replaceAll(" ", "");
-                result = "";
-                String[] tmp = Mac.split(":");
-                for(int i = 0;i<tmp.length;++i){
-                    result +=tmp[i]+"-";
-                }
-            }
-            result = Mac;
-            Log.i("test",result+" result.length: "+result.length());
+        //例如：eth0  Link encap:Ethernet  HWaddr 00:16:E8:3E:DF:67
+        if(result.length()>0 && result.contains("HWaddr")){
+            result = result.substring(result.indexOf("HWaddr")+6, result.length()-1);
         }
         return result;
     }
-
-
-
     private static String callCmd(String cmd,String filter) {
         String result = "";
-        String line = "";
         try {
             Process proc = Runtime.getRuntime().exec(cmd);
             InputStreamReader is = new InputStreamReader(proc.getInputStream());
             BufferedReader br = new BufferedReader(is);
-
+            String line;
             //执行命令cmd，只取结果中含有filter的这一行
-            while ((line = br.readLine ()) != null && line.contains(filter)== false) {
-                //result += line;
-                Log.i("test","line: "+line);
-            }
-
+            while ((line = br.readLine ()) != null && !line.contains(filter)) ;
             result = line;
-            Log.i("test","result: "+result);
         }
         catch(Exception e) {
             e.printStackTrace();

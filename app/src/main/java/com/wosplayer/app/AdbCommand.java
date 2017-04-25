@@ -1,19 +1,11 @@
 package com.wosplayer.app;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 
 import cn.trinea.android.common.util.FileUtils;
 import cn.trinea.android.common.util.ShellUtils;
-
-import com.wos.play.rootdir.model_monitor.soexcute.RunJniHelper;
-import com.wos.play.rootdir.model_monitor.soexcute.WatchServerHelp;
-import com.wosplayer.command.kernal.CommandCenter;
-import com.wosplayer.command.operation.interfaces.CommandType;
 
 /**
  * Created by user on 2016/10/9.
@@ -98,6 +90,8 @@ public class AdbCommand{
             if (ShellUtils.checkRootPermission()) {
                 //放入system
                  excuteAppMoveSystem(context);
+                //关闭状态栏
+
             } else {
                 Logs.e(TAG,"-----------------------------------没有root权限------------------------------------------");
             }

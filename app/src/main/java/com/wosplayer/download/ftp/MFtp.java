@@ -8,14 +8,10 @@ import com.wosplayer.download.ftpimps.IWatched;
 import java.io.File;
 import java.io.IOException;
 
-import it.sauronsoftware.ftp4j.FTPAbortedException;
 import it.sauronsoftware.ftp4j.FTPClient;
-import it.sauronsoftware.ftp4j.FTPDataTransferException;
 import it.sauronsoftware.ftp4j.FTPDataTransferListener;
 import it.sauronsoftware.ftp4j.FTPException;
-import it.sauronsoftware.ftp4j.FTPFile;
 import it.sauronsoftware.ftp4j.FTPIllegalReplyException;
-import it.sauronsoftware.ftp4j.FTPListParseException;
 
 /**
  * Created by user on 2017/4/17.
@@ -128,36 +124,20 @@ public class MFtp  implements IFtpClien{
     }
 
     @Override
-    public long getFileSize(String remoteFileDirs, String remoteFileName) {
-        long size = 0;
-        // 浏览文件.
-        if (changeTargetDirectory(remoteFileDirs)){
-           size = getFileSize(remoteFileName);
-        }
-
-        return size;
-    }
-
-    private long getFileSize(String remoteFileName){
-
+    public long getFileSize(String absulutePath) {
         long size = 0;
         try {
-            FTPFile[] list = client.list();
-            for(FTPFile f : list){
-                if(!f.getName().equals(".") && !f.getName().equals("..")){
-
-                    //判断文件名是否相同
-                    if (f.getName().equals(remoteFileName)){
-                        Log.w(TAG,"获取到指定文件 [ "+ f.getName()+" ] ,大小: "+f.getSize()+" byte ,类型: "+f.getType()+", 最后修改时间: "+f.getModifiedDate());
-                        size = f.getSize();
-                    }
-                }
+            size = client.fileSize(absulutePath);
+        } catch (IOException | FTPIllegalReplyException | FTPException e) {
+            if (!e.getMessage().contains("File not found")){
+                e.printStackTrace();
             }
-        } catch (IOException | FTPListParseException | FTPAbortedException | FTPDataTransferException | FTPException | FTPIllegalReplyException e) {
-            e.printStackTrace();
+            size = 0;
         }
         return size;
     }
+
+
 
     @Override
     public void loadFile(File localFile, final String remoteFile, final long atPoint,final long serverFileSize, final IWatched watche) {
