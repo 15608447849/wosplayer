@@ -59,7 +59,7 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
         super.onDetach();
     }
 
-    private TextView storeDir;
+    private TextView localmac;
     private EditText serverip;
     private EditText serverport;
     private EditText companyid;
@@ -95,7 +95,7 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
 
     private View initView(LayoutInflater inflater) {
         ViewGroup vp = (ViewGroup) inflater.inflate(R.layout.activity_wostools,null);
-        storeDir=(TextView)vp.findViewById(R.id.storedir);
+        localmac =(TextView)vp.findViewById(R.id.localmac);
         serverip=(EditText)vp.findViewById(R.id.serverip);
         serverip.clearFocus();
         serverport=(EditText)vp.findViewById(R.id.serverport);
@@ -119,12 +119,12 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
         playtype = (Spinner) vp.findViewById(R.id.playtype);
         adapter = new SpnnerAdpter(activity);
         playtype.setAdapter(adapter);
-        adapter.settingData("通用模式");
+        adapter.settingData(SystemConfig.playMode);//模式选择
         playtype.setOnItemSelectedListener(this);
         storeSwitch = (Spinner) vp.findViewById(R.id.store_switch);
         adapter2 = new SpnnerAdpter(activity);
         storeSwitch.setAdapter(adapter2);
-        adapter2.settingDataList(SdCardTools.getAllStorePath(activity));
+        adapter2.settingDataList(SdCardTools.getAllStorePath(activity));//文件保存路径选择
         storeSwitch.setOnItemSelectedListener(this);
         localip = (TextView) vp.findViewById(R.id.localip);
         command = (EditText) vp.findViewById(R.id.command_input);
@@ -180,17 +180,18 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
     {
         try
         {
-            storeDir.setText(SdCardTools.getAppSourceDir(activity));
+
+            localip.setText(dataList.GetStringDefualt("tip","127.0.0.1"));
+            localmac.setText(dataList.GetStringDefualt("mac", "00-00-00-00-00"));//本机mac地址
             serverip.setText(dataList.GetStringDefualt("serverip", "127.0.0.1"));
             serverport.setText(dataList.GetStringDefualt("serverport", "8000"));
             companyid.setText(dataList.GetStringDefualt("companyid", "999"));
             terminalNo.setText(dataList.GetStringDefualt("terminalNo", ""));
             heartbeattime.setText(dataList.GetStringDefualt("HeartBeatInterval", "30"));
-            basePath.setText(catPathfile(dataList.GetStringDefualt("basepath", "")));//资源地址
+            basePath.setText(catPathfile(dataList.GetStringDefualt("basepath", "")));//资源文件夹
             storageLimits.setText(dataList.GetStringDefualt("storageLimits","50"));
             restartBeatInterval.setText(dataList.GetStringDefualt("RestartBeatInterval","30"));
-            localip.setText(dataList.GetStringDefualt("tip","127.0.0.1"));
-            version.setText("version:["+ AppUtils.getAppVersionCode(activity)+"]");
+            version.setText("VERSION["+ AppUtils.getAppVersionCode(activity)+"]");//版本
             cap_save.check((dataList.GetIntDefualt("CaptureSave",0)==0)?R.id.cap_save_y:R.id.cap_save_n);
             cap_notify.check((dataList.GetIntDefualt("CaptureNoty",0)==0)?R.id.cap_notify_y:R.id.cap_notify_n);
         }catch(Exception e)
@@ -214,9 +215,7 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
         ArrayList<String> pathList = new ArrayList<>();
         String serverId = serverip.getText().toString();
         String serverPort = serverport.getText().toString();
-        String CaptureURL = String.format("http://%s:%s/wos/captureManagerServlet",
-                serverId,
-                serverPort);
+        String CaptureURL = String.format("http://%s:%s/wos/captureManagerServlet", serverId, serverPort);
         dataList.put("terminalNo",terminalNo.getText().toString());//终端id
         dataList.put("serverip", serverId);//服务器ip
         dataList.put("serverport",serverPort);//终端端口
@@ -234,7 +233,6 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
         {
             basepath=basepath+"/";
         }
-
         basepath = SdCardTools.getAppSourceDir(activity)+basepath;
         dataList.put("basepath",  basepath);
         pathList.add(basepath);
@@ -255,20 +253,32 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
             }
         };
         BackRunner.runBackground(runnable);
+        dataList.save();//保存当前数据
     }
     /**
-     * 保存 - 获取值 - 创建所有文件路径
+     * 保存 :1 获取值 2.创建文件路径 3.判断模式
      */
     public void save(){
         GetViewValue();
-        dataList.save();
+        String playmode = dataList.GetStringDefualt("playMode","");
+        if (playmode.equals(SystemConfig.playMode[0])){ //网络模式
 
-        if (!"".equals(terminalNo.getText().toString())){
+            if (!"".equals(terminalNo.getText().toString())){
+                AppUtils.settingServerInfo(activity,true);
+                activity.mHandler.sendEmptyMessage(PlayHandler.HandleEvent.close.ordinal());
+            }else{
+                AppUtils.Toals(activity,"配置信息不可用，请联系客服.");
+            }
+
+        }
+        if (playmode.equals(SystemConfig.playMode[1])){
+            //单机版
+            //选择分屏显示
+            //启动
             AppUtils.settingServerInfo(activity,true);
             activity.mHandler.sendEmptyMessage(PlayHandler.HandleEvent.close.ordinal());
-        }else{
-            AppUtils.Toals(activity,"配置信息不可用，请联系客服");
         }
+
     }
     public void setcompanyid(String value)
     {
@@ -384,17 +394,18 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
         view.setBackgroundColor(Color.WHITE);
         int vid = parent.getId();
         if (vid == playtype.getId()){
-            dataList.put("playMode",adapter.getDataOnIndex(position));
+            dataList.put("playMode",adapter.getDataOnIndex(position));//关于模式选择
         }
         if (vid == storeSwitch.getId()){
-            SdCardTools.setAppSourceDir(adapter2.getDataOnIndex(position));
+            if (SdCardTools.testDirc(adapter2.getDataOnIndex(position),true)){
+                AppUtils.Toals(activity,"设置文件存贮主目录:"+SdCardTools.getAppSourceDir(activity));
+            }
         }
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
     }
-
 
     //单选框使用
     @Override

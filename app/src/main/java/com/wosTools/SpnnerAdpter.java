@@ -8,8 +8,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-
-
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -32,7 +30,11 @@ public class SpnnerAdpter extends BaseAdapter{
         data_list = new ArrayList<String>();
         this.context = context;
     }
-
+    public void settingData(String[] datas){
+        for (int i = 0;i<datas.length;i++){
+            settingData(datas[i]);
+        }
+    }
     public void settingData(String data){
             if(!data_list.contains(data)) data_list.add(data);
             notifyDataSetChanged();

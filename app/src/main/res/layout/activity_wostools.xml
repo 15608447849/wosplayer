@@ -18,7 +18,7 @@
             <TextView
                 android:layout_width="88dp"
                 android:layout_height="wrap_content"
-                android:text="本机ip地址:"
+                android:text="终端IP:"
                 android:textStyle="bold"
                 />
             <TextView
@@ -30,7 +30,7 @@
                 android:textStyle="bold"
                 android:layout_weight="1"/>
         </LinearLayout>
-        <!-- 本地根路径 -->
+        <!-- 本地mac -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -39,11 +39,11 @@
             <TextView
                 android:layout_width="88dp"
                 android:layout_height="wrap_content"
-                android:text="主目录:"
+                android:text="终端MAC:"
                 android:textStyle="bold"
                 />
             <TextView
-                android:id="@+id/storedir"
+                android:id="@+id/localmac"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"

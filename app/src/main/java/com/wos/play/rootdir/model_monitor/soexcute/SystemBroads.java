@@ -33,7 +33,7 @@ public class SystemBroads extends BroadcastReceiver {
                     "========================================================================================================================\n" +
                     "========================================================================================================================\n");
             AppUtils.LongToals(context,"[欢迎使用多媒体播放器,技术热线:4008-166-128]");
-            WatchServerHelp.openDeams(context);
+           WatchServerHelp.openDeams(context);
         }
         if(action.equals("android.intent.action.MEDIA_MOUNTED")){
            //sdcard等媒体介质装载

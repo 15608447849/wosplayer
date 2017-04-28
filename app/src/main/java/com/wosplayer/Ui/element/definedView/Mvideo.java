@@ -81,7 +81,7 @@ public class Mvideo extends SurfaceView implements SurfaceHolder.Callback{
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        Logs.i(TAG, "视频大小: width = " + width +";height = "+height);
+        //Logs.i(TAG, "视频大小: width = " + width +";height = "+height);
         try {
             createMedio();
         } catch (IOException e) {
@@ -135,19 +135,6 @@ public class Mvideo extends SurfaceView implements SurfaceHolder.Callback{
                 mmr.setDataSource(filename);
                 long pos = mMediaPlayer.getCurrentPosition();
                 bitmap = mmr.getFrameAtTime(pos * 1000,MediaMetadataRetriever.OPTION_PREVIOUS_SYNC);
-//                Logs.e(TAG,"截图 视频 大小 ( "+mMediaPlayer.getVideoWidth()+" , "+mMediaPlayer.getVideoHeight()+" )");
-//                Logs.e(TAG,"截图 视频 大小 ( "+bitmap.getWidth()+" , "+bitmap.getHeight()+" )");
-//                Logs.e(TAG,"截图 视频 大小 ( "+this.getWidth()+" , "+this.getHeight()+" )");
-
-
-
-//                if (bitmap!=null){
-//                    bitmap =  Bitmap.createScaledBitmap(
-//                            bitmap,
-//                            mMediaPlayer.getVideoWidth(),
-//                            mMediaPlayer.getVideoHeight(),
-//                            true);
-//                }
                 if (bitmap!=null){
                     bitmap =  Bitmap.createScaledBitmap(
                             bitmap,
@@ -205,15 +192,11 @@ public class Mvideo extends SurfaceView implements SurfaceHolder.Callback{
         return mDuration;
     }
 
-
-    private MediaPlayer getMediaPlayer(Context context){
-
+    public static MediaPlayer getMediaPlayer(Context context){
         MediaPlayer mediaplayer = new MediaPlayer();
-
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.KITKAT) {
             return mediaplayer;
         }
-
         try {
             Class<?> cMediaTimeProvider = Class.forName( "android.media.MediaTimeProvider" );
             Class<?> cSubtitleController = Class.forName( "android.media.SubtitleController" );
@@ -221,11 +204,8 @@ public class Mvideo extends SurfaceView implements SurfaceHolder.Callback{
             Class<?> iSubtitleControllerListener = Class.forName( "android.media.SubtitleController$Listener" );
 
             Constructor constructor = cSubtitleController.getConstructor(new Class[]{Context.class, cMediaTimeProvider, iSubtitleControllerListener});
-
             Object subtitleInstance = constructor.newInstance(context, null, null);
-
             Field f = cSubtitleController.getDeclaredField("mHandler");
-
             f.setAccessible(true);
             try {
                 f.set(subtitleInstance, new Handler());
@@ -234,13 +214,10 @@ public class Mvideo extends SurfaceView implements SurfaceHolder.Callback{
             finally {
                 f.setAccessible(false);
             }
-
             Method setsubtitleanchor = mediaplayer.getClass().getMethod("setSubtitleAnchor", cSubtitleController, iSubtitleControllerAnchor);
-
             setsubtitleanchor.invoke(mediaplayer, subtitleInstance, null);
-            //Log.e("", "subtitle is setted :p");
-        } catch (Exception e) {}
 
+        } catch (Exception e) {}
         return mediaplayer;
     }
 

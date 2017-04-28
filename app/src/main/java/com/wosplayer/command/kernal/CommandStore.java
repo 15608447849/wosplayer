@@ -45,7 +45,7 @@ public class CommandStore {
     private WeakReference<DisplayActivity> mActivity;
     private HashMap<String, iCommand> commandList = new HashMap<String, iCommand>();
     public void init(DisplayActivity activity){
-        mActivity = new WeakReference<DisplayActivity>(activity);
+        mActivity = new WeakReference<>(activity);
         createOp();
         Logs.i(TAG,"完成初始化");
     }
@@ -94,7 +94,7 @@ public class CommandStore {
      * 执行一个操作对象
      */
     public void opration(final String cmd,final String param){
-        if (mActivity.get()==null){
+        if (mActivity==null || mActivity.get()==null){
             Logs.e(TAG,"软引用 activity 不存在!");
             return;
         }

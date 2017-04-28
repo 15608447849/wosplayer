@@ -7,7 +7,7 @@ android {
     defaultConfig {
         applicationId "com.wosplayer"
         minSdkVersion 16
-        targetSdkVersion 23
+        targetSdkVersion 21
          }
     sourceSets {
         main {
@@ -50,4 +50,5 @@ dependencies {
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.google.code.gson:gson:2.6.2'
     compile files('libs/ftp4j-1.7.2.jar')
+//    compile 'de.mrmaffen:vlc-android-sdk:2.0.6'
 }

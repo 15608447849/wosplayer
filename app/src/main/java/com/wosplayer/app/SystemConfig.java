@@ -14,6 +14,7 @@ import cn.trinea.android.common.util.FileUtils;
 public class SystemConfig extends DataList{
     private static final String TAG = "播放器系统配置";
     private static final String DIR = "/mnt/sdcard/wosplayer/";
+    public static final String [] playMode  = {"网络模式","单机模式"};
     //文件保存路径
     private static final String PATH = DIR+"config.conf";
     private static SystemConfig systemConfig = null;
@@ -106,6 +107,8 @@ public class SystemConfig extends DataList{
         map.put("CaptureMode","0");// ,命令截屏优先
         //是否关闭本地监听播放器值
         map.put("AccessClose","1");//默认不关闭
+        //播放器类型选择
+        map.put("playMode",playMode[0]);// 0网络模式 1单机模式
 
         //保存数据
         boolean isWrite = FileUtils.writeFile(PATH, AppUtils.mapToJson(map));

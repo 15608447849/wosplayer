@@ -32,20 +32,9 @@ public class AdbCommand{
         return cmd;
     }
 
-    //卸载播放器
-    public static String uninstallTelminal(){
-        String alias = "WosOldTerminal.apk";
 
-        String cmd = "mount -o remount,rw /system\n"
-                +"rm -rf /system/app/"+alias+"\n"//删除system app
-                +"rm -rf /system/lib/libserverHelper.so\n"//删除system so文件
-                +"rm -rf /data/local/tem/*\n"//tem下面的临时文件或者apk
-                +"rm -rf /data/data/com.wosplayer*\n"
-                +"rm -rf /data/dalvik-cache/system@app@WosOldTerminal*\n"
-                +"rm -rf /data/dalvik-cache/data@app@com.wosplayer*\n"
-                +"reboot";
-        return cmd;
-    }
+
+
     //多少秒后关机
     public static String closeTelOnTime(int time){
         //关机
@@ -90,8 +79,6 @@ public class AdbCommand{
             if (ShellUtils.checkRootPermission()) {
                 //放入system
                  excuteAppMoveSystem(context);
-                //关闭状态栏
-
             } else {
                 Logs.e(TAG,"-----------------------------------没有root权限------------------------------------------");
             }
@@ -99,14 +86,43 @@ public class AdbCommand{
             Logs.e(TAG,e.getMessage());
         }
     }
+    public static String [] localSoFileList = {
+            "libserverHelper.so",
+            "libanw.10.so",
+            "libanw.13.so",
+            "libanw.14.so",
+            "libanw.18.so",
+            "libanw.21.so",
+            "libcompat.7.so",
+            "libiomx.10.so",
+            "libiomx.13.so",
+            "libiomx.14.so",
+            "libvlc.so",
+            "libvlcjni.so"
+    };
+    //卸载播放器
+    public static String uninstallTelminal(){
+        String alias = "WosOldTerminal.apk";
 
-
-
-
+        StringBuffer sb = new StringBuffer();
+        sb.append("mount -o remount,rw /system\n");//挂载
+        //删除so文件
+        for (String so : localSoFileList){
+            sb.append("rm -rf /system/lib/"+so+"\n");
+        }
+        //删除app
+        sb.append("rm -rf /data/local/tem/*\n"//tem下面的临时文件或者apk
+                +"rm -rf /data/data/com.wosplayer*\n"
+                +"rm -rf /data/dalvik-cache/system@app@WosOldTerminal*\n"
+                +"rm -rf /data/dalvik-cache/data@app@com.wosplayer*\n"
+                +"rm -rf /system/app/"+alias+"\n"
+                +"reboot\n");
+        return sb.toString();
+    }
 
     //放进system cmd
     public static String  getAppChangerPath(String _packagePath, String _packageName, String alias) {
-        return "mount -o remount,rw /system" + "\n" +
+        return "mount -o remount,rw /system" + "\n" + //挂载
                 "cp /data/data/"+_packageName+"/lib/* /system/lib" + "\n" + //复制so文件到目录下
                 "chmod 777 /system/lib/*" + "\n" + //设置so权限
                 "cp " + _packagePath + " /system/app/" + alias + "\n" + //复制app到system

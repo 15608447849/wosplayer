@@ -62,12 +62,15 @@ public class ImageViewPicassocLoader {
     public static Bitmap getBitmap(Context context, String filePath, final ImageView iv) {
         Bitmap bitmap = ImageStore.getInstants().getBitmapCache(filePath);
         if (bitmap==null || bitmap.isRecycled()){
-            bitmap = getBitmap(new File(filePath));
-            ImageStore.getInstants().addBitmapCache(filePath,bitmap);
+            bitmap = getBitmap(filePath);
+            if (bitmap!=null){
+                ImageStore.getInstants().addBitmapCache(filePath,bitmap);
+            }
         }
 
         final  Bitmap bp = bitmap;
         if (iv != null) {
+            //rxjava 线程回调到主线程
             AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                 @Override
                 public void call() {
@@ -89,22 +92,21 @@ public class ImageViewPicassocLoader {
         return getBitmap(null,filePath,iv);
     }
 
-    public static Bitmap getBitmap(String filePath) {
-        return getBitmap(null,filePath,null);
-    }
+
 
     /**
      * 获取一个 bitmap 成功返回turn
      */
-    public static Bitmap getBitmap(File file) {
+    public static Bitmap getBitmap(String filepath) {
         FileInputStream is = null;
         Bitmap bitmap = null;
+        File file = new File(filepath);
+        if (!file.exists()) return null;
+
         try {
-            if (file != null && file.exists()) {
                 is = new FileInputStream(file);
                 bitmap = createImageThumbnail(is);
                 //Log.d("image utils ", "获取完毕 bitmap _success -\nfile -" + file.getAbsolutePath() + "\n");
-            }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -115,6 +117,7 @@ public class ImageViewPicassocLoader {
                     e.printStackTrace();
                 }
             }
+
         }
         return bitmap;
     }

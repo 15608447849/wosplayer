@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -15,6 +16,7 @@ import android.view.WindowManager;
 import android.widget.AbsoluteLayout;
 import android.widget.FrameLayout;
 
+import com.standalone.StandUi;
 import com.wosTools.AppToolsFragment;
 import com.wosplayer.R;
 import com.wosplayer.Ui.performer.UiExcuter;
@@ -46,8 +48,6 @@ public class DisplayActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//保持屏幕常亮
         setContentView(R.layout.activity_main);//设置布局文件
-        //注册指令广播
-        registCommand();
         initActivity();
 
     }
@@ -98,9 +98,7 @@ public class DisplayActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        //注销指令广播
         Logs.i(TAG,"onDestroy");
-        unregistCommand();
         super.onDestroy();
         System.exit(0);
     }
@@ -114,7 +112,6 @@ public class DisplayActivity extends Activity {
     //初始化 activity
     private void initActivity() {
         mHandler = new PlayHandler(this);
-        CommandStore.getInstands().init(this);//命令集
         main = (AbsoluteLayout) this.findViewById(R.id.uilayer);
         fragmentLayer = (FrameLayout)this.findViewById(R.id.frgment_layout);
         closebtn =  (FrameLayout) findViewById(R.id.close_layer);
@@ -134,34 +131,51 @@ public class DisplayActivity extends Activity {
                 return true;
             }
         });
+        CommandStore.getInstands().init(this);//初始化命令集
     }
 
 
     //开始工作
     public void start(){
-            playTypeStart();
-            openCommunication();
+            playTypeStart();//选择模式
     }
-
     //结束工作 - true,关闭 activity
     public void stop(boolean isclose){
-            closeCommunication();
-            closeWosTools();
-            playTypeStop();
+            closeWosTools();//关闭配置界面
+            playTypeStop();//根据模式停止播放
             if (isclose) finish();
     }
     private void playTypeStart() {
         try {
-            UiExcuter.getInstancs().onInite(this);//初始化ui
+            String mode = SystemConfig.get().GetStringDefualt("playMode","");
+            Log.e(TAG,"执行播放模式:"+mode);
+            if (mode.equals(SystemConfig.playMode[0])){
+                //注册指令广播
+                registCommand();
+                UiExcuter.getInstancs().onInite(this);//初始化ui
+                openCommunication();//开启通讯
+            }
+            if (mode.equals(SystemConfig.playMode[1])){//单机版本
+                StandUi.getInstands().init(this);
+            }
         } catch (Exception e) {
-            Logs.e(TAG,"activity 开始执行读取排期失败");
+            e.printStackTrace();
         }
     }
     private void playTypeStop() {
         try {
-            UiExcuter.getInstancs().onUnInit();
+            String mode = SystemConfig.get().GetStringDefualt("playMode","");
+            if (mode.equals(SystemConfig.playMode[0])){
+                //注销命令集
+                unregistCommand();
+                closeCommunication();//关闭通讯
+                UiExcuter.getInstancs().onUnInit();//停止UI界面
+            }
+            if (mode.equals(SystemConfig.playMode[1])){//单机版本
+                StandUi.getInstands().unInin();
+            }
         } catch (Exception e) {
-            Logs.e(TAG,"activity 停止执行播放排期 时 err:"+ e.getMessage());
+          e.printStackTrace();
         }
     }
 

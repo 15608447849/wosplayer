@@ -52,7 +52,7 @@ public class WatchServerHelp extends Service {
         String packageName = this.getPackageName();
         String temPath = createRootPath(this);
         String watchServerPath = "am startservice --user 0 "+packageName+"/com.wos.play.rootdir.model_monitor.soexcute.WatchServer";
-        String activityComd = "am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n "+packageName+"/com.wosplayer.app.DisplayActivity";
+        String activityComd = "am start --user 0 -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n "+packageName+"/com.wosplayer.app.DisplayActivity";
         int sleep = SystemConfig.get().read().GetIntDefualt("RestartBeatInterval",5);
         RunJniHelper.getInstance().startMservice(watchServerPath,activityComd,temPath+"/cpid",temPath+"/clog",sleep);
     }

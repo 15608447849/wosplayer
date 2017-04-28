@@ -17,8 +17,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.trinea.android.common.util.FileUtils;
-
 /**
  * Created by user on 2016/10/31.
  * lzp
@@ -365,14 +363,16 @@ public class SdCardTools {
      * # /mnt/external_sd
      * # /mnt/usb_storage
      */
-    public static void checkSdCard(Context context) {
+    public static boolean checkSdCard(Context context) {
         if (!SdCardTools.existSDCard()) {
             Log.e(TAG, "sdcard不存在,应用存储目录: " + getAppSourceDir(context));
         } else {
             if (testDirc(getSDPath(),true)){
                 MkDir(appSourcePath);//创建目录
-            };
+                return true;
+            }
         }
+        return false;
     }
 
     /**
@@ -435,4 +435,49 @@ public class SdCardTools {
         }
         return false;
     }
+
+
+
+    //文件夹下循环遍历指定后缀的文件
+    public static void getTagerPrefixOnFiles(String dirPath,ArrayList<String> list,String ... prefix){
+        if (list==null) return;
+        File file = new File(dirPath);
+        if (file.exists()) {
+            if (file.isDirectory()){
+                File[] files = file.listFiles();
+                if (files.length!=0){
+                    //继续遍历
+                    for (File file2 : files){
+                        getTagerPrefixOnFiles(file2.getAbsolutePath(),list,prefix);
+                    }
+                }
+            }
+            if (file.isFile()){
+                for (String fix:prefix){
+                    if (file.getName().endsWith(fix)){
+                        list.add(file.getAbsolutePath());
+                        break;
+                    }
+                }
+            }
+
+        }
+    }
+
+    public static String justPath(ArrayList<String> list,String param){
+        for (String var : list){
+            if (var.contains(param)){
+                return  var;
+            }
+        }
+        return null;
+    }
+
+
+
+
+
+
+
+
 }

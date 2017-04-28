@@ -3,6 +3,7 @@ package com.wosplayer.Ui.element.uitools;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.util.LruCache;
 
 import com.wosplayer.R;
@@ -16,12 +17,14 @@ public class ImageStore {
     private static ImageStore instant;
     private boolean isInit = false;
     private ImageStore(){
+        Log.e(TAG," 图片缓存创建  ");
         init();
     }
     public static ImageStore getInstants(){
         if (instant==null){
             instant = new ImageStore();
         }
+
         return instant;
     }
     private LruCache<String,Bitmap> CacheMap = null;
@@ -46,10 +49,13 @@ public class ImageStore {
                 @Override
                 protected void entryRemoved(boolean evicted, String key,
                                             Bitmap oldValue, Bitmap newValue) {
-                    if (evicted){
-                        removeImageCache(key);
-                    }
+                    Log.e("清理缓存","entryRemoved: "+evicted +" bitmap "+oldValue + " "+newValue);
 
+                    if (evicted){
+                        if (oldValue != null)
+                            oldValue.recycle();
+                            oldValue = null;
+                    }
                 }
             };
         }
@@ -89,8 +95,8 @@ public class ImageStore {
     public void clearCache() {
         if (CacheMap != null) {
             if (CacheMap.size() > 0) {
-//                Log.d("CacheUtils",
-//                        "mMemoryCache.size() " + mMemoryCache.size());
+                Log.d("CacheUtils",
+                        "mMemoryCache.size() " + CacheMap.size());
                 CacheMap.evictAll();
 //                Log.d("CacheUtils", "mMemoryCache.size()" + mMemoryCache.size());
             }
@@ -106,6 +112,7 @@ public class ImageStore {
         if (key != null) {
             if (CacheMap != null) {
                 Bitmap bm = CacheMap.remove(key);
+                Log.e("CacheUtils", "删除bitmap:"+key + " - "+bm);
                 if (bm != null)
                     bm.recycle();
             }
