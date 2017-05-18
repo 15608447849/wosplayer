@@ -3,7 +3,6 @@ package com.wosplayer.app;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.text.method.PasswordTransformationMethod;
 import android.widget.EditText;
@@ -63,7 +62,7 @@ public class OverAppDialog {
        });
     }
 
-    public static void showProgressDialog(Context context, String s, final int max, final int stup) {
+    public static void showProgressDialog(Activity context, String s, final int max, final int stup) {
     /* @setProgress 设置初始进度
      * @setProgressStyle 设置样式（水平进度条）
      * @setMax 设置进度最大值
@@ -99,8 +98,29 @@ public class OverAppDialog {
     }
 
 
+    /* 等待Dialog具有屏蔽其他控件的交互能力
+      * @setCancelable 为使屏幕不可点击，设置为不可取消(false)
+      * 下载等事件完成后，主动调用函数关闭该Dialog
+      */
+    public static void showWaitingDialog(final Activity context,final ProgressDialog dialog) {
+        if (context==null  || dialog==null) return;
+        context.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.show();
+            }
+        });
+    }
 
-
+    public static void closeWaitingDialog(final Activity context,final ProgressDialog dialog) {
+        if (context==null || dialog==null) return;
+        context.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.cancel();
+            }
+        });
+    }
 
 
 }

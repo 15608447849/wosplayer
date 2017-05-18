@@ -1,7 +1,8 @@
 package com.standalone;
 
 import android.content.Context;
-import android.util.Log;
+import android.graphics.PixelFormat;
+import android.media.AudioManager;
 import android.view.SurfaceView;
 
 import org.videolan.libvlc.LibVLC;
@@ -19,8 +20,10 @@ public class MSVideo extends SurfaceView implements MVideoInterface {
     private MediaPlayer video;
     public MSVideo(Context context) {
         super(context);
+        getHolder().setFormat(PixelFormat.RGBX_8888);
+        AudioManager mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC,mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),0);
         libVLC = new LibVLC(context);
-
     }
 
     @Override
@@ -41,12 +44,13 @@ public class MSVideo extends SurfaceView implements MVideoInterface {
             stopVideo();
             media = new Media(libVLC,url);
             media.setHWDecoderEnabled(true,true);
+
             media.setEventListener(new Media.EventListener() {
                 @Override
                 public void onEvent(Media.Event event1) {
-                    Log.i("视频","onEvent:" + event1);
+//                    Log.i("视频","onEvent:" + event1);
                     if (video!= null) {
-                        Log.e("视频","当前 video :"+video);
+//                        Log.e("视频","当前 video :"+video);
                         if (video.getPlayerState() == 6 && !video.isReleased()){
                             event.onComplete();
                         }
@@ -91,7 +95,7 @@ public class MSVideo extends SurfaceView implements MVideoInterface {
         if (libVLC!=null){
             libVLC.release();
             libVLC = null;
-            Log.e("视频","vlc lib  释放");
+//            Log.e("视频","vlc lib  释放");
         }
     }
 

@@ -130,12 +130,13 @@ public class AppUtils {
             StringBuffer buffer = new StringBuffer();
             for (int i = 0; i < b.length; i++)
             {
-                if (i != 0 || i!=b.length-1)
+
+                String str = Integer.toHexString(b[i] & 0xFF);
+                buffer.append(str.length() == 1 ? 0 + str : str);
+                if (i != 0 && i!=(b.length-1))
                 {
                     buffer.append('-');
                 }
-                String str = Integer.toHexString(b[i] & 0xFF);
-                buffer.append(str.length() == 1 ? 0 + str : str);
             }
             strMacAddr = buffer.toString().toUpperCase();
         }

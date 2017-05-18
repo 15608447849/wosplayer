@@ -55,7 +55,7 @@ public class AdbCommand{
     //安装app
     public static String getInstallAdb(String apkLocalPath) {
 
-        return " chmod 777 "+apkLocalPath + "\n"+
+        return "chmod 777 "+apkLocalPath + "\n"+
                 "pm install -r "+apkLocalPath ;
     }
     //运行时安装apk
@@ -73,12 +73,13 @@ public class AdbCommand{
             CrashHandler.getInstance().init(context);
             //系统配置监听值
             SystemConfig.get().putOr("watchValue","0").save();
-            //打开监听程序
+
+            //打开监听程序(不要开启)
             //WatchServerHelp.openDeams(context);
 
             if (ShellUtils.checkRootPermission()) {
                 //放入system
-                 excuteAppMoveSystem(context);
+                excuteAppMoveSystem(context);
             } else {
                 Logs.e(TAG,"-----------------------------------没有root权限------------------------------------------");
             }
@@ -128,6 +129,7 @@ public class AdbCommand{
                 "cp " + _packagePath + " /system/app/" + alias + "\n" + //复制app到system
                 "chmod 777 /system/app/" + alias + "\n" + //赋权
                 "rm -rf " + _packagePath + "\n" + //删除data目录下面的app
+                "rm -rf /data/app/com.wosplayer* \n"+
                 "rm -rf /data/dalvik-cache/data*" + "\n";//删除虚拟机缓存
     }
 
@@ -142,12 +144,14 @@ public class AdbCommand{
             if ( (appinfo.flags & ApplicationInfo.FLAG_SYSTEM) > 0 || FileUtils.isFileExist("/system/app/"+alias) ) {
                 return;
             }
-                Log.e(TAG,"源apk路径:" + packagepath + " - 移动路径 :/sysytem/app/" + alias);
+                Log.e(TAG,"源apk路径: " + packagepath + " - 移动路径 :/sysytem/app/" + alias);
                 String cmd = getAppChangerPath(packagepath,packageName, alias);
                 Log.e(TAG,cmd);
                 ShellUtils.CommandResult cr = ShellUtils.execCommand(cmd, true, true);
                 Log.e(TAG,"提升权限结果:" + cr.result);
                 if (cr.result == 0) {
+                    //通知初始化完成,将重启应用程序
+
                     ShellUtils.execCommand("reboot",true);
                 }
     }

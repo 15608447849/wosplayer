@@ -21,7 +21,7 @@ import com.wosplayer.Ui.element.interactive.xml.XmlParse;
 import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.element.interfaces.TimeCalls;
 import com.wosplayer.Ui.element.uitools.ImageAttabuteAnimation;
-import com.wosplayer.Ui.element.uitools.ImageViewPicassocLoader;
+import com.wosplayer.Ui.element.uitools.ImageTools;
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.app.AppUtils;
 import com.wosplayer.app.BackRunner;
@@ -34,14 +34,14 @@ import java.util.HashMap;
 
 import cn.trinea.android.common.util.FileUtils;
 
-public class IinteractionPlayer extends AbsoluteLayout implements IPlayer,View.OnClickListener{
+public class IInteractionPlayer extends AbsoluteLayout implements IPlayer,View.OnClickListener{
 
     private static final java.lang.String TAG ="互动底层" ;
     private Context context;
     private ViewGroup superView = null;
     private boolean isLayout = false;
     private FrameLayout back;
-    public IinteractionPlayer(Context context,ViewGroup superView) {
+    public IInteractionPlayer(Context context, ViewGroup superView) {
         super(context);
         this.context =context;
         this.superView = superView;
@@ -256,9 +256,9 @@ public class IinteractionPlayer extends AbsoluteLayout implements IPlayer,View.O
             btnview.setLayoutParams(new AbsoluteLayout.LayoutParams(button.width,button.height,button.x,button.y));
             btnview.setOnClickListener(this);
             if(FileUtils.isFileExist(button.image)){
-                ImageViewPicassocLoader.getBitmap(button.image,btnview);
+                ImageTools.getBitmap(button.image,btnview);
             }else{
-                ImageViewPicassocLoader.getBitmap(UiExcuter.getInstancs().defImagePath,btnview);
+                ImageTools.getBitmap(UiExcuter.getInstancs().defImagePath,btnview);
             }
             this.addView(btnview);
             ImageAttabuteAnimation.SttingAnimation(null,btnview,null);//new int[]{button.width,button.height,button.x,button.y}
@@ -292,7 +292,7 @@ public class IinteractionPlayer extends AbsoluteLayout implements IPlayer,View.O
        if (data.bgType == 2){
             String path = UiExcuter.getInstancs().basepath+data.bgValue;
             if (FileUtils.isFileExist(path)){
-                Bitmap bitmap = ImageViewPicassocLoader.getBitmap(path);
+                Bitmap bitmap = ImageTools.getBitmap(path,null);
                 this.setBackground(new BitmapDrawable(bitmap));
             }
        }
@@ -330,7 +330,7 @@ public class IinteractionPlayer extends AbsoluteLayout implements IPlayer,View.O
             @Override
             public void onClick(View v) {
                 layer.onDestory();
-                IinteractionPlayer.this.removeView(layer);
+                IInteractionPlayer.this.removeView(layer);
             }
         });//添加返回按钮
         layer.setBackgroundColor(Color.BLACK);

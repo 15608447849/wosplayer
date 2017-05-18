@@ -23,7 +23,6 @@
 package org.videolan.libvlc;
 
 import android.net.Uri;
-import android.util.Log;
 
 import java.io.File;
 
@@ -862,7 +861,6 @@ public class MediaPlayer extends VLCObject<MediaPlayer.Event> {
 
     @Override
     protected void onReleaseNative() {
-        Log.e("VLC",this + "onReleaseNative()");
         if (mMedia != null)
             mMedia.release();
         nativeRelease();

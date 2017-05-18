@@ -8,7 +8,7 @@ import android.os.Handler;
 import android.view.ViewGroup;
 
 import com.wosplayer.Ui.element.uitools.ImageStore;
-import com.wosplayer.Ui.element.uitools.ImageViewPicassocLoader;
+import com.wosplayer.Ui.element.uitools.ImageTools;
 import com.wosplayer.Ui.element.uitools.IplayerStore;
 import com.wosplayer.app.AppUtils;
 import com.wosplayer.app.BackRunner;
@@ -20,11 +20,9 @@ import com.wosplayer.command.operation.schedules.correlation.StringUtils;
 import com.wosplayer.command.operation.schedules.correlation.XmlNodeEntity;
 import com.wosplayer.download.util.MD5Util;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.locks.ReentrantLock;
@@ -292,7 +290,7 @@ public class UiExcuter {
             if (!FileUtils.isFileExist(var)){
                 return;
             }
-            final BitmapDrawable drawable = new BitmapDrawable(ImageViewPicassocLoader.getBitmap(var));
+            final BitmapDrawable drawable = new BitmapDrawable(ImageTools.getBitmap(var,null));
             runingMain(new Runnable() {
                 @Override
                 public void run() {

@@ -5,8 +5,6 @@ import android.media.MediaPlayer;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.webkit.WebChromeClient;
-import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
@@ -18,7 +16,7 @@ import com.wosplayer.Ui.element.definedView.Mimage;
 import com.wosplayer.Ui.element.definedView.Mvideo;
 import com.wosplayer.Ui.element.interactive.databeads.Acontent;
 import com.wosplayer.Ui.element.uitools.ImageAttabuteAnimation;
-import com.wosplayer.Ui.element.uitools.ImageViewPicassocLoader;
+import com.wosplayer.Ui.element.uitools.ImageTools;
 import com.wosplayer.Ui.performer.UiExcuter;
 
 import java.util.ArrayList;
@@ -126,7 +124,7 @@ public class AFileShow extends FrameLayout implements View.OnClickListener{
             }
 
             source = FileUtils.isFileExist(content.sourcePath)?content.sourcePath: UiExcuter.getInstancs().defImagePath;
-            ImageViewPicassocLoader.getBitmap(source,image);
+            ImageTools.getBitmap(source,image);
             view = image;
         }
         if (content.type.equals("1006")){

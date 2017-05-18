@@ -11,7 +11,6 @@ import android.os.storage.StorageManager;
 import android.util.Log;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -400,8 +399,11 @@ public class SdCardTools {
             ArrayList<String> list = new ArrayList<>();
             Log.i(TAG, "可用存储列表:");
             for (int i = 0;i< paths.length ;i++) {
-                Log.i(TAG, i+ " - " + paths[i]);
-                if (testDirc(paths[i],false)) list.add(paths[i]);
+
+                if (testDirc(paths[i],false)) {
+                    list.add(paths[i]);
+                    Log.i(TAG, i+ " - " + paths[i]);
+                }
             }
             return list.size()>0?list:null;
         }
@@ -421,17 +423,15 @@ public class SdCardTools {
             if (!file.exists()) {
                 boolean isSuccess = file.mkdirs();
                 if (!isSuccess){
-                    throw new IOException("创建文件夹失败:"+pathdir);
+                    throw new Exception("创建文件夹失败:"+pathdir);
                 }
                 //Log.i(TAG, "创建文件夹 - " + pathdir + (isSuccess ? " 成功" : " 失败"));
             }
             if (file.exists() && file.isDirectory()) {
                 return true;
-            }else{
-                throw new IOException("已存在的文件:"+pathdir);
             }
         } catch (Exception e) {
-            Log.e(TAG, "创建文件夹错误：" + e.getMessage());
+            //Log.e(TAG, "MkDir() >> " + e.getMessage());
         }
         return false;
     }
@@ -445,7 +445,7 @@ public class SdCardTools {
         if (file.exists()) {
             if (file.isDirectory()){
                 File[] files = file.listFiles();
-                if (files.length!=0){
+                if (files!=null && files.length>0){
                     //继续遍历
                     for (File file2 : files){
                         getTagerPrefixOnFiles(file2.getAbsolutePath(),list,prefix);
@@ -456,24 +456,27 @@ public class SdCardTools {
                 for (String fix:prefix){
                     if (file.getName().endsWith(fix)){
                         list.add(file.getAbsolutePath());
-                        break;
                     }
                 }
             }
-
         }
     }
 
     public static String justPath(ArrayList<String> list,String param){
         for (String var : list){
             if (var.contains(param)){
-                return  var;
+                if (isEntityDirs(new File(var))){
+                    return  var;
+                }
             }
         }
         return null;
     }
 
-
+    //判断文件夹是否为空
+    public static boolean isEntityDirs(File file){
+       return file.exists() && file.isDirectory() && file.list().length > 0;
+    }
 
 
 

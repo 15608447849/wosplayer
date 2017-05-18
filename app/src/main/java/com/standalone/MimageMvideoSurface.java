@@ -6,11 +6,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import com.wosplayer.Ui.element.uitools.ImageViewPicassocLoader;
+import com.wosplayer.Ui.element.uitools.ImageTools;
 
 /**
  * Created by user on 2017/4/27.
@@ -41,6 +40,7 @@ public class MimageMvideoSurface extends SurfaceView implements Runnable,MVideoI
     }
 
     public void destorys(){
+        stopThread();
         drawClear();
         if (video!=null){
             video.stopVideo();
@@ -48,7 +48,6 @@ public class MimageMvideoSurface extends SurfaceView implements Runnable,MVideoI
             video = null;
         }
         if (notify!=null) notify=null;
-        stopThread();
     }
 
     public void setVideo(MVideoInterface video){
@@ -83,24 +82,21 @@ public class MimageMvideoSurface extends SurfaceView implements Runnable,MVideoI
         if (mThread!=null){
             flag = false;
             unlockThread();
-            mThread.interrupt();
             mThread = null;
         }
     }
     @Override
     public void run() {
         //关于图片的绘制的控制
-        try {
         while (flag){
-                if (sourceType==1){
-                    drawImage();
+            try {
+                switch (sourceType){
+                    case 1:drawImage();break;
+                    case 2:showVideo();break;
                 }
-                if (sourceType == 2){
-                    showVideo();
-                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -133,51 +129,61 @@ public class MimageMvideoSurface extends SurfaceView implements Runnable,MVideoI
         //锁定画布
         Canvas mCanvas = getHolder().lockCanvas();
         if (mCanvas!=null){
-            mCanvas.drawColor(Color.YELLOW);
+            mCanvas.drawColor(Color.WHITE);
             getHolder().unlockCanvasAndPost(mCanvas);
         }
 
     }
     //绘制图片
     private void drawImage() {
+        if (!flag) return;
         //先根据资源地址 获取 bitmap
-        Bitmap bitmap = ImageViewPicassocLoader.getBitmap(null,url,null);
-        if (bitmap!=null || getHolder() == null){
-            try {
-                //锁定画布
-                Canvas mCanvas = getHolder().lockCanvas();
-                //展示
-                Paint paint = new Paint();
-                paint.setAntiAlias(true);
-                paint.setStyle(Paint.Style.STROKE);
-                Rect mSrcRect, mDestRect;
-                mSrcRect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-                mDestRect = new Rect(0, 0, getWidth(), getHeight());
-                mCanvas.drawBitmap(bitmap, mSrcRect, mDestRect, paint);
-                //解锁画布
-                getHolder().unlockCanvasAndPost(mCanvas);
-                //休眠指定秒数
-                count.setTime(5, new TimeAction() {
-                    @Override
-                    public void over() {
-                        unlockThread();
+        Bitmap bitmap = ImageTools.getBitmap(null,url,null);
+        if (bitmap!=null && getHolder() != null){
+                    try {
+                        //锁定画布
+                        Canvas mCanvas = getHolder().lockCanvas();
+                        if (mCanvas==null){
+                            onPlayStop();
+                            return;
+                        }
+                        //展示
+                        Paint paint = new Paint();
+                        paint.setAntiAlias(true);
+                        paint.setStyle(Paint.Style.STROKE);
+                        Rect mSrcRect, mDestRect;
+                        mSrcRect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+                        mDestRect = new Rect(0, 0, getWidth(), getHeight());
+                        mCanvas.drawBitmap(bitmap, mSrcRect, mDestRect, paint);
+                        //解锁画布
+                        getHolder().unlockCanvasAndPost(mCanvas);
+                            //休眠指定秒数
+                            count.setTime(5, new TimeAction() {
+                                @Override
+                                public void over() {
+                                    unlockThread();
+                                }
+                            });
+                        lockThread();
+                        onPlayStop();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        onPlayStop();
                     }
-                });
-                lockThread();
-                onPlayStop();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        }else{
+            onPlayStop();
         }
     }
     //播放视频
     private void showVideo() {
-        if (video == null || notify==null){
+        if (!flag) return;
+        if (video == null || notify==null || url==null || url.equals("")){
             onPlayStop();
         }else{
             notify.runMainThread(new Runnable() {
                 @Override
                 public void run() {
+
                     MimageMvideoSurface.this.setVisibility(GONE);
                     video.attch();
                     video.startVideo(url,MimageMvideoSurface.this);
@@ -192,7 +198,7 @@ public class MimageMvideoSurface extends SurfaceView implements Runnable,MVideoI
     @Override
     public void onComplete() {
         //视频播放完成
-        Log.i(TAG,"VideoEvent onComplete : "+video);
+//        Log.i(TAG,"VideoEvent onComplete : "+video);
         if(getVisibility() == GONE){
            this.setVisibility(VISIBLE);
         }

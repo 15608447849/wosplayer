@@ -18,12 +18,14 @@ public class USBBroad extends BroadcastReceiver{
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.e("单机广播",intent.getAction());
+        String action = intent.getAction();
+        String path = intent.getData().getPath();
+        Log.e("单机广播",action+" 目录:"+ path);
         if (intent.getAction().equals("android.intent.action.MEDIA_EJECT")){
-            notify.onBroad("sdcardout");
+            notify.onBroad("out#"+path);
         }
         if(intent.getAction().equals("android.intent.action.MEDIA_MOUNTED")){
-            notify.onBroad("sdcardin");
+            notify.onBroad("in#"+path);
         }
     }
 }

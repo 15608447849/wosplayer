@@ -8,7 +8,7 @@ import com.wosplayer.Ui.element.definedView.Mimage;
 import com.wosplayer.Ui.element.interfaces.IPlayer;
 import com.wosplayer.Ui.element.interfaces.TimeCalls;
 import com.wosplayer.Ui.element.uitools.ImageAttabuteAnimation;
-import com.wosplayer.Ui.element.uitools.ImageViewPicassocLoader;
+import com.wosplayer.Ui.element.uitools.ImageTools;
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.app.DataList;
 import com.wosplayer.app.Logs;
@@ -74,10 +74,10 @@ public class IImagePlayer implements IPlayer{
             }
             if (FileUtils.isFileExist(imageFile)){
 //                image.start(imageFile);
-            ImageViewPicassocLoader.getBitmap(imageFile,image);
+            ImageTools.getBitmap(imageFile,image);
             }else{
 //                image.start();
-                ImageViewPicassocLoader.getBitmap(UiExcuter.getInstancs().defImagePath,image);
+                ImageTools.getBitmap(UiExcuter.getInstancs().defImagePath,image);
             }
             ImageAttabuteAnimation.SttingAnimation(null,image,sizearr);//属性动画
 

@@ -2,10 +2,8 @@ package com.wos.play.rootdir.model_monitor.soexcute;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-
 
 import com.wosplayer.app.AdbCommand;
 import com.wosplayer.app.DisplayActivity;
@@ -48,7 +46,7 @@ public class WatchServer extends Service {
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        android.util.Log.i(TAG, "onStartCommand() - pid : "+android.os.Process.myPid()+"");
+        android.util.Log.i(TAG, "onStartCommand() - pid : "+android.os.Process.myPid()+" call nunber:"+startId);
         int isWatch = SystemConfig.get().read().GetIntDefualt("watchValue",0);
         if (isWatch==0){
             if (!serverUtils.isRunningForeground(getApplicationContext(), activityList)) {

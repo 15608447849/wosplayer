@@ -11,6 +11,11 @@ import android.util.Log;
 
 import com.wosplayer.app.SystemConfig;
 
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by 79306 on 2017/3/8.
  */
@@ -22,30 +27,44 @@ public class WatchServerHelp extends Service {
     public static final int CLOSE_DEAMS = 777;
     public static final int CLOSE_DEAMS_ALL = 888;
     public static final int RESET_DEAMS = 999;
-
+    private static ThreadPoolExecutor mThreadpool =
+            new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 2, TimeUnit.SECONDS,
+                    new LinkedBlockingQueue<Runnable>(), new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable r) {
+                    return new Thread(r);
+                }
+            });
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        long time = System.currentTimeMillis();
+        Log.e(TAG,"开启监听助手 >> onStartCommand - startId:"+startId);
         if (intent!=null){
-            int type = intent.getIntExtra(DEAMS_KEY,-1);
-            if (type == OPEN_DEAMS){
-                open();
-            }
-            if (type == CLOSE_DEAMS){
-                close();
-            }
-            if (type == CLOSE_DEAMS_ALL){
-                closeAll();
-            }
-            if (type == RESET_DEAMS){
-                openAll();
-            }
+            final int type = intent.getIntExtra(DEAMS_KEY,-1);
+
+            mThreadpool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    if (type == OPEN_DEAMS){
+                        open();
+                    }
+                    if (type == CLOSE_DEAMS){
+                        close();
+                    }
+                    if (type == CLOSE_DEAMS_ALL){
+                        closeAll();
+                    }
+                    if (type == RESET_DEAMS){
+                        openAll();
+                    }
+                }
+            });
+
         }
-
-        return START_NOT_STICKY;//super.onStartCommand(intent, flags, startId);
+        Log.e(TAG,"开启监听助手 >> onStartCommand - 时间差:"+(System.currentTimeMillis() - time)+"毫秒");
+        return super.onStartCommand(intent, flags, startId); //START_NOT_STICKY;//
     }
-
-
 
     private void open() {
         //获取包名
@@ -54,6 +73,7 @@ public class WatchServerHelp extends Service {
         String watchServerPath = "am startservice --user 0 "+packageName+"/com.wos.play.rootdir.model_monitor.soexcute.WatchServer";
         String activityComd = "am start --user 0 -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n "+packageName+"/com.wosplayer.app.DisplayActivity";
         int sleep = SystemConfig.get().read().GetIntDefualt("RestartBeatInterval",5);
+        Log.e(TAG,"执行c代码>>>");
         RunJniHelper.getInstance().startMservice(watchServerPath,activityComd,temPath+"/cpid",temPath+"/clog",sleep);
     }
     private void close() {
@@ -114,7 +134,14 @@ public class WatchServerHelp extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.e(TAG,"创建监听助手!!");
         Notification notification = new Notification();
         startForeground(1, notification);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.e(TAG,"监听助手服务死亡!!");
     }
 }

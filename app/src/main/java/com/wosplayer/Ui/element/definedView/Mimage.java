@@ -1,12 +1,8 @@
 package com.wosplayer.Ui.element.definedView;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.widget.ImageView;
-
-import com.wosplayer.Ui.element.uitools.ImageViewPicassocLoader;
-import com.wosplayer.app.Logs;
 
 /**
  * Created by 79306 on 2017/3/11.

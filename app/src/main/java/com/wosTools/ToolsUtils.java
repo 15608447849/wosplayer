@@ -195,10 +195,12 @@ public class ToolsUtils {
         Method method = ownerClass.getMethod(methodName,argsClass);
         return method.invoke(owner, args);
     }
-    public  static void showToast(String msg)
+
+    public  static void showToast(Context context,String msg)
     {
-        Toast toast=Toast.makeText(PlayApplication.appContext, msg, Toast.LENGTH_SHORT);
-        toast.show();
+        if (context==null) return;
+        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+
     }
 
     public static int StrToIntDef(String value,int defualtvalue)

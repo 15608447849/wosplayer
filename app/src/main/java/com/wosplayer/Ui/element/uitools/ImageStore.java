@@ -49,12 +49,11 @@ public class ImageStore {
                 @Override
                 protected void entryRemoved(boolean evicted, String key,
                                             Bitmap oldValue, Bitmap newValue) {
-                    Log.e("清理缓存","entryRemoved: "+evicted +" bitmap "+oldValue + " "+newValue);
+//                    Log.e("清理缓存","entryRemoved: "+evicted +" bitmap "+oldValue + " "+newValue);
 
                     if (evicted){
                         if (oldValue != null)
                             oldValue.recycle();
-                            oldValue = null;
                     }
                 }
             };
@@ -64,7 +63,7 @@ public class ImageStore {
 
     //获取 一个 缓存 view
     public synchronized  Bitmap getBitmapCache(String tag){
-        if (CacheMap==null){
+        if (CacheMap==null || tag==null){
             return null;
         }
 //        Logs.i(TAG,"获取 bitmap - key - "+tag);
@@ -93,13 +92,10 @@ public class ImageStore {
     }
     //清理缓存
     public void clearCache() {
-        if (CacheMap != null) {
-            if (CacheMap.size() > 0) {
-                Log.d("CacheUtils",
-                        "mMemoryCache.size() " + CacheMap.size());
+        if (CacheMap != null && CacheMap.size() > 0) {
+                Log.e(TAG,"图片缓存队列大小 : " + CacheMap.size());
                 CacheMap.evictAll();
-//                Log.d("CacheUtils", "mMemoryCache.size()" + mMemoryCache.size());
-            }
+              Log.e(TAG,"图片缓存清理成功,队列大小 : " + CacheMap.size());
         }
     }
 

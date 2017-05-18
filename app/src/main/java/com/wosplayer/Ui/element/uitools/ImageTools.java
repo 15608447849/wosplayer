@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.ImageView;
 
 import java.io.File;
@@ -33,49 +34,30 @@ import rx.functions.Action0;
  * 把原图按照指定的大小在View中显示，拉伸显示图片，不保持原比例，填满ImageView.
  */
 
-public class ImageViewPicassocLoader {
+public class ImageTools {
 
-
-
-    /************************************************************************/
-
-    // 过时...
-    public static Bitmap loadImage(Context mContext, File tagerImageFile, int[] sizeParam) {
-        Bitmap bitmap = null;
-        try {
-//
-//            bitmap = Picasso.with(mContext)
-//                    .load(tagerImageFile)
-//                    .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
-//                    .networkPolicy(NetworkPolicy.NO_CACHE, NetworkPolicy.NO_STORE)
-//                    .config(Bitmap.Config.RGB_565)
-//                    .resize(sizeParam[0], sizeParam[1])
-//                    .onlyScaleDown()
-//                    .get();
-        } catch (Exception e) {
-            Log.e("", " picasso get bitmap err :" + e.getMessage());
-        }
-        return bitmap;
-
+    private static int RATIO = 1920 * 1080;
+    public static void setRatio(Context context){
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        RATIO =  wm.getDefaultDisplay().getWidth() *  wm.getDefaultDisplay().getHeight();
     }
-
-    public static Bitmap getBitmap(Context context, String filePath, final ImageView iv) {
-        Bitmap bitmap = ImageStore.getInstants().getBitmapCache(filePath);
+    public static Bitmap getBitmap(Context context, String imageFile, final ImageView imageView) {
+        Bitmap bitmap =  ImageStore.getInstants().getBitmapCache(imageFile);//缓存取
         if (bitmap==null || bitmap.isRecycled()){
-            bitmap = getBitmap(filePath);
+            bitmap = getBitmap(imageFile);
             if (bitmap!=null){
-                ImageStore.getInstants().addBitmapCache(filePath,bitmap);
+                ImageStore.getInstants().addBitmapCache(imageFile,bitmap);//添加到缓存
             }
         }
-
+        if (bitmap==null) return null;
         final  Bitmap bp = bitmap;
-        if (iv != null) {
+        if (imageView != null) {
             //rxjava 线程回调到主线程
             AndroidSchedulers.mainThread().createWorker().schedule(new Action0() {
                 @Override
                 public void call() {
-                    iv.setScaleType(ImageView.ScaleType.FIT_XY);
-                    iv.setImageBitmap(bp);
+                    imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+                    imageView.setImageBitmap(bp);
                 }
             });
         }
@@ -88,8 +70,8 @@ public class ImageViewPicassocLoader {
      *
      * 当超出屏幕后，getMeasuredHeight()等于getHeight()加上屏幕之外没有显示的高度。
      */
-    public static Bitmap getBitmap(String filePath, final ImageView iv) {
-        return getBitmap(null,filePath,iv);
+    public static Bitmap getBitmap(String imageFile, final ImageView imageViewv) {
+        return getBitmap(null,imageFile,imageViewv);
     }
 
 
@@ -97,12 +79,12 @@ public class ImageViewPicassocLoader {
     /**
      * 获取一个 bitmap 成功返回turn
      */
-    public static Bitmap getBitmap(String filepath) {
-        FileInputStream is = null;
-        Bitmap bitmap = null;
+    private static Bitmap getBitmap(String filepath) {
+
         File file = new File(filepath);
         if (!file.exists()) return null;
-
+        FileInputStream is = null;
+        Bitmap bitmap = null;
         try {
                 is = new FileInputStream(file);
                 bitmap = createImageThumbnail(is);
@@ -121,19 +103,18 @@ public class ImageViewPicassocLoader {
         }
         return bitmap;
     }
-
-    public static Bitmap createImageThumbnail(FileInputStream is) {
+    //缩略图
+    private static Bitmap createImageThumbnail(FileInputStream is) {
         Bitmap bitmap = null;
         try {
             BitmapFactory.Options opts = new BitmapFactory.Options();
             opts.inJustDecodeBounds = true;//设置压缩比例
-            bitmap = BitmapFactory.decodeFileDescriptor(is.getFD(),
-                    null, opts);
+            bitmap = BitmapFactory.decodeFileDescriptor(is.getFD(), null, opts);
 
-            opts.inSampleSize = computeSampleSize(opts, -1, 1920 * 1080);
+            opts.inSampleSize = computeSampleSize(opts, -1,RATIO);
             opts.inJustDecodeBounds = false;
 
-            opts.inPreferredConfig = Bitmap.Config.RGB_565;
+            opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
             opts.inPurgeable = true;
             opts.inInputShareable = true;
             opts.inDither = false;
@@ -147,7 +128,7 @@ public class ImageViewPicassocLoader {
         return bitmap;
     }
 
-    public static int computeSampleSize(BitmapFactory.Options options, int minSideLength, int maxNumOfPixels) {// 最小边长 最大像素
+    private static int computeSampleSize(BitmapFactory.Options options, int minSideLength, int maxNumOfPixels) {// 最小边长 最大像素
         int initialSize = computeInitialSampleSize(options, minSideLength, maxNumOfPixels);
         int roundedSize;
         if (initialSize <= 8) {

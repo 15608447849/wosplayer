@@ -270,6 +270,7 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
                 AppUtils.Toals(activity,"配置信息不可用，请联系客服.");
             }
 
+
         }
         if (playmode.equals(SystemConfig.playMode[1])){
             //单机版

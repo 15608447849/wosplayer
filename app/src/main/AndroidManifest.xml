@@ -47,49 +47,55 @@
         android:theme="@style/AppTheme"
         android:sharedUserId="android.uid.system"
         android:largeHeap="true"
-        android:hardwareAccelerated="false">
+        android:hardwareAccelerated="true"
+        >
 
-        <!-- 启动activity android:process="com.wosplayer.ui"  -->
+        <!-- 通讯服务  -->
+        <service android:name="com.wosplayer.service.CommunicationService"
+            android:process="com.wosplayer.communication"/>
+        <!-- 接受下载 -->
+        <service android:name="com.wosplayer.download.kernal.DownloadManager"
+            android:process="com.wosplayer.download" />
+        <!-- 更新apk-->
+        <service android:name="com.wosplayer.service.UpdateApkServer"
+            android:process="com.wosplayer.updateapp"/>
+        <!-- 记录日志sever  -->
+        <service android:name="com.wosplayer.service.serviceLog"
+            android:process="com.wosplayer.writelogs"/>
+        <!-- 日志上传  -->
+        <service android:name="com.wosplayer.service.logUploadService"
+            android:process="com.wosplayer.uplogs"/>
+
+        <!--监听服务  android:enabled="true" -->
+        <service android:name="com.wos.play.rootdir.model_monitor.soexcute.WatchServer"
+            android:process="com.wosplayer.watch"
+            android:enabled="true"/>
+        <!-- 守护进程启动服务  -->
+        <service android:name="com.wos.play.rootdir.model_monitor.soexcute.WatchServerHelp"
+            android:process="com.wosplayer.watchhelp"/>
+        <!-- 系统广播 -->
+        <receiver
+            android:name="com.wos.play.rootdir.model_monitor.soexcute.SystemBroads"
+            android:process="com.wosplayer.bootbroad"
+            android:priority="1000"
+            >
+            <!-- 开机启动 -->
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+        <!-- activity   android:hardwareAccelerated="true" android:process="com.wosplayer.ui"-->
         <activity
-            android:name=".app.DisplayActivity"
+            android:name="com.wosplayer.app.DisplayActivity"
             android:launchMode="singleInstance"
-            android:hardwareAccelerated="true"
+
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- 通讯服务 android:process=":remote_communication" -->
-        <service android:name=".service.CommunicationService"
-            android:process="com.wosplayer.communication"/>
-        <!-- 接受下载 队列 android:process=":remote_loader" -->
-        <service android:name=".download.kernal.DownloadManager"
-            android:process="com.wosplayer.download" />
-        <!-- 更新apk-->
-        <service android:name=".service.UpdateApkServer"
-            android:process="com.wosplayer.updateapp"/>
-        <!-- 记录日志sever  android:process=":remote_log_upload"-->
-        <service android:name=".service.serviceLog"
-            android:process="com.wosplayer.writelogs"/>
-        <!-- 日志上传  android:process=":remote_log_upload"-->
-        <service android:name=".service.logUploadService"
-            android:process="com.wosplayer.uplogs"/>
-
-        <!--监听服务  android:enabled="true"  android:process=".MonitorService"  android:process=":remote_monitorService"-->
-        <service android:name="com.wos.play.rootdir.model_monitor.soexcute.WatchServer" />
-        <!-- 守护进程启动服务 -->
-        <service android:name="com.wos.play.rootdir.model_monitor.soexcute.WatchServerHelp"
-            android:process="com.wosplayer.watchhelp" />
-        <!-- 系统广播  android:process=":remote_monitorService" -->
-        <receiver android:name="com.wos.play.rootdir.model_monitor.soexcute.SystemBroads"
-            android:process="com.wosplayer.watchhelp">
-                <!-- 开机启动 -->
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </receiver>
     </application>
 </manifest>
 

@@ -19,6 +19,7 @@ import android.widget.FrameLayout;
 import com.standalone.StandUi;
 import com.wosTools.AppToolsFragment;
 import com.wosplayer.R;
+import com.wosplayer.Ui.element.uitools.ImageTools;
 import com.wosplayer.Ui.performer.UiExcuter;
 import com.wosplayer.command.kernal.CommandCenter;
 import com.wosplayer.command.kernal.CommandStore;
@@ -27,7 +28,6 @@ import com.wosplayer.service.CommunicationService;
 public class DisplayActivity extends Activity {
     private static final String TAG = "播放器UI界面控制";
     public  AbsoluteLayout main = null; //存放所有排期视图的主容器
-    public static DisplayActivity activityContext = null;
     private FrameLayout closebtn ;//左上角 隐藏的 关闭视图
     public PlayHandler mHandler;
     private FrameLayout fragmentLayer;
@@ -46,10 +46,14 @@ public class DisplayActivity extends Activity {
         // 隐藏状态栏
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//保持屏幕常亮
-        setContentView(R.layout.activity_main);//设置布局文件
+        //保持屏幕常亮
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        //设置布局文件
+        setContentView(R.layout.activity_main);
+        //设置宽高比
+        ImageTools.setRatio(this);
+        //初始化页面
         initActivity();
-
     }
     @Override
     public void onStart() {
@@ -98,9 +102,8 @@ public class DisplayActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        Logs.i(TAG,"onDestroy");
         super.onDestroy();
-        System.exit(0);
+        Logs.i(TAG,"onDestroy");
     }
     //键盘监听返回事件
     @Override
@@ -143,7 +146,11 @@ public class DisplayActivity extends Activity {
     public void stop(boolean isclose){
             closeWosTools();//关闭配置界面
             playTypeStop();//根据模式停止播放
-            if (isclose) finish();
+            if (isclose){
+                finish();
+                System.gc();
+                System.exit(0);
+            }
     }
     private void playTypeStart() {
         try {
