@@ -10,6 +10,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.wosplayer.Ui.element.uitools.ImageTools;
+import com.wosplayer.app.SystemConfig;
 
 /**
  * Created by user on 2017/4/27.
@@ -26,12 +27,15 @@ public class MimageMvideoSurface extends SurfaceView implements Runnable,MVideoI
     private TimeCount count;
     private Bitmap bitmap;
     private MVideoInterface video;
+    private int imageTime = 10;
     public MimageMvideoSurface(Context context) {
         super(context);
     }
 
     //初始化
     public void create(){
+        //设置图片播放时间
+        imageTime = SystemConfig.get().GetIntDefualt("SingImageTime",10);
         //白色背景
         SurfaceHolder holder = this.getHolder();
         holder.setSizeFromLayout();//设置surface大小来自布局
@@ -158,7 +162,7 @@ public class MimageMvideoSurface extends SurfaceView implements Runnable,MVideoI
                         //解锁画布
                         getHolder().unlockCanvasAndPost(mCanvas);
                             //休眠指定秒数
-                            count.setTime(5, new TimeAction() {
+                            count.setTime(imageTime, new TimeAction() {
                                 @Override
                                 public void over() {
                                     unlockThread();

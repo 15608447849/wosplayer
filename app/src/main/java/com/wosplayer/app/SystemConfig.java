@@ -109,7 +109,8 @@ public class SystemConfig extends DataList{
         map.put("AccessClose","1");//默认不关闭
         //播放器类型选择
         map.put("playMode",playMode[0]);// 0网络模式 1单机模式
-
+        //单机播放时间 默认 10秒
+        map.put("SingImageTime","10");// 0网络模式 1单机模式
         //保存数据
         boolean isWrite = FileUtils.writeFile(PATH, AppUtils.mapToJson(map));
         if (isWrite){Logs.d(TAG, " ---播放器配置已还原默认设置 ---");}

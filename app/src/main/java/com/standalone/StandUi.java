@@ -17,6 +17,8 @@ import java.util.Iterator;
 
 import cn.trinea.android.common.util.FileUtils;
 
+import static com.wosplayer.tool.SdCardTools.justPath;
+
 /**
  * Created by lzp on 2017/4/26.
  //监听sd卡内容
@@ -120,9 +122,10 @@ public class StandUi implements OnPlayed{
         Logs.e(TAG,"获取路径 耗时: "+ (System.currentTimeMillis()- time) +", 路径列表:\n"+pathlist);
         if (pathlist!=null){
             time = System.currentTimeMillis();
-            dir = SdCardTools.justPath(pathlist,"usb");
-            if (dir==null) dir = SdCardTools.justPath(pathlist,"ext");
-            if (dir == null) dir = SdCardTools.justPath(pathlist,"sd");
+            dir = justPath(pathlist,"usb");
+            if (dir==null) dir = justPath(pathlist,"ext");
+            if (dir == null) dir = justPath(pathlist,"sd");
+            if (dir == null) dir = justPath(pathlist,"emu");
             Logs.e(TAG,"循环根目录路径耗时: "+ (System.currentTimeMillis()- time) );
         }
 

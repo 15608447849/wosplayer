@@ -269,8 +269,6 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
             }else{
                 AppUtils.Toals(activity,"配置信息不可用，请联系客服.");
             }
-
-
         }
         if (playmode.equals(SystemConfig.playMode[1])){
             //单机版
@@ -363,6 +361,21 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
                     }
                 NotityActivty("执行成功");
             }else
+            if(option.equals("simt")){
+                if (null != param){
+
+                    try {
+                        int time = Integer.parseInt(param);
+                        if (time<5) throw new NumberFormatException("error time");
+                        //单机播放器图片时间设置
+                        dataList.put("SingImageTime",param);
+                        NotityActivty("执行成功,单机版本播放器图片播放时间:"+time);
+                    } catch (NumberFormatException e) {
+                        NotityActivty("执行失败,参数错误 : "+param);
+                    }
+                }
+            }
+            else
             if(option.equals("close")){
                 if (null != param && param.equals("1")){
                     //设置绘制方案截屏
