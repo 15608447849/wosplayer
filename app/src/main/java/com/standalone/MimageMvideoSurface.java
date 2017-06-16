@@ -188,9 +188,13 @@ public class MimageMvideoSurface extends SurfaceView implements Runnable,MVideoI
                 @Override
                 public void run() {
 
-                    MimageMvideoSurface.this.setVisibility(GONE);
-                    video.attch();
-                    video.startVideo(url,MimageMvideoSurface.this);
+                    try {
+                        MimageMvideoSurface.this.setVisibility(GONE);
+                        video.attch();
+                        video.startVideo(url,MimageMvideoSurface.this);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             });
             //锁定线程

@@ -26,6 +26,7 @@ import static com.wosplayer.tool.SdCardTools.justPath;
  */
 public class StandUi implements OnPlayed{
     private static final String TAG ="单机播放器";
+    private static final String NODE = "/NODE";
     private StandUi(){
     }
     private static StandUi instands = null;
@@ -40,7 +41,7 @@ public class StandUi implements OnPlayed{
     private MimageMvideoSurface layer;
     private MSVideo video;
     //当前播放的文件夹目录
-    private String curDirs;
+    private String curDirs=NODE;
     //当前播放列表
     private ArrayList<String> playList;
     //是否播放
@@ -98,7 +99,7 @@ public class StandUi implements OnPlayed{
                 try {
                     OverAppDialog.showWaitingDialog(mActivity,dialog);
                     synchronized(this){
-                        wait(1000);
+                        this.wait(1000);
                     }
                     fountsource();
                 } catch (Exception e) {
@@ -153,7 +154,7 @@ public class StandUi implements OnPlayed{
 
     private void onFailt(String var,int time) {
         //没有文件路径
-        OverAppDialog.popWind(mActivity,var,3);
+        OverAppDialog.popWind(mActivity,var,time);
     }
 
     public void unInin(){
@@ -248,7 +249,7 @@ public class StandUi implements OnPlayed{
         ImageStore.getInstants().clearCache();//清除缓存
         //移除播放列表
         playList = null;
-        curDirs = null;
+        curDirs = NODE;
         //初始化下标
         curIndex = 0;
 //        Logs.e(TAG,"############################################# 结束执行");
@@ -278,18 +279,21 @@ public class StandUi implements OnPlayed{
         runMainThread(new Runnable() {
             @Override
             public void run() {
-                String[] strarr = var.split("#");
-                if (strarr.length>=0 ){
-                    if (strarr[0].equals("out") && !strarr[1].contains(curDirs)){
+                if (var!=null && !curDirs.equals(NODE)) {
+                    String[] strarr = var.split("#");
+                    if (strarr.length>0 && !curDirs.equals(NODE)){
+                        if (strarr[0].equals("out") && !strarr[1].contains(curDirs)){
                             return;
-                    }
-                    if (strarr[0].equals("in")){
-                        //如果是当前目录为usb - 不改变
-                        if (curDirs.contains("usb")){
-                            return;
+                        }
+                        if (strarr[0].equals("in")){
+                            //如果是当前目录为usb - 不改变
+                            if (curDirs.contains("usb")){
+                                return;
+                            }
                         }
                     }
                 }
+
                 onStop();
                 onBackExcute();
             }
