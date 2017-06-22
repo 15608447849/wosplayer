@@ -163,7 +163,7 @@ public class DisplayActivity extends Activity {
                 openCommunication();//开启通讯
             }
             if (mode.equals(SystemConfig.playMode[1])){//单机版本
-                StandUi.getInstands().init(this);
+                StandUi.getInstants().init(this);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -179,7 +179,7 @@ public class DisplayActivity extends Activity {
                 UiExcuter.getInstancs().onUnInit();//停止UI界面
             }
             if (mode.equals(SystemConfig.playMode[1])){//单机版本
-                StandUi.getInstands().unInin();
+                StandUi.getInstants().uninitialized();
             }
         } catch (Exception e) {
           e.printStackTrace();

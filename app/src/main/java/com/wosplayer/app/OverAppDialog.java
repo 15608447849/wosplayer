@@ -102,22 +102,28 @@ public class OverAppDialog {
       * @setCancelable 为使屏幕不可点击，设置为不可取消(false)
       * 下载等事件完成后，主动调用函数关闭该Dialog
       */
-    public static void showWaitingDialog(final Activity context,final ProgressDialog dialog) {
+    public static void showDialog(final Activity context, final ProgressDialog dialog,final String message) {
         if (context==null  || dialog==null) return;
         context.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                dialog.show();
+                dialog.setMessage(message);
+                if (!dialog.isShowing()){
+                    dialog.show();
+                }
+
             }
         });
     }
 
-    public static void closeWaitingDialog(final Activity context,final ProgressDialog dialog) {
+    public static void closeDialog(final Activity context,final ProgressDialog dialog) {
         if (context==null || dialog==null) return;
         context.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                dialog.cancel();
+                if (dialog.isShowing()){
+                    dialog.cancel();
+                }
             }
         });
     }

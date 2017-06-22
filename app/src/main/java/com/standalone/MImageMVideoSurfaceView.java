@@ -16,7 +16,7 @@ import com.wosplayer.app.SystemConfig;
  * Created by user on 2017/4/27.
  */
 
-public class MimageMvideoSurface extends SurfaceView implements Runnable,MVideoInterface.VideoEvent{
+public class MImageMVideoSurfaceView extends SurfaceView implements Runnable,MVideoInterface.VideoEvent{
     private static final String TAG = "单机图片显示层";
     private Object lock = new Object();
     private OnPlayed notify;
@@ -28,7 +28,7 @@ public class MimageMvideoSurface extends SurfaceView implements Runnable,MVideoI
     private Bitmap bitmap;
     private MVideoInterface video;
     private int imageTime = 10;
-    public MimageMvideoSurface(Context context) {
+    public MImageMVideoSurfaceView(Context context) {
         super(context);
     }
 
@@ -189,9 +189,9 @@ public class MimageMvideoSurface extends SurfaceView implements Runnable,MVideoI
                 public void run() {
 
                     try {
-                        MimageMvideoSurface.this.setVisibility(GONE);
+                        MImageMVideoSurfaceView.this.setVisibility(GONE);
                         video.attch();
-                        video.startVideo(url,MimageMvideoSurface.this);
+                        video.startVideo(url, MImageMVideoSurfaceView.this);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

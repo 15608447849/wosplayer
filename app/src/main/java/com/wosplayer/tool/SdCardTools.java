@@ -11,8 +11,11 @@ import android.os.storage.StorageManager;
 import android.util.Log;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,7 +79,7 @@ public class SdCardTools {
     private static String appSourcePath = null;
 
     public static void setAppSourceDir(String path) {
-        if(path == null) return;
+        if (path == null) return;
         appSourcePath = path + SdCardTools.app_dir;
         Log.i(TAG, "设置播放器存储根目录 - [" + appSourcePath + "]");
     }
@@ -105,13 +108,7 @@ public class SdCardTools {
                 paths = (String[]) mMethodGetPaths.invoke(mStorageManager);
 
             }
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
+        } catch (NoSuchMethodException | IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
         return paths;
@@ -124,7 +121,7 @@ public class SdCardTools {
     public static void remountSdcardPath(Context c, String path) {
         File dir = new File(path);
         if (!dir.exists()) {
-            new NullPointerException("path is not find file , " + path);
+            throw new NullPointerException("path is not find file , " + path);
         }
         Intent intent = new Intent();
         // 重新挂载的动作
@@ -144,11 +141,12 @@ public class SdCardTools {
         if (existSDCard()) {
             sdDir = Environment.getExternalStorageDirectory();//获取跟目录
         }
+        assert sdDir != null;
         if (sdDir.exists()) {
 //            Log.i(TAG, "获取当前sd卡路径 : "+sdDir.toString());
-            return sdDir.toString();
+            return sdDir.getPath();
         }
-        return null;
+        return "/mnt/sdcard";
     }
 
     /**
@@ -164,7 +162,7 @@ public class SdCardTools {
     /**
      * 查看sd剩余空间
      */
-    public static long getSDFreeSize() {
+    public static long getSDFreeSizeBytes() {
         //取得SD卡文件路径
         File path = Environment.getExternalStorageDirectory();
         StatFs sf = new StatFs(path.getPath());
@@ -175,8 +173,16 @@ public class SdCardTools {
         //返回SD卡空闲大小
         //return freeBlocks * blockSize;  //单位Byte
         //return (freeBlocks * blockSize)/1024;   //单位KB
-        return (freeBlocks * blockSize) / 1024 / 1024; //单位MB
+        return (freeBlocks * blockSize);/// 1024 / 1024; //单位MB
     }
+
+    /**
+     * 查看sd剩余空间
+     */
+    public static long getSDFreeSize() {
+        return getSDFreeSizeBytes() / 1024 / 1024; //单位MB
+    }
+
 
     /**
      * 查看总空间
@@ -284,24 +290,23 @@ public class SdCardTools {
      * 清理 资源
      */
     public static void clearTargetDir(String dir_path, List<String> compList) {
-
-
-        List<String> fileList = parseList(compList);
-
         File dir = new File(dir_path);
         if (!dir.exists()) {
             Log.e(TAG, "file dir is not exists !!");
             return;
         }
-
+        List<String> fileList = null;
+        if (compList != null) {
+            fileList = parseList(compList);
+        }
 
         if (dir.isDirectory()) {
             String[] children = dir.list();
             File subFile = null;
-            Log.d(TAG, " 资源文件 总数量:" + children.length + "\n 保留文件列表数量:" + fileList.size());
+//            Log.d(TAG, " 资源文件 总数量:" + children.length + "\n 保留文件列表数量:" + fileList.size());
             for (int i = 0; i < children.length; i++) {
 
-                if (fileList.contains(children[i])) {
+                if (fileList != null && fileList.contains(children[i])) {
                     //log.d("","保留 - "+children[i]);
                     continue;
                 }
@@ -311,7 +316,6 @@ public class SdCardTools {
                     if (justFileLastModified(subFile)) {
                         subFile.delete();
                     }
-                    ;
                 }
 
             }
@@ -366,7 +370,7 @@ public class SdCardTools {
         if (!SdCardTools.existSDCard()) {
             Log.e(TAG, "sdcard不存在,应用存储目录: " + getAppSourceDir(context));
         } else {
-            if (testDirc(getSDPath(),true)){
+            if (testDirc(getSDPath(), true)) {
                 MkDir(appSourcePath);//创建目录
                 return true;
             }
@@ -377,39 +381,39 @@ public class SdCardTools {
     /**
      * 测试目录
      */
-    public static boolean testDirc(String path,boolean isSetting) {
-            try {
-                String testpath = path+"/test";
-                if (MkDir(testpath)) {
-                    org.apache.commons.io.FileUtils.deleteDirectory(new File(testpath));
-                    if (isSetting) SdCardTools.setAppSourceDir(path);
-                    return true;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+    public static boolean testDirc(String path, boolean isSetting) {
+        try {
+            String testpath = path + "/test";
+            if (MkDir(testpath)) {
+                org.apache.commons.io.FileUtils.deleteDirectory(new File(testpath));
+                if (isSetting) SdCardTools.setAppSourceDir(path);
+                return true;
             }
-       return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
+
     /**
      * 获取 可用的存储路径
      */
-    public static ArrayList<String> getAllStorePath(Context context){
+    public static ArrayList<String> getAllStorePath(Context context) {
         String[] paths = SdCardTools.getVolumePaths(context);
         if (paths != null && paths.length > 0) {
             ArrayList<String> list = new ArrayList<>();
-            Log.i(TAG, "可用存储列表:");
-            for (int i = 0;i< paths.length ;i++) {
+//            Log.i(TAG, "可用存储列表:");
+            for (int i = 0; i < paths.length; i++) {
 
-                if (testDirc(paths[i],false)) {
+                if (testDirc(paths[i], false)) {
                     list.add(paths[i]);
-                    Log.i(TAG, i+ " - " + paths[i]);
+//                    Log.i(TAG, i+ " - " + paths[i]);
                 }
             }
-            return list.size()>0?list:null;
+            return list.size() > 0 ? list : null;
         }
         return null;
     }
-
 
 
     /**
@@ -422,8 +426,8 @@ public class SdCardTools {
             File file = new File(pathdir);
             if (!file.exists()) {
                 boolean isSuccess = file.mkdirs();
-                if (!isSuccess){
-                    throw new Exception("创建文件夹失败:"+pathdir);
+                if (!isSuccess) {
+                    throw new Exception("创建文件夹失败:" + pathdir);
                 }
                 //Log.i(TAG, "创建文件夹 - " + pathdir + (isSuccess ? " 成功" : " 失败"));
             }
@@ -436,51 +440,95 @@ public class SdCardTools {
         return false;
     }
 
-
-
     //文件夹下循环遍历指定后缀的文件
-    public static void getTagerPrefixOnFiles(String dirPath,ArrayList<String> list,String ... prefix){
-        if (list==null) return;
+    public static void getTaggerPrefixOnFiles(String dirPath, ArrayList<String> list, String... prefix) {
+        if (list == null) return;
         File file = new File(dirPath);
         if (file.exists()) {
-            if (file.isDirectory()){
+            if (file.isDirectory()) {
                 File[] files = file.listFiles();
-                if (files!=null && files.length>0){
+                if (files != null && files.length > 0) {
                     //继续遍历
-                    for (File file2 : files){
-                        getTagerPrefixOnFiles(file2.getAbsolutePath(),list,prefix);
+                    for (File file2 : files) {
+                        getTaggerPrefixOnFiles(file2.getAbsolutePath(), list, prefix);
                     }
                 }
             }
-            if (file.isFile()){
-                for (String fix:prefix){
-                    if (file.getName().endsWith(fix)){
-                        list.add(file.getAbsolutePath());
-                    }
+            if (file.isFile()) {
+                if (justFileSuffix(file.getName(), prefix, 0, prefix.length)) {
+                    list.add(file.getAbsolutePath());
                 }
             }
         }
     }
 
-    public static String justPath(ArrayList<String> list,String param){
-        for (String var : list){
-            if (var.contains(param)){
-                if (isEntityDirs(new File(var))){
-                    return  var;
+    public static String justPath(ArrayList<String> list, String param) {
+        for (String var : list) {
+            if (var.contains(param)) {
+                if (isEntityDirs(new File(var))) {
+                    return var;
                 }
             }
         }
         return null;
     }
 
+    public static boolean justFileSuffix(String filePath, String[] suffixArray, int start, int length) {
+        try {
+            for (int i = start; i < length; i++) {
+                if (filePath.endsWith(suffixArray[i])) return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     //判断文件夹是否为空
-    public static boolean isEntityDirs(File file){
-       return file.exists() && file.isDirectory() && file.list().length > 0;
+    public static boolean isEntityDirs(File file) {
+        return file.exists() && file.isDirectory() && file.list().length > 0;
     }
 
 
+    public static void copyFile(String src, String dec) {
+        FileChannel inChannel = null;
+        FileChannel outChannel = null;
+        try {
+            inChannel = new RandomAccessFile(src, "rw").getChannel();
+            outChannel = new RandomAccessFile(dec, "rw").getChannel();
+            inChannel.transferTo(0, inChannel.size(), outChannel);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (inChannel != null) {
+                try {
+                    inChannel.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (outChannel != null) {
+                try {
+                    outChannel.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
+            }
 
+        }
+    }
 
-
+    /**
+     * 清空目录
+     * @param dirs
+     */
+    public static void clearDir(String dirs) {
+        File home = new File(dirs);
+        if (home.exists() && home.exists()){
+           for(File file : home.listFiles()) {
+               file.delete();
+           }
+        }
+    }
 }
