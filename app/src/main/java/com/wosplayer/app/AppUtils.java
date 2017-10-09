@@ -46,7 +46,7 @@ import cn.trinea.android.common.util.FileUtils;
 
 public class AppUtils {
 
-    private static final String TAG = AppUtils.class.getName();
+    private static final String TAG ="系统工具";
 
 
     //检查是不是ui线程
@@ -69,22 +69,21 @@ public class AppUtils {
             mac = getMacAddress();
         if (mac==null || "".equals(mac))
             mac = getLocalMacAddressFromBusybox();
-        if (mac==null || mac.equals("")) mac = getBuildInfo();
+        if (mac==null || mac.equals(""))
+            mac = getBuildInfo();
         if(mac.length()>1) {
             mac = mac.replaceAll("\\s+", "");
-            String[] tmp = mac.trim().split(":");
+            mac = mac.replaceAll("-", "");
             StringBuilder result = new StringBuilder();
-            for (int i = 0; i < tmp.length; ++i) {
-                result.append(tmp[i]);
-                if (i < tmp.length - 1) {
-                    result.append("-");
-                }
+            for (int i = 0;i<mac.length();i+=2) {
+                result.append(mac.charAt(i)).append(mac.charAt(i+1)).append("-");
             }
+            result.deleteCharAt(result.length()-1);
             mac = result.toString();
         }
         return mac.toUpperCase();
     }
-    public static String getBuildInfo() {
+    private static String getBuildInfo() {
         String devID = "35" + //we make this look like a valid IMEI
                 Build.BOARD.length()%10 +
                 Build.BRAND.length()%10 +
@@ -150,7 +149,7 @@ public class AppUtils {
 
 
     //根据Wifi信息获取本地Mac
-    public static String getLocalMacAddressFromWifiInfo(Context context){
+    private static String getLocalMacAddressFromWifiInfo(Context context){
         WifiManager wifi = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         WifiInfo info = wifi.getConnectionInfo();
         return info.getMacAddress();

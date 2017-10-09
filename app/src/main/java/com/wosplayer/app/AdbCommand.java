@@ -158,8 +158,8 @@ public class AdbCommand{
 
     /**
      * 终端命令集
-     * tcmp -p 端口号
-     * tcmp -r 卸载
+     * wos p 端口号
+     * wos r 卸载
      */
     public static String inputCommand(String option,String param){
         if (option!=null && !option.equals("")){

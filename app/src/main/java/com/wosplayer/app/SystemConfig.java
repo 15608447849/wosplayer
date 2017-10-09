@@ -1,9 +1,10 @@
 package com.wosplayer.app;
 
+import android.annotation.SuppressLint;
+
 import com.wosplayer.tool.SdCardTools;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import cn.trinea.android.common.util.FileUtils;
 
@@ -14,7 +15,7 @@ import cn.trinea.android.common.util.FileUtils;
 public class SystemConfig extends DataList{
     private static final String TAG = "播放器系统配置";
     private static final String DIR = "/mnt/sdcard/wosplayer/";
-    public static final String [] playMode  = {"网络模式","单机模式"};
+    public static final String [] PLAY_MODE_ARR = {"未选择","网络模式","单机模式"};
     //文件保存路径
     private static final String PATH = DIR+"config.conf";
     private static SystemConfig systemConfig = null;
@@ -53,6 +54,7 @@ public class SystemConfig extends DataList{
     }
 
     //设置默认值
+    @SuppressLint("SdCardPath")
     private void DefaultValue() {
         HashMap<String,String> map = getMap();
         map.clear();
@@ -108,9 +110,9 @@ public class SystemConfig extends DataList{
         //是否关闭本地监听播放器值
         map.put("AccessClose","1");//默认不关闭
         //播放器类型选择
-        map.put("playMode",playMode[0]);// 0网络模式 1单机模式
+        map.put("playMode", PLAY_MODE_ARR[0]);// 1网络模式 2单机模式
         //单机播放时间 默认 10秒
-        map.put("SingImageTime","10");// 0网络模式 1单机模式
+        map.put("SingImageTime","10");// 单一图片播放时间
         //保存数据
         boolean isWrite = FileUtils.writeFile(PATH, AppUtils.mapToJson(map));
         if (isWrite){Logs.d(TAG, " ---播放器配置已还原默认设置 ---");}
@@ -123,8 +125,8 @@ public class SystemConfig extends DataList{
             String content =  FileUtils.readFile(PATH,"utf-8").toString();
             //Logs.d(TAG,"读取配置文件:\n"+content);
             if (!content.isEmpty()) {
-                Map map = AppUtils.jsonTxtToMap(content);
-                this.setMap((HashMap<String, String>) map);
+                HashMap<String, String> map = AppUtils.jsonTxtToMap(content);
+                this.setMap( map);
 //                Logs.i(TAG,"系统配置文件读取成功" );
             }
         } catch (Exception e) {

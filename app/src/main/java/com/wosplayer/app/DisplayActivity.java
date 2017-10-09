@@ -156,13 +156,12 @@ public class DisplayActivity extends Activity {
         try {
             String mode = SystemConfig.get().GetStringDefualt("playMode","");
             Log.e(TAG,"执行播放模式:"+mode);
-            if (mode.equals(SystemConfig.playMode[0])){
+            if (mode.equals(SystemConfig.PLAY_MODE_ARR[1])){
                 //注册指令广播
                 registCommand();
                 UiExcuter.getInstancs().onInite(this);//初始化ui
                 openCommunication();//开启通讯
-            }
-            if (mode.equals(SystemConfig.playMode[1])){//单机版本
+            }else if (mode.equals(SystemConfig.PLAY_MODE_ARR[2])){//单机版本
                 StandUi.getInstants().init(this);
             }
         } catch (Exception e) {
@@ -172,13 +171,12 @@ public class DisplayActivity extends Activity {
     private void playTypeStop() {
         try {
             String mode = SystemConfig.get().GetStringDefualt("playMode","");
-            if (mode.equals(SystemConfig.playMode[0])){
+            if (mode.equals(SystemConfig.PLAY_MODE_ARR[1])){//网络模式
                 //注销命令集
                 unregistCommand();
                 closeCommunication();//关闭通讯
                 UiExcuter.getInstancs().onUnInit();//停止UI界面
-            }
-            if (mode.equals(SystemConfig.playMode[1])){//单机版本
+            }else if (mode.equals(SystemConfig.PLAY_MODE_ARR[2])){//单机版本
                 StandUi.getInstants().uninitialized();
             }
         } catch (Exception e) {

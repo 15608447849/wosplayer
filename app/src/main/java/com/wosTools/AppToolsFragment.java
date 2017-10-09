@@ -119,7 +119,7 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
         playtype = (Spinner) vp.findViewById(R.id.playtype);
         adapter = new SpnnerAdpter(activity);
         playtype.setAdapter(adapter);
-        adapter.settingData(SystemConfig.playMode);//模式选择
+        adapter.settingData(SystemConfig.PLAY_MODE_ARR);//模式选择
         playtype.setOnItemSelectedListener(this);
         storeSwitch = (Spinner) vp.findViewById(R.id.store_switch);
         adapter2 = new SpnnerAdpter(activity);
@@ -194,6 +194,16 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
             version.setText("VERSION["+ AppUtils.getAppVersionCode(activity)+"]");//版本
             cap_save.check((dataList.GetIntDefualt("CaptureSave",0)==0)?R.id.cap_save_y:R.id.cap_save_n);
             cap_notify.check((dataList.GetIntDefualt("CaptureNoty",0)==0)?R.id.cap_notify_y:R.id.cap_notify_n);
+            String mode = dataList.GetStringDefualt("playMode",SystemConfig.PLAY_MODE_ARR[2]);
+            Log.e("系统工具","模式: "+ mode);
+            if (mode.equals(SystemConfig.PLAY_MODE_ARR[1])){
+                playtype.setSelection(1);
+            }else if(mode.equals(SystemConfig.PLAY_MODE_ARR[2])){
+                playtype.setSelection(2);
+            }else{
+                playtype.setSelection(0);
+            }
+
         }catch(Exception e)
         {
             Log.e("ToolsActivity ", e.getMessage());
@@ -261,7 +271,7 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
     public void save(){
         GetViewValue();
         String playmode = dataList.GetStringDefualt("playMode","");
-        if (playmode.equals(SystemConfig.playMode[0])){ //网络模式
+        if (playmode.equals(SystemConfig.PLAY_MODE_ARR[1])){ //网络模式
 
             if (!"".equals(terminalNo.getText().toString())){
                 AppUtils.settingServerInfo(activity,true);
@@ -269,13 +279,15 @@ public class AppToolsFragment extends Fragment implements DisPlayInterface.onFra
             }else{
                 AppUtils.Toals(activity,"配置信息不可用，请联系客服.");
             }
-        }
-        if (playmode.equals(SystemConfig.playMode[1])){
+        }else
+        if (playmode.equals(SystemConfig.PLAY_MODE_ARR[2])){
             //单机版
             //选择分屏显示
             //启动
             AppUtils.settingServerInfo(activity,true);
             activity.mHandler.sendEmptyMessage(PlayHandler.HandleEvent.close.ordinal());
+        }else{
+            AppUtils.Toals(activity,"请选择初始化模式.");
         }
 
     }
