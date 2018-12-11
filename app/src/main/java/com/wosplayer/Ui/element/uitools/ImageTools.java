@@ -117,7 +117,7 @@ public class ImageTools {
             opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
             opts.inPurgeable = true;
             opts.inInputShareable = true;
-            opts.inDither = false;
+            opts.inDither = false; //是否开启抖动
             opts.inTempStorage = new byte[12 * 1024];
 
             bitmap = BitmapFactory.decodeFileDescriptor(is.getFD(),

@@ -88,7 +88,6 @@ public class MWeb extends android.webkit.WebView{
 //        webSettings.setPluginState(WebSettings.PluginState.ON);//flash 有关系
         this.setWebChromeClient(wCclient==null?new WebChromeClient():wCclient);
         this.setWebViewClient(wVclient==null?new WebViewClient():wVclient);
-
     }
 
     public void killSelf(){
@@ -106,13 +105,6 @@ public class MWeb extends android.webkit.WebView{
         ((ViewGroup) this.getParent()).removeView(this);
         this.destroy();
     }
-
-
-
-
-
-
-
 
 
     public static class MwebChrome extends WebChromeClient{
